@@ -1,0 +1,40 @@
+{
+  "pages": [
+    {
+      "path": "features/home/pages/HomePage",
+      "style": {
+        "navigationBarTitleText": "Home"
+      }
+    },
+    {
+      "path": "features/editor/pages/EditorPage",
+      "style": {
+        "navigationBarTitleText": "Editor"
+      }
+    },
+    {
+      "path": "features/mailbox/pages/MailboxPage",
+      "style": {
+        "navigationBarTitleText": "Mailbox"
+      }
+    },
+    {
+      "path": "features/calendar/pages/CalendarPage",
+      "style": {
+        "navigationBarTitleText": "Calendar"
+      }
+    },
+    {
+      "path": "features/profile/pages/ProfilePage",
+      "style": {
+        "navigationBarTitleText": "Profile"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "noche",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  }
+}
