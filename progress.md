@@ -169,6 +169,7 @@
   - `C:\\Program Files` 与 `C:\\Program Files (x86)` 常见目录未发现 HBuilderX
   - 当前环境无法直接把 `dist/build/app` 进一步打成 APK
 - 用户补充要求：后续所有代码都必须优先考虑可扩展性，因此本轮继续把 Editor 的保存决策从页面挪回 domain。
+- 用户补充设备约束：主验收设备为 `Redmi Note 11T Pro+`；本轮已开始把该约束写入仓库规则与 checkpoint，后续默认围绕该机型写 Android 验收与恢复链路。
 - 已在 `src/domain/services/entryService.ts` 新增 `resolveDraftSaveAction()`，并在 `tests/domain/entryService.test.ts` 先写失败测试锁定三种结果：
   - `save-entry`
   - `discard-empty`

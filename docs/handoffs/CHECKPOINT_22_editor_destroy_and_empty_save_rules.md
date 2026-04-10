@@ -1,5 +1,7 @@
 # CHECKPOINT 22 - Editor Destroy And Empty Save Rules
 
+主验收设备：`Redmi Note 11T Pro+`
+
 ## 1. 本轮概述
 
 本轮继续沿着“可上线版本”推进，但重点不是视觉，而是把 Editor 里原本还没补全的关键行为补完整：

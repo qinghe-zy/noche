@@ -6,6 +6,7 @@
 - 当前追加目标：将 `noche_codex_function_matrix_and_interaction_logic.md` 纳入项目真相入口，并据此优先补主链路：`写入 -> 保存 -> 阅读 -> 信箱查看 -> 日历跳转 -> 续写恢复`。
 
 ## Constraints
+- 主验收设备：`Redmi Note 11T Pro+`
 - 不写业务功能。
 - 不接数据库。
 - 不做 UI 细节。
@@ -42,6 +43,7 @@
 - 交给 Gemini 的页面/UI 任务只提供接口与边界，不强压视觉创造方案。
 - 新增的 `noche_codex_function_matrix_and_interaction_logic.md` 应进入项目真相文档链，并高于零散 prompt 文档。
 - `docs/stitch/**` 只作为结构与视觉节奏参考，不继承原型文案、示例图片或假数据表达。
+- 当前 Android 体验与后续实机验收，默认优先围绕 `Redmi Note 11T Pro+`。
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

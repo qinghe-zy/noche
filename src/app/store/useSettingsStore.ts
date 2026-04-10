@@ -5,6 +5,7 @@ export interface SettingsState {
   theme: "system" | "light" | "dark";
   locale: string;
   weekStartsOn: 0 | 1;
+  privacyLockEnabled: boolean;
 }
 
 interface SettingsStoreState extends SettingsState {
@@ -16,6 +17,7 @@ const SETTINGS_DEFAULTS: SettingsState = {
   theme: "system",
   locale: "zh-CN",
   weekStartsOn: 1,
+  privacyLockEnabled: false,
 };
 
 function isTheme(value: string | null): value is SettingsState["theme"] {
@@ -34,6 +36,18 @@ function toWeekStartsOn(value: string | null): 0 | 1 | null {
   return null;
 }
 
+function toBooleanFlag(value: string | null): boolean | null {
+  if (value === "1") {
+    return true;
+  }
+
+  if (value === "0") {
+    return false;
+  }
+
+  return null;
+}
+
 export { setPrefsRepository };
 
 export const useSettingsStore = defineStore("settings", {
@@ -41,6 +55,7 @@ export const useSettingsStore = defineStore("settings", {
     theme: "system",
     locale: "zh-CN",
     weekStartsOn: 1,
+    privacyLockEnabled: false,
     isLoading: false,
     error: null,
   }),
@@ -51,10 +66,11 @@ export const useSettingsStore = defineStore("settings", {
 
       try {
         const repository = getPrefsRepository();
-        const [themeRecord, localeRecord, weekStartsOnRecord] = await Promise.all([
+        const [themeRecord, localeRecord, weekStartsOnRecord, privacyLockRecord] = await Promise.all([
           repository.get("theme"),
           repository.get("locale"),
           repository.get("weekStartsOn"),
+          repository.get("privacyLockEnabled"),
         ]);
         const persistedTheme = themeRecord?.value ?? null;
 
@@ -63,6 +79,7 @@ export const useSettingsStore = defineStore("settings", {
           : SETTINGS_DEFAULTS.theme;
         this.locale = localeRecord?.value ?? SETTINGS_DEFAULTS.locale;
         this.weekStartsOn = toWeekStartsOn(weekStartsOnRecord?.value ?? null) ?? SETTINGS_DEFAULTS.weekStartsOn;
+        this.privacyLockEnabled = toBooleanFlag(privacyLockRecord?.value ?? null) ?? SETTINGS_DEFAULTS.privacyLockEnabled;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to hydrate settings.";
       } finally {
@@ -80,6 +97,10 @@ export const useSettingsStore = defineStore("settings", {
     setWeekStartsOn(weekStartsOn: 0 | 1) {
       this.weekStartsOn = weekStartsOn;
       void this.persistPreference("weekStartsOn", String(weekStartsOn));
+    },
+    setPrivacyLockEnabled(enabled: boolean) {
+      this.privacyLockEnabled = enabled;
+      void this.persistPreference("privacyLockEnabled", enabled ? "1" : "0");
     },
     async persistPreference(key: string, value: string): Promise<void> {
       try {

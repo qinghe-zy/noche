@@ -70,13 +70,27 @@
 
     <view class="profile-page__section">
       <text class="profile-page__section-title">隐私与数据</text>
-      <view class="profile-page__setting-row">
+      <view class="profile-page__setting-block">
         <text class="profile-page__setting-label">隐私锁</text>
-        <text class="profile-page__setting-value">今晚版本暂未开启</text>
+        <view class="profile-page__chips">
+          <button
+            v-for="option in privacyLockOptions"
+            :key="option.label"
+            class="profile-page__chip"
+            :class="{ 'profile-page__chip--active': settingsStore.privacyLockEnabled === option.value }"
+            @click="settingsStore.setPrivacyLockEnabled(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </view>
       </view>
       <view class="profile-page__setting-row">
         <text class="profile-page__setting-label">数据备份</text>
         <text class="profile-page__setting-value">本地优先，云备份后续开放</text>
+      </view>
+      <view class="profile-page__setting-row">
+        <text class="profile-page__setting-label">关于 noche</text>
+        <text class="profile-page__setting-value">Android / local-first / 私人写信</text>
       </view>
     </view>
   </view>
@@ -99,6 +113,10 @@ const themeOptions = [
 const weekOptions = [
   { value: 1 as const, label: "周一开始" },
   { value: 0 as const, label: "周日开始" },
+];
+const privacyLockOptions = [
+  { value: true, label: "已开启" },
+  { value: false, label: "未开启" },
 ];
 
 const mailboxCount = computed(() => mailboxStore.pastEntries.length + mailboxStore.sealedFutureEntries.length);

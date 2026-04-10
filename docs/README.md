@@ -2,6 +2,11 @@
 
 本目录是 `noche` 项目的“唯一真相源 (Source of Truth)”。所有开发实现必须严格遵守本文档库中的定义。
 
+## 主验收设备
+
+- `Redmi Note 11T Pro+`
+- 当前阶段的安装、启动、编辑、保存、恢复、浏览体验，默认以该机型作为主验收标准。
+
 ## 1. 目录结构
 
 - [spec/](./spec/)：产品规格与交互规则。
@@ -11,6 +16,7 @@
   - [architecture.md](./tech/architecture.md)：系统分层与依赖关系。
   - [data_model.md](./tech/data_model.md)：核心数据模型。
   - [ai_workflow.md](./tech/ai_workflow.md)：AI 协作边界与流程。
+  - [noche_codex_function_matrix_and_interaction_logic.md](./tech/noche_codex_function_matrix_and_interaction_logic.md)：Codex 执行用功能矩阵与交互主链说明。
   - [tech_frontend_backend_contract.md](./tech/tech_frontend_backend_contract.md)：前端可依赖的稳定契约面。
   - [tech_backend_feature_checklist.md](./tech/tech_backend_feature_checklist.md)：后端功能清单与推进顺序。
 - [tasks/](./tasks/)：任务拆解与进度追踪。
