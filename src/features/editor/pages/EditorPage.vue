@@ -113,7 +113,6 @@ import { computed, ref } from "vue";
 import { onLoad, onUnload } from "@dcloudio/uni-app";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
-import { createEntryFromDraft } from "@/domain/services/entryService";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
 import { formatDate, tomorrowDate } from "@/shared/utils/date";
@@ -350,16 +349,11 @@ async function handleFormalSave(): Promise<void> {
     }
 
     await persistDraftNow();
+    const entry = await draftStore.saveActiveDraftAsEntry();
 
-    if (!draftStore.activeDraft) {
-      throw new Error("Draft is not ready.");
+    if (!entry) {
+      throw new Error(draftStore.error ?? "Failed to save entry");
     }
-
-    const slotKey = draftStore.activeDraft.slotKey;
-    const entry = createEntryFromDraft(draftStore.activeDraft);
-
-    await entryStore.saveEntry(entry);
-    await draftStore.removeDraft(slotKey);
 
     savedEntry.value = entry;
     mode.value = "read";

@@ -1,12 +1,16 @@
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
+import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
+import { createEntry } from "@/domain/services/entryService";
+import { setEntryRepository, useEntryStore } from "@/app/store/useEntryStore";
 import { setDraftRepository, useDraftStore } from "@/app/store/useDraftStore";
 
 describe("draft store", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     setDraftRepository(createMemoryDraftRepository());
+    setEntryRepository(createMemoryEntryRepository());
   });
 
   it("opens drafts by slot, persists edits, and restores them from the repository", async () => {
@@ -48,5 +52,53 @@ describe("draft store", () => {
     expect(store.activeDraftKey).toBeNull();
     expect(store.activeDraft).toBeNull();
     expect(store.drafts[draft.slotKey]).toBeUndefined();
+  });
+
+  it("formalizes the active draft into an entry and removes the draft", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+
+    await draftStore.openDraft({
+      type: "future",
+    });
+    await draftStore.saveActiveDraft({
+      title: "给未来的我",
+      content: "记得慢一点。",
+      unlockDate: "2026-04-12",
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+
+    expect(entry).toMatchObject({
+      type: "future",
+      status: "sealed",
+      title: "给未来的我",
+      content: "记得慢一点。",
+      unlockDate: "2026-04-12",
+    });
+    expect(draftStore.activeDraft).toBeNull();
+    expect(draftStore.activeDraftKey).toBeNull();
+    expect(entry ? entryStore.entries[entry.id] : null).toEqual(entry);
+  });
+
+  it("restores an entry into an active draft for continued writing", async () => {
+    const draftStore = useDraftStore();
+    const entry = createEntry({
+      type: "future",
+      title: "旧信",
+      content: "已经写过的内容",
+      recordDate: "2026-04-10",
+      unlockDate: "2026-04-12",
+    });
+
+    const draft = await draftStore.restoreEntryAsActiveDraft(entry);
+
+    expect(draftStore.activeDraftKey).toBe("draft_future");
+    expect(draft).toMatchObject({
+      linkedEntryId: entry.id,
+      title: "旧信",
+      content: "已经写过的内容",
+      unlockDate: "2026-04-12",
+    });
   });
 });

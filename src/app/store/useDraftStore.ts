@@ -1,10 +1,13 @@
 import { defineStore } from "pinia";
 import type { Draft } from "@/domain/draft/types";
+import type { Entry } from "@/domain/entry/types";
 import type { IDraftRepository } from "@/data/repositories/draft.repository";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
 import { buildDraftSlotKey } from "@/domain/draft/rules";
 import type { CreateDraftInput } from "@/domain/services/draftService";
 import { createDraft, markDraftBackgroundSaved } from "@/domain/services/draftService";
+import { createEntryFromDraft } from "@/domain/services/entryService";
+import { useEntryStore } from "@/app/store/useEntryStore";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -107,6 +110,63 @@ export const useDraftStore = defineStore("draft", {
         }
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to remove draft.";
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async saveActiveDraftAsEntry(): Promise<Entry | null> {
+      if (!this.activeDraft) {
+        return null;
+      }
+
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const draft = this.activeDraft;
+        const entry = createEntryFromDraft(draft);
+        const entryStore = useEntryStore();
+        await entryStore.saveEntry(entry);
+
+        if (entryStore.error) {
+          this.error = entryStore.error;
+          return null;
+        }
+
+        await this.removeDraft(draft.slotKey);
+        return entry;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to save draft as entry.";
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async restoreEntryAsActiveDraft(entry: Entry): Promise<Draft> {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const draft = createDraft({
+          type: entry.type,
+          recordDate: entry.type === "diary" ? entry.recordDate : entry.recordDate ?? undefined,
+          linkedEntryId: entry.id,
+        });
+        const nextDraft: Draft = {
+          ...draft,
+          title: entry.title ?? "",
+          content: entry.content,
+          recordDate: entry.recordDate,
+          unlockDate: entry.type === "future" ? entry.unlockDate ?? null : null,
+        };
+
+        await draftRepository.save(nextDraft);
+        this.upsertDraft(nextDraft);
+        this.setActiveDraftKey(nextDraft.slotKey);
+        return nextDraft;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to restore entry into draft.";
         throw error;
       } finally {
         this.isLoading = false;
