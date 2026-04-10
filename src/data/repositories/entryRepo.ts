@@ -17,37 +17,109 @@ export interface EntryRecord {
 }
 
 export interface EntryRepo {
-  list(): Promise<EntryRecord[]>;
+  listActive(): Promise<EntryRecord[]>;
   findById(entryId: string): Promise<EntryRecord | null>;
+  findByDate(recordDate: string): Promise<EntryRecord[]>;
+  findByType(type: string): Promise<EntryRecord[]>;
+  listCalendarMarkedDates(): Promise<string[]>;
   upsert(record: EntryRecord): Promise<void>;
   destroyEntry(
     entryId: string,
+    destroyedAt: string,
     options?: { cleanupHook?: () => Promise<void> | void },
   ): Promise<void>;
 }
 
 export function createEntryRepo(client: SQLiteClient): EntryRepo {
   return {
-    async list() {
-      return client.query<EntryRecord>(`SELECT * FROM ${TABLES.entries} WHERE destroyed_at IS NULL`);
+    async listActive() {
+      return client.query<EntryRecord>(
+        `SELECT * FROM ${TABLES.entries} WHERE destroyed_at IS NULL ORDER BY record_date DESC, created_at DESC`,
+      );
     },
     async findById(entryId) {
       const rows = await client.query<EntryRecord>(
-        `SELECT * FROM ${TABLES.entries} WHERE id = ? LIMIT 1`,
+        `SELECT * FROM ${TABLES.entries} WHERE id = ? AND destroyed_at IS NULL LIMIT 1`,
         [entryId],
       );
 
       return rows[0] ?? null;
     },
-    async upsert(record) {
-      await client.execute(`-- TODO: implement upsert for ${TABLES.entries}`, [record]);
+    async findByDate(recordDate) {
+      return client.query<EntryRecord>(
+        `SELECT * FROM ${TABLES.entries} WHERE record_date = ? AND destroyed_at IS NULL ORDER BY record_date DESC, created_at DESC`,
+        [recordDate],
+      );
     },
-    async destroyEntry(entryId, options) {
+    async findByType(type) {
+      return client.query<EntryRecord>(
+        `SELECT * FROM ${TABLES.entries} WHERE type = ? AND destroyed_at IS NULL ORDER BY record_date DESC, created_at DESC`,
+        [type],
+      );
+    },
+    async listCalendarMarkedDates() {
+      const rows = await client.query<{ record_date: string }>(
+        `SELECT DISTINCT record_date FROM ${TABLES.entries}
+         WHERE destroyed_at IS NULL
+           AND (type IN ('diary', 'jotting') OR (type = 'future' AND status = 'unlocked'))
+         ORDER BY record_date ASC`,
+      );
+
+      return rows.map((row) => row.record_date);
+    },
+    async upsert(record) {
+      await client.execute(
+        `INSERT INTO ${TABLES.entries} (
+          id,
+          type,
+          status,
+          title,
+          content,
+          record_date,
+          created_at,
+          updated_at,
+          saved_at,
+          unlock_date,
+          unlocked_at,
+          destroyed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          type = excluded.type,
+          status = excluded.status,
+          title = excluded.title,
+          content = excluded.content,
+          record_date = excluded.record_date,
+          created_at = excluded.created_at,
+          updated_at = excluded.updated_at,
+          saved_at = excluded.saved_at,
+          unlock_date = excluded.unlock_date,
+          unlocked_at = excluded.unlocked_at,
+          destroyed_at = excluded.destroyed_at`,
+        [
+          record.id,
+          record.type,
+          record.status,
+          record.title,
+          record.content,
+          record.record_date,
+          record.created_at,
+          record.updated_at,
+          record.saved_at,
+          record.unlock_date,
+          record.unlocked_at,
+          record.destroyed_at,
+        ],
+      );
+    },
+    async destroyEntry(entryId, destroyedAt, options) {
       if (options?.cleanupHook) {
         await options.cleanupHook();
       }
 
-      await client.execute(`-- TODO: implement destroyEntry for ${TABLES.entries}`, [entryId]);
+      await client.execute(`UPDATE ${TABLES.entries} SET destroyed_at = ? WHERE id = ?`, [
+        destroyedAt,
+        entryId,
+      ]);
     },
   };
 }

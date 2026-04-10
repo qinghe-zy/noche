@@ -13,6 +13,7 @@ export function mapDraftToRecord(draft: Draft): DraftRecord {
     created_at: draft.createdAt,
     updated_at: draft.updatedAt,
     last_background_saved_at: draft.lastBackgroundSavedAt ?? null,
+    unlock_date: draft.unlockDate ?? null,
   };
 }
 
@@ -28,5 +29,6 @@ export function mapRecordToDraft(record: DraftRecord): Draft {
     createdAt: record.created_at,
     updatedAt: record.updated_at,
     lastBackgroundSavedAt: record.last_background_saved_at,
+    unlockDate: record.unlock_date,
   };
 }

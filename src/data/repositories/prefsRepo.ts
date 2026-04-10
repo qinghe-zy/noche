@@ -22,7 +22,11 @@ export function createPrefsRepo(client: SQLiteClient): PrefsRepo {
       return rows[0] ?? null;
     },
     async set(record) {
-      await client.execute(`-- TODO: implement upsert for ${TABLES.preferences}`, [record]);
+      await client.execute(
+        `INSERT INTO ${TABLES.preferences} (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+        [record.key, record.value],
+      );
     },
   };
 }
