@@ -265,3 +265,17 @@
 - 当前阶段阻塞已经收敛为：
   - HBuilderX 登录态
   - Redmi Note 11T Pro+ USB 连接 / adb 可见
+- 用户新增视觉回归要求：必须和 `docs/stitch/**` 原型做对照，除文字和插图外，结构和视觉层级尽量贴近。
+- 已为当前页面批量生成本地截图到：
+  - `artifacts/shots/*.png`
+  并改用 `--dump-dom` 确认页面真实 DOM 已挂载。
+- 已按视觉回归开始重排：
+  - `src/features/home/pages/HomePage.vue`
+    - 改为顶部题头 + 中央视觉纸页 + 底部三入口
+  - `src/features/mailbox/pages/MailboxPage.vue`
+    - 改为纸页归档箱结构、封存卡片和浮动写作入口
+  - `src/features/calendar/pages/CalendarPage.vue`
+    - 改为顶部细导航 + 中央月历卡 + 下方上下文区
+- 这轮仍未开始视觉回归收口的主页面：
+  - `EditorPage`
+  - `ProfilePage`

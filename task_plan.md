@@ -41,6 +41,7 @@
 - [in_progress] Phase 23: 补齐未解锁 future 的销毁入口，并进入功能矩阵对照验收
 - [in_progress] Phase 24: 完成功能矩阵对照验收，并在通过后切回 APK 打包链
 - [in_progress] Phase 25: 接入 HBuilderX 打包链，并完成 Redmi Note 11T Pro+ 实机安装验收
+- [in_progress] Phase 26: 完成与 `docs/stitch/**` 对齐的视觉回归收口
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

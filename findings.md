@@ -75,3 +75,10 @@
   - `adb devices -l` 返回空列表，说明当前没有连接 `Redmi Note 11T Pro+`
   - `HBuilderX cli publish app-android --type appResource` 返回“此功能需要先登录”
   - 因此从“功能验收通过”到“实际 APK 产出 / 实机安装验收”之间，剩下的是登录态与设备连接问题，不是仓库代码问题
+- 视觉回归当前已开始落到页面代码：
+  - `HomePage` 已按 stitch 的“中央纸页 + 底部三入口”结构重排
+  - `MailboxPage` 已按 stitch 的“纸页堆叠 + 封存卡片 + 浮动入口”结构重排
+  - `CalendarPage` 已按 stitch 的“顶部细导航 + 中央月历卡 + 底部上下文”结构重排
+- 当前视觉回归仍未收口完的页面主要是：
+  - `EditorPage`
+  - `ProfilePage`

@@ -1,28 +1,27 @@
 <template>
   <view class="calendar-page">
-    <view class="calendar-page__header">
-      <view class="calendar-page__nav">
-        <button class="calendar-page__nav-btn" @click="prevMonth">
-          <text class="calendar-page__nav-icon">←</text>
-        </button>
-        <view class="calendar-page__current-month" @click="goToToday">
-          <text class="calendar-page__month-text">{{ formatMonthLabel(currentMonthDate) }}</text>
-          <text class="calendar-page__year-text">{{ formatYearLabel(currentMonthDate) }}</text>
-        </view>
-        <button class="calendar-page__nav-btn" @click="nextMonth">
-          <text class="calendar-page__nav-icon">→</text>
-        </button>
-      </view>
+    <view class="calendar-page__topbar">
+      <button class="calendar-page__topbtn" @click="handleBackToMailbox">‹</button>
+      <text class="calendar-page__toptitle">日历</text>
+      <button class="calendar-page__topbtn calendar-page__topbtn--label" @click="goToToday">
+        今天
+      </button>
+    </view>
+
+    <view class="calendar-page__hero">
+      <text class="calendar-page__hero-title">日历</text>
+      <text class="calendar-page__hero-subtitle">{{ formatMonthLabel(currentMonthDate) }} {{ formatYearLabel(currentMonthDate) }}</text>
     </view>
 
     <view v-if="calendarStore.error" class="calendar-page__banner calendar-page__banner--error">
       <text>{{ calendarStore.error }}</text>
     </view>
 
-    <view class="calendar-page__body">
-      <view class="calendar-page__hero">
-        <text class="calendar-page__title">日历</text>
-        <text class="calendar-page__subtitle">{{ guideText }}</text>
+    <view class="calendar-page__panel">
+      <view class="calendar-page__panel-head">
+        <button class="calendar-page__month-btn" @click="prevMonth">‹</button>
+        <text class="calendar-page__month-label">{{ formatMonthLabel(currentMonthDate) }}</text>
+        <button class="calendar-page__month-btn" @click="nextMonth">›</button>
       </view>
 
       <view class="calendar-page__weekdays">
@@ -30,22 +29,32 @@
       </view>
 
       <view class="calendar-page__grid">
-        <view 
-          v-for="(day, index) in calendarDays" 
-          :key="index" 
-          class="calendar-page__day-cell"
-          :class="{ 
-            'calendar-page__day-cell--empty': !day,
-            'calendar-page__day-cell--today': day && isToday(day.fullDate),
-            'calendar-page__day-cell--selected': day && isSelected(day.fullDate)
+        <view
+          v-for="(day, index) in calendarDays"
+          :key="index"
+          class="calendar-page__day"
+          :class="{
+            'calendar-page__day--empty': !day,
+            'calendar-page__day--today': day && isToday(day.fullDate),
+            'calendar-page__day--selected': day && isSelected(day.fullDate),
           }"
           @click="day && handleDateClick(day.fullDate)"
         >
-          <view v-if="day" class="calendar-page__day-content">
+          <view v-if="day" class="calendar-page__day-inner">
             <text class="calendar-page__day-number">{{ day.date }}</text>
-            <view v-if="hasMarker(day.fullDate)" class="calendar-page__marker" />
+            <view v-if="hasMarker(day.fullDate)" class="calendar-page__marker"></view>
           </view>
         </view>
+      </view>
+    </view>
+
+    <view class="calendar-page__context">
+      <view class="calendar-page__context-date">
+        <text class="calendar-page__context-date-text">{{ contextDate }}</text>
+      </view>
+      <view class="calendar-page__context-copy">
+        <text class="calendar-page__context-title">{{ contextTitle }}</text>
+        <text class="calendar-page__context-body">{{ guideText }}</text>
       </view>
     </view>
 
@@ -54,19 +63,17 @@
         <text class="calendar-page__status-text">正在更新日期标记…</text>
       </view>
       <view v-else class="calendar-page__legend">
-        <view class="calendar-page__legend-item">
-          <view class="calendar-page__marker" />
-          <text class="calendar-page__legend-text">有记录</text>
-        </view>
+        <view class="calendar-page__legend-dot"></view>
+        <text class="calendar-page__legend-text">有记录</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
-import { formatDate, getDaysInMonth, getFirstDayOfWeek, addMonth, isSameDay } from "@/shared/utils/date";
+import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, isSameDay } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
 import {
   formatCalendarGuideText,
@@ -77,26 +84,17 @@ import {
 const calendarStore = useCalendarStore();
 const currentMonthDate = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const selectedDate = ref<string | null>(null);
-
 const weekLabels = ["日", "一", "二", "三", "四", "五", "六"];
-const guideText = computed(() =>
-  formatCalendarGuideText(
-    selectedDate.value,
-    selectedDate.value ? hasMarker(selectedDate.value) : false,
-  ),
-);
 
 const calendarDays = computed(() => {
   const daysInMonth = getDaysInMonth(currentMonthDate.value);
   const firstDay = getFirstDayOfWeek(currentMonthDate.value);
   const days = [];
 
-  // Fill empty slots for previous month
   for (let i = 0; i < firstDay; i++) {
     days.push(null);
   }
 
-  // Fill days of the current month
   const yearMonth = formatDate(currentMonthDate.value, "YYYY-MM");
   for (let i = 1; i <= daysInMonth; i++) {
     const dayStr = i < 10 ? `0${i}` : `${i}`;
@@ -107,6 +105,22 @@ const calendarDays = computed(() => {
   }
 
   return days;
+});
+
+const guideText = computed(() =>
+  formatCalendarGuideText(
+    selectedDate.value,
+    selectedDate.value ? hasMarker(selectedDate.value) : false,
+  ),
+);
+
+const contextDate = computed(() => (selectedDate.value ? selectedDate.value : "选择日期"));
+const contextTitle = computed(() => {
+  if (!selectedDate.value) {
+    return "从这里翻找已经收好的记录";
+  }
+
+  return hasMarker(selectedDate.value) ? "这一天已经留过字" : "这一天还可以补一页日记";
 });
 
 function formatMonthLabel(date: string) {
@@ -138,7 +152,16 @@ function nextMonth() {
 }
 
 function goToToday() {
-  currentMonthDate.value = formatDate(new Date(), 'YYYY-MM-DD');
+  currentMonthDate.value = formatDate(new Date(), "YYYY-MM-DD");
+  selectedDate.value = formatDate(new Date(), "YYYY-MM-DD");
+}
+
+function handleBackToMailbox() {
+  uni.navigateBack({
+    fail: () => {
+      uni.reLaunch({ url: `/${ROUTES.mailbox}` });
+    },
+  });
 }
 
 async function handleDateClick(date: string) {
@@ -170,6 +193,7 @@ async function handleDateClick(date: string) {
 }
 
 onMounted(() => {
+  selectedDate.value = formatDate(new Date(), "YYYY-MM-DD");
   void calendarStore.fetchMarkedDates();
 });
 </script>
@@ -177,91 +201,66 @@ onMounted(() => {
 <style scoped>
 .calendar-page {
   min-height: 100vh;
-  background-color: var(--noche-color-bg);
-  display: flex;
-  flex-direction: column;
+  padding: 24rpx 28rpx 52rpx;
+  background: linear-gradient(180deg, #fbf9f5 0%, #f3efe8 100%);
 }
 
-.calendar-page__header {
-  padding: 80rpx 40rpx 40rpx;
-}
-
-.calendar-page__nav {
-  display: flex;
-  justify-content: space-between;
+.calendar-page__topbar {
+  display: grid;
+  grid-template-columns: 72rpx 1fr 72rpx;
   align-items: center;
+  padding: 12rpx 0 18rpx;
 }
 
-.calendar-page__nav-btn {
-  background: white;
-  border: 1rpx solid var(--noche-color-border);
+.calendar-page__topbtn {
   width: 72rpx;
   height: 72rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent;
+  font-size: 34rpx;
+  color: rgba(49, 51, 46, 0.82);
   padding: 0;
-  margin: 0;
 }
 
-.calendar-page__nav-icon {
-  font-size: 28rpx;
-  color: var(--noche-color-text);
+.calendar-page__topbtn--label {
+  font-size: 18rpx;
+  letter-spacing: 0.18em;
 }
 
-.calendar-page__current-month {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.calendar-page__month-text {
-  font-size: 40rpx;
-  font-weight: 600;
-  color: var(--noche-color-text);
-}
-
-.calendar-page__year-text {
-  font-size: 24rpx;
-  color: var(--noche-color-muted);
-  letter-spacing: 2rpx;
-}
-
-.calendar-page__body {
-  padding: 0 40rpx;
+.calendar-page__toptitle {
+  text-align: center;
+  font-size: 20rpx;
+  color: rgba(49, 51, 46, 0.84);
+  letter-spacing: 0.2em;
 }
 
 .calendar-page__hero {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-  margin-bottom: 32rpx;
-  padding: 26rpx 24rpx;
-  border-radius: 28rpx;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1rpx solid var(--noche-color-border);
+  padding: 18rpx 0 32rpx;
+  text-align: center;
 }
 
-.calendar-page__title {
-  font-size: 42rpx;
-  font-weight: 600;
-  color: var(--noche-color-text);
+.calendar-page__hero-title {
+  display: block;
+  font-size: 58rpx;
+  line-height: 1.2;
+  color: #31332e;
 }
 
-.calendar-page__subtitle {
-  font-size: 26rpx;
-  line-height: 1.6;
-  color: var(--noche-color-muted);
+.calendar-page__hero-subtitle {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 18rpx;
+  letter-spacing: 0.36em;
+  color: rgba(99, 95, 85, 0.76);
+  text-transform: uppercase;
 }
 
 .calendar-page__banner {
-  margin: 0 40rpx 24rpx;
+  margin-bottom: 24rpx;
   padding: 18rpx 22rpx;
   border-radius: 22rpx;
   background: rgba(255, 255, 255, 0.72);
-  border: 1rpx solid var(--noche-color-border);
-  color: var(--noche-color-text);
+  border: 1rpx solid rgba(34, 34, 34, 0.06);
+  color: rgba(34, 34, 34, 0.76);
   font-size: 24rpx;
 }
 
@@ -270,100 +269,139 @@ onMounted(() => {
   color: #7d3535;
 }
 
+.calendar-page__panel {
+  padding: 28rpx 24rpx 34rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid rgba(226, 227, 219, 0.9);
+  box-shadow: 0 14rpx 34rpx rgba(49, 51, 46, 0.04);
+}
+
+.calendar-page__panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22rpx;
+}
+
+.calendar-page__month-btn {
+  width: 56rpx;
+  height: 56rpx;
+  background: transparent;
+  font-size: 28rpx;
+  color: rgba(99, 95, 85, 0.82);
+  padding: 0;
+}
+
+.calendar-page__month-label {
+  font-size: 22rpx;
+  letter-spacing: 0.28em;
+  color: rgba(49, 51, 46, 0.82);
+}
+
 .calendar-page__weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
 }
 
 .calendar-page__weekday {
   text-align: center;
-  font-size: 20rpx;
-  color: var(--noche-color-muted);
-  font-weight: 600;
-  letter-spacing: 2rpx;
+  font-size: 16rpx;
+  letter-spacing: 0.18em;
+  color: rgba(121, 124, 117, 0.78);
 }
 
 .calendar-page__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 16rpx;
+  row-gap: 34rpx;
 }
 
-.calendar-page__day-cell {
-  aspect-ratio: 1;
+.calendar-page__day {
+  min-height: 52rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12rpx;
+}
+
+.calendar-page__day-inner {
   position: relative;
-}
-
-.calendar-page__day-cell--today {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.calendar-page__day-cell--selected {
-  background-color: var(--noche-color-text);
-}
-
-.calendar-page__day-cell--selected .calendar-page__day-number {
-  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
 }
 
 .calendar-page__day-number {
   font-size: 28rpx;
-  color: var(--noche-color-text);
-  font-weight: 500;
+  color: rgba(49, 51, 46, 0.82);
 }
 
-.calendar-page__marker {
-  position: absolute;
-  bottom: 12rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6rpx;
-  height: 6rpx;
-  background-color: var(--noche-color-text);
+.calendar-page__day--today .calendar-page__day-number {
+  font-weight: 700;
+}
+
+.calendar-page__day--selected .calendar-page__day-number {
+  color: #1d1d1d;
+}
+
+.calendar-page__marker,
+.calendar-page__legend-dot {
+  width: 8rpx;
+  height: 8rpx;
   border-radius: 50%;
+  background: rgba(95, 94, 94, 0.88);
 }
 
-.calendar-page__day-cell--selected .calendar-page__marker {
-  background-color: white;
+.calendar-page__context {
+  margin-top: 48rpx;
+  padding-top: 26rpx;
+  border-top: 1rpx solid rgba(177, 179, 171, 0.16);
+  display: grid;
+  grid-template-columns: 180rpx 1fr;
+  gap: 24rpx;
+  align-items: start;
+}
+
+.calendar-page__context-date-text {
+  font-size: 18rpx;
+  letter-spacing: 0.18em;
+  color: rgba(99, 95, 85, 0.8);
+  text-transform: uppercase;
+}
+
+.calendar-page__context-title {
+  display: block;
+  font-size: 34rpx;
+  line-height: 1.35;
+  color: #31332e;
+  margin-bottom: 12rpx;
+}
+
+.calendar-page__context-body {
+  display: block;
+  font-size: 26rpx;
+  line-height: 1.75;
+  color: rgba(99, 95, 85, 0.82);
 }
 
 .calendar-page__footer {
-  margin-top: auto;
-  padding: 60rpx 40rpx 80rpx;
-}
-
-.calendar-page__legend {
+  padding-top: 40rpx;
   display: flex;
   justify-content: center;
 }
 
-.calendar-page__legend-item {
+.calendar-page__status-text,
+.calendar-page__legend-text {
+  font-size: 18rpx;
+  letter-spacing: 0.24em;
+  color: rgba(121, 124, 117, 0.8);
+}
+
+.calendar-page__legend {
   display: flex;
   align-items: center;
   gap: 12rpx;
-}
-
-.calendar-page__legend-item .calendar-page__marker {
-  position: static;
-  transform: none;
-}
-
-.calendar-page__legend-text {
-  font-size: 22rpx;
-  color: var(--noche-color-muted);
-  text-transform: uppercase;
-  letter-spacing: 2rpx;
-}
-
-.calendar-page__status-text {
-  font-size: 24rpx;
-  color: var(--noche-color-muted);
-  display: block;
-  text-align: center;
 }
 </style>
