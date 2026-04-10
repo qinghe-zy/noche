@@ -27,3 +27,7 @@
 - `createEntry()` 仍可保留“未正式保存”的初始 entry 语义；`createEntryFromDraft()` 则负责 formal save 时写入 `savedAt`，两者职责可以并存。
 - Gemini CLI 在本仓库 headless `-p` 模式下两次 editor UI 调用都在 10 分钟内超时且没有落盘改动；后续若继续让 Gemini 写页面，需要更小写入面或换交互方式。
 - H5 下直接在同一个已打开的 editor 页面里切换 hash query，不一定会重置页面状态；fresh load 或正常首页跳转可以正确进入 `diary` / `jotting` / `future` 的各自 editor 视图。
+- 当前前端真正稳定可依赖的表面主要是 `app/store`、`domain/*/types.ts`、`shared/constants` 与少量规则函数；repository / mapper / sqlite 仍应视为后端内部实现。
+- `mailbox`、`calendar`、`profile` 的页面还未开始，但它们所需的后端 contract 已经可以从现有产品规则中抽象出来，不必等待 SQLite 落地后再定义。
+- 若要保证前后端完全分离开发，前端应该 mock facade/store 语义，而不是 mock repository 或 SQL record 结构。
+- 当前最值得优先推进的后端顺序是：`MailboxFacade` -> `CalendarFacade` -> future unlock transition -> SQLite draft/entry repo -> prefs persistence。

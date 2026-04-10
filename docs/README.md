@@ -11,6 +11,8 @@
   - [architecture.md](./tech/architecture.md)：系统分层与依赖关系。
   - [data_model.md](./tech/data_model.md)：核心数据模型。
   - [ai_workflow.md](./tech/ai_workflow.md)：AI 协作边界与流程。
+  - [tech_frontend_backend_contract.md](./tech/tech_frontend_backend_contract.md)：前端可依赖的稳定契约面。
+  - [tech_backend_feature_checklist.md](./tech/tech_backend_feature_checklist.md)：后端功能清单与推进顺序。
 - [tasks/](./tasks/)：任务拆解与进度追踪。
   - 命名格式：`T-###_topic.md`
 - [handoffs/](./handoffs/)：阶段检查点与交接记录。

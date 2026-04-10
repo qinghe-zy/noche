@@ -2,7 +2,7 @@
 
 ## Goal
 - 在 `D:\Project\noche` 保留现有骨架的前提下，补齐“可开工的最小文件集”，把项目推进到可安装、可运行、可继续开发的状态。
-- 当前追加目标：以 `docs/tech` 为功能准绳，优先稳定底层规则、数据与可验证闭环，再交给 Gemini 做正式页面。
+- 当前追加目标：以 `docs/tech` 为功能准绳，主攻底层、数据与可验证闭环，并补齐前端可独立开发的契约文档。
 
 ## Constraints
 - 不写业务功能。
@@ -25,6 +25,7 @@
 - [complete] Phase 10: 调用 Gemini CLI 在约定目录实现首个页面 UI 闭环
 - [complete] Phase 11: 继续推进 editor/draft 最小写作闭环，形成最小 save/read 页面闭环
 - [pending] Phase 12: 基于现有 entry/draft 闭环接入 mailbox/read 读取路径
+- [complete] Phase 13: 补齐前后端分离契约文档与后端功能清单
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

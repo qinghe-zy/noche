@@ -64,3 +64,10 @@
 - 已启动 H5 dev server 并用 Playwright 验证移动视口 editor 页面非空、console 0 error。
 - 已验证 diary 路由可输入内容、出现 `Draft saved at ...`、点击 `Save Today` 后进入同页 read mode。
 - 已验证 fresh load 的 `future` 路由显示 `draft_future` 与 unlock date 字段，`jotting` 路由显示 `Save Jotting`。
+- 用户要求停止调用 Gemini，由用户自行驱动页面工作；Codex 本轮转为后端主攻并补齐前端可用接口文档。
+- 已梳理当前前端真实可依赖的接口面：`useAppStore`、`useSettingsStore`、`useDraftStore`、`useEntryStore`、核心 types、routes、draft keys、时间规则。
+- 已新增 `docs/tech/tech_frontend_backend_contract.md`，明确前端允许依赖层、禁止依赖层、各 store/use case 契约、feature contract、mock 建议。
+- 已新增 `docs/tech/tech_backend_feature_checklist.md`，按模块拆出当前后端完成度、缺口与推荐推进顺序。
+- 已在契约文档中标记 `useDraftStore` 与 `useEntryStore` 的错误语义不一致，避免前端误判。
+- 已明确 `mailbox / calendar / profile` 当前的“目标 facade 契约”，使前端可以先按契约写页面和 mock。
+- 已更新 docs 索引、任务卡与 checkpoint，保持后续可续接。
