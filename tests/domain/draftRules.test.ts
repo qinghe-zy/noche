@@ -16,7 +16,7 @@ describe("draft slot rules", () => {
     expect(buildDraftSlotKey("jotting")).toBe(DRAFT_KEYS.JOTTING);
     expect(createDraft({ type: "jotting" }).slotKey).toBe(DRAFT_KEYS.JOTTING);
 
-    expect(buildDraftSlotKey("future-letter")).toBe(DRAFT_KEYS.FUTURE);
-    expect(createDraft({ type: "future-letter" }).slotKey).toBe(DRAFT_KEYS.FUTURE);
+    expect(buildDraftSlotKey("future")).toBe(DRAFT_KEYS.FUTURE);
+    expect(createDraft({ type: "future" }).slotKey).toBe(DRAFT_KEYS.FUTURE);
   });
 });

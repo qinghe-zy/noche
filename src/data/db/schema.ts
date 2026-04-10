@@ -8,13 +8,15 @@ export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS ${TABLES.entries} (
     id TEXT PRIMARY KEY,
     type TEXT NOT NULL,
-    title TEXT NOT NULL,
+    status TEXT NOT NULL,
+    title TEXT,
     content TEXT NOT NULL,
     record_date TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    future_unlock_date TEXT,
-    future_status TEXT,
+    saved_at TEXT,
+    unlock_date TEXT,
+    unlocked_at TEXT,
     destroyed_at TEXT
   );`,
   `CREATE TABLE IF NOT EXISTS ${TABLES.drafts} (

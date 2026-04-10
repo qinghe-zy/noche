@@ -24,3 +24,11 @@
 - 已验证 `pnpm type-check` 通过。
 - 已验证 `pnpm build:h5` 通过。
 - 用户补充：相信 Gemini 的页面创造力；后续给 Gemini 的 UI 任务只约束接口、路由、数据规则和验收边界，不写过细视觉方案。
+- 自主推进 T-004：检查 `docs/tech` 最终版文档，发现核心模型与当前代码存在 `future-letter` / `future` 口径差异。
+- 已新增 `tests/domain/entryService.test.ts`，用失败测试锁定最终 tech 模型字段：`status`、`unlockDate`、`savedAt`、`unlockedAt`。
+- 已将 `EntryType` 收敛为 `diary | jotting | future`，新增 `EntryStatus = saved | sealed | unlocked`。
+- 已同步 entry service、draft rules、entry mapper、entry repo record、SQLite schema 与 entry 常量。
+- 已更新 `docs/tech/data_model.md` 的 canonical 口径，避免代码只依赖未提交的最终版草稿文档。
+- 已验证 `pnpm test:unit` 通过：2 个测试文件、5 个测试通过。
+- 已验证 `pnpm type-check` 通过。
+- 已验证 `pnpm build:h5` 通过。

@@ -14,3 +14,5 @@
 - 发现草稿槽位规则曾存在两套命名：`DRAFT_KEYS` 使用 `draft_diary_YYYY-MM-DD` / `draft_jotting` / `draft_future`，`domain/draft/rules.ts` 曾生成 `diary:YYYY-MM-DD` / `jotting:default` / `future-letter:default`。
 - 已用 Vitest 单元测试固定草稿槽位约定，避免后续页面或 store 接入时写入错误槽。
 - Gemini 后续负责页面与 UI 时，应提供轻量 handoff：稳定接口、路由、store/use case、不可破坏的数据规则；避免过度规定视觉细节。
+- `docs/tech/noche_data_model_final.md` 明确使用 `EntryType = diary | jotting | future`、`EntryStatus = saved | sealed | unlocked`、未来信日期字段 `unlockDate`；已同步到 tracked `docs/tech/data_model.md` 与核心代码。
+- 当前 `docs/tech/*_final.md` 仍为未跟踪文件，未纳入本轮提交，避免在 canonical 文档之外增加重复真相源；后续可单独做 docs cleanup。

@@ -13,7 +13,7 @@ export function buildDraftSlotKey(
     return buildDiaryDraftKey(options.recordDate ?? "unknown");
   }
 
-  if (type === "future-letter") {
+  if (type === "future") {
     return DRAFT_KEYS.FUTURE;
   }
 

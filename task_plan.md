@@ -19,7 +19,8 @@
 - [complete] Phase 4: 安装依赖并完成最小入口配置
 - [complete] Phase 5: 验证命令可运行并写入日志
 - [complete] Phase 6: 收敛草稿槽位规则并补齐单元测试入口
-- [pending] Phase 7: 打通 entry/draft 的最小 repository + store 用例闭环
+- [complete] Phase 7: 按最终 tech 口径收敛 Entry / Draft 核心模型
+- [pending] Phase 8: 打通 entry/draft 的最小 repository + store 用例闭环
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -35,3 +36,4 @@
 | PowerShell 清理校验日志时使用了保留变量 `$PID` | 1 | 改为普通变量名并定向结束 `uni` 进程后完成清理 |
 | 使用 `pnpm` 接管现有 `npm` 安装结果时出现“不同包管理器”迁移警告 | 1 | 重新执行 `pnpm install`，生成 `pnpm-lock.yaml` 并移除旧的 `package-lock.json` |
 | 草稿槽位规则出现 `draft_*` 与 `type:default` 两套命名 | 1 | 以 `docs/tech/data_model.md` 的草稿隔离规则为准，统一由 `DRAFT_KEYS` 生成并补单元测试 |
+| `docs/tech` 下最终版数据模型使用 `future/status/unlockDate`，当前代码仍使用 `future-letter/futureStatus/futureUnlockDate` | 1 | 以用户“功能以 docs/tech 为准”的要求和最终版 tech 文档为准，收敛代码与 canonical `data_model.md` |

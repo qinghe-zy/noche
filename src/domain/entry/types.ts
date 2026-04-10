@@ -1,12 +1,12 @@
 /**
  * 条目类型字符串字面量
  */
-export type EntryType = 'diary' | 'jotting' | 'future-letter';
+export type EntryType = 'diary' | 'jotting' | 'future';
 
 /**
- * 未来信解锁状态字符串字面量
+ * 条目状态字符串字面量
  */
-export type FutureLetterStatus = 'locked' | 'unlockable' | 'opened';
+export type EntryStatus = 'saved' | 'sealed' | 'unlocked';
 
 /**
  * 核心条目实体
@@ -15,18 +15,17 @@ export type FutureLetterStatus = 'locked' | 'unlockable' | 'opened';
 export interface Entry {
   id: string;
   type: EntryType;
-  title?: string;
+  status: EntryStatus;
+  title: string | null;
   content: string;
   recordDate: string;         // YYYY-MM-DD，打开纸张时锁定
   createdAt: string;          // ISO string
   updatedAt: string;          // ISO string
-  savedAt?: string;           // ISO string，正式保存时间
-
-  // 未来信特有字段
-  futureUnlockDate?: string | null; // YYYY-MM-DD
-  futureStatus?: FutureLetterStatus | null;
+  savedAt: string | null;     // ISO string，正式保存时间
+  unlockDate: string | null;  // YYYY-MM-DD，未来信使用
+  unlockedAt: string | null;  // ISO string，未来信解锁记录时间
 
   // 销毁标记
-  destroyedAt?: string | null;
+  destroyedAt: string | null;
   isDestroyed?: boolean;
 }

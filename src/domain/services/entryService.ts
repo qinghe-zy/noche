@@ -1,6 +1,6 @@
 import { canPersistEntry } from "@/domain/entry/rules";
-import type { Entry, EntryType, FutureLetterStatus } from "@/domain/entry/types";
-import { isFutureUnlockable, lockRecordDate } from "@/domain/time/rules";
+import type { Entry, EntryType } from "@/domain/entry/types";
+import { lockRecordDate } from "@/domain/time/rules";
 import { nowIso } from "@/shared/utils/date";
 import { createId } from "@/shared/utils/id";
 
@@ -9,7 +9,7 @@ export interface CreateEntryInput {
   title?: string;
   content?: string;
   recordDate?: string;
-  futureUnlockDate?: string | null;
+  unlockDate?: string | null;
 }
 
 export interface DestroyEntryOptions {
@@ -18,23 +18,19 @@ export interface DestroyEntryOptions {
 
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
-  const futureStatus: FutureLetterStatus | null =
-    input.type === "future-letter" && input.futureUnlockDate
-      ? isFutureUnlockable(input.futureUnlockDate)
-        ? "unlockable"
-        : "locked"
-      : null;
 
   return {
     id: createId(),
     type: input.type,
-    title: input.title ?? "",
+    status: input.type === "future" ? "sealed" : "saved",
+    title: input.title ?? null,
     content: input.content ?? "",
     recordDate: input.recordDate ?? lockRecordDate(),
     createdAt,
     updatedAt: createdAt,
-    futureUnlockDate: input.futureUnlockDate ?? null,
-    futureStatus,
+    savedAt: null,
+    unlockDate: input.unlockDate ?? null,
+    unlockedAt: null,
     destroyedAt: null,
   };
 }

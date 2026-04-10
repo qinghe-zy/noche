@@ -4,13 +4,15 @@ import type { SQLiteClient } from "@/data/db/sqlite";
 export interface EntryRecord {
   id: string;
   type: string;
-  title: string;
+  status: string;
+  title: string | null;
   content: string;
   record_date: string;
   created_at: string;
   updated_at: string;
-  future_unlock_date: string | null;
-  future_status: string | null;
+  saved_at: string | null;
+  unlock_date: string | null;
+  unlocked_at: string | null;
   destroyed_at: string | null;
 }
 
