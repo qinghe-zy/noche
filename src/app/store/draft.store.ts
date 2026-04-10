@@ -1,18 +1,13 @@
 import { defineStore } from 'pinia';
 import type { DraftEntry } from '@/domain/draft/types';
 import type { EntryType } from '@/domain/entry/types';
+import { buildDraftSlotKey } from '@/domain/draft/rules';
 
 /**
  * 草稿槽位键生成工具
  */
 export function getDraftSlotKey(type: EntryType, recordDate?: string): string {
-  if (type === 'diary' && recordDate) {
-    return `draft_diary_${recordDate}`;
-  }
-  if (type === 'future-letter') {
-    return 'draft_future';
-  }
-  return 'draft_jotting';
+  return buildDraftSlotKey(type, { recordDate });
 }
 
 export const useDraftStore = defineStore('draft', {

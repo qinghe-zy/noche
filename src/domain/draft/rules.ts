@@ -1,7 +1,8 @@
 import type { DraftType } from "./types";
+import { DRAFT_KEYS } from "@/shared/constants/draftKeys";
 
 export function buildDiaryDraftKey(recordDate: string): string {
-  return `diary:${recordDate}`;
+  return DRAFT_KEYS.diary(recordDate);
 }
 
 export function buildDraftSlotKey(
@@ -12,9 +13,9 @@ export function buildDraftSlotKey(
     return buildDiaryDraftKey(options.recordDate ?? "unknown");
   }
 
-  if (options.linkedEntryId) {
-    return `${type}:${options.linkedEntryId}`;
+  if (type === "future-letter") {
+    return DRAFT_KEYS.FUTURE;
   }
 
-  return `${type}:default`;
+  return DRAFT_KEYS.JOTTING;
 }
