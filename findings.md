@@ -20,3 +20,5 @@
 - 旧版 `entry.store.ts` 与 `draft.store.ts` 曾重复定义 `entry` / `draft` Pinia id；已改为 legacy alias，实际 store 只保留 `useEntryStore.ts` 与 `useDraftStore.ts`。
 - Gemini CLI 已可用：`gemini --version` 返回 0.37.1。
 - UI handoff 原则：给 Gemini 稳定接口与写入边界，不给详细视觉方案，让 Gemini 自主发挥页面创造力。
+- Gemini 非交互调用不会显示在用户可见终端里；后续需要在 progress/checkpoint 显式记录命令形态与输出摘要，必要时将 stdout 写入 ignored `logs/`。
+- 当前 UI 页面仍需 Codex 做构建兼容收口：Gemini 倾向使用 SCSS/视觉字符，项目当前保持纯 CSS 与无新增依赖策略。

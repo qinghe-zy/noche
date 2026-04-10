@@ -22,7 +22,8 @@
 - [complete] Phase 7: 按最终 tech 口径收敛 Entry / Draft 核心模型
 - [complete] Phase 8: 打通 entry/store 的最小 repository 用例闭环
 - [complete] Phase 9: 为 Gemini 准备轻量 UI handoff 与稳定接口说明
-- [pending] Phase 10: 调用 Gemini CLI 在约定目录实现首个页面 UI 闭环
+- [complete] Phase 10: 调用 Gemini CLI 在约定目录实现首个页面 UI 闭环
+- [pending] Phase 11: 继续推进 editor/draft 最小写作闭环，UI 仍交给 Gemini
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -40,3 +41,7 @@
 | 草稿槽位规则出现 `draft_*` 与 `type:default` 两套命名 | 1 | 以 `docs/tech/data_model.md` 的草稿隔离规则为准，统一由 `DRAFT_KEYS` 生成并补单元测试 |
 | `docs/tech` 下最终版数据模型使用 `future/status/unlockDate`，当前代码仍使用 `future-letter/futureStatus/futureUnlockDate` | 1 | 以用户“功能以 docs/tech 为准”的要求和最终版 tech 文档为准，收敛代码与 canonical `data_model.md` |
 | PowerShell 中直接写复杂引号正则导致解析错误 | 1 | 改用简单 `rg "defineStore" src/app/store` 验证 store 定义数量 |
+| Gemini 完成 UI 后尝试调用自身不存在的 `run_shell_command` 工具 | 1 | Codex 接手运行 `pnpm test:unit`、`pnpm type-check`、`pnpm build:h5` 与 Playwright 验证 |
+| Home UI 使用 `lang=\"scss\"`，构建缺少 `sass` | 1 | 保留 Gemini 视觉结构，改成纯 CSS，不新增依赖 |
+| `Start-Process pnpm` 在 Windows 下不能直接运行 pnpm shim | 1 | 改用 `Start-Process pnpm.cmd` |
+| dev server 首轮导航时被停止导致 Vite connection lost | 1 | 重新启动 dev server 后复测，控制台 0 error |
