@@ -76,6 +76,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useMailboxStore } from "@/app/store/useMailboxStore";
+import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { ROUTES } from "@/shared/constants/routes";
 import {
@@ -119,12 +120,7 @@ function handleGoToCalendar() {
 
 function handleEntryClick(entry: Entry) {
   if (isSealedFuture(entry)) {
-    uni.showModal({
-      title: "尚未开启",
-      content: `这封未来信会在 ${entry.unlockDate} 当天开启。`,
-      showCancel: false,
-      confirmText: "知道了",
-    });
+    void handleLockedFuture(entry);
     return;
   }
   
@@ -136,6 +132,33 @@ function handleEntryClick(entry: Entry) {
 onMounted(() => {
   void refresh();
 });
+
+async function handleLockedFuture(entry: Entry): Promise<void> {
+  const shouldKeep = await new Promise<boolean>((resolve) => {
+    uni.showModal({
+      title: "尚未开启",
+      content: `这封未来信会在 ${entry.unlockDate} 当天开启。你也可以现在销毁它。`,
+      confirmText: "知道了",
+      cancelText: "销毁",
+      success: (result) => resolve(Boolean(result.confirm)),
+      fail: () => resolve(true),
+    });
+  });
+
+  if (shouldKeep) {
+    return;
+  }
+
+  await mailboxStore.fetchEntryById(entry.id);
+  const entryStore = useEntryStore();
+  await entryStore.destroyEntry(entry.id);
+  await refresh();
+
+  uni.showToast({
+    title: "已销毁",
+    icon: "none",
+  });
+}
 </script>
 
 <style scoped>

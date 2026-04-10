@@ -38,6 +38,7 @@
 - [in_progress] Phase 20: 补齐 future 日期选择体验与封存前交互
 - [in_progress] Phase 21: 补自动标题并继续功能验收收口
 - [in_progress] Phase 22: 补今日日记打开解析链，并准备功能矩阵对照验收
+- [in_progress] Phase 23: 补齐未解锁 future 的销毁入口，并进入功能矩阵对照验收
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

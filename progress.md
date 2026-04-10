@@ -235,3 +235,15 @@
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
+- 自主继续下一轮：补“未解锁 future 也可销毁”。
+- 已更新 `src/features/mailbox/pages/MailboxPage.vue`：
+  - sealed future 点击后不再只有只读提示
+  - modal 里现在提供：
+    - 知道了
+    - 销毁
+  - 销毁路径仍统一复用 `useEntryStore().destroyEntry()`
+  - 销毁后刷新 Mailbox 列表
+- 已再次验证 `pnpm.cmd run test:unit` 通过：26 个测试文件、64 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
