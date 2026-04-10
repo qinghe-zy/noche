@@ -3,6 +3,7 @@ import type { Entry } from "@/domain/entry/types";
 import {
   buildMailboxCollections,
   collectCalendarMarkedDates,
+  listDayArchiveEntries,
   syncFutureEntryStatuses,
 } from "@/domain/services/entryQueryService";
 
@@ -117,5 +118,43 @@ describe("entry query service", () => {
       "2026-04-08",
       "2026-04-10",
     ]);
+  });
+
+  it("lists only calendar-visible entries for a day archive in stable order", () => {
+    const diary = makeEntry({
+      id: "diary-1",
+      type: "diary",
+      recordDate: "2026-04-10",
+      createdAt: "2026-04-10T08:00:00.000Z",
+    });
+    const jotting = makeEntry({
+      id: "jotting-1",
+      type: "jotting",
+      recordDate: "2026-04-10",
+      createdAt: "2026-04-10T09:00:00.000Z",
+    });
+    const unlockedFuture = makeEntry({
+      id: "future-open",
+      type: "future",
+      status: "unlocked",
+      recordDate: "2026-04-10",
+      createdAt: "2026-04-10T07:00:00.000Z",
+      unlockDate: "2026-04-09",
+      unlockedAt: "2026-04-09T00:00:00.000Z",
+    });
+    const sealedFuture = makeEntry({
+      id: "future-locked",
+      type: "future",
+      status: "sealed",
+      recordDate: "2026-04-10",
+      createdAt: "2026-04-10T10:00:00.000Z",
+      unlockDate: "2026-04-12",
+    });
+
+    expect(
+      listDayArchiveEntries([diary, jotting, unlockedFuture, sealedFuture], "2026-04-10").map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["jotting-1", "diary-1", "future-open"]);
   });
 });

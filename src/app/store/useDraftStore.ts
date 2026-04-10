@@ -172,6 +172,32 @@ export const useDraftStore = defineStore("draft", {
         this.isLoading = false;
       }
     },
+    async resumeEntry(entryId: string): Promise<Draft | null> {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const entryStore = useEntryStore();
+        const entry = await entryStore.fetchEntryById(entryId);
+
+        if (!entry) {
+          this.error = entryStore.error ?? "Entry not found.";
+          return null;
+        }
+
+        if (entry.type === "future") {
+          this.error = "Future letters cannot be resumed for editing.";
+          return null;
+        }
+
+        return await this.restoreEntryAsActiveDraft(entry);
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to resume entry.";
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
     setActiveDraftKey(slotKey: string | null) {
       this.activeDraftKey = slotKey;
     },

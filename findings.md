@@ -31,3 +31,14 @@
 - `mailbox`、`calendar`、`profile` 的页面还未开始，但它们所需的后端 contract 已经可以从现有产品规则中抽象出来，不必等待 SQLite 落地后再定义。
 - 若要保证前后端完全分离开发，前端应该 mock facade/store 语义，而不是 mock repository 或 SQL record 结构。
 - 当前最值得优先推进的后端顺序是：`MailboxFacade` -> `CalendarFacade` -> future unlock transition -> SQLite draft/entry repo -> prefs persistence。
+- 新收到的外部执行文档 `D:\Project\daily\noche_codex_function_matrix_and_interaction_logic.md` 明确要求：主链优先级必须回到 `写入 -> 保存 -> 阅读 -> 信箱查看 -> 日历跳转 -> 续写恢复`，并把 `docs/stitch/**` 作为前端设计参考真相之一。
+- 该矩阵文档与当前仓库状态对照后，发现最直接的断点是：
+  - `MailboxPage` / `CalendarPage` 已有进行中的页面接线，但 Editor 仍未接住 `mode=read&entryId=...`
+  - `CalendarPage` 当前工作区实现仍按 `result.type` 分支，而 store 实际返回 `result.kind`
+  - Day Archive 路径仍未落地，导致 Calendar 的 `entry-list` 分支没有真实去向
+- 当前 `pnpm.cmd run type-check` 已明确失败，失败点在 `src/features/calendar/pages/CalendarPage.vue` 的 `type` / `kind` 契约不一致；这是后续续接的第一优先修复点。
+- `EditorPage` 现已真正接住 `mode=read&entryId=...`，并能从阅读态继续续写 diary / jotting；future 仍被挡在不可续写规则之外。
+- `CalendarPage` 已改为消费 `CalendarResolveResult.kind`，并把 `entry-list` 分支导向最小可用的 Day Archive 页面。
+- `Day Archive` 当前采用 `listDayArchiveEntries()` 复用日历可见性规则，因此不会把未解锁 future 混入当天归档列表。
+- `MailboxPage` 与 `CalendarPage` 本轮顺手清掉了明显的原型腔文案；后续若继续收口，应围绕结构、密度和状态体验，而不是回到 stitch 原文案。
+- 当前环境下 `pnpm.cmd run test:unit`、`pnpm.cmd run type-check`、`pnpm.cmd run build:h5` 已全部实跑通过，不再存在上一轮的 `spawn EPERM` 阻塞。

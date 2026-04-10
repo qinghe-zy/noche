@@ -3,6 +3,7 @@
 ## Goal
 - 在 `D:\Project\noche` 保留现有骨架的前提下，补齐“可开工的最小文件集”，把项目推进到可安装、可运行、可继续开发的状态。
 - 当前追加目标：以 `docs/tech` 为功能准绳，主攻底层、数据与可验证闭环，并补齐前端可独立开发的契约文档。
+- 当前追加目标：将 `noche_codex_function_matrix_and_interaction_logic.md` 纳入项目真相入口，并据此优先补主链路：`写入 -> 保存 -> 阅读 -> 信箱查看 -> 日历跳转 -> 续写恢复`。
 
 ## Constraints
 - 不写业务功能。
@@ -11,6 +12,7 @@
 - 尽量不打乱现有目录骨架。
 - 使用 `pnpm` 作为包管理器。
 - 需要安装最小依赖：`pinia`、`dayjs`、`uuid`。
+- 默认连续推进：每轮都执行“实现 -> 验证 -> checkpoint -> commit -> 自动进入下一轮”，直到命中停止条件。
 
 ## Phases
 - [complete] Phase 1: 建立规划记录并确认初始化边界
@@ -26,6 +28,8 @@
 - [complete] Phase 11: 继续推进 editor/draft 最小写作闭环，形成最小 save/read 页面闭环
 - [pending] Phase 12: 基于现有 entry/draft 闭环接入 mailbox/read 读取路径
 - [complete] Phase 13: 补齐前后端分离契约文档与后端功能清单
+- [complete] Phase 14: 纳入 Codex 功能矩阵文档，并补通 read/resume 主链缺口
+- [in_progress] Phase 15: 按 stitch 参考收口 Mailbox / Calendar / Day Archive 页面状态与文案
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -33,6 +37,8 @@
 - 当前任务允许新增最小 store、domain、data、shared、features 骨架文件，但不实现正式页面与完整数据库。
 - 功能判断以 `docs/tech` 下文档为准；`docs/spec` 仅作为产品背景参考。
 - 交给 Gemini 的页面/UI 任务只提供接口与边界，不强压视觉创造方案。
+- 新增的 `noche_codex_function_matrix_and_interaction_logic.md` 应进入项目真相文档链，并高于零散 prompt 文档。
+- `docs/stitch/**` 只作为结构与视觉节奏参考，不继承原型文案、示例图片或假数据表达。
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

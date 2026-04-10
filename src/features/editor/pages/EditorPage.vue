@@ -100,7 +100,18 @@
       <text class="editor-page__read-content">{{ savedEntry.content }}</text>
 
       <view class="editor-page__actions">
-        <button class="editor-page__primary-button" @click="handleStartAnother">
+        <button
+          v-if="canContinueWrite"
+          class="editor-page__primary-button"
+          @click="handleContinueWrite"
+        >
+          Continue Write
+        </button>
+        <button
+          v-if="canStartAnother"
+          class="editor-page__secondary-button"
+          @click="handleStartAnother"
+        >
           Start Another
         </button>
       </view>
@@ -179,6 +190,8 @@ const canSaveEntry = computed(() => {
   const hasFutureDate = entryType.value !== "future" || Boolean(unlockDate.value);
   return hasBody && hasFutureDate;
 });
+const canContinueWrite = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "future"));
+const canStartAnother = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "diary"));
 const draftStatusText = computed(() => {
   if (mode.value !== "edit") {
     return "Entry saved. This page is now in read mode.";
@@ -230,6 +243,29 @@ function normalizeEntryType(rawType?: string): EntryType {
   return "diary";
 }
 
+function resolveRequestedRecordDate(query?: Record<string, unknown>): string {
+  const routeDate = typeof query?.recordDate === "string"
+    ? query.recordDate
+    : typeof query?.date === "string"
+      ? query.date
+      : null;
+
+  return routeDate && routeDate.trim() ? routeDate : lockRecordDate();
+}
+
+function syncFormFromEntry(entry: Entry): void {
+  title.value = entry.title ?? "";
+  content.value = entry.content;
+  recordDate.value = entry.recordDate;
+  unlockDate.value = entry.type === "future" ? entry.unlockDate ?? "" : "";
+}
+
+function applyNavigationTitle(): void {
+  uni.setNavigationBarTitle({
+    title: PAGE_META[entryType.value].eyebrow,
+  });
+}
+
 function syncFormFromDraft(): void {
   const draft = draftStore.activeDraft;
   if (!draft) {
@@ -261,6 +297,41 @@ async function openCurrentDraft(): Promise<void> {
   } finally {
     isHydrating.value = false;
   }
+}
+
+async function openEntryForRead(entryId: string): Promise<void> {
+  isHydrating.value = true;
+
+  try {
+    const entry = await entryStore.fetchEntryById(entryId);
+
+    if (!entry) {
+      throw new Error(entryStore.error ?? "Failed to load entry");
+    }
+
+    entryType.value = entry.type;
+    savedEntry.value = entry;
+    mode.value = "read";
+    draftStore.setActiveDraftKey(null);
+    syncFormFromEntry(entry);
+    applyNavigationTitle();
+  } finally {
+    isHydrating.value = false;
+  }
+}
+
+async function initializeFromRoute(query?: Record<string, unknown>): Promise<void> {
+  entryType.value = normalizeEntryType(typeof query?.type === "string" ? query.type : undefined);
+  recordDate.value = resolveRequestedRecordDate(query);
+  unlockDate.value = entryType.value === "future" ? tomorrowDate() : "";
+  applyNavigationTitle();
+
+  if (query?.mode === "read" && typeof query.entryId === "string" && query.entryId.trim()) {
+    await openEntryForRead(query.entryId);
+    return;
+  }
+
+  await openCurrentDraft();
 }
 
 async function persistDraftNow(): Promise<void> {
@@ -377,14 +448,36 @@ async function handleStartAnother(): Promise<void> {
   await openCurrentDraft();
 }
 
+async function handleContinueWrite(): Promise<void> {
+  if (!savedEntry.value || savedEntry.value.type === "future") {
+    return;
+  }
+
+  try {
+    const draft = await draftStore.resumeEntry(savedEntry.value.id);
+
+    if (!draft) {
+      throw new Error(draftStore.error ?? "Failed to resume entry");
+    }
+
+    syncFormFromDraft();
+    savedEntry.value = null;
+    mode.value = "edit";
+
+    uni.showToast({
+      title: "Continue writing",
+      icon: "none",
+    });
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : "Failed to resume entry",
+      icon: "none",
+    });
+  }
+}
+
 onLoad((query) => {
-  entryType.value = normalizeEntryType(typeof query?.type === "string" ? query.type : undefined);
-  recordDate.value = lockRecordDate();
-  unlockDate.value = entryType.value === "future" ? tomorrowDate() : "";
-  uni.setNavigationBarTitle({
-    title: PAGE_META[entryType.value].eyebrow,
-  });
-  void openCurrentDraft();
+  void initializeFromRoute(query);
 });
 
 onUnload(() => {

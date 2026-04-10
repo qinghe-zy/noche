@@ -90,14 +90,18 @@ export function collectCalendarMarkedDates(entries: Entry[]): string[] {
   ).sort();
 }
 
+export function listDayArchiveEntries(entries: Entry[], recordDate: string): Entry[] {
+  return entries
+    .filter((entry) => entry.recordDate === recordDate)
+    .filter(isCalendarVisibleEntry)
+    .sort(sortEntriesByRecordDateDesc);
+}
+
 export function resolveCalendarDateSelection(
   entries: Entry[],
   recordDate: string,
 ): CalendarResolveResult {
-  const visibleEntries = entries
-    .filter((entry) => entry.recordDate === recordDate)
-    .filter(isCalendarVisibleEntry)
-    .sort(sortEntriesByRecordDateDesc);
+  const visibleEntries = listDayArchiveEntries(entries, recordDate);
 
   if (visibleEntries.length === 0) {
     return {

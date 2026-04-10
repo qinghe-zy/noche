@@ -25,6 +25,12 @@
       }
     },
     {
+      "path": "features/day-archive/pages/DayArchivePage",
+      "style": {
+        "navigationBarTitleText": "Day Archive"
+      }
+    },
+    {
       "path": "features/profile/pages/ProfilePage",
       "style": {
         "navigationBarTitleText": "Profile"

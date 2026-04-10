@@ -101,4 +101,85 @@ describe("draft store", () => {
       unlockDate: "2026-04-12",
     });
   });
+
+  it("resumes a saved diary entry by restoring it into the matching draft slot", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+    const entry = createEntry({
+      type: "diary",
+      title: "旧日记",
+      content: "那天的风很轻。",
+      recordDate: "2026-04-09",
+    });
+
+    await entryStore.saveEntry(entry);
+    const draft = await draftStore.resumeEntry(entry.id);
+
+    expect(draft).toMatchObject({
+      slotKey: "draft_diary_2026-04-09",
+      linkedEntryId: entry.id,
+      title: "旧日记",
+      content: "那天的风很轻。",
+      recordDate: "2026-04-09",
+    });
+    expect(draftStore.activeDraftKey).toBe("draft_diary_2026-04-09");
+  });
+
+  it("does not resume a future letter into editable draft state", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+    const entry = createEntry({
+      type: "future",
+      title: "封存的信",
+      content: "等以后再看。",
+      recordDate: "2026-04-09",
+      unlockDate: "2026-04-12",
+    });
+
+    await entryStore.saveEntry(entry);
+    const draft = await draftStore.resumeEntry(entry.id);
+
+    expect(draft).toBeNull();
+    expect(draftStore.activeDraft).toBeNull();
+    expect(draftStore.error).toBe("Future letters cannot be resumed for editing.");
+  });
+
+  it("saves a resumed diary back into the original entry id", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+    const entry = createEntry({
+      type: "diary",
+      title: "旧页",
+      content: "最初写下来的内容。",
+      recordDate: "2026-04-09",
+    });
+
+    await entryStore.saveEntry({
+      ...entry,
+      savedAt: "2026-04-09T08:00:00.000Z",
+    });
+
+    await draftStore.resumeEntry(entry.id);
+    await draftStore.saveActiveDraft({
+      title: "旧页续写",
+      content: "最初写下来的内容。\n后来又补了一段。",
+    });
+
+    const savedEntry = await draftStore.saveActiveDraftAsEntry();
+    const reloadedEntry = await entryStore.fetchEntryById(entry.id);
+
+    expect(savedEntry?.id).toBe(entry.id);
+    expect(savedEntry).toMatchObject({
+      id: entry.id,
+      title: "旧页续写",
+      content: "最初写下来的内容。\n后来又补了一段。",
+      recordDate: "2026-04-09",
+    });
+    expect(reloadedEntry).toMatchObject({
+      id: entry.id,
+      title: "旧页续写",
+      content: "最初写下来的内容。\n后来又补了一段。",
+    });
+    expect(draftStore.activeDraft).toBeNull();
+  });
 });

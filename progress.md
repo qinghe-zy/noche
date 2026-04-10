@@ -71,3 +71,29 @@
 - 已在契约文档中标记 `useDraftStore` 与 `useEntryStore` 的错误语义不一致，避免前端误判。
 - 已明确 `mailbox / calendar / profile` 当前的“目标 facade 契约”，使前端可以先按契约写页面和 mock。
 - 已更新 docs 索引、任务卡与 checkpoint，保持后续可续接。
+- 收到用户新增执行文档 `D:\Project\daily\noche_codex_function_matrix_and_interaction_logic.md`，其内容补全了主链优先级、页面功能矩阵、禁止项与 Done 定义。
+- 已开始把该矩阵文档纳入仓库真相入口，并将当前轮次重排为“主链补通优先”。
+- 先写测试锁定新的续写语义：
+  - 新增 `resumeEntry(entryId)` 测试，要求已保存 diary 可恢复为对应 draft
+  - 新增 future 不可续写测试，确保封存后不回到编辑态
+- 已在 `useDraftStore` 中补入 `resumeEntry(entryId)`，后续准备让 Editor 真正接住 `Mailbox / Calendar -> read mode -> continue write`。
+- 基线验证结果：
+  - `pnpm.cmd run type-check` 失败，定位到 `CalendarPage.vue` 仍在消费过时的 `result.type`
+  - `pnpm.cmd run test:unit` 与 `pnpm.cmd run build:h5` 在当前 sandbox 下均因 `spawn EPERM` 未跑通，待后续提权复验
+- 自主续接主链：先补失败测试锁定“续写后仍沿用原 entry id”与“Day Archive 只展示 calendar-visible entries”。
+- 已更新 `EditorPage`：
+  - 支持 `mode=read&entryId=...` 直接打开已保存内容
+  - 阅读态支持 `continue write`
+  - `future` 阅读态不暴露续写入口
+  - 支持 `recordDate` 路由参数，用于 Calendar 补写指定日期日记
+- 已更新 `CalendarPage`：
+  - 改为消费 `CalendarResolveResult.kind`
+  - `entry` 直达 Editor read mode
+  - `entry-list` 跳转 Day Archive
+  - `new-diary` 只创建 diary，并透传 `recordDate`
+- 已新增 `src/features/day-archive/pages/DayArchivePage.vue`，形成最小可用的“当天归档列表 -> 单条阅读态”中转页。
+- 已在 `entryQueryService` 新增 `listDayArchiveEntries()`，让 Calendar 与 Day Archive 共用同一套“可见条目”筛选规则。
+- 已顺手收口 `MailboxPage` / `CalendarPage` 文案，避免保留 stitch 原型腔与示意性表达。
+- 已验证 `pnpm.cmd run test:unit` 通过：19 个测试文件、40 个测试通过。
+- 已验证 `pnpm.cmd run type-check` 通过。
+- 已验证 `pnpm.cmd run build:h5` 通过。
