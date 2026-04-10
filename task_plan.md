@@ -30,6 +30,7 @@
 - [complete] Phase 13: 补齐前后端分离契约文档与后端功能清单
 - [complete] Phase 14: 纳入 Codex 功能矩阵文档，并补通 read/resume 主链缺口
 - [in_progress] Phase 15: 按 stitch 参考收口 Mailbox / Calendar / Day Archive 页面状态与文案，并补 H5 可视化验收
+- [pending] Phase 16: 继续把页面展示文案与日期显示从页面内联收口为 feature helper
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

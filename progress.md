@@ -113,3 +113,20 @@
 - 尝试执行 Playwright MCP 浏览器导航验证时，命中环境级错误：
   - `EPERM: operation not permitted, open 'C:\\Windows\\System32\\.playwright-mcp\\page-2026-04-10T13-27-17-293Z.yml'`
   - 当前轮无法继续浏览器自动化，只能把该证据写入 checkpoint。
+- 自主继续下一轮页面收口：先写失败测试锁定 `CalendarPage` 与 `DayArchivePage` 的中文标题 / 引导 / 空态 helper。
+- 已新增：
+  - `src/features/calendar/calendarDisplay.ts`
+  - `src/features/day-archive/dayArchiveDisplay.ts`
+- 已新增：
+  - `tests/features/calendarDisplay.test.ts`
+  - `tests/features/dayArchiveDisplay.test.ts`
+- 已更新 `CalendarPage.vue`：
+  - 月份标题改由 `calendarDisplay` 提供
+  - 增加当前选择日期的引导语区域
+- 已更新 `DayArchivePage.vue`：
+  - 页面标题改为 `YYYY年MM月DD日`
+  - 副标题与空态改由 `dayArchiveDisplay` 提供
+  - 导航栏标题不再使用英文月份缩写
+- 已再次验证 `pnpm.cmd run test:unit` 通过：22 个测试文件、47 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。

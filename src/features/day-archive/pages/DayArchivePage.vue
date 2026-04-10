@@ -15,7 +15,7 @@
     </view>
 
     <view v-else-if="entries.length === 0" class="day-archive-page__state">
-      <text class="day-archive-page__state-text">这一天还没有可阅读的记录。</text>
+      <text class="day-archive-page__state-text">{{ emptyText }}</text>
       <button class="day-archive-page__primary-button" @click="handleWriteDiary">
         补写这一天
       </button>
@@ -48,13 +48,19 @@ import { listDayArchiveEntries } from "@/domain/services/entryQueryService";
 import { lockRecordDate } from "@/domain/time/rules";
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDate } from "@/shared/utils/date";
+import {
+  formatDayArchiveEmptyText,
+  formatDayArchiveSubtitle,
+  formatDayArchiveTitle,
+} from "@/features/day-archive/dayArchiveDisplay";
 
 const entryStore = useEntryStore();
 const recordDate = ref(lockRecordDate());
 
 const entries = computed(() => listDayArchiveEntries(entryStore.entryList, recordDate.value));
-const pageTitle = computed(() => formatDate(recordDate.value, "MMM DD, YYYY"));
-const pageSubtitle = computed(() => `${entries.value.length} 封可阅读记录`);
+const pageTitle = computed(() => formatDayArchiveTitle(recordDate.value));
+const pageSubtitle = computed(() => formatDayArchiveSubtitle(entries.value.length));
+const emptyText = computed(() => formatDayArchiveEmptyText(recordDate.value));
 
 function fallbackTitle(type: EntryType): string {
   if (type === "jotting") {
@@ -98,7 +104,7 @@ onLoad((query) => {
     : lockRecordDate();
 
   uni.setNavigationBarTitle({
-    title: formatDate(recordDate.value, "MMM DD"),
+    title: formatDayArchiveTitle(recordDate.value),
   });
 
   void entryStore.fetchEntriesByDate(recordDate.value);

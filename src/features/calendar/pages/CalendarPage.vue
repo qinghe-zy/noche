@@ -20,6 +20,11 @@
     </view>
 
     <view class="calendar-page__body">
+      <view class="calendar-page__hero">
+        <text class="calendar-page__title">日历</text>
+        <text class="calendar-page__subtitle">{{ guideText }}</text>
+      </view>
+
       <view class="calendar-page__weekdays">
         <text v-for="day in weekLabels" :key="day" class="calendar-page__weekday">{{ day }}</text>
       </view>
@@ -63,12 +68,23 @@ import { ref, computed, onMounted } from "vue";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
 import { formatDate, getDaysInMonth, getFirstDayOfWeek, addMonth, isSameDay } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
+import {
+  formatCalendarGuideText,
+  formatCalendarMonthLabel,
+  formatCalendarYearLabel,
+} from "@/features/calendar/calendarDisplay";
 
 const calendarStore = useCalendarStore();
 const currentMonthDate = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const selectedDate = ref<string | null>(null);
 
 const weekLabels = ["日", "一", "二", "三", "四", "五", "六"];
+const guideText = computed(() =>
+  formatCalendarGuideText(
+    selectedDate.value,
+    selectedDate.value ? hasMarker(selectedDate.value) : false,
+  ),
+);
 
 const calendarDays = computed(() => {
   const daysInMonth = getDaysInMonth(currentMonthDate.value);
@@ -94,11 +110,11 @@ const calendarDays = computed(() => {
 });
 
 function formatMonthLabel(date: string) {
-  return formatDate(date, 'MMMM');
+  return formatCalendarMonthLabel(date);
 }
 
 function formatYearLabel(date: string) {
-  return formatDate(date, 'YYYY');
+  return formatCalendarYearLabel(date);
 }
 
 function isToday(date: string) {
@@ -214,6 +230,29 @@ onMounted(() => {
 
 .calendar-page__body {
   padding: 0 40rpx;
+}
+
+.calendar-page__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-bottom: 32rpx;
+  padding: 26rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid var(--noche-color-border);
+}
+
+.calendar-page__title {
+  font-size: 42rpx;
+  font-weight: 600;
+  color: var(--noche-color-text);
+}
+
+.calendar-page__subtitle {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: var(--noche-color-muted);
 }
 
 .calendar-page__banner {
