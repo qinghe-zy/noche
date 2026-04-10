@@ -3,37 +3,37 @@
     {
       "path": "features/home/pages/HomePage",
       "style": {
-        "navigationBarTitleText": "Home"
+        "navigationBarTitleText": "noche"
       }
     },
     {
       "path": "features/editor/pages/EditorPage",
       "style": {
-        "navigationBarTitleText": "Editor"
+        "navigationBarTitleText": "写信"
       }
     },
     {
       "path": "features/mailbox/pages/MailboxPage",
       "style": {
-        "navigationBarTitleText": "Mailbox"
+        "navigationBarTitleText": "信箱"
       }
     },
     {
       "path": "features/calendar/pages/CalendarPage",
       "style": {
-        "navigationBarTitleText": "Calendar"
+        "navigationBarTitleText": "日历"
       }
     },
     {
       "path": "features/day-archive/pages/DayArchivePage",
       "style": {
-        "navigationBarTitleText": "Day Archive"
+        "navigationBarTitleText": "当日归档"
       }
     },
     {
       "path": "features/profile/pages/ProfilePage",
       "style": {
-        "navigationBarTitleText": "Profile"
+        "navigationBarTitleText": "我的"
       }
     }
   ],

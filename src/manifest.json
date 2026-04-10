@@ -1,7 +1,7 @@
 {
   "name": "noche",
-  "appid": "",
-  "description": "noche private letter and diary app bootstrap",
+  "appid": "__UNI__NOCHE001",
+  "description": "noche 私人写信与日记应用",
   "versionName": "1.0.0",
   "versionCode": "100",
   "transformPx": false,

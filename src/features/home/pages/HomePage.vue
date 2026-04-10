@@ -6,8 +6,8 @@
       <!-- Main Action: Today Diary -->
       <view class="home-page__section">
         <HomeActionCard 
-          label="Write Today" 
-          sub-label="Keep a record of your day" 
+          label="打开今日信纸" 
+          sub-label="写下今天，收好今天" 
           size="large"
           @click="handleNavigate('editor', { type: 'diary' })"
         />
@@ -16,14 +16,14 @@
       <!-- Secondary Actions: Jotting & Future Letter -->
       <view class="home-page__row">
         <HomeActionCard 
-          label="Quick Jotting" 
-          sub-label="Instant thoughts" 
+          label="随手记一笔" 
+          sub-label="记下灵光和碎片" 
           size="small"
           @click="handleNavigate('editor', { type: 'jotting' })"
         />
         <HomeActionCard 
-          label="To Future" 
-          sub-label="Send a message later" 
+          label="写给未来" 
+          sub-label="留到以后再打开" 
           size="small"
           @click="handleNavigate('editor', { type: 'future' })"
         />
@@ -32,12 +32,12 @@
 
     <view class="home-page__footer">
       <view class="home-page__footer-item" @click="handleNavigate('mailbox')">
-        <view class="home-page__footer-icon">M</view>
-        <text class="home-page__footer-label">Mailbox</text>
+        <view class="home-page__footer-icon">信</view>
+        <text class="home-page__footer-label">信箱</text>
       </view>
       <view class="home-page__footer-item" @click="handleNavigate('profile')">
-        <view class="home-page__footer-icon">P</view>
-        <text class="home-page__footer-label">Profile</text>
+        <view class="home-page__footer-icon">我</view>
+        <text class="home-page__footer-label">我的</text>
       </view>
     </view>
   </view>
@@ -110,7 +110,8 @@ const handleNavigate = (routeKey: keyof typeof ROUTES, query?: Record<string, st
   height: 48rpx;
   border: 1rpx solid var(--noche-color-border);
   border-radius: 50%;
-  font-size: 40rpx;
+  font-size: 24rpx;
+  font-weight: 600;
   line-height: 48rpx;
   text-align: center;
   color: var(--noche-color-text);

@@ -14,17 +14,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import dayjs from "dayjs";
+import { formatHomeDateInfo, formatHomeGreeting } from "@/features/home/homeDisplay";
 
 const day = computed(() => dayjs().format("DD"));
-const dateInfo = computed(() => dayjs().format("MMM. YYYY / dddd"));
-
-const greeting = computed(() => {
-  const hour = dayjs().hour();
-  if (hour < 5) return "Good night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-});
+const dateInfo = computed(() => formatHomeDateInfo());
+const greeting = computed(() => formatHomeGreeting());
 </script>
 
 <style scoped>

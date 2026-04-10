@@ -23,49 +23,49 @@
     <view v-if="mode === 'edit'" class="editor-page__sheet">
       <view class="editor-page__sheet-header">
         <view>
-          <text class="editor-page__section-label">Draft Slot</text>
+          <text class="editor-page__section-label">草稿槽位</text>
           <text class="editor-page__section-value">{{ activeSlotLabel }}</text>
         </view>
 
         <button class="editor-page__ghost-button" @click="handleDiscardDraft">
-          Reset Draft
+          重置草稿
         </button>
       </view>
 
       <view class="editor-page__field-group">
-        <text class="editor-page__field-label">Title</text>
+        <text class="editor-page__field-label">标题</text>
         <input
           class="editor-page__input"
           :value="title"
           maxlength="80"
-          placeholder="Give this page a line to lean on"
+          placeholder="给这一页留一个题头"
           placeholder-class="editor-page__placeholder"
           @input="handleTitleInput"
         />
       </view>
 
       <view v-if="entryType === 'future'" class="editor-page__field-group">
-        <text class="editor-page__field-label">Unlock Date</text>
+        <text class="editor-page__field-label">开启日期</text>
         <input
           class="editor-page__input"
           :value="unlockDate"
           type="date"
           @input="handleUnlockDateInput"
         />
-        <text class="editor-page__hint">Future letters must unlock no earlier than tomorrow.</text>
+        <text class="editor-page__hint">未来信的开启日期不能早于明天。</text>
       </view>
 
       <view class="editor-page__field-group editor-page__field-group--content">
         <view class="editor-page__content-head">
-          <text class="editor-page__field-label">Content</text>
-          <text class="editor-page__counter">{{ contentLength }} chars</text>
+          <text class="editor-page__field-label">正文</text>
+          <text class="editor-page__counter">{{ contentLength }} 字</text>
         </view>
         <textarea
           class="editor-page__textarea"
           :value="content"
           auto-height
           maxlength="-1"
-          placeholder="Write the part that should stay."
+          placeholder="写下你想留下来的部分"
           placeholder-class="editor-page__placeholder"
           @input="handleContentInput"
         />
@@ -84,14 +84,14 @@
           :disabled="draftStore.isLoading"
           @click="handleManualSave"
         >
-          Save Draft
+          保存草稿
         </button>
       </view>
     </view>
 
     <view v-else-if="savedEntry" class="editor-page__sheet editor-page__sheet--read">
       <view class="editor-page__read-header">
-        <text class="editor-page__section-label">Saved Entry</text>
+        <text class="editor-page__section-label">已收好的信</text>
         <text class="editor-page__saved-stamp">{{ savedStamp }}</text>
       </view>
 
@@ -105,14 +105,14 @@
           class="editor-page__primary-button"
           @click="handleContinueWrite"
         >
-          Continue Write
+          继续续写
         </button>
         <button
           v-if="canStartAnother"
           class="editor-page__secondary-button"
           @click="handleStartAnother"
         >
-          Start Another
+          另起一页
         </button>
       </view>
     </view>
@@ -141,25 +141,25 @@ const PAGE_META: Record<
   }
 > = {
   diary: {
-    eyebrow: "Today",
-    title: "Write while the day is still warm",
-    subtitle: "One dated page, one locked slot, one honest record.",
-    saveLabel: "Save Today",
-    fallbackTitle: "Today",
+    eyebrow: "今日日记",
+    title: "趁今天还温着，写下这一天",
+    subtitle: "一天一页，记录会留在这一天里。",
+    saveLabel: "收好今天",
+    fallbackTitle: "今日日记",
   },
   jotting: {
-    eyebrow: "Jotting",
-    title: "Catch the thought before it dries out",
-    subtitle: "Small notes are still real notes.",
-    saveLabel: "Save Jotting",
-    fallbackTitle: "Quick Jotting",
+    eyebrow: "随笔",
+    title: "先把这一下记住",
+    subtitle: "零碎念头也值得被认真收好。",
+    saveLabel: "收好随笔",
+    fallbackTitle: "随笔",
   },
   future: {
-    eyebrow: "Future",
-    title: "Seal a note for a later self",
-    subtitle: "Choose when it should return and let it wait there.",
-    saveLabel: "Seal Letter",
-    fallbackTitle: "Future Letter",
+    eyebrow: "未来信",
+    title: "给未来留一封还没开启的信",
+    subtitle: "选好日期，让它安静等到那一天。",
+    saveLabel: "封存这封信",
+    fallbackTitle: "未来信",
   },
 };
 
@@ -180,11 +180,11 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null;
 const pageMeta = computed(() => PAGE_META[entryType.value]);
 const heroDate = computed(() =>
   entryType.value === "future" && unlockDate.value
-    ? `Unlock ${unlockDate.value}`
-    : formatDate(recordDate.value, "MMM DD, YYYY"),
+    ? `将在 ${unlockDate.value} 开启`
+    : recordDate.value,
 );
 const contentLength = computed(() => content.value.trim().length);
-const activeSlotLabel = computed(() => draftStore.activeDraft?.slotKey ?? "Not opened");
+const activeSlotLabel = computed(() => draftStore.activeDraft?.slotKey ?? "尚未打开");
 const canSaveEntry = computed(() => {
   const hasBody = title.value.trim().length > 0 || content.value.trim().length > 0;
   const hasFutureDate = entryType.value !== "future" || Boolean(unlockDate.value);
@@ -194,18 +194,18 @@ const canContinueWrite = computed(() => Boolean(savedEntry.value && savedEntry.v
 const canStartAnother = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "diary"));
 const draftStatusText = computed(() => {
   if (mode.value !== "edit") {
-    return "Entry saved. This page is now in read mode.";
+    return "这封信已经收好，现在是阅读态。";
   }
 
   if (draftStore.isLoading) {
-    return "Persisting draft...";
+    return "正在保存草稿…";
   }
 
   if (draftStore.activeDraft?.lastBackgroundSavedAt) {
-    return `Draft saved at ${formatDate(draftStore.activeDraft.lastBackgroundSavedAt, "HH:mm")}`;
+    return `草稿已在 ${formatDate(draftStore.activeDraft.lastBackgroundSavedAt, "HH:mm")} 保存`;
   }
 
-  return "Draft opened. Start writing.";
+  return "纸页已经展开，可以开始写了。";
 });
 const errorMessage = computed(() => draftStore.error ?? entryStore.error);
 const savedStamp = computed(() =>
@@ -217,10 +217,10 @@ const readMeta = computed(() => {
   }
 
   if (savedEntry.value.type === "future" && savedEntry.value.unlockDate) {
-    return `Unlocks on ${savedEntry.value.unlockDate}`;
+    return `开启日期 ${savedEntry.value.unlockDate}`;
   }
 
-  return `Recorded on ${savedEntry.value.recordDate}`;
+  return `记录日期 ${savedEntry.value.recordDate}`;
 });
 
 function extractInputValue(event: Event | { detail?: { value?: string } }): string {
@@ -380,12 +380,12 @@ async function handleManualSave(): Promise<void> {
   try {
     await persistDraftNow();
     uni.showToast({
-      title: "Draft saved",
+      title: "草稿已保存",
       icon: "none",
     });
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "Failed to save draft",
+      title: error instanceof Error ? error.message : "草稿保存失败",
       icon: "none",
     });
   }
@@ -407,7 +407,7 @@ async function handleDiscardDraft(): Promise<void> {
 async function handleFormalSave(): Promise<void> {
   if (!canSaveEntry.value) {
     uni.showToast({
-      title: "Write something first",
+      title: "先写一点内容",
       icon: "none",
     });
     return;
@@ -423,19 +423,19 @@ async function handleFormalSave(): Promise<void> {
     const entry = await draftStore.saveActiveDraftAsEntry();
 
     if (!entry) {
-      throw new Error(draftStore.error ?? "Failed to save entry");
+      throw new Error(draftStore.error ?? "正式保存失败");
     }
 
     savedEntry.value = entry;
     mode.value = "read";
 
     uni.showToast({
-      title: "Entry saved",
+      title: "已经收好",
       icon: "none",
     });
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "Failed to save entry",
+      title: error instanceof Error ? error.message : "正式保存失败",
       icon: "none",
     });
   }
@@ -465,12 +465,12 @@ async function handleContinueWrite(): Promise<void> {
     mode.value = "edit";
 
     uni.showToast({
-      title: "Continue writing",
+      title: "回到编辑态",
       icon: "none",
     });
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "Failed to resume entry",
+      title: error instanceof Error ? error.message : "恢复续写失败",
       icon: "none",
     });
   }

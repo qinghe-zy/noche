@@ -140,3 +140,31 @@
 - 已再次验证 `pnpm.cmd run test:unit` 通过：23 个测试文件、49 个测试通过。
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 用户新增目标：今晚要打包 APK，因此本轮开始转向“可上线版本”收口，而不是只补主链。
+- 已新增 `tests/release/appReadiness.test.ts`，先用失败测试锁定 4 个发布阻塞：
+  - `manifest.appid` 不能为空
+  - `ProfilePage` 不能还是 TODO
+  - `Home` 不能残留英文入口文案
+  - 导航标题不能残留 `Mailbox/Profile`
+- 已新增 `src/features/home/homeDisplay.ts`，并更新：
+  - `HomeHero.vue`
+  - `HomePage.vue`
+  让首页日期与问候语、入口按钮和底部入口全部切回中文
+- 已重写 `src/features/profile/pages/ProfilePage.vue`：
+  - 不再是占位壳页
+  - 已接入 settings hydrate
+  - 已接入 mailbox 统计
+  - 提供主题、每周起始日、语言、隐私与数据说明的最小可上线页
+- 已更新：
+  - `src/manifest.json`：补入非空 `appid`
+  - `src/pages.json`：首页 / 编辑页 / 信箱 / 日历 / 归档 / 我的 导航标题全部本地化
+- 已新增 release 红灯：Editor 仍存在英文主路径文案；随后已继续修复 `EditorPage.vue` 的标题、副标题、按钮、提示、toast 和阅读态文案。
+- 已验证 `pnpm.cmd vitest run tests/release/appReadiness.test.ts` 通过：5 个发布就绪测试全部通过。
+- 已再次验证 `pnpm.cmd run test:unit` 通过：24 个测试文件、54 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过，当前可稳定产出 `dist/build/app`。
+- 已检查本机打包工具链：
+  - `where.exe HBuilderX` 未找到
+  - `C:\\Program Files` 与 `C:\\Program Files (x86)` 常见目录未发现 HBuilderX
+  - 当前环境无法直接把 `dist/build/app` 进一步打成 APK

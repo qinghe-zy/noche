@@ -31,6 +31,7 @@
 - [complete] Phase 14: 纳入 Codex 功能矩阵文档，并补通 read/resume 主链缺口
 - [in_progress] Phase 15: 按 stitch 参考收口 Mailbox / Calendar / Day Archive 页面状态与文案，并补 H5 可视化验收
 - [in_progress] Phase 16: 继续把页面展示文案与日期显示从页面内联收口为 feature helper
+- [complete] Phase 17: 收口上线阻塞项（manifest appid、Home/Profile/Editor 中文化、app-plus 产物验证）
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -56,3 +57,4 @@
 | dev server 首轮导航时被停止导致 Vite connection lost | 1 | 重新启动 dev server 后复测，控制台 0 error |
 | Gemini CLI 两次 headless editor 调用在 10 分钟超时内未写出文件 | 1 | 保留 handoff 文档和调用记录，本轮由 Codex 本地接管 editor feature 实现与验收 |
 | Playwright MCP 导航本地 dev server 时尝试写入 `C:\Windows\System32\.playwright-mcp\...` 并触发 `EPERM` | 1 | 本轮已保留 dev server 正常启动证据与完整报错，待后续切换可写目录或 MCP 环境后再继续浏览器自动化验收 |
+| 需要进一步将 `dist/build/app` 打成 APK，但本机未找到 HBuilderX 安装或可执行程序 | 1 | 代码侧已完成 app-plus 产物准备；APK 最终打包目前受限于本机缺少 HBuilderX 工具链 |
