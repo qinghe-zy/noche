@@ -182,4 +182,28 @@ describe("draft store", () => {
     });
     expect(draftStore.activeDraft).toBeNull();
   });
+
+  it("peeks an existing jotting draft without activating it", async () => {
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "jotting",
+    });
+    await draftStore.saveActiveDraft({
+      title: "随手记",
+      content: "刚刚想到一句话。",
+    });
+
+    draftStore.setActiveDraftKey(null);
+    const draft = await draftStore.peekDraft({
+      type: "jotting",
+    });
+
+    expect(draft).toMatchObject({
+      slotKey: "draft_jotting",
+      title: "随手记",
+      content: "刚刚想到一句话。",
+    });
+    expect(draftStore.activeDraft).toBeNull();
+  });
 });

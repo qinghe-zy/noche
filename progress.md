@@ -183,3 +183,16 @@
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过，`dist/build/app` 仍可稳定生成。
+- 自主继续下一轮：补 `jotting` 活跃草稿冲突处理。
+- 已先在 `tests/app/draftStore.test.ts` 写失败测试，要求 store 能在不激活草稿的前提下探测现有 jotting draft。
+- 已在 `src/app/store/useDraftStore.ts` 新增 `peekDraft()`。
+- 已更新 `src/features/home/pages/HomePage.vue`：
+  - 点击“随手记一笔”时，若已有有效 jotting 草稿，会弹出：
+    - 继续上次
+    - 另起一张
+    - 取消
+  - “另起一张”会先移除旧 jotting draft，再进入 editor
+- 已再次验证 `pnpm.cmd run test:unit` 通过：25 个测试文件、59 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过。

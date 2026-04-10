@@ -48,6 +48,27 @@ export const useDraftStore = defineStore("draft", {
     upsertDraft(draft: Draft) {
       this.drafts[draft.slotKey] = draft;
     },
+    async peekDraft(input: CreateDraftInput): Promise<Draft | null> {
+      this.error = null;
+
+      const slotKey = buildDraftSlotKey(input.type, {
+        recordDate: input.recordDate ?? null,
+        linkedEntryId: input.linkedEntryId ?? null,
+      });
+
+      try {
+        const draft = await draftRepository.getBySlotKey(slotKey);
+
+        if (draft) {
+          this.upsertDraft(draft);
+        }
+
+        return draft;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to inspect draft.";
+        throw error;
+      }
+    },
     async openDraft(input: CreateDraftInput): Promise<Draft> {
       this.isLoading = true;
       this.error = null;
