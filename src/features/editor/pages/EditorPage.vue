@@ -158,6 +158,7 @@ import { isValidFutureLetterDate, lockRecordDate } from "@/domain/time/rules";
 import { formatDate } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
+import { resolveDiaryEntryOpenTarget } from "@/domain/services/editorService";
 
 type EditorMode = "edit" | "read";
 
@@ -368,6 +369,25 @@ async function initializeFromRoute(query?: Record<string, unknown>): Promise<voi
   if (query?.mode === "read" && typeof query.entryId === "string" && query.entryId.trim()) {
     await openEntryForRead(query.entryId);
     return;
+  }
+
+  if (entryType.value === "diary") {
+    const draft = await draftStore.peekDraft({
+      type: "diary",
+      recordDate: recordDate.value,
+    });
+    await entryStore.fetchEntriesByDate(recordDate.value);
+
+    const target = resolveDiaryEntryOpenTarget({
+      draft,
+      entries: entryStore.entryList.filter((entry) => entry.recordDate === recordDate.value),
+      recordDate: recordDate.value,
+    });
+
+    if (target.kind === "entry") {
+      await openEntryForRead(target.entryId);
+      return;
+    }
   }
 
   await openCurrentDraft();
