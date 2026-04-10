@@ -36,6 +36,7 @@
 - [in_progress] Phase 18: 收口 Editor 的销毁与空白保存行为，并保持规则可扩展
 - [in_progress] Phase 19: 补齐 jotting 活跃草稿冲突处理与隐私锁最小闭环
 - [in_progress] Phase 20: 补齐 future 日期选择体验与封存前交互
+- [in_progress] Phase 21: 补自动标题并继续功能验收收口
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

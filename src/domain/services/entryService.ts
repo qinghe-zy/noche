@@ -19,6 +19,19 @@ export interface DestroyEntryOptions {
 
 export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry" | "pick-future-date";
 
+export function deriveEntryTitle(content: string, maxLength = 13): string | null {
+  const firstLine = content
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+
+  if (!firstLine) {
+    return null;
+  }
+
+  return firstLine.slice(0, maxLength);
+}
+
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
 
@@ -71,7 +84,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
     id: draft.linkedEntryId ?? createId(),
     type: draft.type,
     status: draft.type === "future" ? "sealed" : "saved",
-    title: draft.title.trim() ? draft.title : null,
+    title: draft.title.trim() ? draft.title : deriveEntryTitle(draft.content),
     content: draft.content,
     recordDate: draft.recordDate ?? lockRecordDate(),
     createdAt: savedAt,

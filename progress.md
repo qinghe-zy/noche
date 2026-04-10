@@ -209,3 +209,13 @@
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
+- 自主继续下一轮：补自动标题（首行 12~16 字）。
+- 已先在 `tests/domain/entryService.test.ts` 写失败测试，要求标题为空时，formal save 从正文首行生成标题。
+- 已在 `src/domain/services/entryService.ts` 新增 `deriveEntryTitle()`，并接入 `createEntryFromDraft()`。
+- 当前自动标题口径：
+  - 取正文首个非空行
+  - 默认截取 13 个字
+- 已再次验证 `pnpm.cmd run test:unit` 通过：25 个测试文件、61 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过。

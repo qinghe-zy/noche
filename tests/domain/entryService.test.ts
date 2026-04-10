@@ -57,6 +57,21 @@ describe("entry service", () => {
     expect(entry.updatedAt).toBe(entry.savedAt);
   });
 
+  it("derives a title from the first content line when title is blank", () => {
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      title: "   ",
+      content: "今天在地铁上忽然想通了一件事\n第二行继续写",
+    };
+
+    const entry = createEntryFromDraft(draft);
+
+    expect(entry.title).toBe("今天在地铁上忽然想通了一件");
+  });
+
   it("marks destroyed entries through the destroyEntry use case", async () => {
     const entry = createEntry({
       type: "jotting",
