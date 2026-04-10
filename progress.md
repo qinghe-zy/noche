@@ -247,3 +247,4 @@
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
+- 自主继续下一轮：转入功能矩阵对照验收，不再继续零散补点。
