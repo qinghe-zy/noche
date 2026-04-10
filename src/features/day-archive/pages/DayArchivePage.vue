@@ -29,10 +29,10 @@
         @click="handleOpenEntry(entry.id)"
       >
         <view class="day-archive-page__item-head">
-          <text class="day-archive-page__item-type">{{ formatType(entry.type) }}</text>
+          <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type) }}</text>
           <text class="day-archive-page__item-date">{{ formatDate(entry.recordDate, "MM/DD") }}</text>
         </view>
-        <text class="day-archive-page__item-title">{{ entry.title || fallbackTitle(entry.type) }}</text>
+        <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type) }}</text>
         <text class="day-archive-page__item-content">{{ entry.content }}</text>
       </view>
     </view>
@@ -43,7 +43,6 @@
 import { computed, ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { useEntryStore } from "@/app/store/useEntryStore";
-import type { EntryType } from "@/domain/entry/types";
 import { listDayArchiveEntries } from "@/domain/services/entryQueryService";
 import { lockRecordDate } from "@/domain/time/rules";
 import { ROUTES } from "@/shared/constants/routes";
@@ -53,6 +52,7 @@ import {
   formatDayArchiveSubtitle,
   formatDayArchiveTitle,
 } from "@/features/day-archive/dayArchiveDisplay";
+import { fallbackEntryTitle, formatEntryTypeLabel } from "@/features/entries/entryDisplay";
 
 const entryStore = useEntryStore();
 const recordDate = ref(lockRecordDate());
@@ -61,30 +61,6 @@ const entries = computed(() => listDayArchiveEntries(entryStore.entryList, recor
 const pageTitle = computed(() => formatDayArchiveTitle(recordDate.value));
 const pageSubtitle = computed(() => formatDayArchiveSubtitle(entries.value.length));
 const emptyText = computed(() => formatDayArchiveEmptyText(recordDate.value));
-
-function fallbackTitle(type: EntryType): string {
-  if (type === "jotting") {
-    return "随笔";
-  }
-
-  if (type === "future") {
-    return "已开启的未来信";
-  }
-
-  return "日记";
-}
-
-function formatType(type: EntryType): string {
-  if (type === "jotting") {
-    return "随笔";
-  }
-
-  if (type === "future") {
-    return "未来信";
-  }
-
-  return "日记";
-}
 
 function handleOpenEntry(entryId: string): void {
   uni.navigateTo({

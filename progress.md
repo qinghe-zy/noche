@@ -130,3 +130,13 @@
 - 已再次验证 `pnpm.cmd run test:unit` 通过：22 个测试文件、47 个测试通过。
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 自主继续下一轮展示逻辑收口：先写失败测试锁定共享 `entryDisplay` helper，再让 `Mailbox` / `DayArchive` 共用类型标签与 fallback title。
+- 已新增：
+  - `src/features/entries/entryDisplay.ts`
+  - `tests/features/entryDisplay.test.ts`
+- 已更新：
+  - `src/features/mailbox/mailboxDisplay.ts` 改为复用共享 `formatEntryTypeLabel()`
+  - `src/features/day-archive/pages/DayArchivePage.vue` 改为复用共享 `formatEntryTypeLabel()` / `fallbackEntryTitle()`
+- 已再次验证 `pnpm.cmd run test:unit` 通过：23 个测试文件、49 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。

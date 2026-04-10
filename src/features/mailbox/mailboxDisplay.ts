@@ -1,16 +1,9 @@
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { formatDate } from "@/shared/utils/date";
+import { formatEntryTypeLabel } from "@/features/entries/entryDisplay";
 
 export function formatMailboxTypeLabel(type: EntryType): string {
-  if (type === "jotting") {
-    return "随笔";
-  }
-
-  if (type === "future") {
-    return "未来信";
-  }
-
-  return "日记";
+  return formatEntryTypeLabel(type);
 }
 
 export function formatMailboxDateLabel(entry: Entry, tab: "past" | "future"): string {

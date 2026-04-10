@@ -50,3 +50,4 @@
 - H5 dev server 可以正常启动在 `http://localhost:5173/`，但 Playwright MCP 在当前环境尝试写入 `C:\Windows\System32\.playwright-mcp\...` 时触发 `EPERM`，导致浏览器自动化导航无法继续；这是本轮唯一未自行排除的环境级阻塞。
 - `CalendarPage` 与 `DayArchivePage` 的标题/引导/空态文案已经开始抽到 feature helper，避免页面继续直接使用英文月份格式或散落的拼接文案。
 - `calendarDisplay` / `dayArchiveDisplay` 当前都已补单测，说明这两页的中文日期标题与引导语可以稳定复用。
+- `Mailbox` 与 `Day Archive` 里原本各写一套的类型标签 / fallback title 已开始收口到共享 `entryDisplay` helper，条目展示规则正在从“页面各自维护”转成“共享 helper 维护”。
