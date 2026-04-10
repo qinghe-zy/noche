@@ -101,4 +101,16 @@ describe("entry service", () => {
 
     expect(resolveDraftSaveAction(draft)).toBe("save-entry");
   });
+
+  it("resolves future drafts without unlock date to date selection first", () => {
+    const draft = {
+      ...createDraft({
+        type: "future",
+      }),
+      content: "等以后再打开。",
+      unlockDate: null,
+    };
+
+    expect(resolveDraftSaveAction(draft)).toBe("pick-future-date");
+  });
 });

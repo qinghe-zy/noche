@@ -35,6 +35,7 @@
 - [complete] Phase 17: 收口上线阻塞项（manifest appid、Home/Profile/Editor 中文化、app-plus 产物验证）
 - [in_progress] Phase 18: 收口 Editor 的销毁与空白保存行为，并保持规则可扩展
 - [in_progress] Phase 19: 补齐 jotting 活跃草稿冲突处理与隐私锁最小闭环
+- [in_progress] Phase 20: 补齐 future 日期选择体验与封存前交互
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

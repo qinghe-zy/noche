@@ -17,7 +17,7 @@ export interface DestroyEntryOptions {
   cleanupHook?: (entry: Entry) => Promise<void> | void;
 }
 
-export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry";
+export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry" | "pick-future-date";
 
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
@@ -42,7 +42,13 @@ export function shouldSaveEntry(input: Pick<Entry, "title" | "content">): boolea
   return canPersistEntry(input);
 }
 
-export function resolveDraftSaveAction(draft: Pick<Draft, "title" | "content" | "linkedEntryId">): DraftSaveAction {
+export function resolveDraftSaveAction(
+  draft: Pick<Draft, "type" | "title" | "content" | "linkedEntryId" | "unlockDate">,
+): DraftSaveAction {
+  if (draft.type === "future" && canPersistEntry(draft) && !draft.unlockDate) {
+    return "pick-future-date";
+  }
+
   if (canPersistEntry(draft)) {
     return "save-entry";
   }

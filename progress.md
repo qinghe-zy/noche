@@ -196,3 +196,16 @@
 - 已再次验证 `pnpm.cmd run type-check` 通过。
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
+- 自主继续下一轮：补 future 日期选择体验，避免未来信默认灌入明天。
+- 已先在 `tests/domain/entryService.test.ts` 写失败测试，要求 future draft 有正文但未选日期时，`resolveDraftSaveAction()` 返回 `pick-future-date`。
+- 已更新 `src/domain/services/entryService.ts`：
+  - `DraftSaveAction` 新增 `pick-future-date`
+- 已更新 `src/features/editor/pages/EditorPage.vue`：
+  - future 不再默认预填明天
+  - 点击信封时若未选日期，会先打开底部半屏日期选择层
+  - 选择日期后才继续封存
+  - 日期校验复用 `isValidFutureLetterDate()`
+- 已再次验证 `pnpm.cmd run test:unit` 通过：25 个测试文件、60 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过。

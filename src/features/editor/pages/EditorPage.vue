@@ -46,12 +46,9 @@
 
       <view v-if="entryType === 'future'" class="editor-page__field-group">
         <text class="editor-page__field-label">开启日期</text>
-        <input
-          class="editor-page__input"
-          :value="unlockDate"
-          type="date"
-          @input="handleUnlockDateInput"
-        />
+        <button class="editor-page__date-button" @click="openFutureDateSheet">
+          {{ futureDateLabel }}
+        </button>
         <text class="editor-page__hint">未来信的开启日期不能早于明天。</text>
       </view>
 
@@ -123,6 +120,31 @@
         </button>
       </view>
     </view>
+
+    <view
+      v-if="isFutureDateSheetOpen"
+      class="editor-page__sheet-mask"
+      @click="closeFutureDateSheet"
+    >
+      <view class="editor-page__date-sheet" @click.stop>
+        <text class="editor-page__sheet-title">选择开启日期</text>
+        <text class="editor-page__sheet-copy">这封未来信会在当天零点之后进入可阅读状态。</text>
+        <input
+          class="editor-page__input"
+          :value="pendingUnlockDate"
+          type="date"
+          @input="handleUnlockDateInput"
+        />
+        <view class="editor-page__sheet-actions">
+          <button class="editor-page__secondary-button" @click="closeFutureDateSheet">
+            暂不设置
+          </button>
+          <button class="editor-page__primary-button" @click="handleConfirmFutureDate">
+            确认日期
+          </button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -132,8 +154,8 @@ import { onLoad, onUnload } from "@dcloudio/uni-app";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
-import { lockRecordDate } from "@/domain/time/rules";
-import { formatDate, tomorrowDate } from "@/shared/utils/date";
+import { isValidFutureLetterDate, lockRecordDate } from "@/domain/time/rules";
+import { formatDate } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
 
@@ -181,8 +203,10 @@ const mode = ref<EditorMode>("edit");
 const title = ref("");
 const content = ref("");
 const unlockDate = ref("");
+const pendingUnlockDate = ref("");
 const savedEntry = ref<Entry | null>(null);
 const isHydrating = ref(false);
+const isFutureDateSheetOpen = ref(false);
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -190,14 +214,15 @@ const pageMeta = computed(() => PAGE_META[entryType.value]);
 const heroDate = computed(() =>
   entryType.value === "future" && unlockDate.value
     ? `将在 ${unlockDate.value} 开启`
-    : recordDate.value,
+    : entryType.value === "future"
+      ? "待选择开启日期"
+      : recordDate.value,
 );
+const futureDateLabel = computed(() => unlockDate.value || "选择一个未来日期");
 const contentLength = computed(() => content.value.trim().length);
 const activeSlotLabel = computed(() => draftStore.activeDraft?.slotKey ?? "尚未打开");
 const canSaveEntry = computed(() => {
-  const hasBody = title.value.trim().length > 0 || content.value.trim().length > 0;
-  const hasFutureDate = entryType.value !== "future" || Boolean(unlockDate.value);
-  return hasBody && hasFutureDate;
+  return title.value.trim().length > 0 || content.value.trim().length > 0;
 });
 const canContinueWrite = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "future"));
 const canStartAnother = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "diary"));
@@ -267,6 +292,7 @@ function syncFormFromEntry(entry: Entry): void {
   content.value = entry.content;
   recordDate.value = entry.recordDate;
   unlockDate.value = entry.type === "future" ? entry.unlockDate ?? "" : "";
+  pendingUnlockDate.value = unlockDate.value;
 }
 
 function applyNavigationTitle(): void {
@@ -290,7 +316,8 @@ function syncFormFromDraft(): void {
   title.value = draft.title;
   content.value = draft.content;
   recordDate.value = draft.recordDate ?? lockRecordDate();
-  unlockDate.value = draft.type === "future" ? draft.unlockDate ?? tomorrowDate() : "";
+  unlockDate.value = draft.type === "future" ? draft.unlockDate ?? "" : "";
+  pendingUnlockDate.value = unlockDate.value;
 }
 
 async function openCurrentDraft(): Promise<void> {
@@ -305,10 +332,6 @@ async function openCurrentDraft(): Promise<void> {
     mode.value = "edit";
     savedEntry.value = null;
     syncFormFromDraft();
-
-    if (draft.type === "future" && !draft.unlockDate) {
-      await draftStore.saveActiveDraft({ unlockDate: unlockDate.value });
-    }
   } finally {
     isHydrating.value = false;
   }
@@ -338,7 +361,8 @@ async function openEntryForRead(entryId: string): Promise<void> {
 async function initializeFromRoute(query?: Record<string, unknown>): Promise<void> {
   entryType.value = normalizeEntryType(typeof query?.type === "string" ? query.type : undefined);
   recordDate.value = resolveRequestedRecordDate(query);
-  unlockDate.value = entryType.value === "future" ? tomorrowDate() : "";
+  unlockDate.value = "";
+  pendingUnlockDate.value = "";
   applyNavigationTitle();
 
   if (query?.mode === "read" && typeof query.entryId === "string" && query.entryId.trim()) {
@@ -387,8 +411,31 @@ function handleContentInput(event: Event | { detail?: { value?: string } }): voi
 }
 
 function handleUnlockDateInput(event: Event | { detail?: { value?: string } }): void {
-  unlockDate.value = extractInputValue(event);
-  queueDraftSave();
+  pendingUnlockDate.value = extractInputValue(event);
+}
+
+function openFutureDateSheet(): void {
+  pendingUnlockDate.value = unlockDate.value;
+  isFutureDateSheetOpen.value = true;
+}
+
+function closeFutureDateSheet(): void {
+  isFutureDateSheetOpen.value = false;
+}
+
+async function handleConfirmFutureDate(): Promise<void> {
+  if (!pendingUnlockDate.value || !isValidFutureLetterDate(pendingUnlockDate.value)) {
+    uni.showToast({
+      title: "请选择明天及以后的日期",
+      icon: "none",
+    });
+    return;
+  }
+
+  unlockDate.value = pendingUnlockDate.value;
+  await persistDraftNow();
+  closeFutureDateSheet();
+  await handleFormalSave();
 }
 
 async function handleManualSave(): Promise<void> {
@@ -415,7 +462,8 @@ async function handleDiscardDraft(): Promise<void> {
   await draftStore.removeDraft(slotKey);
   title.value = "";
   content.value = "";
-  unlockDate.value = entryType.value === "future" ? tomorrowDate() : "";
+  unlockDate.value = "";
+  pendingUnlockDate.value = "";
   await openCurrentDraft();
 }
 
@@ -445,6 +493,11 @@ async function handleFormalSave(): Promise<void> {
 
     if (action === "destroy-entry") {
       await handleDestroyLinkedEntryDraft();
+      return;
+    }
+
+    if (action === "pick-future-date") {
+      openFutureDateSheet();
       return;
     }
 
@@ -503,7 +556,8 @@ async function handleDestroyLinkedEntryDraft(): Promise<void> {
 async function handleStartAnother(): Promise<void> {
   title.value = "";
   content.value = "";
-  unlockDate.value = entryType.value === "future" ? tomorrowDate() : "";
+  unlockDate.value = "";
+  pendingUnlockDate.value = "";
   await openCurrentDraft();
 }
 
@@ -740,6 +794,17 @@ onUnload(() => {
   font-size: 28rpx;
 }
 
+.editor-page__date-button {
+  min-height: 92rpx;
+  padding: 0 24rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(34, 34, 34, 0.08);
+  background: rgba(250, 246, 241, 0.95);
+  color: #1f1f1f;
+  font-size: 28rpx;
+  text-align: left;
+}
+
 .editor-page__textarea {
   min-height: 420rpx;
   padding: 26rpx 24rpx;
@@ -799,6 +864,44 @@ onUnload(() => {
   background: rgba(136, 49, 49, 0.08);
   color: #7d3535;
   border: 1rpx solid rgba(136, 49, 49, 0.16);
+}
+
+.editor-page__sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(17, 17, 17, 0.32);
+  display: flex;
+  align-items: flex-end;
+}
+
+.editor-page__date-sheet {
+  width: 100%;
+  padding: 32rpx 28rpx 36rpx;
+  border-radius: 32rpx 32rpx 0 0;
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1rpx solid rgba(34, 34, 34, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.editor-page__sheet-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1d1d1d;
+}
+
+.editor-page__sheet-copy {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: rgba(34, 34, 34, 0.68);
+}
+
+.editor-page__sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .editor-page__read-title {
