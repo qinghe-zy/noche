@@ -16,3 +16,5 @@
 - Gemini 后续负责页面与 UI 时，应提供轻量 handoff：稳定接口、路由、store/use case、不可破坏的数据规则；避免过度规定视觉细节。
 - `docs/tech/noche_data_model_final.md` 明确使用 `EntryType = diary | jotting | future`、`EntryStatus = saved | sealed | unlocked`、未来信日期字段 `unlockDate`；已同步到 tracked `docs/tech/data_model.md` 与核心代码。
 - 当前 `docs/tech/*_final.md` 仍为未跟踪文件，未纳入本轮提交，避免在 canonical 文档之外增加重复真相源；后续可单独做 docs cleanup。
+- 已新增内存版 `IEntryRepository`，用于 SQLite 真实接入前打通可测试的 save / query / delete 闭环。
+- 旧版 `entry.store.ts` 与 `draft.store.ts` 曾重复定义 `entry` / `draft` Pinia id；已改为 legacy alias，实际 store 只保留 `useEntryStore.ts` 与 `useDraftStore.ts`。

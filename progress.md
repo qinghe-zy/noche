@@ -32,3 +32,10 @@
 - 已验证 `pnpm test:unit` 通过：2 个测试文件、5 个测试通过。
 - 已验证 `pnpm type-check` 通过。
 - 已验证 `pnpm build:h5` 通过。
+- 自主推进 T-005：新增内存 `IEntryRepository`，在 SQLite 接入前提供可执行仓储闭环。
+- 已更新 `useEntryStore.ts`，支持 repository 注入，并通过 `saveEntry` / `fetchEntriesByDate` / `destroyEntry` 调用仓储。
+- 已将旧 `entry.store.ts` 与 `draft.store.ts` 改为 alias，避免重复定义同名 Pinia store。
+- 已新增 repository、store、store alias 单元测试。
+- 已验证 `pnpm test:unit` 通过：5 个测试文件、8 个测试通过。
+- 已验证 `pnpm type-check` 通过。
+- 已验证 `pnpm build:h5` 通过。
