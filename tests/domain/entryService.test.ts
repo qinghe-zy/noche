@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createEntry, destroyEntry } from "@/domain/services/entryService";
+import { createDraft } from "@/domain/services/draftService";
+import { createEntry, createEntryFromDraft, destroyEntry } from "@/domain/services/entryService";
 
 describe("entry service", () => {
   it("creates saved diary entries with final tech model fields", () => {
@@ -28,6 +29,27 @@ describe("entry service", () => {
     expect(entry.type).toBe("future");
     expect(entry.status).toBe("sealed");
     expect(entry.unlockDate).toBe("2026-04-11");
+  });
+
+  it("creates a formally saved entry from a draft", () => {
+    const draft = createDraft({
+      type: "future",
+    });
+
+    const entry = createEntryFromDraft({
+      ...draft,
+      title: "给未来的我",
+      content: "保持清醒，别着急。",
+      unlockDate: "2026-04-11",
+    });
+
+    expect(entry.type).toBe("future");
+    expect(entry.status).toBe("sealed");
+    expect(entry.title).toBe("给未来的我");
+    expect(entry.content).toBe("保持清醒，别着急。");
+    expect(entry.unlockDate).toBe("2026-04-11");
+    expect(entry.savedAt).toEqual(expect.any(String));
+    expect(entry.updatedAt).toBe(entry.savedAt);
   });
 
   it("marks destroyed entries through the destroyEntry use case", async () => {

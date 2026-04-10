@@ -23,7 +23,8 @@
 - [complete] Phase 8: 打通 entry/store 的最小 repository 用例闭环
 - [complete] Phase 9: 为 Gemini 准备轻量 UI handoff 与稳定接口说明
 - [complete] Phase 10: 调用 Gemini CLI 在约定目录实现首个页面 UI 闭环
-- [pending] Phase 11: 继续推进 editor/draft 最小写作闭环，UI 仍交给 Gemini
+- [complete] Phase 11: 继续推进 editor/draft 最小写作闭环，形成最小 save/read 页面闭环
+- [pending] Phase 12: 基于现有 entry/draft 闭环接入 mailbox/read 读取路径
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -45,3 +46,4 @@
 | Home UI 使用 `lang=\"scss\"`，构建缺少 `sass` | 1 | 保留 Gemini 视觉结构，改成纯 CSS，不新增依赖 |
 | `Start-Process pnpm` 在 Windows 下不能直接运行 pnpm shim | 1 | 改用 `Start-Process pnpm.cmd` |
 | dev server 首轮导航时被停止导致 Vite connection lost | 1 | 重新启动 dev server 后复测，控制台 0 error |
+| Gemini CLI 两次 headless editor 调用在 10 分钟超时内未写出文件 | 1 | 保留 handoff 文档和调用记录，本轮由 Codex 本地接管 editor feature 实现与验收 |

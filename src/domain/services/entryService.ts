@@ -1,4 +1,5 @@
 import { canPersistEntry } from "@/domain/entry/rules";
+import type { Draft } from "@/domain/draft/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
 import { nowIso } from "@/shared/utils/date";
@@ -37,6 +38,33 @@ export function createEntry(input: CreateEntryInput): Entry {
 
 export function shouldSaveEntry(input: Pick<Entry, "title" | "content">): boolean {
   return canPersistEntry(input);
+}
+
+export function createEntryFromDraft(draft: Draft): Entry {
+  if (!canPersistEntry(draft)) {
+    throw new Error("Cannot save an empty draft.");
+  }
+
+  if (draft.type === "future" && !draft.unlockDate) {
+    throw new Error("Future drafts require unlockDate before saving.");
+  }
+
+  const savedAt = nowIso();
+
+  return {
+    id: draft.linkedEntryId ?? createId(),
+    type: draft.type,
+    status: draft.type === "future" ? "sealed" : "saved",
+    title: draft.title.trim() ? draft.title : null,
+    content: draft.content,
+    recordDate: draft.recordDate ?? lockRecordDate(),
+    createdAt: savedAt,
+    updatedAt: savedAt,
+    savedAt,
+    unlockDate: draft.type === "future" ? draft.unlockDate ?? null : null,
+    unlockedAt: null,
+    destroyedAt: null,
+  };
 }
 
 export async function destroyEntry(entry: Entry, options: DestroyEntryOptions = {}): Promise<Entry> {

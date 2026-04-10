@@ -33,8 +33,11 @@ export function createDraft(input: CreateDraftInput): Draft {
 }
 
 export function markDraftBackgroundSaved(draft: Draft): Draft {
+  const timestamp = nowIso();
+
   return {
     ...draft,
-    lastBackgroundSavedAt: nowIso(),
+    updatedAt: timestamp,
+    lastBackgroundSavedAt: timestamp,
   };
 }

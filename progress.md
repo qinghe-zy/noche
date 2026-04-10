@@ -50,3 +50,17 @@
 - 已验证 `pnpm test:unit` 通过：5 个测试文件、8 个测试通过。
 - 已验证 `pnpm type-check` 通过。
 - 已验证 `pnpm build:h5` 通过。
+- 自主推进 T-008：先写失败测试锁定 draft repository、draft store、以及 draft 正式保存 entry 时 `savedAt` 的行为。
+- 已新增 `src/data/repositories/draft.repository.ts` 与 `src/data/repositories/memoryDraftRepository.ts`，在 SQLite 接入前补齐可执行 draft 仓储。
+- 已更新 `src/app/store/useDraftStore.ts`，支持 `openDraft` / `saveActiveDraft` / `removeDraft` 与 repository 注入。
+- 已新增 `createEntryFromDraft`，让 formal save 不再停留在 `savedAt = null` 的临时模型。
+- 已写入 `docs/handoffs/HANDOFF_08_Codex_to_Gemini_editor_ui.md`，只约束目标、接口、边界和禁止项。
+- 已两次显式调用 Gemini CLI 尝试落地 editor 页面：`gemini --approval-mode auto_edit -p "...editor ui..."` 与 `gemini --approval-mode yolo -p "...editor ui..."`；两次均超时且未写文件。
+- Codex 已接手 `src/features/editor/pages/EditorPage.vue`，实现 diary / jotting / future 三类入口的最小 editor UI。
+- 已打通 editor 页面内的 draft autosave、formal save、same-page read mode。
+- 已验证 `pnpm test:unit` 通过：7 个测试文件、12 个测试通过。
+- 已验证 `pnpm type-check` 通过。
+- 已验证 `pnpm build:h5` 通过。
+- 已启动 H5 dev server 并用 Playwright 验证移动视口 editor 页面非空、console 0 error。
+- 已验证 diary 路由可输入内容、出现 `Draft saved at ...`、点击 `Save Today` 后进入同页 read mode。
+- 已验证 fresh load 的 `future` 路由显示 `draft_future` 与 unlock date 字段，`jotting` 路由显示 `Save Jotting`。

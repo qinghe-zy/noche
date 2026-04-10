@@ -22,3 +22,8 @@
 - UI handoff 原则：给 Gemini 稳定接口与写入边界，不给详细视觉方案，让 Gemini 自主发挥页面创造力。
 - Gemini 非交互调用不会显示在用户可见终端里；后续需要在 progress/checkpoint 显式记录命令形态与输出摘要，必要时将 stdout 写入 ignored `logs/`。
 - 当前 UI 页面仍需 Codex 做构建兼容收口：Gemini 倾向使用 SCSS/视觉字符，项目当前保持纯 CSS 与无新增依赖策略。
+- 当前 `draftRepo.ts` 仍是 SQLite 占位实现；本轮新增的 `IDraftRepository` + `createMemoryDraftRepository` 是 editor 闭环真正使用的运行路径。
+- `useDraftStore` 现在已经具备真正的草稿生命周期动作：按槽位打开、背景保存、删除；不再只是内存字典占位。
+- `createEntry()` 仍可保留“未正式保存”的初始 entry 语义；`createEntryFromDraft()` 则负责 formal save 时写入 `savedAt`，两者职责可以并存。
+- Gemini CLI 在本仓库 headless `-p` 模式下两次 editor UI 调用都在 10 分钟内超时且没有落盘改动；后续若继续让 Gemini 写页面，需要更小写入面或换交互方式。
+- H5 下直接在同一个已打开的 editor 页面里切换 hash query，不一定会重置页面状态；fresh load 或正常首页跳转可以正确进入 `diary` / `jotting` / `future` 的各自 editor 视图。
