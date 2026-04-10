@@ -1,13 +1,9 @@
 import { defineStore } from "pinia";
 import type { Entry } from "@/domain/entry/types";
-import type { IEntryRepository } from "@/data/repositories/entry.repository";
-import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
+import { getEntriesByDateWithFutureState, getEntryByIdWithFutureState, listActiveEntriesWithFutureState } from "@/app/store/entryReadFacade";
+import { getEntryRepository, setEntryRepository } from "@/app/store/entryRepository";
 
-let entryRepository: IEntryRepository = createMemoryEntryRepository();
-
-export function setEntryRepository(repository: IEntryRepository): void {
-  entryRepository = repository;
-}
+export { setEntryRepository };
 
 interface EntryState {
   entries: Record<string, Entry>;
@@ -38,7 +34,7 @@ export const useEntryStore = defineStore("entry", {
       this.error = null;
 
       try {
-        const entries = await entryRepository.getByDate(recordDate);
+        const entries = await getEntriesByDateWithFutureState(recordDate);
         for (const entry of entries) {
           this.upsertEntry(entry);
         }
@@ -53,7 +49,7 @@ export const useEntryStore = defineStore("entry", {
       this.error = null;
 
       try {
-        await entryRepository.save(entry);
+        await getEntryRepository().save(entry);
         this.upsertEntry(entry);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to save entry.";
@@ -66,10 +62,42 @@ export const useEntryStore = defineStore("entry", {
       this.error = null;
 
       try {
-        await entryRepository.deleteById(entryId);
+        await getEntryRepository().deleteById(entryId);
         this.removeEntry(entryId);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to destroy entry.";
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async fetchEntryById(entryId: string): Promise<Entry | null> {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const entry = await getEntryByIdWithFutureState(entryId);
+        if (entry) {
+          this.upsertEntry(entry);
+        }
+        return entry;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to fetch entry.";
+        return null;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async refreshFutureLetterStatus(): Promise<void> {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const entries = await listActiveEntriesWithFutureState();
+        for (const entry of entries) {
+          this.upsertEntry(entry);
+        }
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to refresh future entry status.";
       } finally {
         this.isLoading = false;
       }
