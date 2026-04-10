@@ -21,7 +21,8 @@
 - [complete] Phase 6: 收敛草稿槽位规则并补齐单元测试入口
 - [complete] Phase 7: 按最终 tech 口径收敛 Entry / Draft 核心模型
 - [complete] Phase 8: 打通 entry/store 的最小 repository 用例闭环
-- [pending] Phase 9: 为 Gemini 准备轻量 UI handoff 与稳定接口说明
+- [complete] Phase 9: 为 Gemini 准备轻量 UI handoff 与稳定接口说明
+- [pending] Phase 10: 调用 Gemini CLI 在约定目录实现首个页面 UI 闭环
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

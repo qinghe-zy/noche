@@ -23,6 +23,9 @@
 - 已验证 `pnpm test:unit` 通过：1 个测试文件、2 个测试通过。
 - 已验证 `pnpm type-check` 通过。
 - 已验证 `pnpm build:h5` 通过。
+- 自主推进 T-006：确认 Gemini CLI 可用，版本 0.37.1。
+- 已写入轻量 Gemini handoff，只约束路由、store、类型、不可破坏规则和写入目录，不规定视觉细节。
+- 下一轮可让 Gemini 在 `src/features/home/**` 先实现首页 UI 闭环，Codex 负责验收与底层收口。
 - 用户补充：相信 Gemini 的页面创造力；后续给 Gemini 的 UI 任务只约束接口、路由、数据规则和验收边界，不写过细视觉方案。
 - 自主推进 T-004：检查 `docs/tech` 最终版文档，发现核心模型与当前代码存在 `future-letter` / `future` 口径差异。
 - 已新增 `tests/domain/entryService.test.ts`，用失败测试锁定最终 tech 模型字段：`status`、`unlockDate`、`savedAt`、`unlockedAt`。
