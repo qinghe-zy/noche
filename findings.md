@@ -42,3 +42,9 @@
 - `Day Archive` 当前采用 `listDayArchiveEntries()` 复用日历可见性规则，因此不会把未解锁 future 混入当天归档列表。
 - `MailboxPage` 与 `CalendarPage` 本轮顺手清掉了明显的原型腔文案；后续若继续收口，应围绕结构、密度和状态体验，而不是回到 stitch 原文案。
 - 当前环境下 `pnpm.cmd run test:unit`、`pnpm.cmd run type-check`、`pnpm.cmd run build:h5` 已全部实跑通过，不再存在上一轮的 `spawn EPERM` 阻塞。
+- `MailboxPage` 里剩余的展示文案逻辑已抽到 `src/features/mailbox/mailboxDisplay.ts`，页面不再直接拼英语状态文案或密封信摘要规则。
+- 本轮新增的 `mailboxDisplay` helper 已用单测固定住：
+  - 类型标签中文化
+  - future 日期标签中文化
+  - sealed future 不泄露正文
+- H5 dev server 可以正常启动在 `http://localhost:5173/`，但 Playwright MCP 在当前环境尝试写入 `C:\Windows\System32\.playwright-mcp\...` 时触发 `EPERM`，导致浏览器自动化导航无法继续；这是本轮唯一未自行排除的环境级阻塞。

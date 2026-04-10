@@ -97,3 +97,19 @@
 - 已验证 `pnpm.cmd run test:unit` 通过：19 个测试文件、40 个测试通过。
 - 已验证 `pnpm.cmd run type-check` 通过。
 - 已验证 `pnpm.cmd run build:h5` 通过。
+- 自主进入下一轮页面收口：先写失败测试锁定 `MailboxPage` 的展示文案 helper，避免页面里继续残留英文状态词或 sealed future 泄露正文。
+- 已新增 `src/features/mailbox/mailboxDisplay.ts`，收口：
+  - `formatMailboxTypeLabel()`
+  - `formatMailboxDateLabel()`
+  - `formatMailboxExcerpt()`
+- 已新增 `tests/features/mailboxDisplay.test.ts`，并验证：
+  - future 的 past / pending 日期标签已切到中文
+  - sealed future 只显示锁定说明，不泄露正文
+- 已更新 `MailboxPage.vue`，改为复用 `mailboxDisplay` helper，同时把按钮和类型标签文案收回项目语境。
+- 已再次验证 `pnpm.cmd run test:unit` 通过：20 个测试文件、43 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已重启 `pnpm.cmd run dev:h5`，确认本地 dev server 正常启动在 `http://localhost:5173/`。
+- 尝试执行 Playwright MCP 浏览器导航验证时，命中环境级错误：
+  - `EPERM: operation not permitted, open 'C:\\Windows\\System32\\.playwright-mcp\\page-2026-04-10T13-27-17-293Z.yml'`
+  - 当前轮无法继续浏览器自动化，只能把该证据写入 checkpoint。

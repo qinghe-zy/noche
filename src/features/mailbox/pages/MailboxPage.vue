@@ -38,7 +38,7 @@
 
       <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
         <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
-        <button class="mailbox-page__retry-button" @click="refresh">Retry</button>
+        <button class="mailbox-page__retry-button" @click="refresh">重新加载</button>
       </view>
 
       <view v-else-if="currentEntries.length === 0" class="mailbox-page__state">
@@ -54,17 +54,17 @@
         >
           <view class="mailbox-page__item-header">
             <text class="mailbox-page__item-date">{{ formatDateLabel(entry) }}</text>
-            <text v-if="entry.type !== 'jotting'" class="mailbox-page__item-type">{{ entry.type }}</text>
+            <text class="mailbox-page__item-type">{{ formatTypeLabel(entry.type) }}</text>
           </view>
           
           <text class="mailbox-page__item-title">{{ entry.title || "未命名" }}</text>
           
           <view class="mailbox-page__item-body">
-            <text v-if="isSealedFuture(entry)" class="mailbox-page__item-excerpt mailbox-page__item-excerpt--sealed">
-              这封未来信会在 {{ entry.unlockDate }} 当天开启。
-            </text>
-            <text v-else class="mailbox-page__item-excerpt">
-              {{ entry.content.slice(0, 100) }}{{ entry.content.length > 100 ? '...' : '' }}
+            <text
+              class="mailbox-page__item-excerpt"
+              :class="{ 'mailbox-page__item-excerpt--sealed': isSealedFuture(entry) }"
+            >
+              {{ formatExcerpt(entry) }}
             </text>
           </view>
         </view>
@@ -74,32 +74,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useMailboxStore } from '@/app/store/useMailboxStore';
-import type { Entry } from '@/domain/entry/types';
-import { formatDate } from '@/shared/utils/date';
-import { ROUTES } from '@/shared/constants/routes';
+import { ref, computed, onMounted } from "vue";
+import { useMailboxStore } from "@/app/store/useMailboxStore";
+import type { Entry, EntryType } from "@/domain/entry/types";
+import { ROUTES } from "@/shared/constants/routes";
+import {
+  formatMailboxDateLabel,
+  formatMailboxExcerpt,
+  formatMailboxTypeLabel,
+} from "@/features/mailbox/mailboxDisplay";
 
 const mailboxStore = useMailboxStore();
-const activeTab = ref<'past' | 'future'>('past');
+const activeTab = ref<"past" | "future">("past");
 
 const currentEntries = computed(() => {
-  return activeTab.value === 'past' 
+  return activeTab.value === "past" 
     ? mailboxStore.pastEntries 
     : mailboxStore.sealedFutureEntries;
 });
 
 function isSealedFuture(entry: Entry): boolean {
-  return entry.type === 'future' && entry.status === 'sealed';
+  return entry.type === "future" && entry.status === "sealed";
 }
 
 function formatDateLabel(entry: Entry): string {
-  if (entry.type === 'future') {
-    return activeTab.value === 'past' 
-      ? `Unlocked ${formatDate(entry.recordDate, 'MMM DD, YYYY')}`
-      : `Unlocks ${entry.unlockDate}`;
-  }
-  return formatDate(entry.recordDate, 'MMM DD, YYYY');
+  return formatMailboxDateLabel(entry, activeTab.value);
+}
+
+function formatTypeLabel(type: EntryType): string {
+  return formatMailboxTypeLabel(type);
+}
+
+function formatExcerpt(entry: Entry): string {
+  return formatMailboxExcerpt(entry);
 }
 
 async function refresh() {
@@ -113,10 +120,10 @@ function handleGoToCalendar() {
 function handleEntryClick(entry: Entry) {
   if (isSealedFuture(entry)) {
     uni.showModal({
-      title: '尚未开启',
+      title: "尚未开启",
       content: `这封未来信会在 ${entry.unlockDate} 当天开启。`,
       showCancel: false,
-      confirmText: '知道了'
+      confirmText: "知道了",
     });
     return;
   }
@@ -127,7 +134,7 @@ function handleEntryClick(entry: Entry) {
 }
 
 onMounted(() => {
-  refresh();
+  void refresh();
 });
 </script>
 
@@ -163,7 +170,7 @@ onMounted(() => {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: white;
+  background: rgba(255, 255, 255, 0.74);
   border: 1rpx solid var(--noche-color-border);
   display: flex;
   align-items: center;
@@ -270,11 +277,10 @@ onMounted(() => {
 
 .mailbox-page__item-type {
   font-size: 20rpx;
-  color: var(--noche-color-muted);
-  background: #eee;
-  padding: 4rpx 12rpx;
-  border-radius: 4rpx;
-  text-transform: uppercase;
+  color: rgba(34, 34, 34, 0.66);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
 }
 
 .mailbox-page__item-title {
