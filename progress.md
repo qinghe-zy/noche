@@ -248,3 +248,20 @@
 - 已再次验证 `pnpm.cmd run build:h5` 通过。
 - 已再次验证 `pnpm.cmd exec uni build -p app` 通过。
 - 自主继续下一轮：转入功能矩阵对照验收，不再继续零散补点。
+- 已用 `docs/tech/noche_codex_function_matrix_and_interaction_logic.md` 完成一轮功能矩阵对照验收，并写入 `CHECKPOINT_29_function_matrix_acceptance.md`。
+- 结论：当前代码层功能验收可通过，可以切回 APK 打包链。
+- 已接入 HBuilderX：
+  - `D:\\Develop\\HBuilderX\\cli.exe project open --path D:\\Project\\noche`
+  - 返回：项目导入成功
+- 已检查 HBuilderX 项目列表：
+  - `cli project list`
+  - 返回：`noche(UniApp_VUE)`
+- 已检查 Android 设备连接：
+  - `adb devices -l`
+  - 返回空列表，当前无已连接设备
+- 已尝试继续发行链：
+  - `cli publish app-android --project D:\\Project\\noche --type appResource`
+  - 返回：`此功能需要先登录`
+- 当前阶段阻塞已经收敛为：
+  - HBuilderX 登录态
+  - Redmi Note 11T Pro+ USB 连接 / adb 可见

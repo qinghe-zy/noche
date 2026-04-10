@@ -40,6 +40,7 @@
 - [in_progress] Phase 22: 补今日日记打开解析链，并准备功能矩阵对照验收
 - [in_progress] Phase 23: 补齐未解锁 future 的销毁入口，并进入功能矩阵对照验收
 - [in_progress] Phase 24: 完成功能矩阵对照验收，并在通过后切回 APK 打包链
+- [in_progress] Phase 25: 接入 HBuilderX 打包链，并完成 Redmi Note 11T Pro+ 实机安装验收
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -67,3 +68,4 @@
 | Gemini CLI 两次 headless editor 调用在 10 分钟超时内未写出文件 | 1 | 保留 handoff 文档和调用记录，本轮由 Codex 本地接管 editor feature 实现与验收 |
 | Playwright MCP 导航本地 dev server 时尝试写入 `C:\Windows\System32\.playwright-mcp\...` 并触发 `EPERM` | 1 | 本轮已保留 dev server 正常启动证据与完整报错，待后续切换可写目录或 MCP 环境后再继续浏览器自动化验收 |
 | 需要进一步将 `dist/build/app` 打成 APK，但本机未找到 HBuilderX 安装或可执行程序 | 1 | 代码侧已完成 app-plus 产物准备；APK 最终打包目前受限于本机缺少 HBuilderX 工具链 |
+| HBuilderX 已接入，但 `cli publish app-android --type appResource` 返回“此功能需要先登录”，同时 `adb devices -l` 为空 | 1 | 代码与 app-plus 产物已就绪；当前 APK 产出与 Redmi 实机验收受限于 HBuilderX 登录态和设备未连接 |
