@@ -114,6 +114,13 @@
         >
           另起一页
         </button>
+        <button
+          v-if="savedEntry"
+          class="editor-page__danger-button"
+          @click="handleDestroySavedEntry"
+        >
+          销毁
+        </button>
       </view>
     </view>
   </view>
@@ -127,6 +134,8 @@ import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
 import { formatDate, tomorrowDate } from "@/shared/utils/date";
+import { ROUTES } from "@/shared/constants/routes";
+import { resolveDraftSaveAction } from "@/domain/services/entryService";
 
 type EditorMode = "edit" | "read";
 
@@ -263,6 +272,12 @@ function syncFormFromEntry(entry: Entry): void {
 function applyNavigationTitle(): void {
   uni.setNavigationBarTitle({
     title: PAGE_META[entryType.value].eyebrow,
+  });
+}
+
+function returnToHome(): void {
+  uni.reLaunch({
+    url: `/${ROUTES.home}`,
   });
 }
 
@@ -405,14 +420,6 @@ async function handleDiscardDraft(): Promise<void> {
 }
 
 async function handleFormalSave(): Promise<void> {
-  if (!canSaveEntry.value) {
-    uni.showToast({
-      title: "先写一点内容",
-      icon: "none",
-    });
-    return;
-  }
-
   try {
     if (saveTimer) {
       clearTimeout(saveTimer);
@@ -420,6 +427,27 @@ async function handleFormalSave(): Promise<void> {
     }
 
     await persistDraftNow();
+    const action = draftStore.activeDraft ? resolveDraftSaveAction(draftStore.activeDraft) : "discard-empty";
+
+    if (action === "discard-empty") {
+      const slotKey = draftStore.activeDraft?.slotKey;
+      if (slotKey) {
+        await draftStore.removeDraft(slotKey);
+      }
+
+      uni.showToast({
+        title: "信纸是空的，已收起",
+        icon: "none",
+      });
+      returnToHome();
+      return;
+    }
+
+    if (action === "destroy-entry") {
+      await handleDestroyLinkedEntryDraft();
+      return;
+    }
+
     const entry = await draftStore.saveActiveDraftAsEntry();
 
     if (!entry) {
@@ -439,6 +467,37 @@ async function handleFormalSave(): Promise<void> {
       icon: "none",
     });
   }
+}
+
+async function handleDestroyLinkedEntryDraft(): Promise<void> {
+  const draft = draftStore.activeDraft;
+  if (!draft?.linkedEntryId) {
+    return;
+  }
+
+  const confirmed = await new Promise<boolean>((resolve) => {
+    uni.showModal({
+      title: "销毁这封信？",
+      content: "这封信已经被删空，确认后会被彻底销毁。",
+      confirmText: "确认销毁",
+      cancelText: "再想想",
+      success: (result) => resolve(Boolean(result.confirm)),
+      fail: () => resolve(false),
+    });
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  await entryStore.destroyEntry(draft.linkedEntryId);
+  await draftStore.removeDraft(draft.slotKey);
+
+  uni.showToast({
+    title: "已销毁",
+    icon: "none",
+  });
+  returnToHome();
 }
 
 async function handleStartAnother(): Promise<void> {
@@ -474,6 +533,37 @@ async function handleContinueWrite(): Promise<void> {
       icon: "none",
     });
   }
+}
+
+async function handleDestroySavedEntry(): Promise<void> {
+  if (!savedEntry.value) {
+    return;
+  }
+
+  const entryId = savedEntry.value.id;
+  const confirmed = await new Promise<boolean>((resolve) => {
+    uni.showModal({
+      title: "销毁这封信？",
+      content: "销毁后不会进入回收站，也不能恢复。",
+      confirmText: "确认销毁",
+      cancelText: "再想想",
+      success: (result) => resolve(Boolean(result.confirm)),
+      fail: () => resolve(false),
+    });
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  await entryStore.destroyEntry(entryId);
+  savedEntry.value = null;
+
+  uni.showToast({
+    title: "已销毁",
+    icon: "none",
+  });
+  returnToHome();
 }
 
 onLoad((query) => {
@@ -670,7 +760,8 @@ onUnload(() => {
 
 .editor-page__primary-button,
 .editor-page__secondary-button,
-.editor-page__ghost-button {
+.editor-page__ghost-button,
+.editor-page__danger-button {
   border: none;
   border-radius: 999rpx;
   font-size: 28rpx;
@@ -701,6 +792,13 @@ onUnload(() => {
   background: rgba(255, 255, 255, 0.56);
   color: rgba(34, 34, 34, 0.76);
   border: 1rpx solid rgba(34, 34, 34, 0.06);
+}
+
+.editor-page__danger-button {
+  min-height: 88rpx;
+  background: rgba(136, 49, 49, 0.08);
+  color: #7d3535;
+  border: 1rpx solid rgba(136, 49, 49, 0.16);
 }
 
 .editor-page__read-title {

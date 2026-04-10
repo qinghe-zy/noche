@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createDraft } from "@/domain/services/draftService";
-import { createEntry, createEntryFromDraft, destroyEntry } from "@/domain/services/entryService";
+import {
+  createEntry,
+  createEntryFromDraft,
+  destroyEntry,
+  resolveDraftSaveAction,
+} from "@/domain/services/entryService";
 
 describe("entry service", () => {
   it("creates saved diary entries with final tech model fields", () => {
@@ -61,5 +66,39 @@ describe("entry service", () => {
     const destroyed = await destroyEntry(entry);
 
     expect(destroyed.destroyedAt).toEqual(expect.any(String));
+  });
+
+  it("resolves empty fresh drafts to discard instead of formal save", () => {
+    const draft = createDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+
+    expect(resolveDraftSaveAction(draft)).toBe("discard-empty");
+  });
+
+  it("resolves empty linked drafts to destroy entry", () => {
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+        linkedEntryId: "entry-1",
+      }),
+      title: "",
+      content: "   ",
+    };
+
+    expect(resolveDraftSaveAction(draft)).toBe("destroy-entry");
+  });
+
+  it("resolves non-empty drafts to formal save", () => {
+    const draft = {
+      ...createDraft({
+        type: "jotting",
+      }),
+      content: "留下这段话",
+    };
+
+    expect(resolveDraftSaveAction(draft)).toBe("save-entry");
   });
 });

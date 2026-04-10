@@ -17,6 +17,8 @@ export interface DestroyEntryOptions {
   cleanupHook?: (entry: Entry) => Promise<void> | void;
 }
 
+export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry";
+
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
 
@@ -38,6 +40,14 @@ export function createEntry(input: CreateEntryInput): Entry {
 
 export function shouldSaveEntry(input: Pick<Entry, "title" | "content">): boolean {
   return canPersistEntry(input);
+}
+
+export function resolveDraftSaveAction(draft: Pick<Draft, "title" | "content" | "linkedEntryId">): DraftSaveAction {
+  if (canPersistEntry(draft)) {
+    return "save-entry";
+  }
+
+  return draft.linkedEntryId ? "destroy-entry" : "discard-empty";
 }
 
 export function createEntryFromDraft(draft: Draft): Entry {

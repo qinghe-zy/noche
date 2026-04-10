@@ -168,3 +168,17 @@
   - `where.exe HBuilderX` 未找到
   - `C:\\Program Files` 与 `C:\\Program Files (x86)` 常见目录未发现 HBuilderX
   - 当前环境无法直接把 `dist/build/app` 进一步打成 APK
+- 用户补充要求：后续所有代码都必须优先考虑可扩展性，因此本轮继续把 Editor 的保存决策从页面挪回 domain。
+- 已在 `src/domain/services/entryService.ts` 新增 `resolveDraftSaveAction()`，并在 `tests/domain/entryService.test.ts` 先写失败测试锁定三种结果：
+  - `save-entry`
+  - `discard-empty`
+  - `destroy-entry`
+- 已更新 `src/features/editor/pages/EditorPage.vue`：
+  - 阅读态新增“销毁”
+  - 空白新草稿点击信封后会收起并返回首页
+  - 已保存内容续写后若删空，再次点信封会走销毁确认
+  - 所有这类分支都改为复用 domain 规则，而不是页面直接猜测
+- 已再次验证 `pnpm.cmd run test:unit` 通过：24 个测试文件、57 个测试通过。
+- 已再次验证 `pnpm.cmd run type-check` 通过。
+- 已再次验证 `pnpm.cmd run build:h5` 通过。
+- 已再次验证 `pnpm.cmd exec uni build -p app` 通过，`dist/build/app` 仍可稳定生成。

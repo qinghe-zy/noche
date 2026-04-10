@@ -58,3 +58,9 @@
   - `EditorPage` 主路径文案已中文化
 - `pnpm.cmd exec uni build -p app` 当前可稳定产出 `dist/build/app`，说明 app-plus 工程产物已经可生成。
 - 本机未发现 `HBuilderX` 可执行程序，也未在常见安装目录中找到 HBuilderX；因此“将 app-plus 产物进一步打成 APK”在当前环境里是工具链阻塞，而不是仓库代码阻塞。
+- `Editor` 的正式保存规则已开始收口到 domain：`resolveDraftSaveAction()` 现在统一决定“正式保存 / 收起空白 / 销毁已删空内容”，避免页面继续直接写死判断。
+- `EditorPage` 当前已经具备：
+  - 阅读态销毁入口
+  - 已保存内容删空后进入销毁确认
+  - 空白新草稿点击信封后收起并回首页
+- 这轮改动延续了“规则进 domain，页面只负责交互编排”的扩展性原则，后续若补更多编辑规则，不需要继续堆在页面里。
