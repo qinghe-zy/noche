@@ -17,6 +17,7 @@ function makeEntryRecord(overrides: Partial<EntryRecord> = {}): EntryRecord {
     unlocked_at: overrides.unlocked_at ?? null,
     destroyed_at: overrides.destroyed_at ?? null,
     attachments_json: overrides.attachments_json ?? "[]",
+    diary_prelude_json: overrides.diary_prelude_json ?? "null",
   };
 }
 
@@ -61,6 +62,7 @@ describe("entryRepo", () => {
         record.unlocked_at,
         record.destroyed_at,
         record.attachments_json,
+        record.diary_prelude_json,
       ],
     });
     expect(cleanupHook).toHaveBeenCalledTimes(1);

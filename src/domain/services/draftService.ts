@@ -30,6 +30,7 @@ export function createDraft(input: CreateDraftInput): Draft {
     updatedAt: timestamp,
     lastBackgroundSavedAt: null,
     attachments: [],
+    diaryPrelude: null,
   };
 }
 

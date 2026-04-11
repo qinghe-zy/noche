@@ -2,6 +2,7 @@
  * 条目类型字符串字面量
  */
 import type { Attachment } from "@/shared/types/attachment";
+import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
 
 export type EntryType = 'diary' | 'jotting' | 'future';
 
@@ -31,4 +32,5 @@ export interface Entry {
   destroyedAt: string | null;
   isDestroyed?: boolean;
   attachments?: Attachment[];
+  diaryPrelude?: DiaryPreludeMeta | null;
 }

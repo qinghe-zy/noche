@@ -1,4 +1,5 @@
 import type { IEntryRepository } from "@/data/repositories/entry.repository";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import type { JsonStorage } from "@/shared/utils/storage";
 
@@ -33,6 +34,7 @@ export function createStorageEntryRepository(
       seeded[entry.id] = {
         ...entry,
         attachments: entry.attachments ? [...entry.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
       };
     }
     writeEntries(storage, seeded);
@@ -44,6 +46,7 @@ export function createStorageEntryRepository(
       .map((entry) => ({
         ...entry,
         attachments: entry.attachments ? [...entry.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
       }))
       .sort(compareEntryForMailbox);
 
@@ -53,6 +56,7 @@ export function createStorageEntryRepository(
       entries[entry.id] = {
         ...entry,
         attachments: entry.attachments ? [...entry.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
       };
       writeEntries(storage, entries);
     },
@@ -62,6 +66,7 @@ export function createStorageEntryRepository(
         ? {
             ...entry,
             attachments: entry.attachments ? [...entry.attachments] : [],
+            diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
           }
         : null;
     },

@@ -18,7 +18,8 @@ export const SCHEMA_STATEMENTS = [
     unlock_date TEXT,
     unlocked_at TEXT,
     destroyed_at TEXT,
-    attachments_json TEXT NOT NULL DEFAULT '[]'
+    attachments_json TEXT NOT NULL DEFAULT '[]',
+    diary_prelude_json TEXT NOT NULL DEFAULT 'null'
   );`,
   `CREATE TABLE IF NOT EXISTS ${TABLES.drafts} (
     slot_key TEXT PRIMARY KEY,
@@ -32,7 +33,8 @@ export const SCHEMA_STATEMENTS = [
     updated_at TEXT NOT NULL,
     last_background_saved_at TEXT,
     unlock_date TEXT,
-    attachments_json TEXT NOT NULL DEFAULT '[]'
+    attachments_json TEXT NOT NULL DEFAULT '[]',
+    diary_prelude_json TEXT NOT NULL DEFAULT 'null'
   );`,
   `CREATE TABLE IF NOT EXISTS ${TABLES.preferences} (
     key TEXT PRIMARY KEY,

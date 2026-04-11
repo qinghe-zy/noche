@@ -1,4 +1,5 @@
 import type { IDraftRepository } from "@/data/repositories/draft.repository";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 import type { Draft } from "@/domain/draft/types";
 import type { JsonStorage } from "@/shared/utils/storage";
 
@@ -20,6 +21,7 @@ export function createStorageDraftRepository(storage: JsonStorage): IDraftReposi
       drafts[draft.slotKey] = {
         ...draft,
         attachments: draft.attachments ? [...draft.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
       };
       writeDraftMap(storage, drafts);
     },
@@ -29,6 +31,7 @@ export function createStorageDraftRepository(storage: JsonStorage): IDraftReposi
         ? {
             ...draft,
             attachments: draft.attachments ? [...draft.attachments] : [],
+            diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
           }
         : null;
     },
@@ -36,6 +39,7 @@ export function createStorageDraftRepository(storage: JsonStorage): IDraftReposi
       return Object.values(readDraftMap(storage)).map((draft) => ({
         ...draft,
         attachments: draft.attachments ? [...draft.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
       }));
     },
     async deleteBySlotKey(slotKey) {

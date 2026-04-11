@@ -34,6 +34,14 @@
         </view>
       </view>
 
+      <DiaryPreludeInlineCard
+        v-if="showDiaryPreludeCard"
+        class="diary-editor-shell__prelude"
+        :mode="mode"
+        :prelude="diaryPrelude"
+        @edit="$emit('edit-diary-prelude')"
+      />
+
       <view v-if="errorMessage" class="diary-editor-shell__notice">
         <text>{{ errorMessage }}</text>
       </view>
@@ -93,7 +101,9 @@
 </template>
 
 <script setup lang="ts">
+import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
 import type { Attachment } from "@/shared/types/attachment";
+import DiaryPreludeInlineCard from "@/features/editor/components/DiaryPreludeInlineCard.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
@@ -117,6 +127,8 @@ defineProps<{
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
+  diaryPrelude: DiaryPreludeMeta | null;
+  showDiaryPreludeCard: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -127,6 +139,7 @@ const emit = defineEmits<{
   (event: "pick-images"): void;
   (event: "remove-attachment", attachmentId: string): void;
   (event: "preview-attachment", attachmentId: string): void;
+  (event: "edit-diary-prelude"): void;
 }>();
 
 function handlePickImagesTrigger(): void {
@@ -239,6 +252,10 @@ function handlePickImagesTrigger(): void {
 
 .diary-editor-shell__header {
   margin-bottom: 48rpx;
+}
+
+.diary-editor-shell__prelude {
+  margin-bottom: 26rpx;
 }
 
 .diary-editor-shell__date {

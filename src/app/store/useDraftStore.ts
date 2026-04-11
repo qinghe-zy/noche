@@ -9,6 +9,8 @@ import { createDraft, markDraftBackgroundSaved } from "@/domain/services/draftSe
 import { createEntryFromDraft } from "@/domain/services/entryService";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Attachment } from "@/shared/types/attachment";
+import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -21,6 +23,7 @@ interface SaveDraftPatch {
   content?: string;
   unlockDate?: string | null;
   attachments?: Attachment[];
+  diaryPrelude?: DiaryPreludeMeta | null;
 }
 
 interface DraftState {
@@ -110,6 +113,9 @@ export const useDraftStore = defineStore("draft", {
             ? patch.unlockDate ?? this.activeDraft.unlockDate ?? null
             : null,
           attachments: patch.attachments ?? this.activeDraft.attachments ?? [],
+          diaryPrelude: cloneDiaryPrelude(
+            patch.diaryPrelude === undefined ? this.activeDraft.diaryPrelude : patch.diaryPrelude,
+          ),
         });
 
         await draftRepository.save(nextDraft);
@@ -189,6 +195,7 @@ export const useDraftStore = defineStore("draft", {
             draftKey: draft.slotKey,
             sortOrder: index,
           })),
+          diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
         };
 
         await draftRepository.save(nextDraft);

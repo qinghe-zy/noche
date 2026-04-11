@@ -15,6 +15,7 @@ export interface EntryRecord {
   unlocked_at: string | null;
   destroyed_at: string | null;
   attachments_json?: string | null;
+  diary_prelude_json?: string | null;
 }
 
 export interface EntryRepo {
@@ -83,8 +84,9 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
           unlock_date,
           unlocked_at,
           destroyed_at,
-          attachments_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          attachments_json,
+          diary_prelude_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
           type = excluded.type,
           status = excluded.status,
@@ -97,7 +99,8 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
           unlock_date = excluded.unlock_date,
           unlocked_at = excluded.unlocked_at,
           destroyed_at = excluded.destroyed_at,
-          attachments_json = excluded.attachments_json`,
+          attachments_json = excluded.attachments_json,
+          diary_prelude_json = excluded.diary_prelude_json`,
         [
           record.id,
           record.type,
@@ -112,6 +115,7 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
           record.unlocked_at,
           record.destroyed_at,
           record.attachments_json ?? "[]",
+          record.diary_prelude_json ?? "null",
         ],
       );
     },

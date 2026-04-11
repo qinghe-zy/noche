@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createStorageDraftRepository } from "@/data/repositories/storageDraftRepository";
 import { createMemoryJsonStorage } from "@/shared/utils/storage";
+import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import { createDraft } from "@/domain/services/draftService";
 import type { Attachment } from "@/shared/types/attachment";
 
@@ -37,5 +38,27 @@ describe("storageDraftRepository", () => {
     const restoredDraft = await secondRepository.getBySlotKey("draft_diary_2026-04-10");
 
     expect(restoredDraft?.attachments).toEqual([createImageAttachment()]);
+  });
+
+  it("persists diary prelude across repository re-creation", async () => {
+    const storage = createMemoryJsonStorage();
+    const firstRepository = createStorageDraftRepository(storage);
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      diaryPrelude: buildDiaryPreludeMeta({
+        weatherCode: "sunny",
+        moodCode: "calm",
+      }),
+    };
+
+    await firstRepository.save(draft);
+
+    const secondRepository = createStorageDraftRepository(storage);
+    const restoredDraft = await secondRepository.getBySlotKey("draft_diary_2026-04-10");
+
+    expect(restoredDraft?.diaryPrelude).toEqual(draft.diaryPrelude);
   });
 });

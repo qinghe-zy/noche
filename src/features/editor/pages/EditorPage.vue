@@ -1,6 +1,14 @@
 <template>
+  <DiaryPreludePicker
+    v-if="entryType === 'diary' && isDiaryPreludePickerOpen"
+    :initial-prelude="diaryPrelude"
+    @go-back="handleGoBack"
+    @skip="handleDiaryPreludeSkip"
+    @confirm="handleDiaryPreludeConfirm"
+  />
+
   <DiaryEditorShell
-    v-if="entryType === 'diary'"
+    v-else-if="entryType === 'diary'"
     :mode="mode"
     :atmosphere-line="diaryAtmosphereLine"
     :headline-date="diaryHeadlineDate"
@@ -16,6 +24,8 @@
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
+    :diary-prelude="diaryPrelude"
+    :show-diary-prelude-card="showDiaryPreludeCard"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
@@ -23,6 +33,7 @@
     @pick-images="handlePickImages"
     @remove-attachment="handleRemoveAttachment"
     @preview-attachment="handlePreviewAttachment"
+    @edit-diary-prelude="openDiaryPreludePicker"
   />
 
   <JottingEditorShell
@@ -91,6 +102,8 @@ import { computed, ref } from "vue";
 import { onHide, onLoad, onUnload } from "@dcloudio/uni-app";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
+import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { isValidFutureLetterDate, lockRecordDate } from "@/domain/time/rules";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, nowIso, tomorrowDate } from "@/shared/utils/date";
@@ -104,7 +117,9 @@ import { useEditorKeyboardViewport } from "@/features/editor/composables/useEdit
 import { shouldResetFutureUnlockDate } from "@/features/editor/editorFutureDraft";
 import { useEditorImageAttachments } from "@/features/editor/composables/useEditorImageAttachments";
 import { useEditorImagePicker } from "@/features/editor/composables/useEditorImagePicker";
+import { shouldOpenDiaryPreludePicker, shouldRenderDiaryPreludeInlineCard } from "@/features/editor/diaryPreludeState";
 import DiaryEditorShell from "@/features/editor/components/DiaryEditorShell.vue";
+import DiaryPreludePicker from "@/features/editor/components/DiaryPreludePicker.vue";
 import JottingEditorShell from "@/features/editor/components/JottingEditorShell.vue";
 import FutureLetterEditorShell from "@/features/editor/components/FutureLetterEditorShell.vue";
 
@@ -140,12 +155,14 @@ const recordDate = ref(lockRecordDate());
 const mode = ref<EditorMode>("edit");
 const title = ref("");
 const content = ref("");
+const diaryPrelude = ref<DiaryPreludeMeta | null>(null);
 const unlockDate = ref("");
 const pendingUnlockDate = ref("");
 const futurePickerMonth = ref(tomorrowDate());
 const savedEntry = ref<Entry | null>(null);
 const isHydrating = ref(false);
 const isFutureDateSheetOpen = ref(false);
+const isDiaryPreludePickerOpen = ref(false);
 const futureHint = ref("");
 
 const { showSavedHint, stampOpacity, markDirty, markSaved, reset: resetFeedback } = useEditorFeedbackState();
@@ -168,6 +185,9 @@ const autosave = useEditorAutosave({
 
 const errorMessage = computed(() => draftStore.error ?? entryStore.error);
 const canContinueWrite = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "future"));
+const showDiaryPreludeCard = computed(() =>
+  shouldRenderDiaryPreludeInlineCard(mode.value, diaryPrelude.value),
+);
 const paperDateDisplay = computed(() =>
   mode.value === "read" && savedEntry.value?.savedAt
     ? formatDate(savedEntry.value.savedAt, "YYYY年 · M月 · D日")
@@ -317,6 +337,7 @@ function syncFormFromEntry(entry: Entry): void {
   title.value = entry.title ?? "";
   content.value = entry.content;
   recordDate.value = entry.recordDate;
+  diaryPrelude.value = cloneDiaryPrelude(entry.diaryPrelude);
   unlockDate.value = entry.type === "future" ? entry.unlockDate ?? "" : "";
   pendingUnlockDate.value = unlockDate.value;
   futureHint.value = "";
@@ -333,6 +354,7 @@ function syncFormFromDraft(): void {
   title.value = draft.title;
   content.value = draft.content;
   recordDate.value = draft.recordDate ?? lockRecordDate();
+  diaryPrelude.value = cloneDiaryPrelude(draft.diaryPrelude);
   unlockDate.value = draft.type === "future" ? draft.unlockDate ?? "" : "";
   pendingUnlockDate.value = unlockDate.value;
   futureHint.value = "";
@@ -350,6 +372,33 @@ function handleGoBack(): void {
   navigateBackOrFallback({
     fallbackUrl: `/${ROUTES.home}`,
   });
+}
+
+function syncDiaryPreludePresentation(): void {
+  isDiaryPreludePickerOpen.value = shouldOpenDiaryPreludePicker({
+    entryType: entryType.value,
+    mode: mode.value,
+    diaryPrelude: diaryPrelude.value,
+  });
+}
+
+function openDiaryPreludePicker(): void {
+  if (entryType.value !== "diary" || mode.value !== "edit") {
+    return;
+  }
+
+  isDiaryPreludePickerOpen.value = true;
+}
+
+function handleDiaryPreludeSkip(): void {
+  isDiaryPreludePickerOpen.value = false;
+}
+
+async function handleDiaryPreludeConfirm(nextPrelude: DiaryPreludeMeta): Promise<void> {
+  diaryPrelude.value = cloneDiaryPrelude(nextPrelude);
+  isDiaryPreludePickerOpen.value = false;
+  await persistDraftNow();
+  markSaved();
 }
 
 async function normalizeFutureDraftIfExpired(): Promise<void> {
@@ -387,6 +436,7 @@ async function openCurrentDraft(): Promise<void> {
     savedEntry.value = null;
     syncFormFromDraft();
     await normalizeFutureDraftIfExpired();
+    syncDiaryPreludePresentation();
   } finally {
     isHydrating.value = false;
   }
@@ -405,6 +455,7 @@ async function openEntryForRead(entryId: string): Promise<void> {
     entryType.value = entry.type;
     savedEntry.value = entry;
     mode.value = "read";
+    isDiaryPreludePickerOpen.value = false;
     draftStore.setActiveDraftKey(null);
     syncFormFromEntry(entry);
   } finally {
@@ -415,8 +466,10 @@ async function openEntryForRead(entryId: string): Promise<void> {
 async function initializeFromRoute(query?: Record<string, unknown>): Promise<void> {
   entryType.value = normalizeEntryType(typeof query?.type === "string" ? query.type : undefined);
   recordDate.value = resolveRequestedRecordDate(query);
+  diaryPrelude.value = null;
   unlockDate.value = "";
   pendingUnlockDate.value = "";
+  isDiaryPreludePickerOpen.value = false;
   clearAttachments();
 
   if (query?.mode === "read" && typeof query.entryId === "string" && query.entryId.trim()) {
@@ -454,6 +507,7 @@ async function persistDraftNow(): Promise<void> {
   await draftStore.saveActiveDraft({
     title: title.value,
     content: content.value,
+    diaryPrelude: diaryPrelude.value,
     unlockDate: entryType.value === "future" ? unlockDate.value : null,
     attachments: attachments.value,
   });
@@ -619,6 +673,8 @@ async function handleFormalSave(): Promise<void> {
 
     savedEntry.value = entry;
     mode.value = "read";
+    diaryPrelude.value = cloneDiaryPrelude(entry.diaryPrelude);
+    isDiaryPreludePickerOpen.value = false;
     futureHint.value = "";
     replaceAttachments(entry.attachments ?? []);
     resetFeedback();
@@ -645,6 +701,7 @@ async function handleContinueWrite(): Promise<void> {
     syncFormFromDraft();
     savedEntry.value = null;
     mode.value = "edit";
+    syncDiaryPreludePresentation();
     futureHint.value = "";
   } catch (error) {
     uni.showToast({

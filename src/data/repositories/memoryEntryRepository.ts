@@ -1,5 +1,6 @@
 import type { Entry, EntryType } from "@/domain/entry/types";
 import type { IEntryRepository } from "@/data/repositories/entry.repository";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 
 function compareEntryForMailbox(a: Entry, b: Entry): number {
   if (a.recordDate !== b.recordDate) {
@@ -26,6 +27,7 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
       entries.set(entry.id, {
         ...entry,
         attachments: entry.attachments ? [...entry.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
       });
     },
 
@@ -35,6 +37,7 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
         ? {
             ...entry,
             attachments: entry.attachments ? [...entry.attachments] : [],
+            diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
           }
         : null;
     },

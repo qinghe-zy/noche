@@ -1,5 +1,6 @@
 import type { Draft } from "@/domain/draft/types";
 import type { IDraftRepository } from "@/data/repositories/draft.repository";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 
 export function createMemoryDraftRepository(seed: Draft[] = []): IDraftRepository {
   const drafts = new Map<string, Draft>();
@@ -13,6 +14,7 @@ export function createMemoryDraftRepository(seed: Draft[] = []): IDraftRepositor
       drafts.set(draft.slotKey, {
         ...draft,
         attachments: draft.attachments ? [...draft.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
       });
     },
 
@@ -22,6 +24,7 @@ export function createMemoryDraftRepository(seed: Draft[] = []): IDraftRepositor
         ? {
             ...draft,
             attachments: draft.attachments ? [...draft.attachments] : [],
+            diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
           }
         : null;
     },
@@ -30,6 +33,7 @@ export function createMemoryDraftRepository(seed: Draft[] = []): IDraftRepositor
       return Array.from(drafts.values()).map((draft) => ({
         ...draft,
         attachments: draft.attachments ? [...draft.attachments] : [],
+        diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
       }));
     },
 

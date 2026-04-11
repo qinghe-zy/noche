@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
 import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
+import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import { createEntry } from "@/domain/services/entryService";
 import { setEntryRepository, useEntryStore } from "@/app/store/useEntryStore";
 import { setDraftRepository, useDraftStore } from "@/app/store/useDraftStore";
@@ -244,6 +245,32 @@ describe("draft store", () => {
     expect(restored.attachments).toEqual([createImageAttachment()]);
   });
 
+  it("persists diary prelude when saving and reopening a diary draft", async () => {
+    const draftStore = useDraftStore();
+    const diaryPrelude = buildDiaryPreludeMeta({
+      weatherCode: "sunny",
+      moodCode: "calm",
+    });
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "",
+      diaryPrelude,
+    });
+
+    draftStore.setActiveDraftKey(null);
+    const restored = await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+
+    expect(restored.diaryPrelude).toEqual(diaryPrelude);
+  });
+
   it("formalizes image-only drafts into entries with attachments intact", async () => {
     const draftStore = useDraftStore();
 
@@ -268,5 +295,33 @@ describe("draft store", () => {
         }),
       ],
     });
+  });
+
+  it("formalizes diary prelude into an entry and restores it on resume", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+    const diaryPrelude = buildDiaryPreludeMeta({
+      weatherCode: "cloudy",
+      moodCode: "anxious",
+    });
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "今天心里很满。",
+      diaryPrelude,
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+    const reloadedEntry = entry ? await entryStore.fetchEntryById(entry.id) : null;
+
+    expect(entry?.diaryPrelude).toEqual(diaryPrelude);
+    expect(reloadedEntry?.diaryPrelude).toEqual(diaryPrelude);
+
+    const resumedDraft = entry ? await draftStore.resumeEntry(entry.id) : null;
+    expect(resumedDraft?.diaryPrelude).toEqual(diaryPrelude);
   });
 });

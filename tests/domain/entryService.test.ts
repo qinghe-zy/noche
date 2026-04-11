@@ -6,6 +6,7 @@ import {
   destroyEntry,
   resolveDraftSaveAction,
 } from "@/domain/services/entryService";
+import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import type { Attachment } from "@/shared/types/attachment";
 
 function createImageAttachment(overrides: Partial<Attachment> = {}): Attachment {
@@ -156,6 +157,41 @@ describe("entry service", () => {
     };
 
     expect(resolveDraftSaveAction(draft)).toBe("save-entry");
+  });
+
+  it("keeps diary prelude on formally saved entries", () => {
+    const diaryPrelude = buildDiaryPreludeMeta({
+      weatherCode: "cloudy",
+      moodCode: "anxious",
+    });
+    const entry = createEntryFromDraft({
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      title: "",
+      content: "今天先慢慢写。",
+      diaryPrelude,
+    });
+
+    expect(entry.diaryPrelude).toEqual(diaryPrelude);
+  });
+
+  it("does not treat diary prelude alone as enough for formal save", () => {
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      title: "",
+      content: "   ",
+      diaryPrelude: buildDiaryPreludeMeta({
+        weatherCode: "sunny",
+        moodCode: "joyful",
+      }),
+    };
+
+    expect(resolveDraftSaveAction(draft)).toBe("discard-empty");
   });
 
   it("uses image fallback titles when a draft has only attachments", () => {

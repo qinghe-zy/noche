@@ -1,4 +1,5 @@
 import { canPersistEntry } from "@/domain/entry/rules";
+import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
 import type { Draft } from "@/domain/draft/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
@@ -14,6 +15,7 @@ export interface CreateEntryInput {
   recordDate?: string;
   unlockDate?: string | null;
   attachments?: Attachment[];
+  diaryPrelude?: Draft["diaryPrelude"];
 }
 
 export interface DestroyEntryOptions {
@@ -60,6 +62,7 @@ export function createEntry(input: CreateEntryInput): Entry {
     unlockedAt: null,
     destroyedAt: null,
     attachments: normalizeAttachments(input.attachments),
+    diaryPrelude: cloneDiaryPrelude(input.diaryPrelude),
   };
 }
 
@@ -116,6 +119,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
     unlockedAt: null,
     destroyedAt: null,
     attachments,
+    diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
   };
 }
 

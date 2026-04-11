@@ -16,6 +16,7 @@ function makeDraftRecord(overrides: Partial<DraftRecord> = {}): DraftRecord {
     last_background_saved_at: overrides.last_background_saved_at ?? "2026-04-10T08:30:00.000Z",
     unlock_date: overrides.unlock_date ?? "2026-04-12",
     attachments_json: overrides.attachments_json ?? "[]",
+    diary_prelude_json: overrides.diary_prelude_json ?? "null",
   };
 }
 
@@ -49,6 +50,7 @@ describe("draftRepo", () => {
         record.last_background_saved_at,
         record.unlock_date,
         record.attachments_json,
+        record.diary_prelude_json,
       ],
     });
   });
