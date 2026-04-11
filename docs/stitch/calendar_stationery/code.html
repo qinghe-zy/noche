@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-dim": "#4e0309",
+                    "on-surface-variant": "#5d605a",
+                    "on-background": "#31332e",
+                    "on-secondary-fixed": "#423f36",
+                    "on-tertiary-container": "#5e5c53",
+                    "primary-dim": "#535252",
+                    "on-error": "#fff7f6",
+                    "inverse-on-surface": "#9e9d99",
+                    "surface-dim": "#d9dbd2",
+                    "secondary-fixed": "#e9e2d5",
+                    "on-error-container": "#752121",
+                    "on-primary-fixed": "#3f3f3f",
+                    "on-surface": "#31332e",
+                    "surface-container-highest": "#e2e3db",
+                    "primary-container": "#e4e2e1",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface-tint": "#5f5e5e",
+                    "on-secondary-container": "#555148",
+                    "secondary": "#635f55",
+                    "tertiary": "#625f56",
+                    "on-primary-container": "#525251",
+                    "primary": "#5f5e5e",
+                    "surface-bright": "#fbf9f5",
+                    "secondary-container": "#e9e2d5",
+                    "on-secondary": "#fff8ed",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "inverse-primary": "#ffffff",
+                    "tertiary-container": "#f9f3e8",
+                    "inverse-surface": "#0e0e0c",
+                    "error": "#9f403d",
+                    "surface-container": "#eeeee8",
+                    "error-container": "#fe8983",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "background": "#fbf9f5",
+                    "primary-fixed": "#e4e2e1",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "on-primary": "#faf7f6",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "outline-variant": "#b1b3ab",
+                    "outline": "#797c75",
+                    "surface": "#fbf9f5",
+                    "on-tertiary": "#fef8ed",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-dim": "#575349",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-low": "#f5f4ee",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-dim": "#56534b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f5;
+            color: #31332e;
+            font-family: 'Noto Serif SC', serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            font-size: 1.5rem;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar from JSON -->
+<header class="w-full top-0 sticky bg-[#fbf9f5] dark:bg-[#1a1b18] z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-2xl mx-auto">
+<button class="text-[#5f5e5e] dark:text-[#d1cfc9] hover:bg-[#f5f4ee]/50 dark:hover:bg-[#31332e]/50 transition-colors duration-300 p-2 rounded-full Active:opacity-70">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-noto-serif italic text-[#31332e] dark:text-[#fbf9f5] text-lg tracking-tight leading-relaxed">
+                The Journal
+            </h1>
+<button class="text-[#5f5e5e] dark:text-[#d1cfc9] hover:bg-[#f5f4ee]/50 dark:hover:bg-[#31332e]/50 transition-colors duration-300 p-2 rounded-full Active:opacity-70">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</button>
+</div>
+<div class="bg-gradient-to-b from-[#f5f4ee] to-transparent h-12"></div>
+</header>
+<main class="max-w-2xl mx-auto px-6 pb-24">
+<!-- Calendar Header -->
+<section class="mb-12 text-center">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-on-surface mb-2">日历</h2>
+<p class="font-label text-secondary text-sm uppercase tracking-widest">October 2024</p>
+</section>
+<!-- Calendar Container -->
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<!-- Day Labels -->
+<div class="grid grid-cols-7 mb-8">
+<div class="text-center font-label text-xs text-outline font-medium">日</div>
+<div class="text-center font-label text-xs text-outline font-medium">一</div>
+<div class="text-center font-label text-xs text-outline font-medium">二</div>
+<div class="text-center font-label text-xs text-outline font-medium">三</div>
+<div class="text-center font-label text-xs text-outline font-medium">四</div>
+<div class="text-center font-label text-xs text-outline font-medium">五</div>
+<div class="text-center font-label text-xs text-outline font-medium">六</div>
+</div>
+<!-- Date Grid -->
+<div class="grid grid-cols-7 gap-y-10">
+<!-- Row 1 -->
+<div class="flex flex-col items-center opacity-0"><span class="text-lg font-label"></span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">1</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">2</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">3</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">4</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">5</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">6</span></div>
+<!-- Row 2 -->
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">7</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">8</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">9</span>
+<span class="w-3 h-[1px] bg-primary-dim absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">10</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">11</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">12</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">13</span></div>
+<!-- Row 3 -->
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">14</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label font-bold text-on-surface">15</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">16</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">17</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">18</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">19</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">20</span></div>
+<!-- Row 4 -->
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">21</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">22</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">23</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">24</span>
+<span class="w-3 h-[1px] bg-primary-dim absolute -bottom-2"></span>
+</div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">25</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">26</span></div>
+<div class="flex flex-col items-center relative">
+<span class="text-lg font-label">27</span>
+<span class="w-1 h-1 bg-primary rounded-full absolute -bottom-2"></span>
+</div>
+<!-- Row 5 -->
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">28</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">29</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">30</span></div>
+<div class="flex flex-col items-center"><span class="text-lg font-label text-outline">31</span></div>
+<div class="flex flex-col items-center opacity-0"></div>
+<div class="flex flex-col items-center opacity-0"></div>
+<div class="flex flex-col items-center opacity-0"></div>
+</div>
+</div>
+<!-- Archived Note Context (Asymmetric/Editorial) -->
+<section class="mt-16 border-t border-outline-variant border-opacity-10 pt-12">
+<div class="grid grid-cols-12 gap-6 items-start">
+<div class="col-span-4 font-label text-xs text-secondary uppercase tracking-widest pt-1">
+                    Oct 15, 2024
+                </div>
+<div class="col-span-8">
+<h3 class="font-headline text-xl mb-3">午后的雨</h3>
+<p class="font-body text-on-surface leading-relaxed opacity-80 line-clamp-3">
+                        今天窗外下起了绵绵细雨。墨水在纸张上晕开的瞬间，仿佛时间也随之慢了下来。这种安静的时刻，最适合整理思绪...
+                    </p>
+<a class="inline-block mt-4 font-label text-sm text-primary hover:underline underline-offset-4 decoration-outline-variant" href="#">查看详情</a>
+</div>
+</div>
+</section>
+<!-- Visual Anchor: Tonal Image -->
+<section class="mt-16">
+<div class="aspect-[16/9] w-full rounded-xl overflow-hidden bg-surface-container">
+<img alt="Archival mood" class="w-full h-full object-cover mix-blend-multiply opacity-80" data-alt="Close up of a vintage fountain pen resting on a thick stack of ivory paper journals, soft side lighting from a window, muted tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXid_YReCz4BmF6cexLuSunDO48IPzdO6Vf3cx2OAZU0n3_pOwgUJSe44Pd2JaKWj7p1DmDWdH4dVYZ-mkI1wMDXNbCea7-3CEvbEgXKvGHip-_VUQsUt50971fEH9mjrjTjDVjWmqbsMsv0I3jRhSdv1BCFiCJ46W7TevTOKUvDOJgVbkO3cebPfkcmlKjPzgzZ_Xdw29hBIqw6x14qjEThOa1RCYOrRwptlxIG0M4HA2pwFSNtezgbA15b_AOfWMoYNdZFEym7Q"/>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Hidden by default, structure provided based on JSON) -->
+<!-- This would normally be toggled via a menu icon, but kept as a structural reference -->
+<nav class="hidden fixed left-0 top-0 h-full w-80 bg-[#ffffff] dark:bg-[#121212] shadow-xl shadow-[#31332e]/5 z-[100] flex-col py-12 px-8 font-noto-serif body-lg text-[#31332e]">
+<div class="flex items-center mb-12">
+<div class="w-12 h-12 rounded-full bg-surface-container-high mr-4 flex items-center justify-center overflow-hidden">
+<img alt="The Author" class="w-full h-full object-cover" data-alt="Minimalist portrait of an author in soft monochrome lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkV3KEqk_E3qWJ3_xy1H0z0n3tU_S3U3ivlMi9vp27nzIeWDiuyKXHvkxfmJ-qXtQbgx-8xfNE-oGiztb-LEylquCNPINJGpG__13s5-a7W2x6yp2OPHKkts-CQfaFdJyr8jEmhgqNGQDO-A7Wj6pxGIaAA_hy92_7MzP7eg3WNu_1uRQF5N_kVmgH4wUUU_l6C4V5HoJZyO-6s9rCjtC9okYHhAwmeRepVYX2SS3bFh1K85C1iaPzdO87qDTPSymmoG5OBnRO7LA"/>
+</div>
+<div>
+<p class="font-bold">The Author</p>
+<p class="text-xs text-secondary">Ink on Paper</p>
+</div>
+</div>
+<ul class="space-y-6">
+<li class="text-[#635f55] pl-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined align-middle mr-3" data-icon="edit_note">edit_note</span> Reflections
+            </li>
+<li class="text-[#31332e] font-bold border-l-2 border-[#5f5e5e] pl-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined align-middle mr-3" data-icon="calendar_today">calendar_today</span> Archive
+            </li>
+<li class="text-[#635f55] pl-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined align-middle mr-3" data-icon="settings">settings</span> Settings
+            </li>
+<li class="text-[#635f55] pl-4 hover:translate-x-1 transition-transform duration-200 cursor-pointer">
+<span class="material-symbols-outlined align-middle mr-3" data-icon="drafts">drafts</span> Letters
+            </li>
+</ul>
+<div class="mt-auto text-[10px] uppercase tracking-widest text-outline">
+            Est. 2024
+        </div>
+</nav>
+</body></html>

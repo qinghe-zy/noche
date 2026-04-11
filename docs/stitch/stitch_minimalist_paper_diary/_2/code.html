@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;400;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#797c75",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary": "#fef8ed",
+                    "tertiary-dim": "#56534b",
+                    "surface-tint": "#5f5e5e",
+                    "secondary": "#635f55",
+                    "on-surface": "#31332e",
+                    "background": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-container": "#e9e2d5",
+                    "on-primary-container": "#525251",
+                    "on-error-container": "#752121",
+                    "primary-container": "#e4e2e1",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "on-error": "#fff7f6",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "on-secondary": "#fff8ed",
+                    "error-dim": "#4e0309",
+                    "error-container": "#fe8983",
+                    "inverse-primary": "#ffffff",
+                    "primary-dim": "#535252",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-container": "#555148",
+                    "secondary-dim": "#575349",
+                    "on-surface-variant": "#5d605a",
+                    "tertiary": "#625f56",
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-container": "#5e5c53",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-highest": "#e2e3db",
+                    "surface-container": "#eeeee8",
+                    "on-background": "#31332e",
+                    "inverse-surface": "#0e0e0c",
+                    "surface-container-low": "#f5f4ee",
+                    "on-primary-fixed": "#3f3f3f",
+                    "error": "#9f403d",
+                    "primary-fixed": "#e4e2e1",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-primary": "#faf7f6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed": "#423f36",
+                    "outline-variant": "#b1b3ab",
+                    "primary": "#5f5e5e",
+                    "inverse-on-surface": "#9e9d99",
+                    "secondary-fixed": "#e9e2d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif JP", "serif"],
+                    "body": ["Noto Serif JP", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f5;
+            color: #31332e;
+            -webkit-font-smoothing: antialiased;
+        }
+        .hand-drawn-neutral {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar following the JSON structure -->
+<header class="fixed w-full top-0 z-50 bg-[#fbf9f5] dark:bg-[#1a1a18] shadow-[0px_4px_16px_rgba(49,51,46,0.04)]">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined text-xl">arrow_back_ios</span>
+</button>
+</div>
+<h1 class="text-lg font-serif italic text-[#31332e] dark:text-[#fbf9f5] tracking-widest">信箋</h1>
+<div class="flex items-center gap-4">
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined text-xl">more_horiz</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-6 mt-16">
+<!-- Content Canvas mimicking a physical stationery paper -->
+<div class="w-full max-w-md aspect-square flex flex-col items-center justify-center bg-surface-container-lowest rounded-xl shadow-[0px_4px_16px_rgba(49,51,46,0.06)] border border-outline-variant/10">
+<!-- Hand-drawn Neutral SVG Icon -->
+<div class="mb-6 flex items-center justify-center">
+<svg class="text-on-surface" fill="none" height="120" viewbox="0 0 24 24" width="120" xmlns="http://www.w3.org/2000/svg">
+<circle class="hand-drawn-neutral" cx="12" cy="12" r="9" stroke="#333333" stroke-width="1.5"></circle>
+<!-- Neutral Face Eyes: Hand-drawn look simplified -->
+<path d="M8.5 10C8.5 10 8.75 9.5 9 9.5C9.25 9.5 9.5 10 9.5 10" stroke="#333333" stroke-linecap="round" stroke-width="1.5"></path>
+<path d="M14.5 10C14.5 10 14.75 9.5 15 9.5C15.25 9.5 15.5 10 15.5 10" stroke="#333333" stroke-linecap="round" stroke-width="1.5"></path>
+<!-- Neutral Mouth: Flat line with slight hand-drawn character -->
+<path d="M8 14.5C8.5 14.3 11 14.2 12 14.2C13 14.2 15.5 14.3 16 14.5" stroke="#333333" stroke-linecap="round" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Typography centered below icon -->
+<div class="text-center">
+<h2 class="font-headline font-light text-2xl tracking-[0.2em] text-on-surface mb-2">平和</h2>
+<p class="font-label text-sm uppercase tracking-widest text-secondary opacity-60">Neutral</p>
+</div>
+<!-- Decorative Element -->
+<div class="mt-12 w-8 h-px bg-outline-variant/30"></div>
+</div>
+</main>
+<!-- Floating Action Button: The "Inkwell" -->
+<div class="fixed bottom-8 right-8">
+<button class="w-14 h-14 bg-primary-dim text-on-primary rounded-full shadow-[0px_8px_24px_rgba(49,51,46,0.15)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-weight="fill">edit</span>
+</button>
+</div>
+<!-- Bottom Navigation Shell suppression for focus context -->
+<!-- The user is viewing a specific emotional state icon, treated as a focused detail view. Navigation is handled by the TopAppBar back action. -->
+</body></html>

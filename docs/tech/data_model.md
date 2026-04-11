@@ -24,6 +24,7 @@
 - `unlockDate` (未来信解锁日)
 - `unlockedAt`
 - `destroyedAt`
+- `attachments` (本地附件列表)
 
 ### 2.2 Draft
 
@@ -41,8 +42,24 @@
 - `createdAt`
 - `updatedAt`
 - `lastBackgroundSavedAt`
+- `attachments`
 
-### 2.3 Settings / Prefs
+### 2.3 Attachment
+
+本地图片附件。
+
+建议核心字段：
+
+- `id`
+- `type` (`image`)
+- `entryId` 或 `draftKey`
+- `localUri`
+- `sortOrder`
+- `createdAt`
+- `width`
+- `height`
+
+### 2.4 Settings / Prefs
 
 本地偏好配置。
 
@@ -57,11 +74,12 @@
 
 - `EntryType`: `diary` / `jotting` / `future`
 - `EntryStatus`: `saved` / `sealed` / `unlocked`
+- `AttachmentType`: `image`
 
 ## 4. 关键规则映射
 
 - `recordDate` 在打开纸张时锁定
-- 空白内容不能正式保存
+- 只有正文为空且附件为空时，内容才算空白，不能正式保存
 - 未来信最早只能选明天
 - 草稿按类型隔离
 - 日记草稿按日期分槽
@@ -69,6 +87,9 @@
 - 删除统一走 `destroyEntry`
 - 日历补写只能补日记
 - 未来信正式封存后状态为 `sealed`，到解锁日后进入 `unlocked`
+- 三套 editor shell 共享保存语义，但视觉层分离
+- 标题优先取正文首行；纯图片内容回退到类型专属图片标题
+- 附件只保留本地引用，不依赖远端 URL
 
 ## 5. 数据层落地建议
 
@@ -76,11 +97,11 @@
 
 - `entries`
 - `drafts`
+- `attachments`
 - `preferences`
 
 后续如果引入附件、索引、搜索，可再扩展：
 
-- `entry_resources`
 - `entry_search_index`
 
 ## 6. 当前状态
@@ -102,6 +123,8 @@
   - 普通日记 / 随笔：`saved`
   - 已封存未来信：`sealed`
   - 已解锁未来信：`unlocked`
+- 附件统一使用独立 `attachments` 概念，不把图片塞进 `content` 字段。
+- 第一版附件能力固定为本地图片插入、展示、删除、恢复，不做云同步和复杂编辑。
 - 草稿槽位统一使用：
   - `draft_diary_YYYY-MM-DD`
   - `draft_jotting`

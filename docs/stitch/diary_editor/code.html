@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#5f5e5e",
+                        "on-secondary": "#fff8ed",
+                        "tertiary-fixed-dim": "#eae5da",
+                        "on-surface-variant": "#5d605a",
+                        "on-secondary-container": "#555148",
+                        "surface-container-low": "#f5f4ee",
+                        "surface-container-high": "#e8e9e1",
+                        "secondary-container": "#e9e2d5",
+                        "surface-dim": "#d9dbd2",
+                        "on-tertiary-container": "#5e5c53",
+                        "surface-variant": "#e2e3db",
+                        "secondary-fixed-dim": "#dad4c7",
+                        "error-container": "#fe8983",
+                        "on-secondary-fixed": "#423f36",
+                        "primary-dim": "#535252",
+                        "outline": "#797c75",
+                        "tertiary-container": "#f9f3e8",
+                        "on-error-container": "#752121",
+                        "surface-container": "#eeeee8",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-dim": "#575349",
+                        "primary-container": "#e4e2e1",
+                        "surface": "#fbf9f5",
+                        "on-tertiary-fixed-variant": "#69665d",
+                        "on-primary": "#faf7f6",
+                        "on-primary-fixed": "#3f3f3f",
+                        "tertiary-fixed": "#f9f3e8",
+                        "surface-container-highest": "#e2e3db",
+                        "inverse-surface": "#0e0e0c",
+                        "background": "#fbf9f5",
+                        "on-tertiary-fixed": "#4c4a41",
+                        "primary": "#5f5e5e",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "on-primary-container": "#525251",
+                        "on-error": "#fff7f6",
+                        "on-tertiary": "#fef8ed",
+                        "outline-variant": "#b1b3ab",
+                        "tertiary": "#625f56",
+                        "inverse-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5f5b51",
+                        "on-background": "#31332e",
+                        "on-surface": "#31332e",
+                        "secondary": "#635f55",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "surface-bright": "#fbf9f5",
+                        "primary-fixed": "#e4e2e1",
+                        "secondary-fixed": "#e9e2d5",
+                        "inverse-on-surface": "#9e9d99",
+                        "error-dim": "#4e0309",
+                        "tertiary-dim": "#56534b",
+                        "error": "#9f403d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>body {
+    background-color: #fbf9f5;
+    -webkit-font-smoothing: antialiased
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24
+    }
+textarea::placeholder {
+    color: #b1b3ab;
+    font-weight: 300
+    }
+.paper-grain {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAD9C9FwGVRBKYTicGzgO6lNrkbh8F3Uy-jnt-ma8CSwqeSSSjWXIQyExaUXGZqqA5BGJM4bEBLF_5V4xearGYfpLIwACWMWnsPPUPkvzyj-9dE81C2xYjHsnHijdThkW-e57zkV98DdxAk9lEheprU608k5qDJ_SXqfhzDZ5u7mqx-qSutL8B1qYsLP6M7RJDhrenmbijJIHWiUGkhp-mPlw5eVjkMcXzLpTDcEXT291hpDuL0zxNtjklmnK1L5Px7YyVgqoGdbLk);
+    opacity: 0.03;
+    pointer-events: none
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body text-on-surface selection:bg-secondary-container/30 overflow-x-hidden">
+<!-- Subtle Paper Texture Overlay -->
+<div class="fixed inset-0 paper-grain z-50"></div>
+<!-- Top Navigation Bar -->
+<!-- Predicted Component Mapping: TopAppBar -->
+<nav class="fixed top-0 left-0 right-0 z-40 bg-[#fbf9f5] flex items-center justify-between w-full px-6 py-6 shadow-[0px_4px_16px_rgba(49,51,46,0.04)]">
+<div class="flex items-center">
+<button aria-label="Go back" class="flex items-center justify-center w-10 h-10 transition-colors duration-300 hover:bg-[#f5f4ee] active:opacity-70 active:scale-[0.99]">
+<span class="material-symbols-outlined text-on-surface text-xl">arrow_back_ios</span>
+</button>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-serif italic text-lg tracking-widest text-on-surface opacity-80">
+                二零二四年 · 冬
+            </span>
+</div>
+<div class="flex items-center">
+<button aria-label="Seal entry" class="group flex items-center justify-center w-10 h-10 transition-colors duration-300 hover:bg-[#f5f4ee] active:opacity-70 active:scale-[0.99]">
+<span class="material-symbols-outlined text-on-surface text-2xl group-hover:scale-110 transition-transform">mail</span>
+</button>
+</div>
+</nav>
+<!-- Main Editor Area -->
+<main class="relative min-h-screen pt-32 pb-20 px-8 md:px-24 lg:px-64 max-w-7xl mx-auto flex flex-col">
+<!-- Metadata Header -->
+<header class="mb-12 flex flex-col items-start gap-4">
+<div class="flex items-baseline gap-4">
+<h1 class="text-4xl font-light tracking-tighter text-on-surface">
+                    十二月十二日
+                </h1>
+</div>
+<div class="flex items-center gap-6 mt-2">
+<div class="flex items-center gap-2 text-secondary/60">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs font-label tracking-wider">SHANGHAI, STUDIO</span>
+</div>
+<div class="flex items-center gap-2 text-secondary/60">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="text-xs font-label tracking-wider">22:45</span>
+</div>
+</div>
+</header>
+<!-- Entry Body -->
+<article class="flex-grow">
+<textarea autofocus="" class="w-full h-full bg-transparent border-none focus:ring-0 resize-none text-on-surface font-body font-light text-lg md:text-xl leading-[2.2] tracking-wide placeholder:font-light" placeholder="今天的心情..." spellcheck="false"></textarea>
+</article>
+<!-- Dynamic Context Footer -->
+<footer class="mt-20 flex items-center border-t border-outline-variant/10 pt-8 pb-12 justify-start">
+<div class="flex gap-8 gap-10">
+<button class="group flex items-center gap-2 text-secondary/40 hover:text-secondary transition-colors"><span class="material-symbols-outlined text-2xl" style="color: #B8B4AA;">image</span></button>
+<button class="group flex items-center gap-2 text-secondary/40 hover:text-secondary transition-colors"><span class="material-symbols-outlined text-2xl">palette</span></button>
+</div>
+</footer>
+</main>
+<!-- Floating Action Element (Predicted "Inkwell") -->
+<!-- Suppressed on Editor screen per Shell Visibility rules, but kept as a subtle "Focus" trigger if needed -->
+<!-- In this case, we use it for a "Zen Mode" toggle -->
+<div class="fixed bottom-10 right-10 z-40">
+<button class="w-12 h-12 rounded-full bg-primary-dim text-on-primary flex items-center justify-center shadow-[0px_4px_16px_rgba(49,51,46,0.12)] transition-all hover:scale-110 active:scale-95">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">ink_pen</span>
+</button>
+</div>
+<!-- Visual Anchor: Asymmetric Image for Mood -->
+<aside class="hidden lg:block fixed left-12 top-1/2 -translate-y-1/2 w-32 opacity-20 hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+<div class="relative aspect-[3/4] rounded-lg overflow-hidden grayscale contrast-125">
+<img alt="Minimalist ink wash painting" class="w-full h-full object-cover" data-alt="Abstract minimalist ink wash painting on textured rice paper with deep black strokes and plenty of white space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA67bOxZQgq6OG3PGcHqDC8_oLoZIh5nXNOxB9zDYr3wIyNph4XS5pxlfW493VGlWrGpriCrBGaCjgqEjt7NBGCyRCgBWLDvh9macwicq9GzhI3ouVAWiMO4N_ClbhnNytO72IoPBfLzslvjxiFTleRuGMWOAqM0g2yNTUB9DJklmy5pp-yhgdlCOZq522s-qsAHdRKSST86bSI5v0o-S1PIExgMYNht3YUQC7sbwBYgwmpRF90GHIKbkT-o8o8TuXOhr6LMW452ZI"/>
+</div>
+<p class="mt-4 text-[8px] font-label tracking-widest text-secondary vertical-text rotate-180 uppercase">
+            Inspiration · 墨
+        </p>
+</aside>
+</body></html>

@@ -1,6 +1,8 @@
 /**
  * 条目类型字符串字面量
  */
+import type { Attachment } from "@/shared/types/attachment";
+
 export type EntryType = 'diary' | 'jotting' | 'future';
 
 /**
@@ -28,4 +30,5 @@ export interface Entry {
   // 销毁标记
   destroyedAt: string | null;
   isDestroyed?: boolean;
+  attachments?: Attachment[];
 }

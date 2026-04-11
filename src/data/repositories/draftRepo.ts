@@ -13,6 +13,7 @@ export interface DraftRecord {
   updated_at: string;
   last_background_saved_at: string | null;
   unlock_date: string | null;
+  attachments_json?: string | null;
 }
 
 export interface DraftRepo {
@@ -48,8 +49,9 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           created_at,
           updated_at,
           last_background_saved_at,
-          unlock_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          unlock_date,
+          attachments_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(slot_key) DO UPDATE SET
           id = excluded.id,
           type = excluded.type,
@@ -60,7 +62,8 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           created_at = excluded.created_at,
           updated_at = excluded.updated_at,
           last_background_saved_at = excluded.last_background_saved_at,
-          unlock_date = excluded.unlock_date`,
+          unlock_date = excluded.unlock_date,
+          attachments_json = excluded.attachments_json`,
         [
           record.slot_key,
           record.id,
@@ -73,6 +76,7 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           record.updated_at,
           record.last_background_saved_at,
           record.unlock_date,
+          record.attachments_json ?? "[]",
         ],
       );
     },

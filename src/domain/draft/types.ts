@@ -1,4 +1,5 @@
 import type { EntryType } from '../entry/types';
+import type { Attachment } from "@/shared/types/attachment";
 
 /**
  * 草稿类型（与 EntryType 对齐）
@@ -27,6 +28,7 @@ export interface Draft {
   lastBackgroundSavedAt: string | null; // ISO string
   // 未来信特有
   unlockDate?: string | null;
+  attachments?: Attachment[];
 }
 
 /**

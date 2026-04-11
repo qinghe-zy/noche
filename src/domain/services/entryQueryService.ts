@@ -13,8 +13,10 @@ interface FutureStatusSyncResult {
 }
 
 interface MailboxCollections {
-  pastEntries: Entry[];
-  sealedFutureEntries: Entry[];
+  documentaryDiaries: Entry[];
+  documentaryJottings: Entry[];
+  distantOpenedFutures: Entry[];
+  distantPendingFutures: Entry[];
 }
 
 function toIso(source: ConfigType): string {
@@ -31,6 +33,20 @@ export function sortEntriesByRecordDateDesc(a: Entry, b: Entry): number {
 
 function isCalendarVisibleEntry(entry: Entry): boolean {
   return entry.type !== "future" || entry.status === "unlocked";
+}
+
+function getCalendarSignalDate(entry: Entry): string | null {
+  if (entry.type === "future") {
+    return entry.unlockDate;
+  }
+
+  return entry.recordDate;
+}
+
+function sortEntriesByTimelineDesc(a: Entry, b: Entry): number {
+  const aTimeline = a.savedAt ?? a.createdAt;
+  const bTimeline = b.savedAt ?? b.createdAt;
+  return bTimeline.localeCompare(aTimeline);
 }
 
 function materializeFutureEntryStatus(entry: Entry, now: ConfigType = new Date()): Entry {
@@ -67,16 +83,24 @@ export function syncFutureEntryStatuses(
 }
 
 export function buildMailboxCollections(entries: Entry[]): MailboxCollections {
-  const pastEntries = entries
-    .filter((entry) => entry.type !== "future" || entry.status === "unlocked")
+  const documentaryDiaries = entries
+    .filter((entry) => entry.type === "diary")
     .sort(sortEntriesByRecordDateDesc);
-  const sealedFutureEntries = entries
+  const documentaryJottings = entries
+    .filter((entry) => entry.type === "jotting")
+    .sort(sortEntriesByRecordDateDesc);
+  const distantOpenedFutures = entries
+    .filter((entry) => entry.type === "future" && entry.status === "unlocked")
+    .sort(sortEntriesByRecordDateDesc);
+  const distantPendingFutures = entries
     .filter((entry) => entry.type === "future" && entry.status === "sealed")
     .sort(sortEntriesByRecordDateDesc);
 
   return {
-    pastEntries,
-    sealedFutureEntries,
+    documentaryDiaries,
+    documentaryJottings,
+    distantOpenedFutures,
+    distantPendingFutures,
   };
 }
 
@@ -84,10 +108,16 @@ export function collectCalendarMarkedDates(entries: Entry[]): string[] {
   return Array.from(
     new Set(
       entries
-        .filter(isCalendarVisibleEntry)
-        .map((entry) => entry.recordDate),
+        .map(getCalendarSignalDate)
+        .filter((date): date is string => Boolean(date)),
     ),
   ).sort();
+}
+
+export function listCalendarPreviewEntries(entries: Entry[], recordDate: string): Entry[] {
+  return entries
+    .filter((entry) => getCalendarSignalDate(entry) === recordDate)
+    .sort(sortEntriesByTimelineDesc);
 }
 
 export function listDayArchiveEntries(entries: Entry[], recordDate: string): Entry[] {

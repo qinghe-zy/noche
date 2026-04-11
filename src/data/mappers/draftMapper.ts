@@ -14,6 +14,7 @@ export function mapDraftToRecord(draft: Draft): DraftRecord {
     updated_at: draft.updatedAt,
     last_background_saved_at: draft.lastBackgroundSavedAt ?? null,
     unlock_date: draft.unlockDate ?? null,
+    attachments_json: JSON.stringify(draft.attachments ?? []),
   };
 }
 
@@ -30,5 +31,6 @@ export function mapRecordToDraft(record: DraftRecord): Draft {
     updatedAt: record.updated_at,
     lastBackgroundSavedAt: record.last_background_saved_at,
     unlockDate: record.unlock_date,
+    attachments: record.attachments_json ? JSON.parse(record.attachments_json) : [],
   };
 }

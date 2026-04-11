@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "on-secondary-fixed": "#423f36",
+                    "inverse-primary": "#ffffff",
+                    "tertiary-dim": "#56534b",
+                    "secondary": "#635f55",
+                    "on-primary-container": "#525251",
+                    "surface-container-low": "#f5f4ee",
+                    "surface-container": "#eeeee8",
+                    "surface-bright": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary": "#fef8ed",
+                    "on-secondary": "#fff8ed",
+                    "primary-fixed": "#e4e2e1",
+                    "on-error": "#fff7f6",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "outline": "#797c75",
+                    "error-container": "#fe8983",
+                    "tertiary-fixed": "#f9f3e8",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "inverse-surface": "#0e0e0c",
+                    "secondary-container": "#e9e2d5",
+                    "background": "#fbf9f5",
+                    "outline-variant": "#b1b3ab",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "secondary-fixed": "#e9e2d5",
+                    "on-surface-variant": "#5d605a",
+                    "on-background": "#31332e",
+                    "surface": "#fbf9f5",
+                    "primary": "#5f5e5e",
+                    "on-primary": "#faf7f6",
+                    "on-primary-fixed": "#3f3f3f",
+                    "surface-container-highest": "#e2e3db",
+                    "on-error-container": "#752121",
+                    "primary-dim": "#535252",
+                    "primary-container": "#e4e2e1",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary-container": "#5e5c53",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#31332e",
+                    "secondary-dim": "#575349",
+                    "surface-container-high": "#e8e9e1",
+                    "surface-tint": "#5f5e5e",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "tertiary": "#625f56",
+                    "inverse-on-surface": "#9e9d99",
+                    "error-dim": "#4e0309",
+                    "error": "#9f403d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "PingFang SC", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        body {
+            background-color: #fbf9f5;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface selection:bg-secondary-container">
+<header class="docked w-full top-0 bg-[#fbf9f5] flex items-center justify-between px-8 py-10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface cursor-pointer">arrow_back_ios</span>
+<h1 class="text-lg font-headline tracking-widest text-on-surface">我的角落</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface cursor-pointer">more_horiz</span>
+</div>
+</header>
+<main class="max-w-screen-md mx-auto px-8 pb-20">
+<section class="flex flex-col items-center text-center mb-16 pt-4">
+<div class="relative mb-6">
+<div class="w-24 h-24 rounded-full overflow-hidden border border-outline-variant/10 p-1">
+<img alt="用户头像" class="w-full h-full rounded-full object-cover grayscale opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI8-lscibrKS52fiUhukEIRD-B0Y2D_gLih8VVcc7NtBSvzKVzTh4lHSjiuCu_tPHrVQ8zszCTh4mgL6qKDnnwRT_r7qSsDAFjpYvviJfnft8j5Y9RdCjGtQrWcO0rL7AgGTLyKhDiFQMmy8FZ02oqz3UKiJilmDfPaEin97XX5KSfGe8HXeus5mhKJoowT8ZoTD9vW_Y14et2KZR32IPRoqGtOobMtRztexM9IKaF1XPCrKsyBaEmEeIm9bvwfSUrmlGYfK9UiRg"/>
+</div>
+</div>
+<h2 class="text-2xl font-headline font-light tracking-wide mb-2 text-on-surface">林间小径</h2>
+<p class="text-secondary font-light text-sm italic tracking-widest">安静记录时光</p>
+</section>
+<section class="mb-20 bg-surface-container-lowest rounded-xl p-8 shadow-[0px_4px_24px_rgba(49,51,46,0.03)] border border-outline-variant/5">
+<div class="flex justify-around items-center">
+<div class="flex flex-col items-center flex-1">
+<span class="text-xl font-headline mb-1 font-light">128</span>
+<span class="text-[11px] font-headline text-secondary tracking-widest">日记</span>
+</div>
+<div class="h-6 w-[0.5px] bg-outline-variant opacity-20"></div>
+<div class="flex flex-col items-center flex-1">
+<span class="text-xl font-headline mb-1 font-light">12</span>
+<span class="text-[11px] font-headline text-secondary tracking-widest">未来信</span>
+</div>
+<div class="h-6 w-[0.5px] bg-outline-variant opacity-20"></div>
+<div class="flex flex-col items-center flex-1">
+<span class="text-xl font-headline mb-1 font-light">45</span>
+<span class="text-[11px] font-headline text-secondary tracking-widest">信箱</span>
+</div>
+</div>
+</section>
+<nav class="space-y-1">
+<div class="group flex items-center justify-between py-5 px-4 hover:bg-surface-container-low transition-colors duration-300 rounded-lg cursor-pointer">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary/70 group-hover:text-on-surface transition-colors">palette</span>
+<span class="text-sm font-headline tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">外观设置</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-xs opacity-50">chevron_right</span>
+</div>
+<div class="group flex items-center justify-between py-5 px-4 hover:bg-surface-container-low transition-colors duration-300 rounded-lg cursor-pointer">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary/70 group-hover:text-on-surface transition-colors">lock</span>
+<span class="text-sm font-headline tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">隐私锁</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-xs opacity-50">chevron_right</span>
+</div>
+<div class="group flex items-center justify-between py-5 px-4 hover:bg-surface-container-low transition-colors duration-300 rounded-lg cursor-pointer">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary/70 group-hover:text-on-surface transition-colors">cloud_done</span>
+<span class="text-sm font-headline tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">数据备份</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-xs opacity-50">chevron_right</span>
+</div>
+<div class="group flex items-center justify-between py-5 px-4 hover:bg-surface-container-low transition-colors duration-300 rounded-lg cursor-pointer">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary/70 group-hover:text-on-surface transition-colors">info</span>
+<span class="text-sm font-headline tracking-wide opacity-80 group-hover:opacity-100 transition-opacity">关于</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-xs opacity-50">chevron_right</span>
+</div>
+</nav>
+<footer class="mt-32 text-center">
+<div class="inline-block border-t border-outline-variant opacity-10 w-24 mb-6"></div>
+<p class="text-[11px] font-headline text-outline-variant tracking-[0.25em] opacity-60">岁月安好 · 纸短情长</p>
+</footer>
+</main>
+</body></html>

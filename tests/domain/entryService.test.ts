@@ -6,6 +6,21 @@ import {
   destroyEntry,
   resolveDraftSaveAction,
 } from "@/domain/services/entryService";
+import type { Attachment } from "@/shared/types/attachment";
+
+function createImageAttachment(overrides: Partial<Attachment> = {}): Attachment {
+  return {
+    id: overrides.id ?? "attachment-1",
+    type: "image",
+    draftKey: overrides.draftKey ?? "draft_diary_2026-04-10",
+    entryId: overrides.entryId ?? null,
+    localUri: overrides.localUri ?? "file:///noche/image-1.png",
+    sortOrder: overrides.sortOrder ?? 0,
+    createdAt: overrides.createdAt ?? "2026-04-10T08:00:00.000Z",
+    width: overrides.width ?? 1200,
+    height: overrides.height ?? 900,
+  };
+}
 
 describe("entry service", () => {
   it("creates saved diary entries with final tech model fields", () => {
@@ -127,5 +142,52 @@ describe("entry service", () => {
     };
 
     expect(resolveDraftSaveAction(draft)).toBe("pick-future-date");
+  });
+
+  it("allows image-only diary drafts to be formally saved", () => {
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      title: "",
+      content: "   ",
+      attachments: [createImageAttachment()],
+    };
+
+    expect(resolveDraftSaveAction(draft)).toBe("save-entry");
+  });
+
+  it("uses image fallback titles when a draft has only attachments", () => {
+    const diaryEntry = createEntryFromDraft({
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      title: "",
+      content: "",
+      attachments: [createImageAttachment({ draftKey: "draft_diary_2026-04-10" })],
+    });
+    const jottingEntry = createEntryFromDraft({
+      ...createDraft({
+        type: "jotting",
+      }),
+      title: "",
+      content: "",
+      attachments: [createImageAttachment({ draftKey: "draft_jotting" })],
+    });
+    const futureEntry = createEntryFromDraft({
+      ...createDraft({
+        type: "future",
+      }),
+      title: "",
+      content: "",
+      unlockDate: "2026-04-11",
+      attachments: [createImageAttachment({ draftKey: "draft_future" })],
+    });
+
+    expect(diaryEntry.title).toBe("图片日记");
+    expect(jottingEntry.title).toBe("图片随笔");
+    expect(futureEntry.title).toBe("图片未来信");
   });
 });

@@ -33,7 +33,7 @@ describe("mailbox store", () => {
     vi.useRealTimers();
   });
 
-  it("fetches past and sealed future entries without leaking locked letters into past", async () => {
+  it("fetches documentary and distant modules without mixing future states", async () => {
     const repository = createMemoryEntryRepository([
       makeEntry({
         id: "diary-1",
@@ -66,13 +66,10 @@ describe("mailbox store", () => {
     await store.fetchPastEntries();
     await store.fetchSealedFutureEntries();
 
-    expect(store.pastEntries.map((entry) => entry.id)).toEqual([
-      "jotting-1",
-      "diary-1",
-      "future-open",
-    ]);
-    expect(store.sealedFutureEntries.map((entry) => entry.id)).toEqual(["future-locked"]);
-    expect(store.pendingFutureEntries.map((entry) => entry.id)).toEqual(["future-locked"]);
+    expect(store.documentaryJottings.map((entry) => entry.id)).toEqual(["jotting-1"]);
+    expect(store.documentaryDiaries.map((entry) => entry.id)).toEqual(["diary-1"]);
+    expect(store.distantOpenedFutures.map((entry) => entry.id)).toEqual(["future-open"]);
+    expect(store.distantPendingFutures.map((entry) => entry.id)).toEqual(["future-locked"]);
 
     const persisted = await repository.getById("future-open");
     expect(persisted?.status).toBe("unlocked");

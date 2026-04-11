@@ -8,6 +8,7 @@ import type { CreateDraftInput } from "@/domain/services/draftService";
 import { createDraft, markDraftBackgroundSaved } from "@/domain/services/draftService";
 import { createEntryFromDraft } from "@/domain/services/entryService";
 import { useEntryStore } from "@/app/store/useEntryStore";
+import type { Attachment } from "@/shared/types/attachment";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -19,6 +20,7 @@ interface SaveDraftPatch {
   title?: string;
   content?: string;
   unlockDate?: string | null;
+  attachments?: Attachment[];
 }
 
 interface DraftState {
@@ -107,6 +109,7 @@ export const useDraftStore = defineStore("draft", {
           unlockDate: this.activeDraft.type === "future"
             ? patch.unlockDate ?? this.activeDraft.unlockDate ?? null
             : null,
+          attachments: patch.attachments ?? this.activeDraft.attachments ?? [],
         });
 
         await draftRepository.save(nextDraft);
@@ -180,6 +183,12 @@ export const useDraftStore = defineStore("draft", {
           content: entry.content,
           recordDate: entry.recordDate,
           unlockDate: entry.type === "future" ? entry.unlockDate ?? null : null,
+          attachments: (entry.attachments ?? []).map((attachment, index) => ({
+            ...attachment,
+            entryId: null,
+            draftKey: draft.slotKey,
+            sortOrder: index,
+          })),
         };
 
         await draftRepository.save(nextDraft);

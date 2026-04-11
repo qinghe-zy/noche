@@ -1,89 +1,136 @@
 <template>
   <view class="mailbox-page">
     <view class="mailbox-page__topbar">
-      <button class="mailbox-page__nav-btn" @click="handleGoHome">‹</button>
-      <text class="mailbox-page__topbar-title">私人信箱</text>
-      <button class="mailbox-page__nav-btn mailbox-page__nav-btn--icon" @click="handleGoToCalendar">
-        日历
-      </button>
+      <view class="mailbox-page__topbar-inner">
+        <TopbarIconButton @tap="handleGoHome" />
+        <text class="mailbox-page__topbar-title">私人信箱</text>
+        <TopbarIconButton icon-name="calendar" @tap="handleGoToCalendar" />
+      </view>
     </view>
 
-    <view class="mailbox-page__tabs">
-      <button
-        class="mailbox-page__tab"
-        :class="{ 'mailbox-page__tab--active': activeTab === 'past' }"
-        @click="activeTab = 'past'"
-      >
-        <text class="mailbox-page__tab-text">往日信件</text>
-      </button>
-      <button
-        class="mailbox-page__tab"
-        :class="{ 'mailbox-page__tab--active': activeTab === 'future' }"
-        @click="activeTab = 'future'"
-      >
-        <text class="mailbox-page__tab-text">待启之信</text>
-      </button>
-    </view>
-
-    <scroll-view scroll-y class="mailbox-page__content">
-      <view v-if="mailboxStore.isLoading" class="mailbox-page__state">
-        <text class="mailbox-page__state-text">正在整理信箱…</text>
-      </view>
-
-      <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
-        <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
-        <button class="mailbox-page__retry" @click="refresh">重新加载</button>
-      </view>
-
-      <view v-else-if="currentEntries.length === 0" class="mailbox-page__state">
-        <text class="mailbox-page__state-text">这里暂时还没有内容。</text>
-      </view>
-
-      <view v-else class="mailbox-page__list">
-        <view
-          v-for="entry in currentEntries"
-          :key="entry.id"
-          class="mailbox-page__stack"
-          :class="{
-            'mailbox-page__stack--paper': activeTab === 'past',
-            'mailbox-page__stack--sealed': activeTab === 'future',
-          }"
-          @click="handleEntryClick(entry)"
-        >
-          <view class="mailbox-page__item">
-            <view class="mailbox-page__item-head">
-              <view class="mailbox-page__item-badge">
-                <view class="mailbox-page__item-dot"></view>
-                <text class="mailbox-page__item-type">{{ formatTypeLabel(entry.type) }}</text>
-              </view>
-              <text class="mailbox-page__item-date">{{ formatDateLabel(entry) }}</text>
-            </view>
-
-            <template v-if="activeTab === 'past'">
-              <text class="mailbox-page__item-title">{{ entry.title || "未命名" }}</text>
-              <text class="mailbox-page__item-excerpt">{{ formatExcerpt(entry) }}</text>
-              <view class="mailbox-page__item-foot">
-                <text class="mailbox-page__item-meta">记录已收好</text>
-                <text class="mailbox-page__item-arrow">›</text>
-              </view>
-            </template>
-
-            <template v-else>
-              <view class="mailbox-page__sealed-center">
-                <view class="mailbox-page__sealed-icon">信</view>
-                <text class="mailbox-page__sealed-title">{{ entry.title || "写给未来的信" }}</text>
-              </view>
-              <view class="mailbox-page__sealed-foot">
-                <text class="mailbox-page__sealed-copy">{{ formatExcerpt(entry) }}</text>
-                <view class="mailbox-page__sealed-wax"></view>
-              </view>
-            </template>
-          </view>
+    <view class="mailbox-page__main">
+      <view class="mailbox-page__switcher">
+        <view class="mailbox-page__tab-group mailbox-page__tab-group--primary">
+          <button
+            class="mailbox-page__tab-pill mailbox-page__tab-pill--primary"
+            :class="{ 'mailbox-page__tab-pill--active': activeTab === 'documentary' }"
+            @click="handlePrimaryTabChange('documentary')"
+          >
+            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">纪实</text>
+          </button>
+          <button
+            class="mailbox-page__tab-pill mailbox-page__tab-pill--primary"
+            :class="{ 'mailbox-page__tab-pill--active': activeTab === 'distant' }"
+            @click="handlePrimaryTabChange('distant')"
+          >
+            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">寄远</text>
+          </button>
         </view>
       </view>
-    </scroll-view>
 
-    <button class="mailbox-page__floating" @click="handleOpenJotting">写</button>
+      <view class="mailbox-page__switcher mailbox-page__switcher--secondary">
+        <view class="mailbox-page__tab-group mailbox-page__tab-group--secondary">
+          <button
+            v-for="option in secondaryOptions"
+            :key="option.value"
+            class="mailbox-page__tab-pill mailbox-page__tab-pill--secondary"
+            :class="{ 'mailbox-page__tab-pill--active': activeSecondaryTab === option.value }"
+            @click="activeSecondaryTab = option.value"
+          >
+            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--secondary">{{ option.label }}</text>
+          </button>
+        </view>
+      </view>
+
+      <scroll-view scroll-y class="mailbox-page__content">
+        <view v-if="mailboxStore.isLoading" class="mailbox-page__state">
+          <text class="mailbox-page__state-text">正在整理信箱…</text>
+        </view>
+
+        <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
+          <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
+          <button class="mailbox-page__retry" @click="refresh">重新加载</button>
+        </view>
+
+        <view v-else-if="activeSection.entries.length === 0" class="mailbox-page__state">
+          <text class="mailbox-page__state-text">
+            {{ activeSection.emptyText }}
+          </text>
+        </view>
+
+        <view v-else class="mailbox-page__module-list">
+          <view class="mailbox-page__module">
+            <view class="mailbox-page__module-head">
+              <view class="mailbox-page__module-tab">
+                <text class="mailbox-page__module-tab-text">{{ activeSection.title }}</text>
+                <view class="mailbox-page__module-tab-underline"></view>
+              </view>
+              <text class="mailbox-page__module-count">{{ activeSection.entries.length }}</text>
+            </view>
+
+            <view class="mailbox-page__list">
+              <view
+                v-for="entry in activeSection.entries"
+                :key="entry.id"
+                class="mailbox-page__entry-shell"
+                :class="activeSection.stackClass"
+                @click="handleEntryClick(entry)"
+              >
+                <view
+                  class="mailbox-page__entry-card"
+                  :class="activeSection.cardClass"
+                >
+                  <view class="mailbox-page__entry-head">
+                    <view class="mailbox-page__entry-badge">
+                      <view class="mailbox-page__entry-dot"></view>
+                      <text class="mailbox-page__entry-type">{{ formatTypeLabel(entry.type) }}</text>
+                    </view>
+                    <text class="mailbox-page__entry-date">{{ formatDateLabel(entry, activeSection.dateTab) }}</text>
+                  </view>
+
+                  <template v-if="activeSection.renderMode === 'paper'">
+                    <text class="mailbox-page__entry-title">{{ entry.title || "未命名" }}</text>
+                    <text class="mailbox-page__entry-excerpt">{{ formatExcerpt(entry) }}</text>
+                    <view class="mailbox-page__entry-foot">
+                      <text class="mailbox-page__entry-meta">{{ activeSection.metaLabel }}</text>
+                      <AppIcon :name="resolveMailboxMetaIcon(activeSection.metaIcon)" class="mailbox-page__entry-icon" />
+                    </view>
+                  </template>
+
+                  <template v-else>
+                    <view class="mailbox-page__sealed-center">
+                      <view class="mailbox-page__sealed-lock">
+                        <AppIcon name="lock" class="mailbox-page__sealed-lock-icon" />
+                        <text class="mailbox-page__sealed-lock-label">Reserved</text>
+                      </view>
+
+                      <view class="mailbox-page__sealed-icon-wrap">
+                        <AppIcon name="mail" class="mailbox-page__sealed-icon" />
+                      </view>
+
+                      <text class="mailbox-page__sealed-title">{{ formatMailboxLockedTitle(entry) }}</text>
+                    </view>
+
+                    <view class="mailbox-page__sealed-bottom">
+                      <text class="mailbox-page__sealed-copy">{{ formatExcerpt(entry) }}</text>
+                      <view class="mailbox-page__sealed-wax">
+                        <view class="mailbox-page__sealed-wax-core"></view>
+                      </view>
+                    </view>
+                  </template>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="mailbox-page__footer"></view>
+      </scroll-view>
+    </view>
+
+    <button class="mailbox-page__fab" @click="handleComposeCurrentSection">
+      <AppIcon name="edit-square" class="mailbox-page__fab-icon" />
+    </button>
   </view>
 </template>
 
@@ -93,25 +140,113 @@ import { useMailboxStore } from "@/app/store/useMailboxStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { ROUTES } from "@/shared/constants/routes";
+import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import AppIcon from "@/shared/ui/AppIcon.vue";
 import {
   formatMailboxDateLabel,
   formatMailboxExcerpt,
+  formatMailboxLockedTitle,
   formatMailboxTypeLabel,
 } from "@/features/mailbox/mailboxDisplay";
+import {
+  getDefaultMailboxSecondaryTab,
+  getMailboxSecondaryOptions,
+  resolveMailboxComposeType,
+  type MailboxPrimaryTab,
+  type MailboxSecondaryTab,
+} from "@/features/mailbox/mailboxView";
+
+interface MailboxSection {
+  key: string;
+  title: string;
+  emptyText: string;
+  entries: Entry[];
+  renderMode: "paper" | "sealed";
+  stackClass: string;
+  cardClass: string;
+  metaLabel: string;
+  metaIcon: string;
+  dateTab: "past" | "future";
+}
 
 const mailboxStore = useMailboxStore();
-const activeTab = ref<"past" | "future">("past");
+const activeTab = ref<MailboxPrimaryTab>("documentary");
+const activeSecondaryTab = ref<MailboxSecondaryTab>(getDefaultMailboxSecondaryTab("documentary"));
 
-const currentEntries = computed(() =>
-  activeTab.value === "past" ? mailboxStore.pastEntries : mailboxStore.sealedFutureEntries,
-);
+const activeSections = computed<MailboxSection[]>(() => {
+  if (activeTab.value === "documentary") {
+    return [
+      {
+        key: "documentary-diary",
+        title: "日记",
+        emptyText: "这里还没有日记。",
+        entries: mailboxStore.documentaryDiaries,
+        renderMode: "paper",
+        stackClass: "mailbox-page__paper-stack",
+        cardClass: "",
+        metaLabel: "已经收好",
+        metaIcon: "auto_stories",
+        dateTab: "past",
+      },
+      {
+        key: "documentary-jotting",
+        title: "随笔",
+        emptyText: "这里还没有随笔。",
+        entries: mailboxStore.documentaryJottings,
+        renderMode: "paper",
+        stackClass: "mailbox-page__paper-stack",
+        cardClass: "",
+        metaLabel: "已经收好",
+        metaIcon: "edit_note",
+        dateTab: "past",
+      },
+    ];
+  }
+
+  return [
+    {
+      key: "distant-opened",
+      title: "已启",
+      emptyText: "这里还没有已启的未来信。",
+      entries: mailboxStore.distantOpenedFutures,
+      renderMode: "paper",
+      stackClass: "mailbox-page__paper-stack",
+      cardClass: "",
+      metaLabel: "已经开启",
+      metaIcon: "mark_email_read",
+      dateTab: "past",
+    },
+    {
+      key: "distant-pending",
+      title: "待启",
+      emptyText: "这里还没有待启的未来信。",
+      entries: mailboxStore.distantPendingFutures,
+      renderMode: "sealed",
+      stackClass: "mailbox-page__sealed-stack",
+      cardClass: "mailbox-page__entry-card--sealed",
+      metaLabel: "尚未开启",
+      metaIcon: "lock",
+      dateTab: "future",
+    },
+  ];
+});
+
+const secondaryOptions = computed(() => getMailboxSecondaryOptions(activeTab.value));
+
+const activeSection = computed<MailboxSection>(() => {
+  const matched = activeSections.value.find((section) =>
+    section.key.endsWith(activeSecondaryTab.value),
+  );
+
+  return matched ?? activeSections.value[0];
+});
 
 function isSealedFuture(entry: Entry): boolean {
   return entry.type === "future" && entry.status === "sealed";
 }
 
-function formatDateLabel(entry: Entry): string {
-  return formatMailboxDateLabel(entry, activeTab.value);
+function formatDateLabel(entry: Entry, tab: "past" | "future"): string {
+  return formatMailboxDateLabel(entry, tab);
 }
 
 function formatTypeLabel(type: EntryType): string {
@@ -120,6 +255,18 @@ function formatTypeLabel(type: EntryType): string {
 
 function formatExcerpt(entry: Entry): string {
   return formatMailboxExcerpt(entry);
+}
+
+function resolveMailboxMetaIcon(icon: string): "stories" | "edit-note" | "mail-read" | "mail" {
+  if (icon === "edit_note") {
+    return "edit-note";
+  }
+
+  if (icon === "mark_email_read") {
+    return "mail-read";
+  }
+
+  return icon === "mail" ? "mail" : "stories";
 }
 
 async function refresh() {
@@ -136,6 +283,16 @@ function handleGoToCalendar() {
 
 function handleOpenJotting() {
   uni.navigateTo({ url: `/${ROUTES.editor}?type=jotting` });
+}
+
+function handlePrimaryTabChange(nextTab: MailboxPrimaryTab): void {
+  activeTab.value = nextTab;
+  activeSecondaryTab.value = getDefaultMailboxSecondaryTab(nextTab);
+}
+
+function handleComposeCurrentSection(): void {
+  const composeType = resolveMailboxComposeType(activeSecondaryTab.value);
+  uni.navigateTo({ url: `/${ROUTES.editor}?type=${composeType}` });
 }
 
 function handleEntryClick(entry: Entry) {
@@ -182,280 +339,421 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 </script>
 
 <style scoped>
+.mailbox-page,
+.mailbox-page * {
+  box-sizing: border-box;
+}
+
 .mailbox-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #fbf9f5 0%, #f3efe8 100%);
-  padding: 24rpx 28rpx 120rpx;
+  background-color: #f7f4ef;
+  color: #31332e;
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
+  overflow-x: hidden;
 }
 
 .mailbox-page__topbar {
-  display: grid;
-  grid-template-columns: 72rpx 1fr 72rpx;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(247, 244, 239, 0.96);
+  z-index: 20;
+}
+
+.mailbox-page__topbar-inner {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28rpx 32rpx 24rpx;
+  display: flex;
   align-items: center;
-  padding: 12rpx 0 28rpx;
-}
-
-.mailbox-page__nav-btn {
-  width: 72rpx;
-  height: 72rpx;
-  background: transparent;
-  color: rgba(49, 51, 46, 0.78);
-  font-size: 34rpx;
-  padding: 0;
-}
-
-.mailbox-page__nav-btn--icon {
-  font-size: 18rpx;
-  letter-spacing: 0.18em;
+  justify-content: space-between;
 }
 
 .mailbox-page__topbar-title {
-  text-align: center;
-  font-size: 20rpx;
-  letter-spacing: 0.28em;
-  color: rgba(49, 51, 46, 0.82);
+  font-size: 30rpx;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  color: #31332e;
+  padding-left: 0.25em;
 }
 
-.mailbox-page__tabs {
+.mailbox-page__main {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4px 24px 88px;
+}
+
+.mailbox-page__switcher {
   display: flex;
   justify-content: center;
-  gap: 48rpx;
-  padding-bottom: 36rpx;
+  margin-bottom: 15px;
 }
 
-.mailbox-page__tab {
-  background: transparent;
-  padding: 0 0 12rpx;
-  position: relative;
+.mailbox-page__switcher--secondary {
+  margin-bottom: 22px;
 }
 
-.mailbox-page__tab--active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 28rpx;
-  height: 2rpx;
-  transform: translateX(-50%);
-  background: rgba(95, 94, 94, 0.9);
+.mailbox-page__tab-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 18px;
+  border: 1px solid #ddd4c8;
+  background: #f4eee6;
 }
 
-.mailbox-page__tab-text {
-  font-size: 18rpx;
-  letter-spacing: 0.28em;
-  color: rgba(99, 95, 85, 0.72);
+.mailbox-page__tab-group--primary {
+  width: 312px;
+  min-height: 46px;
 }
 
-.mailbox-page__tab--active .mailbox-page__tab-text {
-  color: rgba(49, 51, 46, 0.92);
+.mailbox-page__tab-group--secondary {
+  width: 232px;
+  min-height: 38px;
+  border-radius: 9999px;
 }
 
 .mailbox-page__content {
-  height: calc(100vh - 220rpx);
+  min-height: calc(100vh - 180px);
+}
+
+.mailbox-page__tab-pill {
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mailbox-page__tab-pill--primary {
+  flex: 1;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 14px;
+}
+
+.mailbox-page__tab-pill--secondary {
+  flex: 1;
+  min-height: 30px;
+  padding: 0 12px;
+}
+
+.mailbox-page__tab-pill-text {
+  font-family: "Inter", sans-serif;
+  color: #8f857b;
+}
+
+.mailbox-page__tab-pill-text--primary {
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  padding-left: 0.14em;
+}
+
+.mailbox-page__tab-pill-text--secondary {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding-left: 0.08em;
+}
+
+.mailbox-page__tab-pill--active {
+  background: #fff9f2;
+  border: 1px solid rgba(221, 212, 200, 0.92);
+}
+
+.mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
+  color: #6b6259;
+  font-weight: 600;
 }
 
 .mailbox-page__state {
-  padding: 160rpx 32rpx;
+  padding: 120px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24rpx;
+  gap: 20px;
 }
 
 .mailbox-page__state-text {
-  font-size: 28rpx;
-  line-height: 1.7;
-  color: rgba(99, 95, 85, 0.74);
+  font-size: 15px;
+  line-height: 1.8;
   text-align: center;
+  color: rgba(99, 95, 85, 0.8);
+}
+
+.mailbox-page__state--error .mailbox-page__state-text {
+  color: #9f403d;
 }
 
 .mailbox-page__retry {
-  min-height: 72rpx;
-  padding: 0 28rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1rpx solid rgba(201, 203, 192, 0.6);
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(177, 179, 171, 0.42);
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
   color: #31332e;
-  font-size: 24rpx;
+}
+
+.mailbox-page__module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.mailbox-page__module {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.mailbox-page__module-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+}
+
+.mailbox-page__module-count {
+  position: absolute;
+  right: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(121, 124, 117, 0.74);
+  padding-left: 0.18em;
+}
+
+.mailbox-page__module-tab {
+  position: relative;
+  padding: 0 0 8px;
+}
+
+.mailbox-page__module-tab-text {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: #31332e;
+  font-weight: 600;
+  padding-left: 0.3em;
+}
+
+.mailbox-page__module-tab-underline {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: rgba(138, 129, 120, 0.8);
+}
+
+.mailbox-page__module-empty {
+  padding: 20px 0 8px;
+}
+
+.mailbox-page__module-empty-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(99, 95, 85, 0.72);
 }
 
 .mailbox-page__list {
   display: flex;
   flex-direction: column;
-  gap: 40rpx;
-  padding-bottom: 48rpx;
+  gap: 18px;
 }
 
-.mailbox-page__stack {
+.mailbox-page__entry-shell {
   position: relative;
 }
 
-.mailbox-page__stack::before,
-.mailbox-page__stack::after {
-  content: "";
-  position: absolute;
-  left: 12rpx;
-  right: 12rpx;
-  height: 100%;
-  z-index: 0;
+.mailbox-page__paper-stack::before,
+.mailbox-page__paper-stack::after,
+.mailbox-page__sealed-stack::before,
+.mailbox-page__sealed-stack::after {
+  display: none;
 }
 
-.mailbox-page__stack--paper::before,
-.mailbox-page__stack--paper::after {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1rpx solid rgba(239, 238, 232, 0.9);
+.mailbox-page__entry-card {
+  background: #fbf8f3;
+  border: 1px solid #ddd4c8;
+  padding: 24px 22px;
+  border-radius: 18px;
 }
 
-.mailbox-page__stack--paper::before {
-  top: 8rpx;
-  transform: rotate(-0.25deg);
+.mailbox-page__entry-card--sealed {
+  background: #f3ede6;
+  border-color: #ddd4c8;
 }
 
-.mailbox-page__stack--paper::after {
-  top: 16rpx;
-  transform: rotate(0.35deg);
-}
-
-.mailbox-page__stack--sealed::before,
-.mailbox-page__stack--sealed::after {
-  background: #f0ede6;
-  border: 1rpx solid rgba(224, 221, 213, 0.9);
-}
-
-.mailbox-page__stack--sealed::before {
-  top: 10rpx;
-  transform: scale(0.99);
-}
-
-.mailbox-page__stack--sealed::after {
-  top: 20rpx;
-  transform: scale(0.98);
-}
-
-.mailbox-page__item {
-  position: relative;
-  z-index: 1;
-  padding: 30rpx 28rpx;
-  border: 1rpx solid rgba(239, 238, 232, 0.95);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.mailbox-page__stack--sealed .mailbox-page__item {
-  background: rgba(240, 237, 230, 0.96);
-  border-color: rgba(224, 221, 213, 0.95);
-}
-
-.mailbox-page__item-head {
+.mailbox-page__entry-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 18rpx;
-  margin-bottom: 20rpx;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.mailbox-page__item-badge {
+.mailbox-page__entry-badge {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 8px;
 }
 
-.mailbox-page__item-dot {
-  width: 8rpx;
-  height: 8rpx;
-  border-radius: 50%;
-  background: rgba(177, 179, 171, 0.65);
+.mailbox-page__entry-dot {
+  width: 4px;
+  height: 4px;
+  background: rgba(177, 179, 171, 0.7);
 }
 
-.mailbox-page__item-type,
-.mailbox-page__item-date,
-.mailbox-page__item-meta {
-  font-size: 16rpx;
-  letter-spacing: 0.22em;
+.mailbox-page__entry-type,
+.mailbox-page__entry-date,
+.mailbox-page__entry-meta,
+.mailbox-page__sealed-lock-label,
+.mailbox-page__footer-text {
+  font-family: "Inter", sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(121, 124, 117, 0.82);
+  color: rgba(121, 124, 117, 0.72);
 }
 
-.mailbox-page__item-title {
+.mailbox-page__entry-type,
+.mailbox-page__sealed-lock-label,
+.mailbox-page__footer-text {
+  padding-left: 0.18em;
+}
+
+.mailbox-page__entry-title {
   display: block;
-  font-size: 34rpx;
-  line-height: 1.45;
+  font-size: 22px;
+  line-height: 1.5;
   color: #31332e;
-  margin-bottom: 18rpx;
+  margin-bottom: 12px;
 }
 
-.mailbox-page__item-excerpt {
+.mailbox-page__entry-excerpt {
   display: block;
-  font-size: 24rpx;
+  font-size: 13px;
   line-height: 1.9;
-  color: rgba(99, 95, 85, 0.84);
+  color: rgba(99, 95, 85, 0.82);
 }
 
-.mailbox-page__item-foot {
-  margin-top: 28rpx;
-  padding-top: 18rpx;
-  border-top: 1rpx dashed rgba(201, 203, 192, 0.7);
+.mailbox-page__entry-foot {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(221, 212, 200, 0.8);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.mailbox-page__item-arrow {
-  font-size: 28rpx;
-  color: rgba(121, 124, 117, 0.58);
+.mailbox-page__entry-icon {
+  width: 16px;
+  height: 16px;
+  color: rgba(177, 179, 171, 0.62);
 }
 
 .mailbox-page__sealed-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18rpx;
-  padding: 30rpx 0 40rpx;
+  padding: 2px 0 14px;
+}
+
+.mailbox-page__sealed-lock {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.6;
+  margin-bottom: 18px;
+}
+
+.mailbox-page__sealed-lock-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.mailbox-page__sealed-icon-wrap {
+  margin-bottom: 14px;
+  opacity: 0.24;
 }
 
 .mailbox-page__sealed-icon {
-  font-size: 34rpx;
-  color: rgba(99, 95, 85, 0.32);
+  width: 24px;
+  height: 24px;
 }
 
 .mailbox-page__sealed-title {
-  font-size: 28rpx;
-  letter-spacing: 0.18em;
-  color: rgba(87, 83, 73, 0.88);
-}
-
-.mailbox-page__sealed-foot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 22rpx;
-}
-
-.mailbox-page__sealed-copy {
-  font-size: 20rpx;
-  line-height: 1.6;
-  color: rgba(99, 95, 85, 0.68);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: rgba(87, 83, 73, 0.92);
+  padding-left: 0.12em;
   text-align: center;
 }
 
-.mailbox-page__sealed-wax {
-  width: 20rpx;
-  height: 20rpx;
-  border-radius: 50%;
-  border: 1rpx solid rgba(159, 64, 61, 0.24);
-  background: rgba(159, 64, 61, 0.14);
+.mailbox-page__sealed-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
-.mailbox-page__floating {
+.mailbox-page__sealed-copy {
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: center;
+  color: rgba(99, 95, 85, 0.68);
+}
+
+.mailbox-page__sealed-wax {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: rgba(138, 129, 120, 0.12);
+  border: 1px solid rgba(138, 129, 120, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mailbox-page__sealed-wax-core {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(138, 129, 120, 0.28);
+}
+
+.mailbox-page__footer {
+  height: 20px;
+}
+
+.mailbox-page__fab {
   position: fixed;
-  right: 28rpx;
-  bottom: 36rpx;
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 2rpx;
-  background: rgba(95, 94, 94, 0.92);
-  color: #faf7f6;
-  font-size: 30rpx;
-  box-shadow: 0 14rpx 32rpx rgba(49, 51, 46, 0.18);
+  right: 24px;
+  bottom: 28px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 18px;
+  background: #8a8178;
+  color: #fff9f2;
+  box-shadow: 0 8px 18px rgba(49, 51, 46, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mailbox-page__fab-icon {
+  width: 22px;
+  height: 22px;
 }
 </style>

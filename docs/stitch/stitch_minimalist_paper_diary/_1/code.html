@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>信笺 - 焦虑</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;600;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#797c75",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary": "#fef8ed",
+                    "tertiary-dim": "#56534b",
+                    "surface-tint": "#5f5e5e",
+                    "secondary": "#635f55",
+                    "on-surface": "#31332e",
+                    "background": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-container": "#e9e2d5",
+                    "on-primary-container": "#525251",
+                    "on-error-container": "#752121",
+                    "primary-container": "#e4e2e1",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "on-error": "#fff7f6",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "on-secondary": "#fff8ed",
+                    "error-dim": "#4e0309",
+                    "error-container": "#fe8983",
+                    "inverse-primary": "#ffffff",
+                    "primary-dim": "#535252",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-container": "#555148",
+                    "secondary-dim": "#575349",
+                    "on-surface-variant": "#5d605a",
+                    "tertiary": "#625f56",
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-container": "#5e5c53",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-highest": "#e2e3db",
+                    "surface-container": "#eeeee8",
+                    "on-background": "#31332e",
+                    "inverse-surface": "#0e0e0c",
+                    "surface-container-low": "#f5f4ee",
+                    "on-primary-fixed": "#3f3f3f",
+                    "error": "#9f403d",
+                    "primary-fixed": "#e4e2e1",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-primary": "#faf7f6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed": "#423f36",
+                    "outline-variant": "#b1b3ab",
+                    "primary": "#5f5e5e",
+                    "inverse-on-surface": "#9e9d99",
+                    "secondary-fixed": "#e9e2d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fbf9f5;
+            font-family: 'Noto Serif SC', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface flex flex-col min-h-screen">
+<!-- Top Navigation Anchor -->
+<header class="docked w-full top-0 bg-[#fbf9f5] dark:bg-[#1a1a18] shadow-[0px_4px_16px_rgba(49,51,46,0.04)] z-50">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] p-2 rounded-full transition-colors duration-300">
+                    arrow_back_ios
+                </button>
+<h1 class="text-lg font-serif italic text-[#31332e] dark:text-[#fbf9f5] tracking-widest">信笺</h1>
+</div>
+<div class="flex items-center">
+<button class="material-symbols-outlined text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] p-2 rounded-full transition-colors duration-300">
+                    more_horiz
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center p-8">
+<div class="max-w-md w-full flex flex-col items-center">
+<!-- Bento-style Content Card -->
+<div class="bg-surface-container-lowest rounded-xl p-12 flex flex-col items-center justify-center space-y-8 transition-all duration-500 hover:shadow-[0px_4px_32px_rgba(49,51,46,0.08)]">
+<!-- Hand-drawn Anxious SVG Icon -->
+<div class="relative w-32 h-32 flex items-center justify-center group">
+<!-- Subtle background recession for the icon -->
+<div class="absolute inset-0 bg-surface-container-low rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
+<svg class="relative z-10 text-[#333333]" fill="none" height="64" viewbox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<!-- Hand-drawn scribbly nervous eyes -->
+<path d="M8.5 9.5C8.5 9.5 9 8.5 10 9M14 9C15 8.5 15.5 9.5 15.5 9.5" stroke="#333333" stroke-linecap="round" stroke-width="1.5"></path>
+<circle cx="9.5" cy="11.5" fill="#333333" r="1.5"></circle>
+<circle cx="14.5" cy="11.5" fill="#333333" r="1.5"></circle>
+<!-- Quivering mouth path -->
+<path d="M8 16C8.5 15.5 9.5 16.5 10 16C10.5 15.5 11.5 16.5 12 16C12.5 15.5 13.5 16.5 14 16C14.5 15.5 15.5 16.5 16 16" stroke="#333333" stroke-linecap="round" stroke-width="1.5"></path>
+<!-- Sweat droplet (symbolizing anxiety) -->
+<path d="M18 7.5C18 8.328 17.328 9 16.5 9C15.672 9 16.5 7.5 16.5 7.5C16.5 7.5 17.328 6.672 18 7.5Z" fill="#333333" fill-opacity="0.2" stroke="#333333" stroke-width="1"></path>
+</svg>
+</div>
+<!-- Textual Identity -->
+<div class="text-center space-y-4">
+<h2 class="text-4xl font-headline font-light tracking-[0.2em] text-on-surface">焦虑</h2>
+<div class="w-8 h-px bg-outline-variant/30 mx-auto"></div>
+<p class="text-secondary font-body italic text-sm tracking-wide">(Anxious)</p>
+</div>
+</div>
+<!-- Contextual Meta Information (Asymmetric Layout) -->
+<div class="mt-12 w-full flex justify-between items-end px-4">
+<div class="space-y-1">
+<p class="text-xs font-label uppercase tracking-widest text-outline">State of Being</p>
+<p class="text-lg font-headline text-on-surface-variant">内心的波澜</p>
+</div>
+<div class="text-right">
+<p class="text-xs font-label text-secondary">No. 042</p>
+</div>
+</div>
+</div>
+</main>
+<!-- The Inkwell (Floating Action Button) -->
+<button class="fixed bottom-12 right-12 w-14 h-14 bg-primary-dim text-on-primary rounded-full shadow-[0px_4px_16px_rgba(49,51,46,0.15)] flex items-center justify-center group hover:scale-105 transition-all duration-300">
+<span class="material-symbols-outlined text-2xl">edit_note</span>
+</button>
+<!-- Footer Decoration -->
+<footer class="py-12 px-8 flex justify-center opacity-40">
+<div class="flex items-center gap-2">
+<span class="w-1 h-1 bg-on-surface rounded-full"></span>
+<span class="w-1 h-1 bg-on-surface rounded-full"></span>
+<span class="w-1 h-1 bg-on-surface rounded-full"></span>
+</div>
+</footer>
+</body></html>

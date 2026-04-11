@@ -82,3 +82,37 @@
 - 当前视觉回归仍未收口完的页面主要是：
   - `EditorPage`
   - `ProfilePage`
+- 当前最稳定的推进方式已经收敛为：
+  - 以 `docs/tech/**` 判规则
+  - 以 `docs/stitch/**` 判结构和视觉层级
+  - 先补窄红灯测试，再改页面 / helper / store
+  - 最后统一跑 `test:unit / type-check / build:h5`
+- `Home` / `Mailbox` / `Calendar` / `Editor` 都已不再只是“能用页面”，而是进入了“功能语义稳定 + 可继续抠视觉”的阶段。
+- `Calendar` 当前已从“点日期直接跳”改为“当前页打开当天小邮箱”，这条交互模型已经成为后续默认基线。
+- `Mailbox` 当前已从“往日信件 / 待启之信”收成“纪实 / 寄远”双层结构，后续不应再退回单列表心智。
+- `Editor` 当前最容易继续出问题的地方不再是 store/facade，而是：
+  - 顶栏按钮位置
+  - 纸头节奏
+  - 首行书写落线
+  - 真机上的键盘与纸面比例
+- 书写页正文默认 `18px` 已写入仓库级规则；后续新增书写页不应再单独猜字号。
+- `Editor` 的产品真相已经切换：不能再把 `diary / jotting / future` 继续压在同一套 future-style editor 上，后续必须以三套 shell 继续推进。
+- `docs/stitch/diary_editor` 的核心气质是“安静、日常、长文留白”；`docs/stitch/minimalist_jotting_editor` 的核心气质是“轻、快、即时、浮纸卡片感”；两者都不应再回退成 future 的封存氛围。
+- 用户新增硬要求：图片入口图标要从 Stitch 导出代码原样拿过来，但必须接成真实可点击交互，不能只是视觉近似。
+- 当前最小可行图片能力已经明确：本机选择、插入、展示、删除、自动暂存恢复、正式保存恢复、阅读态查看；仍不做云同步和复杂图片编辑。
+- 现有 `memoryDraftRepository` / `memoryEntryRepository` 本身不具备跨 App 重启恢复能力；要满足图片和草稿重开可恢复，默认 runtime 必须切到本地持久化仓储。
+- 当前仓库已经补出本地 JSON storage-backed repositories，可在不接真实 SQLite 的情况下先满足“local-first + reopen recover”。
+- 空白内容规则已升级为“正文为空且附件为空才算空白”；因此旧的 `content.trim() === ""` 判断已经不再合法。
+- 标题生成规则已升级：若没有正文但存在图片附件，必须回退到类型专属标题，而不是直接保存成空标题。
+- `EditorPage` 当前已经转成 orchestrator；未来若继续改 editor，优先改三套 shell 或 shared composables，不要再把视觉和数据规则重新搅回单文件里。
+- 最终交付到 Android 本地设备时，Editor 不能依赖任何在线字体、在线图标或远端资源；否则 APK 本地运行时会直接退回成文字 icon 或默认控件样式。
+- `Diary` 页此前右下角存在“看起来像按钮但没有交互”的墨水块，这种装饰性强交互外观会误导用户；已改为移除，只保留真实可点击入口。
+- `Diary` 页的图片入口在 H5 检查链路里，单独依赖 `tap` 可能不够稳；现在采用 `tap + click` 共用触发并加去抖，更适合当前 H5 验收和后续 APK 点击链路。
+- `Mailbox` 中 sealed future 若显示用户标题，会构成“未解锁 future 仍泄露内容”的体验漏洞；当前应一律只显示固定锁定标题和开启日期说明。
+- `FutureLetter` 的日期确认层若继续使用原生 `type=date`，虽然功能上可用，但在视觉和仪式感上都与整页风格割裂；当前已经开始转为项目内月历式日期选择器。
+- 顶栏统一目前的正确口径是：
+  - 交互位 72rpx
+  - 图标约 40rpx
+  - 无边框无底色
+  - 主内边距 28rpx / 32rpx / 24rpx
+  后续新页面若偏离，应视为回归而不是自由发挥。

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>信笺 - 见字如面</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;600&amp;family=Inter:wght@300;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#555148",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "on-secondary-fixed": "#423f36",
+                        "inverse-primary": "#ffffff",
+                        "tertiary-dim": "#56534b",
+                        "secondary": "#635f55",
+                        "on-primary-container": "#525251",
+                        "surface-container-low": "#f7f6f0",
+                        "surface-container": "#f1eee4",
+                        "surface-bright": "#fdfbf7",
+                        "surface-dim": "#e8e6dc",
+                        "on-tertiary": "#fef8ed",
+                        "on-secondary": "#fff8ed",
+                        "primary-fixed": "#e4e2e1",
+                        "on-error": "#fff7f6",
+                        "tertiary-fixed-dim": "#eae5da",
+                        "secondary-fixed-dim": "#dad4c7",
+                        "outline": "#8a8c82",
+                        "error-container": "#fe8983",
+                        "tertiary-fixed": "#f9f3e8",
+                        "on-tertiary-fixed": "#4c4a41",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "inverse-surface": "#0e0e0c",
+                        "secondary-container": "#ede7da",
+                        "background": "#fdfbf7",
+                        "outline-variant": "#c9cbc0",
+                        "on-secondary-fixed-variant": "#5f5b51",
+                        "secondary-fixed": "#e9e2d5",
+                        "on-surface-variant": "#5d605a",
+                        "on-background": "#2c2e2a",
+                        "surface": "#fdfbf7",
+                        "primary": "#4a4a4a",
+                        "on-primary": "#faf7f6",
+                        "on-primary-fixed": "#3f3f3f",
+                        "surface-container-highest": "#e2e3db",
+                        "on-error-container": "#752121",
+                        "primary-dim": "#535252",
+                        "primary-container": "#e4e2e1",
+                        "tertiary-container": "#f9f3e8",
+                        "on-tertiary-container": "#5e5c53",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#2c2e2a",
+                        "secondary-dim": "#575349",
+                        "surface-container-high": "#ebebe1",
+                        "surface-tint": "#5f5e5e",
+                        "surface-variant": "#e2e3db",
+                        "on-tertiary-fixed-variant": "#69665d",
+                        "tertiary": "#625f56",
+                        "inverse-on-surface": "#9e9d99",
+                        "error-dim": "#4e0309",
+                        "error": "#9f403d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "sm": "1px",
+                        "lg": "2px",
+                        "xl": "4px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Inter", "PingFang SC", "sans-serif"]
+                    },
+                    "spacing": {
+                        "6": "24px",
+                        "12": "48px",
+                        "24": "96px"
+                    }
+                },
+            },
+        }
+    </script>
+<style>body {
+    font-family: "Noto Serif SC", serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #fdfbf7;
+    /* Warm Ivory */
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24;
+    font-size: 20px
+    }
+/* Premium Paper Embossing and Soft Shadow */
+.paper-premium {
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 10px 30px -5px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    position: relative
+    }
+.paper-premium::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    pointer-events: none
+    }
+.letter-spacing-widest {
+    letter-spacing: 0.8em;
+    margin-right: -0.8em
+    }
+.letter-spacing-medium {
+    letter-spacing: 0.35em;
+    margin-right: -0.35em
+    }
+.paper-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBWOsHrKELS9OzpBgav9btG0US__Q5LVLc5d_x1Vu7d-WYGRKP8MPrIfJpyg0fSeVm4vXpzCQ60I0lJ9sY6fds7DgEnasBrNYGgNWr83qla5Zvb8IBqT4a1X58MkOHjlWBNq39ZGMScTKh70f2TxEcHRksZ1S3QrfyfwEfWym1CX23p8hGNulas0eB0CwBEYPnBCGXRNeZEf9a2muY7EjUu8RaLEJAfc4LoaTYTQxjxpgtGF9x2yIhgtm2BoNbWVB_hYXjyMY5EPYU);
+    background-blend-mode: multiply;
+    opacity: 0.04
+    }
+.nav-paper-entry {
+    transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1)
+    }
+.nav-paper-entry:hover {
+    transform: translatey(-2px);
+    background-color: rgba(255, 255, 255, 0.8)
+    }</style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<nav class="w-full flex items-center justify-end px-8 py-8 z-50">
+<div class="flex items-center">
+<button class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/20 hover:opacity-80 transition-opacity">
+<img alt="User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZYPFbgDi4bV_dycXyh6KUMha82c3B4D-HGBLEH__p1oW8t7ZoNa4sB0MAkmMONBvLlSdna5gO3rm32OSa3Ja2IJNtG5SoR2xwyTbHJjqvjsewxdWScrmcms5V-7-PVumTqdyHUZJ1Vo3RYNxh2VXZnQRkMHwVdjfTefwfaxMyQ_3c0uLfh_DoaAIHYnAlwdfoYkAHqhXuAVsRvjF1FuqtdzBqw0T9KCqEAFmGgofTN464-GoN32EBKKc_yPlMFFDC8-JjmstP2dU"/>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-screen-md flex flex-col items-center justify-center px-6 relative -mt-12">
+<!-- Center Title -->
+<header class="mb-16 text-center">
+<h1 class="text-4xl md:text-5xl font-extralight text-on-surface letter-spacing-widest opacity-90">
+                见字如面
+            </h1>
+</header>
+<!-- Main Focal Point: Premium Stationery Card -->
+<section class="w-full flex justify-center mb-16">
+<button class="group relative w-full max-w-[340px] aspect-[1/1.4] paper-premium flex flex-col items-center p-12 transition-all duration-700 hover:shadow-2xl">
+<!-- Watermark / Texture Overlay -->
+<div class="absolute inset-0 paper-texture pointer-events-none"></div>
+<!-- Inner Decorative Frame -->
+<div class="w-full h-full flex flex-col items-center justify-center border-[0.5px] border-outline-variant/10 relative">
+<!-- Subtle Top Line Emboss -->
+<div class="absolute top-10 left-1/2 -translate-x-1/2 w-6 h-[0.5px] bg-outline-variant/30"></div>
+<div class="flex flex-col items-center gap-8 z-10">
+<div class="w-10 h-10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary/30 text-4xl group-hover:text-primary/60 transition-colors duration-700">
+                                edit_note
+                            </span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<p class="text-2xl font-light text-on-surface/80 letter-spacing-medium">
+                                写今日随笔
+                            </p>
+<span class="text-[10px] uppercase tracking-[0.4em] text-outline-variant/60 font-label">Commence Writing</span>
+</div>
+</div>
+<!-- Bottom Maker's Mark -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-30">
+<div class="w-1.5 h-1.5 rounded-full border border-outline-variant"></div>
+</div>
+</div>
+</button>
+</section>
+<!-- Secondary Navigation: Refined entries -->
+<nav class="flex items-center justify-center gap-10 md:gap-14 w-full max-w-md">
+<a class="nav-paper-entry flex flex-col items-center gap-3 px-4 py-3 rounded-sm group" href="#">
+<div class="w-11 h-11 flex items-center justify-center border border-outline-variant/20 group-hover:border-outline-variant/50 transition-colors duration-400">
+<span class="material-symbols-outlined text-secondary/50 group-hover:text-on-surface transition-colors">auto_stories</span>
+</div>
+<span class="text-[10px] font-label text-secondary/70 tracking-[0.3em] group-hover:text-on-surface transition-colors">日记</span>
+</a>
+<a class="nav-paper-entry flex flex-col items-center gap-3 px-4 py-3 rounded-sm group" href="#">
+<div class="w-11 h-11 flex items-center justify-center border border-outline-variant/20 group-hover:border-outline-variant/50 transition-colors duration-400">
+<span class="material-symbols-outlined text-secondary/50 group-hover:text-on-surface transition-colors">history_edu</span>
+</div>
+<span class="text-[10px] font-label text-secondary/70 tracking-[0.3em] group-hover:text-on-surface transition-colors">未来信</span>
+</a>
+<a class="nav-paper-entry flex flex-col items-center gap-3 px-4 py-3 rounded-sm group" href="#">
+<div class="w-11 h-11 flex items-center justify-center border border-outline-variant/20 group-hover:border-outline-variant/50 transition-colors duration-400">
+<span class="material-symbols-outlined text-secondary/50 group-hover:text-on-surface transition-colors">drafts</span>
+</div>
+<span class="text-[10px] font-label text-secondary/70 tracking-[0.3em] group-hover:text-on-surface transition-colors">邮箱</span>
+</a>
+</nav>
+</main>
+<!-- Footer Quote / Date -->
+<footer class="pb-12 pt-6 mt-auto">
+<p class="text-[10px] font-label uppercase tracking-[0.6em] text-outline-variant/60">
+            二零二四年 · 仲夏
+        </p>
+</footer>
+<!-- Subtle Vignette -->
+<div class="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.01)_100%)] z-0"></div>
+</body></html>

@@ -17,6 +17,7 @@ function makeEntry(overrides: Partial<Entry> = {}): Entry {
     unlockDate: overrides.unlockDate ?? "2026-04-12",
     unlockedAt: overrides.unlockedAt ?? null,
     destroyedAt: overrides.destroyedAt ?? null,
+    attachments: overrides.attachments ?? [],
   };
 }
 
@@ -65,6 +66,7 @@ function makeEntryRecord(overrides: Partial<{
   unlock_date: string | null;
   unlocked_at: string | null;
   destroyed_at: string | null;
+  attachments_json: string | null;
 }> = {}) {
   return {
     id: overrides.id ?? "entry-1",
@@ -79,5 +81,6 @@ function makeEntryRecord(overrides: Partial<{
     unlock_date: overrides.unlock_date ?? "2026-04-12",
     unlocked_at: overrides.unlocked_at ?? null,
     destroyed_at: overrides.destroyed_at ?? null,
+    attachments_json: overrides.attachments_json ?? "[]",
   };
 }

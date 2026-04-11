@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#797c75",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary": "#fef8ed",
+                    "tertiary-dim": "#56534b",
+                    "surface-tint": "#5f5e5e",
+                    "secondary": "#635f55",
+                    "on-surface": "#31332e",
+                    "background": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-container": "#e9e2d5",
+                    "on-primary-container": "#525251",
+                    "on-error-container": "#752121",
+                    "primary-container": "#e4e2e1",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "on-error": "#fff7f6",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "on-secondary": "#fff8ed",
+                    "error-dim": "#4e0309",
+                    "error-container": "#fe8983",
+                    "inverse-primary": "#ffffff",
+                    "primary-dim": "#535252",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-container": "#555148",
+                    "secondary-dim": "#575349",
+                    "on-surface-variant": "#5d605a",
+                    "tertiary": "#625f56",
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-container": "#5e5c53",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-highest": "#e2e3db",
+                    "surface-container": "#eeeee8",
+                    "on-background": "#31332e",
+                    "inverse-surface": "#0e0e0c",
+                    "surface-container-low": "#f5f4ee",
+                    "on-primary-fixed": "#3f3f3f",
+                    "error": "#9f403d",
+                    "primary-fixed": "#e4e2e1",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-primary": "#faf7f6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed": "#423f36",
+                    "outline-variant": "#b1b3ab",
+                    "primary": "#5f5e5e",
+                    "inverse-on-surface": "#9e9d99",
+                    "secondary-fixed": "#e9e2d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #F8F6F2;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="docked w-full top-0 shadow-[0px_4px_16px_rgba(49,51,46,0.04)] bg-[#fbf9f5] dark:bg-[#1a1a18]">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined leading-none" data-icon="arrow_back_ios">arrow_back_ios</span>
+</button>
+<h1 class="font-serif font-light tracking-widest text-[#31332e] dark:text-[#fbf9f5] text-lg uppercase tracking-[0.2em]">信箋</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined leading-none" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-6">
+<div class="flex flex-col items-center gap-8">
+<!-- Icon Container -->
+<div class="relative w-48 h-48 flex items-center justify-center group">
+<!-- Tonal layer for depth without hard borders -->
+<div class="absolute inset-0 bg-surface-container-low rounded-full scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"></div>
+<!-- Hand-drawn SVG Icon -->
+<svg class="relative z-10 transition-all duration-500 hover:rotate-12" fill="none" height="64" viewbox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4V7" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M12 17V20" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M4.92993 4.93018L7.05125 7.05149" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M16.9487 16.9487L19.07 19.07" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M2 12H5" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M19 12H22" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M4.92993 19.07L7.05125 16.9487" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M16.9487 7.05127L19.07 4.92995" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<circle cx="12" cy="12" fill="#333333" r="1.5"></circle>
+</svg>
+</div>
+<!-- Typography Label -->
+<div class="text-center space-y-2">
+<p class="font-serif text-3xl font-light tracking-[0.5em] text-on-surface">落雪</p>
+<p class="font-label text-xs uppercase tracking-widest text-secondary opacity-60">Snowy</p>
+</div>
+</div>
+</main>
+<!-- Footer Decoration -->
+<footer class="w-full py-12 flex justify-center opacity-40">
+<div class="w-px h-16 bg-outline-variant"></div>
+</footer>
+</body></html>

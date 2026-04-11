@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@300;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "on-secondary-fixed": "#423f36",
+                    "inverse-primary": "#ffffff",
+                    "tertiary-dim": "#56534b",
+                    "secondary": "#635f55",
+                    "on-primary-container": "#525251",
+                    "surface-container-low": "#f5f4ee",
+                    "surface-container": "#eeeee8",
+                    "surface-bright": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary": "#fef8ed",
+                    "on-secondary": "#fff8ed",
+                    "primary-fixed": "#e4e2e1",
+                    "on-error": "#fff7f6",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "outline": "#797c75",
+                    "error-container": "#fe8983",
+                    "tertiary-fixed": "#f9f3e8",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "inverse-surface": "#0e0e0c",
+                    "secondary-container": "#e9e2d5",
+                    "background": "#fbf9f5",
+                    "outline-variant": "#b1b3ab",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "secondary-fixed": "#e9e2d5",
+                    "on-surface-variant": "#5d605a",
+                    "on-background": "#31332e",
+                    "surface": "#fbf9f5",
+                    "primary": "#5f5e5e",
+                    "on-primary": "#faf7f6",
+                    "on-primary-fixed": "#3f3f3f",
+                    "surface-container-highest": "#e2e3db",
+                    "on-error-container": "#752121",
+                    "primary-dim": "#535252",
+                    "primary-container": "#e4e2e1",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary-container": "#5e5c53",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#31332e",
+                    "secondary-dim": "#575349",
+                    "surface-container-high": "#e8e9e1",
+                    "surface-tint": "#5f5e5e",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "tertiary": "#625f56",
+                    "inverse-on-surface": "#9e9d99",
+                    "error-dim": "#4e0309",
+                    "error": "#9f403d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            min-height: 100dvh;
+            background-color: #fbf9f5; /* Warm Ivory Base */
+        }
+
+        .paper-surface {
+            background-color: #ffffff;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .writing-lines {
+            background-image: repeating-linear-gradient(
+                transparent, 
+                transparent 39px, 
+                #f0eeea 39px, 
+                #f0eeea 40px
+            );
+            background-attachment: local;
+            line-height: 40px;
+        }
+        
+        .custom-placeholder::placeholder {
+            color: #b1b3ab;
+            font-style: normal;
+            opacity: 0.3;
+            font-weight: 300;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .envelope-btn .material-symbols-outlined {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .envelope-btn:hover .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+            transform: translateY(-2px);
+        }
+
+        textarea {
+            caret-color: #5f5e5e;
+            scrollbar-width: none;
+        }
+        textarea::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Calm literary typography settings */
+        .literary-text {
+            letter-spacing: 0.05em;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface selection:bg-secondary-container/30 overflow-x-hidden">
+<!-- Fixed Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-start justify-between px-8 py-10 pointer-events-none">
+<div class="pointer-events-auto">
+<button class="flex items-center text-secondary/40 hover:text-on-surface transition-colors duration-500">
+<span class="material-symbols-outlined text-[24px]" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+<div class="pointer-events-auto flex flex-col items-end gap-3">
+<button class="envelope-btn group flex flex-col items-center gap-2 text-secondary/50 hover:text-on-surface transition-all">
+<span class="material-symbols-outlined text-[28px]" data-icon="mail">mail</span>
+<div class="overflow-hidden h-4">
+<span class="text-[10px] font-label tracking-[0.4em] translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100 uppercase block">收好这封信</span>
+</div>
+</button>
+</div>
+</header>
+<!-- Main Editor Canvas -->
+<main class="min-h-screen pt-12 pb-24 px-4 md:px-0 flex justify-center">
+<div class="paper-surface w-full max-w-2xl min-h-[90vh] mt-20 mb-20 p-10 md:p-16 relative flex flex-col transition-all duration-1000">
+<!-- Metadata Area -->
+<div class="mb-16 select-none">
+<div class="text-secondary/60 text-[13px] font-label tracking-[0.25em] mb-2 literary-text">
+                二零二四年 · 十月 · 十四日
+            </div>
+<div class="text-outline-variant/50 text-[10px] font-label tracking-[0.3em] uppercase">
+                Monday Afternoon
+            </div>
+</div>
+<!-- The Writing Area -->
+<div class="relative flex-grow">
+<textarea autofocus="" class="w-full writing-lines border-none focus:ring-0 resize-none text-[18px] md:text-[20px] text-on-surface/90 font-light custom-placeholder bg-transparent overflow-y-auto leading-[40px] literary-text" placeholder="见字如面..." rows="15"></textarea>
+</div>
+<!-- Signature/Stamp -->
+<div class="mt-20 flex justify-end opacity-10 pr-4 select-none">
+<img alt="Ink-style signature" class="h-12 grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl46C6vsihr3AbPSDb1qeWcAuQ0miyQQmM9B5qhA1RrKXL0_NzVSDsuLxGENNf56n_klFb5uy4zVW2PoFpstq8RDhcFtO0XnwGIKGd5sqXpwJtYr6LvB9twt-JSdKBGkIUPU3I7ZpXrJf1Kg_vvuy9paQ0reGX-dK7s5hQQ06QYhmrqheF7ikkyzSHiebuFvxxmYWSHOXPVwzifKvcgQn-gr_8oHRrCRHqrtV7927T_aXa45fNs8ePVLEiJ1O_x_riUTLbg4gSgK8"/>
+</div>
+</div>
+</main>
+<!-- Decorative Paper Texture Overlay -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('https://www.transparenttextures.com/patterns/felt.png')]"></div>
+<!-- Discreet Vertical Element -->
+<aside class="fixed right-10 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center gap-8 opacity-10 hover:opacity-30 transition-opacity duration-1000">
+<div class="h-16 w-[0.5px] bg-secondary"></div>
+<div class="writing-mode-vertical text-[10px] font-label tracking-[0.6em] text-secondary uppercase py-6" style="writing-mode: vertical-rl;">
+        STILLNESS
+    </div>
+<div class="h-16 w-[0.5px] bg-secondary"></div>
+</aside>
+</body></html>

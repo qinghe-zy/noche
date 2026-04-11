@@ -16,6 +16,7 @@ function makeDraft(overrides: Partial<Draft> = {}): Draft {
     updatedAt: overrides.updatedAt ?? "2026-04-10T08:00:00.000Z",
     lastBackgroundSavedAt: overrides.lastBackgroundSavedAt ?? "2026-04-10T08:30:00.000Z",
     unlockDate: overrides.unlockDate ?? "2026-04-12",
+    attachments: overrides.attachments ?? [],
   };
 }
 
@@ -35,6 +36,7 @@ describe("sqliteDraftRepository", () => {
         updated_at: "2026-04-10T08:00:00.000Z",
         last_background_saved_at: "2026-04-10T08:30:00.000Z",
         unlock_date: "2026-04-12",
+        attachments_json: "[]",
       },
     ]);
     const repository = createSQLiteDraftRepository(client);

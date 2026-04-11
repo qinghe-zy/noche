@@ -5,6 +5,21 @@ import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepo
 import { createEntry } from "@/domain/services/entryService";
 import { setEntryRepository, useEntryStore } from "@/app/store/useEntryStore";
 import { setDraftRepository, useDraftStore } from "@/app/store/useDraftStore";
+import type { Attachment } from "@/shared/types/attachment";
+
+function createImageAttachment(overrides: Partial<Attachment> = {}): Attachment {
+  return {
+    id: overrides.id ?? "attachment-1",
+    type: "image",
+    draftKey: overrides.draftKey ?? "draft_diary_2026-04-10",
+    entryId: overrides.entryId ?? null,
+    localUri: overrides.localUri ?? "file:///noche/image-1.png",
+    sortOrder: overrides.sortOrder ?? 0,
+    createdAt: overrides.createdAt ?? "2026-04-10T08:00:00.000Z",
+    width: overrides.width ?? 1200,
+    height: overrides.height ?? 900,
+  };
+}
 
 describe("draft store", () => {
   beforeEach(() => {
@@ -205,5 +220,53 @@ describe("draft store", () => {
       content: "刚刚想到一句话。",
     });
     expect(draftStore.activeDraft).toBeNull();
+  });
+
+  it("persists image attachments when saving and reopening a diary draft", async () => {
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "",
+      attachments: [createImageAttachment()],
+    });
+
+    draftStore.setActiveDraftKey(null);
+    const restored = await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+
+    expect(restored.attachments).toEqual([createImageAttachment()]);
+  });
+
+  it("formalizes image-only drafts into entries with attachments intact", async () => {
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "jotting",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "",
+      attachments: [createImageAttachment({ draftKey: "draft_jotting" })],
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+
+    expect(entry).toMatchObject({
+      type: "jotting",
+      title: "图片随笔",
+      attachments: [
+        expect.objectContaining({
+          type: "image",
+          localUri: "file:///noche/image-1.png",
+        }),
+      ],
+    });
   });
 });

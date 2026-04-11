@@ -4,6 +4,8 @@ import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
 import { nowIso } from "@/shared/utils/date";
 import { createId } from "@/shared/utils/id";
+import { normalizeAttachments } from "@/domain/entry/rules";
+import type { Attachment } from "@/shared/types/attachment";
 
 export interface CreateEntryInput {
   type: EntryType;
@@ -11,6 +13,7 @@ export interface CreateEntryInput {
   content?: string;
   recordDate?: string;
   unlockDate?: string | null;
+  attachments?: Attachment[];
 }
 
 export interface DestroyEntryOptions {
@@ -32,6 +35,14 @@ export function deriveEntryTitle(content: string, maxLength = 13): string | null
   return firstLine.slice(0, maxLength);
 }
 
+export function deriveImageOnlyEntryTitle(type: EntryType): string {
+  if (type === "future") {
+    return "图片未来信";
+  }
+
+  return type === "jotting" ? "图片随笔" : "图片日记";
+}
+
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
 
@@ -48,6 +59,7 @@ export function createEntry(input: CreateEntryInput): Entry {
     unlockDate: input.unlockDate ?? null,
     unlockedAt: null,
     destroyedAt: null,
+    attachments: normalizeAttachments(input.attachments),
   };
 }
 
@@ -79,12 +91,22 @@ export function createEntryFromDraft(draft: Draft): Entry {
   }
 
   const savedAt = nowIso();
+  const entryId = draft.linkedEntryId ?? createId();
+  const attachments = normalizeAttachments(draft.attachments).map((attachment, index) => ({
+    ...attachment,
+    draftKey: null,
+    entryId,
+    sortOrder: index,
+  }));
+  const derivedTitle = draft.title.trim()
+    ? draft.title
+    : deriveEntryTitle(draft.content) ?? deriveImageOnlyEntryTitle(draft.type);
 
   return {
-    id: draft.linkedEntryId ?? createId(),
+    id: entryId,
     type: draft.type,
     status: draft.type === "future" ? "sealed" : "saved",
-    title: draft.title.trim() ? draft.title : deriveEntryTitle(draft.content),
+    title: derivedTitle,
     content: draft.content,
     recordDate: draft.recordDate ?? lockRecordDate(),
     createdAt: savedAt,
@@ -93,6 +115,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
     unlockDate: draft.type === "future" ? draft.unlockDate ?? null : null,
     unlockedAt: null,
     destroyedAt: null,
+    attachments,
   };
 }
 

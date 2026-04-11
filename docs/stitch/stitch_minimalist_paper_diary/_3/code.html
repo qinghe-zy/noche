@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#797c75",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary": "#fef8ed",
+                    "tertiary-dim": "#56534b",
+                    "surface-tint": "#5f5e5e",
+                    "secondary": "#635f55",
+                    "on-surface": "#31332e",
+                    "background": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-container": "#e9e2d5",
+                    "on-primary-container": "#525251",
+                    "on-error-container": "#752121",
+                    "primary-container": "#e4e2e1",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "on-error": "#fff7f6",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "on-secondary": "#fff8ed",
+                    "error-dim": "#4e0309",
+                    "error-container": "#fe8983",
+                    "inverse-primary": "#ffffff",
+                    "primary-dim": "#535252",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-container": "#555148",
+                    "secondary-dim": "#575349",
+                    "on-surface-variant": "#5d605a",
+                    "tertiary": "#625f56",
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-container": "#5e5c53",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-highest": "#e2e3db",
+                    "surface-container": "#eeeee8",
+                    "on-background": "#31332e",
+                    "inverse-surface": "#0e0e0c",
+                    "surface-container-low": "#f5f4ee",
+                    "on-primary-fixed": "#3f3f3f",
+                    "error": "#9f403d",
+                    "primary-fixed": "#e4e2e1",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-primary": "#faf7f6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed": "#423f36",
+                    "outline-variant": "#b1b3ab",
+                    "primary": "#5f5e5e",
+                    "inverse-on-surface": "#9e9d99",
+                    "secondary-fixed": "#e9e2d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fbf9f5;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen text-on-surface font-body">
+<!-- Top Navigation Shell -->
+<header class="docked w-full top-0 bg-[#fbf9f5] dark:bg-[#1a1a18] shadow-[0px_4px_16px_rgba(49,51,46,0.04)] z-50">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</button>
+<h1 class="font-serif font-light tracking-widest text-[#31332e] dark:text-[#fbf9f5] text-lg">信笺</h1>
+<button class="text-[#31332e] dark:text-[#fbf9f5] hover:bg-[#f5f4ee] dark:hover:bg-[#2a2a28] transition-colors duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex items-center justify-center px-8 relative overflow-hidden bg-surface">
+<!-- Subtle Textural Element (Paper Edge Simulation) -->
+<div class="absolute inset-y-0 left-0 w-4 bg-surface-container-low opacity-30"></div>
+<div class="flex flex-col items-center gap-12 max-w-md w-full">
+<!-- Icon Display Section -->
+<div class="relative group">
+<!-- Decorative Layering -->
+<div class="absolute inset-0 translate-x-1 translate-y-1 bg-surface-container-high rounded-xl -z-10"></div>
+<div class="bg-surface-container-lowest p-16 rounded-xl shadow-sm border border-outline-variant/10 flex flex-col items-center justify-center aspect-square min-w-[280px]">
+<!-- Hand-drawn SVG Icon (Sad) -->
+<div class="w-24 h-24 mb-10 flex items-center justify-center">
+<svg fill="none" height="96" stroke="#31332E" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" width="96" xmlns="http://www.w3.org/2000/svg">
+<!-- Hand-drawn circle -->
+<path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"></path>
+<!-- Left Eye (Pencil point) -->
+<path d="M9 10L9.01 10" stroke-width="2"></path>
+<!-- Right Eye (Pencil point) -->
+<path d="M15 10L15.01 10" stroke-width="2"></path>
+<!-- Sad Mouth (Slightly irregular hand-drawn curve) -->
+<path d="M16 16.5C15 15.5 13.5 15 12 15C10.5 15 9 15.5 8 16.5"></path>
+</svg>
+</div>
+<!-- Label -->
+<div class="flex flex-col items-center gap-4">
+<span class="font-headline font-light text-2xl tracking-[0.2em] text-on-surface">忧郁</span>
+<div class="h-px w-8 bg-outline-variant/30"></div>
+<span class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary">Melancholy</span>
+</div>
+</div>
+</div>
+<!-- Narrative Context -->
+<div class="text-center space-y-4">
+<p class="font-serif italic text-secondary text-sm leading-relaxed max-w-[240px]">
+                    “文字是有重量的，正如心情亦有其笔触。”
+                </p>
+</div>
+</div>
+<!-- Background Element: Tonal shift representing a stacked paper stack -->
+<div class="absolute bottom-0 right-0 w-64 h-64 bg-surface-container-low rounded-tl-[120px] -mr-32 -mb-32 opacity-50 -z-10"></div>
+</main>
+<!-- Floating Action Button (The Inkwell) -->
+<div class="fixed bottom-10 right-10 z-50">
+<button class="bg-primary-dim text-on-primary w-14 h-14 rounded-full shadow-[0px_4px_16px_rgba(49,51,46,0.15)] flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
+<span class="material-symbols-outlined text-2xl">edit</span>
+</button>
+</div>
+<!-- Secondary Shell Decoration (Footer-like whitespace) -->
+<footer class="h-16 bg-surface-container-low/20 w-full"></footer>
+</body></html>

@@ -4,22 +4,36 @@ import { getEntryByIdWithFutureState, listActiveEntriesWithFutureState } from "@
 import { buildMailboxCollections } from "@/domain/services/entryQueryService";
 
 interface MailboxState {
-  pastEntries: Entry[];
-  sealedFutureEntries: Entry[];
+  documentaryDiaries: Entry[];
+  documentaryJottings: Entry[];
+  distantOpenedFutures: Entry[];
+  distantPendingFutures: Entry[];
   isLoading: boolean;
   error: string | null;
 }
 
 export const useMailboxStore = defineStore("mailbox", {
   state: (): MailboxState => ({
-    pastEntries: [],
-    sealedFutureEntries: [],
+    documentaryDiaries: [],
+    documentaryJottings: [],
+    distantOpenedFutures: [],
+    distantPendingFutures: [],
     isLoading: false,
     error: null,
   }),
   getters: {
+    pastEntries(state): Entry[] {
+      return [
+        ...state.documentaryJottings,
+        ...state.documentaryDiaries,
+        ...state.distantOpenedFutures,
+      ];
+    },
+    sealedFutureEntries(state): Entry[] {
+      return state.distantPendingFutures;
+    },
     pendingFutureEntries(state): Entry[] {
-      return state.sealedFutureEntries;
+      return state.distantPendingFutures;
     },
   },
   actions: {
@@ -30,8 +44,10 @@ export const useMailboxStore = defineStore("mailbox", {
       try {
         const entries = await listActiveEntriesWithFutureState();
         const collections = buildMailboxCollections(entries);
-        this.pastEntries = collections.pastEntries;
-        this.sealedFutureEntries = collections.sealedFutureEntries;
+        this.documentaryDiaries = collections.documentaryDiaries;
+        this.documentaryJottings = collections.documentaryJottings;
+        this.distantOpenedFutures = collections.distantOpenedFutures;
+        this.distantPendingFutures = collections.distantPendingFutures;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to refresh mailbox.";
         throw error;

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=412, height=915, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#5d605a",
+                    "on-tertiary": "#fef8ed",
+                    "surface-dim": "#d9dbd2",
+                    "primary-fixed": "#e4e2e1",
+                    "on-tertiary-container": "#5e5c53",
+                    "on-surface": "#31332e",
+                    "surface-container": "#eeeee8",
+                    "on-primary-fixed": "#3f3f3f",
+                    "outline-variant": "#b1b3ab",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface-bright": "#fbf9f5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "on-error-container": "#752121",
+                    "surface": "#fbf9f5",
+                    "error-dim": "#4e0309",
+                    "background": "#fbf9f5",
+                    "tertiary-container": "#f9f3e8",
+                    "secondary-container": "#e9e2d5",
+                    "on-secondary": "#fff8ed",
+                    "on-primary-container": "#525251",
+                    "surface-container-highest": "#e2e3db",
+                    "tertiary": "#625f56",
+                    "primary": "#5f5e5e",
+                    "secondary-fixed": "#e9e2d5",
+                    "primary-container": "#e4e2e1",
+                    "on-background": "#31332e",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "surface-tint": "#5f5e5e",
+                    "primary-dim": "#535252",
+                    "tertiary-dim": "#56534b",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "error": "#9f403d",
+                    "secondary": "#635f55",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-secondary-fixed": "#423f36",
+                    "outline": "#797c75",
+                    "on-error": "#fff7f6",
+                    "error-container": "#fe8983",
+                    "surface-container-low": "#f5f4ee",
+                    "inverse-surface": "#0e0e0c",
+                    "inverse-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "inverse-on-surface": "#9e9d99",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-dim": "#575349",
+                    "on-secondary-container": "#555148",
+                    "on-primary": "#faf7f6",
+                    "tertiary-fixed": "#f9f3e8",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "surface-variant": "#e2e3db"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #EBE8E0;
+            font-family: 'Noto Serif SC', serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .paper-shadow {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02);
+        }
+        .textarea-ghost:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center overflow-hidden">
+<!-- TopAppBar -->
+<main class="flex-grow w-full flex flex-col items-center justify-center px-6 relative">
+<!-- Floating Paper Card (Perfectly Centered) -->
+<div class="w-full bg-[#F8F6F2] rounded-xl paper-shadow p-8 flex flex-col min-h-[480px] max-w-sm transition-all duration-500 pt-16"><div class="absolute top-6 left-6 right-6 flex justify-between pointer-events-none">
+<span class="material-symbols-outlined cursor-pointer pointer-events-auto" style="color: #B8B4AA; font-size: 20px;">arrow_back</span>
+<span class="material-symbols-outlined cursor-pointer pointer-events-auto" style="color: #B8B4AA; font-size: 20px;">check</span>
+</div>
+<!-- Metadata Area (Editorial Feel) -->
+<div class="mb-8 flex flex-col">
+<span class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary/60 mb-1">Entry No. 042</span>
+<time class="font-headline font-bold text-on-surface text-xl tracking-tight">二月 十四日</time>
+</div>
+<!-- Jotting Editor -->
+<div class="flex-grow">
+<textarea autofocus="" class="w-full h-full bg-transparent border-none p-0 textarea-ghost font-body text-on-surface leading-[2] text-base resize-none placeholder:text-outline-variant/40" placeholder="今天的心情..."></textarea>
+</div>
+<div class="absolute bottom-6 left-8">
+<span class="material-symbols-outlined cursor-pointer" style="color: #B8B4AA; font-size: 20px;">image</span>
+</div></div>
+<!-- Decorative Subtle Element (Quiet Luxury) -->
+<div class="absolute bottom-12 text-center opacity-30 select-none">
+<p class="font-headline italic text-on-surface text-sm">Quiet moments, lasting words.</p>
+</div>
+</main>
+</body></html>

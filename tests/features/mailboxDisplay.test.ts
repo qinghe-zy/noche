@@ -3,6 +3,7 @@ import type { Entry } from "@/domain/entry/types";
 import {
   formatMailboxDateLabel,
   formatMailboxExcerpt,
+  formatMailboxLockedTitle,
   formatMailboxTypeLabel,
 } from "@/features/mailbox/mailboxDisplay";
 
@@ -67,5 +68,18 @@ describe("mailbox display helpers", () => {
         }),
       ),
     ).toBe("这封未来信会在 2026-04-12 当天开启。");
+  });
+
+  it("uses a generic title for sealed future letters instead of leaking user-written title", () => {
+    expect(
+      formatMailboxLockedTitle(
+        makeEntry({
+          type: "future",
+          status: "sealed",
+          title: "你好",
+          unlockDate: "2026-04-12",
+        }),
+      ),
+    ).toBe("写给未来的信");
   });
 });

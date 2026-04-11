@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#555148",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "on-secondary-fixed": "#423f36",
+                    "inverse-primary": "#ffffff",
+                    "tertiary-dim": "#56534b",
+                    "secondary": "#635f55",
+                    "on-primary-container": "#525251",
+                    "surface-container-low": "#f5f4ee",
+                    "surface-container": "#eeeee8",
+                    "surface-bright": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary": "#fef8ed",
+                    "on-secondary": "#fff8ed",
+                    "primary-fixed": "#e4e2e1",
+                    "on-error": "#fff7f6",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "outline": "#797c75",
+                    "error-container": "#fe8983",
+                    "tertiary-fixed": "#f9f3e8",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "inverse-surface": "#0e0e0c",
+                    "secondary-container": "#e9e2d5",
+                    "background": "#fbf9f5",
+                    "outline-variant": "#b1b3ab",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "secondary-fixed": "#e9e2d5",
+                    "on-surface-variant": "#5d605a",
+                    "on-background": "#31332e",
+                    "surface": "#fbf9f5",
+                    "primary": "#5f5e5e",
+                    "on-primary": "#faf7f6",
+                    "on-primary-fixed": "#3f3f3f",
+                    "surface-container-highest": "#e2e3db",
+                    "on-error-container": "#752121",
+                    "primary-dim": "#535252",
+                    "primary-container": "#e4e2e1",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary-container": "#5e5c53",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#31332e",
+                    "secondary-dim": "#575349",
+                    "surface-container-high": "#e8e9e1",
+                    "surface-tint": "#5f5e5e",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "tertiary": "#625f56",
+                    "inverse-on-surface": "#9e9d99",
+                    "error-dim": "#4e0309",
+                    "error": "#9f403d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .paper-stack {
+            position: relative;
+        }
+        .paper-stack::before, .paper-stack::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: white;
+            border: 1px solid #efeee8;
+            z-index: -1;
+        }
+        .paper-stack::before {
+            top: 3px;
+            transform: rotate(-0.3deg);
+        }
+        .paper-stack::after {
+            top: 6px;
+            transform: rotate(0.4deg);
+        }
+        .sealed-stack::before, .sealed-stack::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: #f0ede6;
+            border: 1px solid #e0ddd5;
+            z-index: -1;
+        }
+        .sealed-stack::before {
+            top: 4px;
+            transform: scale(0.99);
+        }
+        .sealed-stack::after {
+            top: 8px;
+            transform: scale(0.98);
+        }
+        body {
+            background-color: #fbf9f5;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface min-h-screen">
+<!-- Top AppBar -->
+<header class="fixed top-0 w-full bg-[#fbf9f5]/90 backdrop-blur-sm z-50">
+<div class="flex items-center justify-between w-full px-6 py-5">
+<button class="p-2 -ml-2">
+<span class="material-symbols-outlined" data-icon="arrow_back_ios">arrow_back_ios</span>
+</button>
+<h1 class="font-headline font-light tracking-[0.25em] text-[#31332e] text-base">私人信箱</h1>
+<button class="p-2 -mr-2">
+<span class="material-symbols-outlined" data-icon="inbox">inbox</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-20 px-8 max-w-xl mx-auto">
+<!-- Elegant Tabs -->
+<nav class="flex justify-center space-x-12 mb-16">
+<button class="relative pb-3 text-on-surface transition-all">
+<span class="font-label text-[11px] tracking-[0.3em] font-semibold">往日随笔</span>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[1px] bg-primary"></div>
+</button>
+<button class="relative pb-3 text-outline/60 hover:text-on-surface transition-all">
+<span class="font-label text-[11px] tracking-[0.3em] font-light">待启之信</span>
+</button>
+</nav>
+<!-- Archive Box Content -->
+<div class="space-y-16">
+<!-- Past Letter Section -->
+<div class="space-y-12">
+<!-- Letter 1 -->
+<article class="paper-stack">
+<div class="bg-white p-8 border border-[#efeee8] shadow-[0px_2px_4px_rgba(0,0,0,0.02)]">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-2">
+<span class="w-1 h-1 bg-outline-variant/40"></span>
+<span class="text-[9px] tracking-[0.15em] font-label text-outline/70 uppercase">随笔</span>
+</div>
+<time class="text-[10px] font-label text-outline/60 tracking-wider">2023.11.24</time>
+</div>
+<h2 class="text-lg font-headline font-normal text-on-surface mb-5 leading-relaxed">关于初冬的第一场雪</h2>
+<p class="text-secondary/80 leading-loose text-sm font-light">
+                        早晨推开窗户时，空气中满是清冽的味道。院子里的柿子树上挂着残雪，像是一封未寄出的信件，静默地诉说着季节的更迭。我坐下写这段话时，手心还带着咖啡杯的余温。
+                    </p>
+<div class="mt-10 pt-6 border-t border-dashed border-surface-container-highest flex justify-between items-center">
+<span class="text-[8px] text-outline-variant/50 font-label tracking-widest">NO. 042</span>
+<span class="material-symbols-outlined text-outline-variant/40 text-sm" data-icon="edit_note">edit_note</span>
+</div>
+</div>
+</article>
+<!-- Letter 2 -->
+<article class="paper-stack">
+<div class="bg-white p-8 border border-[#efeee8] shadow-[0px_2px_4px_rgba(0,0,0,0.02)]">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center space-x-2">
+<span class="w-1 h-1 bg-outline-variant/40"></span>
+<span class="text-[9px] tracking-[0.15em] font-label text-outline/70 uppercase">随笔</span>
+</div>
+<time class="text-[10px] font-label text-outline/60 tracking-wider">2023.10.15</time>
+</div>
+<h2 class="text-lg font-headline font-normal text-on-surface mb-5 leading-relaxed">午后三点的咖啡馆</h2>
+<p class="text-secondary/80 leading-loose text-sm font-light">
+                        对面的老先生读了一下午的波德莱尔。阳光斜斜地打在泛黄的纸页上，那一刻时间仿佛是静止的。灰尘在光柱里跳舞，而我也只是这静谧时空里的一名速记员。
+                    </p>
+<div class="mt-10 pt-6 border-t border-dashed border-surface-container-highest flex justify-between items-center">
+<span class="text-[8px] text-outline-variant/50 font-label tracking-widest">NO. 038</span>
+<span class="material-symbols-outlined text-outline-variant/40 text-sm" data-icon="edit_note">edit_note</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Visual Break -->
+<div class="py-4 flex items-center justify-center space-x-4">
+<div class="w-8 h-[0.5px] bg-outline-variant/20"></div>
+<span class="material-symbols-outlined text-outline-variant/30 text-[10px]" data-icon="fiber_manual_record">fiber_manual_record</span>
+<div class="w-8 h-[0.5px] bg-outline-variant/20"></div>
+</div>
+<!-- Sealed Letters Section -->
+<div class="space-y-12">
+<!-- Sealed Letter 1 -->
+<article class="sealed-stack">
+<div class="bg-[#f0ede6] p-8 border border-outline-variant/30 relative overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div class="flex items-center space-x-1.5 opacity-60">
+<span class="material-symbols-outlined text-[12px]" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="text-[9px] tracking-[0.2em] font-label uppercase">Reserved</span>
+</div>
+<time class="text-[10px] font-label text-outline/60 tracking-wider">2024.05.20</time>
+</div>
+<div class="flex flex-col items-center py-8">
+<div class="mb-6 opacity-30">
+<span class="material-symbols-outlined text-[32px]" data-icon="mail">mail</span>
+</div>
+<h2 class="text-base font-headline font-light text-secondary-dim tracking-widest">写给春天的自己</h2>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-[#9f403d]/5"></div>
+<!-- Mock Wax Seal -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
+<div class="w-5 h-5 rounded-full bg-[#9f403d]/10 border border-[#9f403d]/20 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-[#9f403d]/30"></div>
+</div>
+</div>
+</div>
+</article>
+<!-- Sealed Letter 2 -->
+<article class="sealed-stack">
+<div class="bg-[#f0ede6] p-8 border border-outline-variant/30 relative overflow-hidden">
+<div class="flex justify-between items-start mb-8">
+<div class="flex items-center space-x-1.5 opacity-60">
+<span class="material-symbols-outlined text-[12px]" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="text-[9px] tracking-[0.2em] font-label uppercase">Reserved</span>
+</div>
+<time class="text-[10px] font-label text-outline/60 tracking-wider">2024.12.31</time>
+</div>
+<div class="flex flex-col items-center py-8">
+<div class="mb-6 opacity-30">
+<span class="material-symbols-outlined text-[32px]" data-icon="drafts">drafts</span>
+</div>
+<h2 class="text-base font-headline font-light text-secondary-dim tracking-widest">岁末寄语</h2>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-[#9f403d]/5"></div>
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
+<div class="w-5 h-5 rounded-full bg-[#9f403d]/10 border border-[#9f403d]/20 flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-[#9f403d]/30"></div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</div>
+<!-- Footer Decor -->
+<footer class="mt-24 mb-10 text-center">
+<p class="font-label text-[9px] text-outline-variant/40 tracking-[0.4em] uppercase">PRIVATE ARCHIVE • BOX NO. 2024</p>
+</footer>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-10 right-8 w-14 h-14 bg-primary text-on-primary shadow-xl flex items-center justify-center transition-transform active:scale-90 z-50">
+<span class="material-symbols-outlined" data-icon="edit_square">edit_square</span>
+</button>
+</body></html>

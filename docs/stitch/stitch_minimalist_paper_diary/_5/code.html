@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hans"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;400;700&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#797c75",
+                        "tertiary-container": "#f9f3e8",
+                        "on-tertiary": "#fef8ed",
+                        "tertiary-dim": "#56534b",
+                        "surface-tint": "#5f5e5e",
+                        "secondary": "#635f55",
+                        "on-surface": "#31332e",
+                        "background": "#fbf9f5",
+                        "surface-dim": "#d9dbd2",
+                        "on-tertiary-fixed": "#4c4a41",
+                        "surface-container-high": "#e8e9e1",
+                        "secondary-container": "#e9e2d5",
+                        "on-primary-container": "#525251",
+                        "on-error-container": "#752121",
+                        "primary-container": "#e4e2e1",
+                        "on-secondary-fixed-variant": "#5f5b51",
+                        "surface-variant": "#e2e3db",
+                        "on-tertiary-fixed-variant": "#69665d",
+                        "on-error": "#fff7f6",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "on-secondary": "#fff8ed",
+                        "error-dim": "#4e0309",
+                        "error-container": "#fe8983",
+                        "inverse-primary": "#ffffff",
+                        "primary-dim": "#535252",
+                        "secondary-fixed-dim": "#dad4c7",
+                        "on-secondary-container": "#555148",
+                        "secondary-dim": "#575349",
+                        "on-surface-variant": "#5d605a",
+                        "tertiary": "#625f56",
+                        "surface-bright": "#fbf9f5",
+                        "on-tertiary-container": "#5e5c53",
+                        "tertiary-fixed": "#f9f3e8",
+                        "surface-container-highest": "#e2e3db",
+                        "surface-container": "#eeeee8",
+                        "on-background": "#31332e",
+                        "inverse-surface": "#0e0e0c",
+                        "surface-container-low": "#f5f4ee",
+                        "on-primary-fixed": "#3f3f3f",
+                        "error": "#9f403d",
+                        "primary-fixed": "#e4e2e1",
+                        "tertiary-fixed-dim": "#eae5da",
+                        "on-primary": "#faf7f6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "surface": "#fbf9f5",
+                        "on-secondary-fixed": "#423f36",
+                        "outline-variant": "#b1b3ab",
+                        "primary": "#5f5e5e",
+                        "inverse-on-surface": "#9e9d99",
+                        "secondary-fixed": "#e9e2d5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hand-drawn-sunny {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Anchor -->
+<header class="fixed w-full top-0 bg-[#fbf9f5] shadow-[0px_4px_16px_rgba(49,51,46,0.04)] z-50">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<button class="text-[#31332e] hover:bg-[#f5f4ee] p-2 transition-all active:opacity-70 active:scale-[0.99] rounded-lg">
+<span class="material-symbols-outlined text-xl">arrow_back_ios</span>
+</button>
+<h1 class="font-serif font-light tracking-widest text-[#31332e] text-lg">信箋</h1>
+</div>
+<button class="text-[#31332e] hover:bg-[#f5f4ee] p-2 transition-all active:opacity-70 active:scale-[0.99] rounded-lg">
+<span class="material-symbols-outlined text-xl">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="min-h-screen flex flex-col items-center justify-center p-8 pt-24">
+<!-- Digital Stationery Surface -->
+<div class="w-full max-w-sm aspect-square bg-surface-container-lowest rounded-xl shadow-[0px_4px_24px_rgba(49,51,46,0.03)] flex flex-col items-center justify-center space-y-8 transition-all duration-500">
+<!-- Hand-drawn SVG Container -->
+<div class="relative group">
+<div class="absolute inset-0 bg-primary-container opacity-0 group-hover:opacity-10 rounded-full blur-2xl transition-opacity duration-700"></div>
+<svg class="hand-drawn-sunny relative z-10" fill="none" height="64" viewbox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
+<!-- Sun Core: Slightly irregular hand-drawn circle -->
+<path d="M12 7.5C14.4853 7.5 16.5 9.51472 16.5 12C16.5 14.4853 14.4853 16.5 12 16.5C9.51472 16.5 7.5 14.4853 7.5 12C7.5 9.51472 9.51472 7.5 12 7.5Z" stroke="#333333" stroke-width="1.5"></path>
+<!-- Hand-drawn Rays with organic start/end points -->
+<path d="M12 2.5V5M12 19V21.5" stroke="#333333" stroke-width="1.5"></path>
+<path d="M5.28271 5.28271L7.05048 7.05048M16.9497 16.9497L18.7175 18.7175" stroke="#333333" stroke-width="1.5"></path>
+<path d="M2.75 12H5.25M18.75 12H21.25" stroke="#333333" stroke-width="1.5"></path>
+<path d="M5.28271 18.7175L7.05048 16.9497M16.9497 7.05048L18.7175 5.28271" stroke="#333333" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Typography Anchor -->
+<div class="text-center">
+<p class="font-headline font-light text-2xl tracking-[0.2em] text-[#333333]">晴朗</p>
+<p class="font-label text-[10px] uppercase tracking-[0.3em] text-secondary mt-3 opacity-50">Sunny</p>
+</div>
+<!-- Decorative Element: Tactile Texture Hint -->
+<div class="mt-4">
+<div class="h-[1px] w-8 bg-outline-variant opacity-20"></div>
+</div>
+</div>
+<!-- Footnote / Meta Information -->
+<footer class="mt-12 text-center max-w-xs">
+<p class="text-secondary text-sm leading-relaxed font-light italic">
+                “今天的陽光，如同揉碎的金箔落在了紙上。”
+            </p>
+</footer>
+</main>
+<!-- The Inkwell (FAB) - Suppression Logic: Hidden for Detail Focused Task -->
+<div class="fixed bottom-10 right-8 hidden">
+<button class="w-14 h-14 bg-primary-dim text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined">edit_note</span>
+</button>
+</div>
+</body></html>

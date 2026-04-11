@@ -279,3 +279,139 @@
 - 这轮仍未开始视觉回归收口的主页面：
   - `EditorPage`
   - `ProfilePage`
+- 自主继续视觉回归收口：先写结构红灯，锁定 `EditorPage` / `ProfilePage` 必须出现的 stitch 骨架，而不是直接做脆弱截图断言。
+- 已新增 `tests/release/visualRegressionStructure.test.ts`，要求：
+  - `EditorPage` 具备固定导航、纸面容器、书写面和元信息区
+  - `ProfilePage` 具备顶部细导航、居中头像区、设置清单和页尾收束
+- 已重排 `src/features/editor/pages/EditorPage.vue`：
+  - 改为顶部细导航 + 中央单张纸面 + 横线书写区
+  - 保留 edit/read/save/resume/destroy/future-date 逻辑，不改主链行为
+  - 阅读态与编辑态的日期、状态文案改为更贴近纸面书写语境的中文表达
+- 已重排 `src/features/profile/pages/ProfilePage.vue`：
+  - 改为顶部细导航 + 居中头像签名 + 单张轻统计纸卡 + 下方设置清单
+  - 保留 theme / weekStartsOn / privacyLock / locale / mailbox 统计等现有功能入口
+- 已验证新增结构红灯转绿：
+  - `pnpm.cmd vitest run tests/release/visualRegressionStructure.test.ts`
+- 已再次验证：
+  - `pnpm.cmd run type-check` 通过
+  - `pnpm.cmd run test:unit` 通过：27 个测试文件、66 个测试通过
+  - `pnpm.cmd run build:h5` 通过
+- 自主继续视觉与交互收口，当前主链页面已进入“按 stitch 逐页回贴 + 保持 store/domain 语义稳定”的工作方式。
+- 已将 `Home` 重新收成中央纸页主入口，并移除重复的 `日记` 次入口；当前 Home 保持：
+  - 主卡片 = 今日日记
+  - 次入口 = 随笔 / 未来信 / 邮箱
+- 已将 `Mailbox` 收成：
+  - 一级：纪实 / 寄远
+  - 二级：日记 / 随笔 / 待启 / 已启
+  - 右下写作按钮跟随当前二级语义跳转
+- 已将 `Calendar` 收成：
+  - 月历只保留日期、小点、今天高亮、选中态
+  - 点击任意日期后在当前页打开“小邮箱”
+  - future 现在按 `unlockDate` 进入日历信号和当天预览
+  - 图片位已改成 AI 金句位 / 优雅降级文案位
+- 已将 `Editor` 收成沉浸式信纸方向，并补齐：
+  - autosave = 草稿层静默保存
+  - 小信封 = 正式保存 / 封存
+  - 阅读态右上 = 续写
+  - 退后台强制 flush 一次 autosave
+  - future 草稿过期日期自动清空、保留正文
+- 已新增 editor 相关可复用层：
+  - `src/features/editor/composables/useEditorAutosave.ts`
+  - `src/features/editor/composables/useEditorFeedbackState.ts`
+  - `src/features/editor/composables/useEditorKeyboardViewport.ts`
+  - `src/features/editor/editorFutureDraft.ts`
+- 已写入仓库规则：
+  - 所有新增书写页面正文默认字号统一使用 `18px`
+- 当前 H5 截图默认落在：
+  - `artifacts/shots/latest/home-latest.png`
+  - `artifacts/shots/latest/mailbox-latest.png`
+  - `artifacts/shots/latest/calendar-latest.png`
+  - `artifacts/shots/latest/editor-after.png`
+- 已生成线程交接文档：
+  - `docs/handoffs/CHECKPOINT_33_thread_handoff_visual_and_interaction_baseline.md`
+- 已再次验证：
+  - `pnpm.cmd run test:unit` 通过：38 个测试文件、97 个测试通过
+  - `pnpm.cmd run type-check` 通过
+  - `pnpm.cmd run build:h5` 通过
+- 用户更新 Editor 真相：
+  - `diary` 改以 `docs/stitch/diary_editor` 为视觉源
+  - `jotting` 改以 `docs/stitch/minimalist_jotting_editor` 为视觉源
+  - `future` 继续沿用现有沉浸式信纸 editor
+- 已先更新真相文档与 workflow 文档：
+  - `AGENTS.md`
+  - `docs/spec/interaction_rules.md`
+  - `docs/tech/ai_workflow.md`
+  - `docs/tech/data_model.md`
+  - `docs/tech/noche_codex_function_matrix_and_interaction_logic.md`
+  - `docs/handoffs/CHECKPOINT_34_editor_shell_split_and_local_image_scope.md`
+- 已新增 implementation plan：
+  - `docs/superpowers/plans/2026-04-11-editor-shell-and-local-images.md`
+- 已补 attachment 最小数据模型与本地持久化路径：
+  - 新增 `src/shared/types/attachment.ts`
+  - 新增本地 JSON storage adapter 与 storage-backed `draft / entry / prefs` repositories
+  - `bootstrapAppRuntime` 默认运行时已切到本地持久化仓储，同时保留测试注入能力
+- 已升级保存语义：
+  - 仅当“正文为空且附件为空”时才视为空白
+  - `diary / jotting / future` 纯图片内容允许正式保存
+  - 标题 fallback 已新增：
+    - `图片日记`
+    - `图片随笔`
+    - `图片未来信`
+- 已新增 Editor 图片相关 composables：
+  - `useEditorImagePicker`
+  - `useEditorImageAttachments`
+- 已将 Editor 路由页改成 orchestrator，并新增三套壳：
+  - `DiaryEditorShell.vue`
+  - `JottingEditorShell.vue`
+  - `FutureLetterEditorShell.vue`
+- 已保留并接回共享逻辑：
+  - autosave
+  - formal save
+  - resume
+  - future date picker
+  - linked entry destroy 分支
+- 已把 diary / jotting 的图片入口图标按 stitch 原始源码片段落到 shell 中，并挂上真实点击事件
+- 已新增与更新测试：
+  - `tests/data/storageDraftRepository.test.ts`
+  - `tests/data/storageEntryRepository.test.ts`
+  - `tests/release/diaryEditorStitchParity.test.ts`
+  - `tests/release/jottingEditorStitchParity.test.ts`
+  - `tests/domain/entryService.test.ts`
+  - `tests/app/draftStore.test.ts`
+  - `tests/release/editorStitchParity.test.ts`
+  - `tests/release/visualRegressionStructure.test.ts`
+- 已验证：
+  - `pnpm.cmd run test:unit` 通过：42 个测试文件、106 个测试通过
+  - `pnpm.cmd run type-check` 通过
+  - `pnpm.cmd run build:h5` 通过
+- 已生成当前轮截图：
+  - `artifacts/shots/latest/editor-before.png`
+  - `artifacts/shots/latest/editor-diary-after.png`
+  - `artifacts/shots/latest/editor-jotting-after.png`
+  - `artifacts/shots/latest/editor-future-after.png`
+- 已继续收口本地可运行性与页面一致性：
+  - Editor 全面去除对远端字体图标的依赖，改成本地 SVG 图标
+  - `Editor / Mailbox / Calendar / Profile / Home` 顶栏已开始收口到统一按钮规格
+  - `EditorPage` / `CalendarPage` 返回逻辑已改为“有栈返回，无栈兜底”
+- 已将首页 `jotting` 草稿冲突弹层改成项目内弹层，不再使用系统 `ActionSheet`
+- 已将“另起一张”语义升级为：
+  - 若旧 jotting 草稿已有内容，先正式收好旧随笔
+  - 若旧 jotting 草稿为空，再安静收起
+  - 然后进入新的 jotting editor
+- 已继续收口首页右上入口：
+  - 去掉旧线框按钮感
+  - 改成“个人角落”式轻入口标记
+- 已继续收口邮箱与日记页图标问题：
+  - `Mailbox` 右下角 FAB 与卡片内元图标已改为本地图标组件
+  - `Diary` 页面底部只保留一个图片入口，不再保留无功能旁按钮
+  - `Diary` 图片入口已改成更稳的 `tap + click` 共用触发
+- 已继续收口 future 日期选择体验：
+  - 未来信确认日期弹层不再使用原生 `type=date`
+  - 改为项目内月历式日期选择器，支持快捷日期、切月、点击选日
+- 已继续收口待启 future 泄露问题：
+  - `Mailbox` 中 sealed future 不再显示用户标题
+  - 当前固定标题为 `写给未来的信`
+- 已再次验证：
+  - `pnpm.cmd run test:unit` 通过：47 个测试文件、116 个测试通过
+  - `pnpm.cmd run type-check` 通过
+  - 本地 `dev:h5` 可重新拉起并返回 200

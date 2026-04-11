@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#797c75",
+                    "tertiary-container": "#f9f3e8",
+                    "on-tertiary": "#fef8ed",
+                    "tertiary-dim": "#56534b",
+                    "surface-tint": "#5f5e5e",
+                    "secondary": "#635f55",
+                    "on-surface": "#31332e",
+                    "background": "#fbf9f5",
+                    "surface-dim": "#d9dbd2",
+                    "on-tertiary-fixed": "#4c4a41",
+                    "surface-container-high": "#e8e9e1",
+                    "secondary-container": "#e9e2d5",
+                    "on-primary-container": "#525251",
+                    "on-error-container": "#752121",
+                    "primary-container": "#e4e2e1",
+                    "on-secondary-fixed-variant": "#5f5b51",
+                    "surface-variant": "#e2e3db",
+                    "on-tertiary-fixed-variant": "#69665d",
+                    "on-error": "#fff7f6",
+                    "primary-fixed-dim": "#d6d4d3",
+                    "on-secondary": "#fff8ed",
+                    "error-dim": "#4e0309",
+                    "error-container": "#fe8983",
+                    "inverse-primary": "#ffffff",
+                    "primary-dim": "#535252",
+                    "secondary-fixed-dim": "#dad4c7",
+                    "on-secondary-container": "#555148",
+                    "secondary-dim": "#575349",
+                    "on-surface-variant": "#5d605a",
+                    "tertiary": "#625f56",
+                    "surface-bright": "#fbf9f5",
+                    "on-tertiary-container": "#5e5c53",
+                    "tertiary-fixed": "#f9f3e8",
+                    "surface-container-highest": "#e2e3db",
+                    "surface-container": "#eeeee8",
+                    "on-background": "#31332e",
+                    "inverse-surface": "#0e0e0c",
+                    "surface-container-low": "#f5f4ee",
+                    "on-primary-fixed": "#3f3f3f",
+                    "error": "#9f403d",
+                    "primary-fixed": "#e4e2e1",
+                    "tertiary-fixed-dim": "#eae5da",
+                    "on-primary": "#faf7f6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#5c5b5b",
+                    "surface": "#fbf9f5",
+                    "on-secondary-fixed": "#423f36",
+                    "outline-variant": "#b1b3ab",
+                    "primary": "#5f5e5e",
+                    "inverse-on-surface": "#9e9d99",
+                    "secondary-fixed": "#e9e2d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #fbf9f5;
+            color: #31332e;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="docked w-full top-0 shadow-[0px_4px_16px_rgba(49,51,46,0.04)] bg-[#fbf9f5] z-50">
+<div class="flex items-center justify-between w-full px-6 py-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#31332e] cursor-pointer hover:bg-[#f5f4ee] transition-colors duration-300 p-2 rounded-full active:opacity-70 active:scale-[0.99]" data-icon="arrow_back_ios">arrow_back_ios</span>
+<h1 class="font-serif font-light tracking-widest text-[#31332e] text-xl">信笺</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#31332e] cursor-pointer hover:bg-[#f5f4ee] transition-colors duration-300 p-2 rounded-full active:opacity-70 active:scale-[0.99]" data-icon="more_horiz">more_horiz</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex items-center justify-center p-8">
+<!-- The Stationery Surface -->
+<div class="max-w-md w-full aspect-square bg-surface-container-lowest rounded-xl shadow-[0px_4px_16px_rgba(49,51,46,0.06)] flex flex-col items-center justify-center space-y-8 p-12">
+<!-- Custom SVG Icon: Happy (Hand-drawn style) -->
+<div class="relative flex items-center justify-center w-32 h-32">
+<!-- Subtle background circular highlight -->
+<div class="absolute inset-0 bg-surface-container-low rounded-full scale-110 opacity-50"></div>
+<svg class="relative z-10" fill="none" height="80" viewbox="0 0 24 24" width="80" xmlns="http://www.w3.org/2000/svg">
+<!-- Face outline: slightly irregular for hand-drawn feel -->
+<path d="M12 21.5C17.2467 21.5 21.5 17.2467 21.5 12C21.5 6.75329 17.2467 2.5 12 2.5C6.75329 2.5 2.5 6.75329 2.5 12C2.5 17.2467 6.75329 21.5 12 21.5Z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<!-- Left Eye: slightly hand-drawn oval -->
+<path d="M9 10C9.27614 10 9.5 9.77614 9.5 9.5C9.5 9.22386 9.27614 9 9 9C8.72386 9 8.5 9.22386 8.5 9.5C8.5 9.77614 8.72386 10 9 10Z" fill="#333333" stroke="#333333" stroke-width="0.5"></path>
+<!-- Right Eye: slightly hand-drawn oval -->
+<path d="M15 10C15.2761 10 15.5 9.77614 15.5 9.5C15.5 9.22386 15.2761 9 15 9C14.7239 9 14.5 9.22386 14.5 9.5C14.5 9.77614 14.7239 10 15 10Z" fill="#333333" stroke="#333333" stroke-width="0.5"></path>
+<!-- Smile: expressive curve -->
+<path d="M7.5 14.5C8.5 16.5 10.5 17.5 12.5 17.5C14.5 17.5 16.5 16.5 17.5 14.5" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Label in Serif Typography -->
+<div class="text-center">
+<p class="font-serif text-3xl font-light tracking-[0.2em] text-on-surface">喜悦</p>
+<p class="font-label text-sm uppercase tracking-widest text-secondary mt-4 opacity-60">Happy</p>
+</div>
+<!-- Decorative Element -->
+<div class="w-12 h-[1px] bg-outline-variant opacity-30 mt-4"></div>
+</div>
+</main>
+<!-- Contextual Inkwell (FAB) Suppression: Hidden on detail/focused screens per instructions -->
+<!-- Navigation Shell Suppression: Hidden for task-focused single-element display -->
+</body></html>

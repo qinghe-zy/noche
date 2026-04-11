@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import type { Entry } from "@/domain/entry/types";
 import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
+import type { IEntryRepository } from "@/data/repositories/entry.repository";
 import { setEntryRepository } from "@/app/store/useEntryStore";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
 
@@ -60,7 +61,7 @@ describe("calendar store", () => {
 
     await store.fetchMarkedDates();
 
-    expect(store.markedDates).toEqual(["2026-04-08", "2026-04-10"]);
+    expect(store.markedDates).toEqual(["2026-04-10", "2026-04-14"]);
   });
 
   it("resolves a single visible entry date to direct entry navigation", async () => {
@@ -121,5 +122,51 @@ describe("calendar store", () => {
       kind: "new-diary",
       recordDate: "2026-04-12",
     });
+  });
+
+  it("fetches the selected date entries for inline day preview", async () => {
+    const repository = createMemoryEntryRepository([
+      makeEntry({
+        id: "diary-1",
+        type: "diary",
+        recordDate: "2026-04-10",
+      }),
+      makeEntry({
+        id: "jotting-1",
+        type: "jotting",
+        recordDate: "2026-04-10",
+        createdAt: "2026-04-10T09:00:00.000Z",
+      }),
+      makeEntry({
+        id: "future-locked",
+        type: "future",
+        status: "sealed",
+        recordDate: "2026-04-10",
+        unlockDate: "2026-04-14",
+      }),
+    ]);
+    setEntryRepository(repository);
+    const store = useCalendarStore();
+
+    await expect(store.fetchSelectedDateEntries("2026-04-10")).resolves.toHaveLength(2);
+    expect(store.selectedDateEntries.map((entry) => entry.id)).toEqual(["jotting-1", "diary-1"]);
+  });
+
+  it("degrades to an empty selected-date preview instead of throwing when reading fails", async () => {
+    const brokenRepository: IEntryRepository = {
+      async save() {},
+      async getById() { return null; },
+      async getByDate() { throw new Error("broken"); },
+      async getAllActive() { return []; },
+      async getByType() { return []; },
+      async deleteById() {},
+      async getCalendarMarkedDates() { return []; },
+    };
+    setEntryRepository(brokenRepository);
+    const store = useCalendarStore();
+
+    await expect(store.fetchSelectedDateEntries("2026-04-10")).resolves.toEqual([]);
+    expect(store.selectedDateEntries).toEqual([]);
+    expect(store.error).toBe("broken");
   });
 });

@@ -3,44 +3,41 @@
     {
       "path": "features/home/pages/HomePage",
       "style": {
-        "navigationBarTitleText": "noche"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "features/editor/pages/EditorPage",
       "style": {
-        "navigationBarTitleText": "写信"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "features/mailbox/pages/MailboxPage",
       "style": {
-        "navigationBarTitleText": "信箱"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "features/calendar/pages/CalendarPage",
       "style": {
-        "navigationBarTitleText": "日历"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "features/day-archive/pages/DayArchivePage",
       "style": {
-        "navigationBarTitleText": "当日归档"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "features/profile/pages/ProfilePage",
       "style": {
-        "navigationBarTitleText": "我的"
+        "navigationStyle": "custom"
       }
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "noche",
-    "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
   }
 }

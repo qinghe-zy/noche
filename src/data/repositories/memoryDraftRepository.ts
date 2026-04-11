@@ -10,15 +10,27 @@ export function createMemoryDraftRepository(seed: Draft[] = []): IDraftRepositor
 
   return {
     async save(draft) {
-      drafts.set(draft.slotKey, draft);
+      drafts.set(draft.slotKey, {
+        ...draft,
+        attachments: draft.attachments ? [...draft.attachments] : [],
+      });
     },
 
     async getBySlotKey(slotKey) {
-      return drafts.get(slotKey) ?? null;
+      const draft = drafts.get(slotKey);
+      return draft
+        ? {
+            ...draft,
+            attachments: draft.attachments ? [...draft.attachments] : [],
+          }
+        : null;
     },
 
     async getAll() {
-      return Array.from(drafts.values());
+      return Array.from(drafts.values()).map((draft) => ({
+        ...draft,
+        attachments: draft.attachments ? [...draft.attachments] : [],
+      }));
     },
 
     async deleteBySlotKey(slotKey) {

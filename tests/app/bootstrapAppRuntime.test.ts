@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { bootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
 import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
+import { getEntryRepository } from "@/app/store/entryRepository";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
 import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
 import { createMemoryPrefsRepository } from "@/data/repositories/memoryPrefsRepository";
@@ -29,5 +30,18 @@ describe("bootstrapAppRuntime", () => {
     expect(settingsStore.theme).toBe("dark");
     expect(settingsStore.locale).toBe("en-US");
     expect(settingsStore.weekStartsOn).toBe(0);
+  });
+
+  it("seeds one diary and one jotting in the default in-memory runtime", async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+
+    await bootstrapAppRuntime(pinia);
+
+    const entries = await getEntryRepository().getAllActive();
+
+    expect(entries).toHaveLength(2);
+    expect(entries.map((entry) => entry.type).sort()).toEqual(["diary", "jotting"]);
+    expect(new Set(entries.map((entry) => entry.recordDate)).size).toBe(1);
   });
 });

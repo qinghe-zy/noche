@@ -29,7 +29,6 @@ describe("release readiness", () => {
     expect(homePage).not.toContain("Quick Jotting");
     expect(homePage).not.toContain("To Future");
     expect(homePage).not.toContain("Mailbox");
-    expect(homePage).not.toContain("Profile");
     expect(homeHero).not.toContain("Good morning");
     expect(homeHero).not.toContain("Good afternoon");
     expect(homeHero).not.toContain("Good evening");
@@ -40,6 +39,18 @@ describe("release readiness", () => {
 
     expect(pagesJson).not.toContain("\"navigationBarTitleText\": \"Mailbox\"");
     expect(pagesJson).not.toContain("\"navigationBarTitleText\": \"Profile\"");
+  });
+
+  it("uses custom navigation for feature pages so the system title bar does not stack on top", () => {
+    const pagesJson = readProjectFile("src/pages.json");
+
+    expect(pagesJson).toContain("\"path\": \"features/home/pages/HomePage\"");
+    expect(pagesJson).toContain("\"path\": \"features/editor/pages/EditorPage\"");
+    expect(pagesJson).toContain("\"path\": \"features/mailbox/pages/MailboxPage\"");
+    expect(pagesJson).toContain("\"path\": \"features/calendar/pages/CalendarPage\"");
+    expect(pagesJson).toContain("\"path\": \"features/day-archive/pages/DayArchivePage\"");
+    expect(pagesJson).toContain("\"path\": \"features/profile/pages/ProfilePage\"");
+    expect(pagesJson).toContain("\"navigationStyle\": \"custom\"");
   });
 
   it("does not leave editor page in english prototype copy", () => {

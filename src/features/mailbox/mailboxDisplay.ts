@@ -23,3 +23,11 @@ export function formatMailboxExcerpt(entry: Entry): string {
 
   return `${entry.content.slice(0, 100)}${entry.content.length > 100 ? "..." : ""}`;
 }
+
+export function formatMailboxLockedTitle(entry: Entry): string {
+  if (entry.type === "future" && entry.status === "sealed") {
+    return "写给未来的信";
+  }
+
+  return entry.title || "未命名";
+}

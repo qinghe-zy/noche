@@ -15,6 +15,7 @@ export function mapEntryToRecord(entry: Entry): EntryRecord {
     unlock_date: entry.unlockDate,
     unlocked_at: entry.unlockedAt,
     destroyed_at: entry.destroyedAt ?? null,
+    attachments_json: JSON.stringify(entry.attachments ?? []),
   };
 }
 
@@ -32,5 +33,6 @@ export function mapRecordToEntry(record: EntryRecord): Entry {
     unlockDate: record.unlock_date,
     unlockedAt: record.unlocked_at,
     destroyedAt: record.destroyed_at,
+    attachments: record.attachments_json ? JSON.parse(record.attachments_json) : [],
   };
 }

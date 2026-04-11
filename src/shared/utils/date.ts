@@ -11,3 +11,19 @@ export function nowIso(): string {
 export function tomorrowDate(): string {
   return dayjs().add(1, "day").format("YYYY-MM-DD");
 }
+
+export function getDaysInMonth(date: ConfigType): number {
+  return dayjs(date).daysInMonth();
+}
+
+export function getFirstDayOfWeek(date: ConfigType): number {
+  return dayjs(date).startOf("month").day();
+}
+
+export function addMonth(date: ConfigType, value: number): string {
+  return dayjs(date).add(value, "month").format("YYYY-MM-DD");
+}
+
+export function isSameDay(date1: ConfigType, date2: ConfigType): boolean {
+  return dayjs(date1).isSame(dayjs(date2), "day");
+}

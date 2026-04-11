@@ -23,12 +23,20 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
 
   return {
     async save(entry) {
-      entries.set(entry.id, entry);
+      entries.set(entry.id, {
+        ...entry,
+        attachments: entry.attachments ? [...entry.attachments] : [],
+      });
     },
 
     async getById(id) {
       const entry = entries.get(id);
-      return entry && !entry.destroyedAt ? entry : null;
+      return entry && !entry.destroyedAt
+        ? {
+            ...entry,
+            attachments: entry.attachments ? [...entry.attachments] : [],
+          }
+        : null;
     },
 
     async getByDate(recordDate) {

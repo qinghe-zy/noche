@@ -29,6 +29,7 @@ export function createDraft(input: CreateDraftInput): Draft {
     createdAt: timestamp,
     updatedAt: timestamp,
     lastBackgroundSavedAt: null,
+    attachments: [],
   };
 }
 

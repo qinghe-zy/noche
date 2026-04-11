@@ -3,6 +3,7 @@ import type { Entry } from "@/domain/entry/types";
 import {
   buildMailboxCollections,
   collectCalendarMarkedDates,
+  listCalendarPreviewEntries,
   listDayArchiveEntries,
   syncFutureEntryStatuses,
 } from "@/domain/services/entryQueryService";
@@ -55,7 +56,7 @@ describe("entry query service", () => {
     expect(result.entries[1]).toBe(stillLocked);
   });
 
-  it("builds mailbox buckets with recordDate-desc sorting", () => {
+  it("builds mailbox modules for documentary and distant letters", () => {
     const diary = makeEntry({
       id: "diary-1",
       type: "diary",
@@ -84,12 +85,10 @@ describe("entry query service", () => {
 
     const result = buildMailboxCollections([diary, sealedFuture, jotting, unlockedFuture]);
 
-    expect(result.pastEntries.map((entry) => entry.id)).toEqual([
-      "jotting-1",
-      "diary-1",
-      "future-open",
-    ]);
-    expect(result.sealedFutureEntries.map((entry) => entry.id)).toEqual(["future-locked"]);
+    expect(result.documentaryJottings.map((entry) => entry.id)).toEqual(["jotting-1"]);
+    expect(result.documentaryDiaries.map((entry) => entry.id)).toEqual(["diary-1"]);
+    expect(result.distantOpenedFutures.map((entry) => entry.id)).toEqual(["future-open"]);
+    expect(result.distantPendingFutures.map((entry) => entry.id)).toEqual(["future-locked"]);
   });
 
   it("collects unique marked dates from calendar-visible entries", () => {
@@ -115,8 +114,40 @@ describe("entry query service", () => {
     });
 
     expect(collectCalendarMarkedDates([visibleDiary, visibleFuture, sealedFuture])).toEqual([
-      "2026-04-08",
       "2026-04-10",
+      "2026-04-14",
+    ]);
+  });
+
+  it("lists calendar preview entries by recordDate for diary/jotting and unlockDate for future", () => {
+    const diary = makeEntry({
+      id: "diary-1",
+      type: "diary",
+      recordDate: "2026-04-10",
+      savedAt: "2026-04-10T08:00:00.000Z",
+    });
+    const jotting = makeEntry({
+      id: "jotting-1",
+      type: "jotting",
+      recordDate: "2026-04-10",
+      savedAt: "2026-04-10T09:00:00.000Z",
+    });
+    const pendingFuture = makeEntry({
+      id: "future-pending",
+      type: "future",
+      status: "sealed",
+      recordDate: "2026-04-10",
+      unlockDate: "2026-04-12",
+      savedAt: "2026-04-10T10:00:00.000Z",
+    });
+
+    expect(listCalendarPreviewEntries([diary, jotting, pendingFuture], "2026-04-10").map((entry) => entry.id)).toEqual([
+      "jotting-1",
+      "diary-1",
+    ]);
+
+    expect(listCalendarPreviewEntries([diary, jotting, pendingFuture], "2026-04-12").map((entry) => entry.id)).toEqual([
+      "future-pending",
     ]);
   });
 

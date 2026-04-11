@@ -42,6 +42,7 @@
 - [in_progress] Phase 24: 完成功能矩阵对照验收，并在通过后切回 APK 打包链
 - [in_progress] Phase 25: 接入 HBuilderX 打包链，并完成 Redmi Note 11T Pro+ 实机安装验收
 - [in_progress] Phase 26: 完成与 `docs/stitch/**` 对齐的视觉回归收口
+- [in_progress] Phase 27: 固化视觉收口方法、线程交接文档与真机验收基线
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -52,6 +53,7 @@
 - 新增的 `noche_codex_function_matrix_and_interaction_logic.md` 应进入项目真相文档链，并高于零散 prompt 文档。
 - `docs/stitch/**` 只作为结构与视觉节奏参考，不继承原型文案、示例图片或假数据表达。
 - 当前 Android 体验与后续实机验收，默认优先围绕 `Redmi Note 11T Pro+`。
+- 当前视觉收口阶段默认采用“单页聚焦式推进”：一次只集中收一个主链页面，先跑截图/红灯，再补样式与交互细节。
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

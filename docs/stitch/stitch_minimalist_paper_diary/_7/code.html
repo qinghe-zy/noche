@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#797c75",
+                        "tertiary-container": "#f9f3e8",
+                        "on-tertiary": "#fef8ed",
+                        "tertiary-dim": "#56534b",
+                        "surface-tint": "#5f5e5e",
+                        "secondary": "#635f55",
+                        "on-surface": "#31332e",
+                        "background": "#fbf9f5",
+                        "surface-dim": "#d9dbd2",
+                        "on-tertiary-fixed": "#4c4a41",
+                        "surface-container-high": "#e8e9e1",
+                        "secondary-container": "#e9e2d5",
+                        "on-primary-container": "#525251",
+                        "on-error-container": "#752121",
+                        "primary-container": "#e4e2e1",
+                        "on-secondary-fixed-variant": "#5f5b51",
+                        "surface-variant": "#e2e3db",
+                        "on-tertiary-fixed-variant": "#69665d",
+                        "on-error": "#fff7f6",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "on-secondary": "#fff8ed",
+                        "error-dim": "#4e0309",
+                        "error-container": "#fe8983",
+                        "inverse-primary": "#ffffff",
+                        "primary-dim": "#535252",
+                        "secondary-fixed-dim": "#dad4c7",
+                        "on-secondary-container": "#555148",
+                        "secondary-dim": "#575349",
+                        "on-surface-variant": "#5d605a",
+                        "tertiary": "#625f56",
+                        "surface-bright": "#fbf9f5",
+                        "on-tertiary-container": "#5e5c53",
+                        "tertiary-fixed": "#f9f3e8",
+                        "surface-container-highest": "#e2e3db",
+                        "surface-container": "#eeeee8",
+                        "on-background": "#31332e",
+                        "inverse-surface": "#0e0e0c",
+                        "surface-container-low": "#f5f4ee",
+                        "on-primary-fixed": "#3f3f3f",
+                        "error": "#9f403d",
+                        "primary-fixed": "#e4e2e1",
+                        "tertiary-fixed-dim": "#eae5da",
+                        "on-primary": "#faf7f6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "surface": "#fbf9f5",
+                        "on-secondary-fixed": "#423f36",
+                        "outline-variant": "#b1b3ab",
+                        "primary": "#5f5e5e",
+                        "inverse-on-surface": "#9e9d99",
+                        "secondary-fixed": "#e9e2d5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #F8F6F2;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex items-center justify-center min-h-screen text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<main class="flex flex-col items-center gap-6 p-8">
+<!-- Hand-drawn Rainy Icon Wrapper -->
+<div class="w-16 h-16 flex items-center justify-center transition-opacity duration-500 hover:opacity-70">
+<svg fill="none" height="48" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">
+<!-- Cloud Path (Hand-drawn style intentional asymmetry) -->
+<path d="M17.5 19C18.4283 19 19.3185 18.6312 19.9749 17.9749C20.6312 17.3185 21 16.4283 21 15.5C21 14.703 20.729 13.974 20.274 13.401C20.42 12.956 20.5 12.487 20.5 12C20.5 9.791 18.709 8 16.5 8C16.142 8 15.798 8.047 15.472 8.136C14.86 6.303 13.13 5 11 5C8.239 5 6 7.239 6 10C6 10.155 6.007 10.308 6.021 10.459C4.305 11.026 3 12.616 3 14.5C3 16.985 5.015 19 7.5 19H17.5Z"></path>
+<!-- Raindrops -->
+<path d="M8 19L7 22"></path>
+<path d="M12 20L11 23"></path>
+<path d="M16 19L15 22"></path>
+</svg>
+</div>
+<!-- Label using Serif Typography -->
+<div class="text-center">
+<span class="font-headline text-lg font-light tracking-[0.2em] text-on-surface opacity-80">
+                下雨
+            </span>
+</div>
+</main>
+<!-- Invisible background context for visual depth -->
+<div class="fixed inset-0 -z-10 bg-[#F8F6F2] opacity-50 pointer-events-none"></div>
+</body></html>

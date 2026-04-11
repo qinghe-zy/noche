@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#797c75",
+                        "tertiary-container": "#f9f3e8",
+                        "on-tertiary": "#fef8ed",
+                        "tertiary-dim": "#56534b",
+                        "surface-tint": "#5f5e5e",
+                        "secondary": "#635f55",
+                        "on-surface": "#31332e",
+                        "background": "#fbf9f5",
+                        "surface-dim": "#d9dbd2",
+                        "on-tertiary-fixed": "#4c4a41",
+                        "surface-container-high": "#e8e9e1",
+                        "secondary-container": "#e9e2d5",
+                        "on-primary-container": "#525251",
+                        "on-error-container": "#752121",
+                        "primary-container": "#e4e2e1",
+                        "on-secondary-fixed-variant": "#5f5b51",
+                        "surface-variant": "#e2e3db",
+                        "on-tertiary-fixed-variant": "#69665d",
+                        "on-error": "#fff7f6",
+                        "primary-fixed-dim": "#d6d4d3",
+                        "on-secondary": "#fff8ed",
+                        "error-dim": "#4e0309",
+                        "error-container": "#fe8983",
+                        "inverse-primary": "#ffffff",
+                        "primary-dim": "#535252",
+                        "secondary-fixed-dim": "#dad4c7",
+                        "on-secondary-container": "#555148",
+                        "secondary-dim": "#575349",
+                        "on-surface-variant": "#5d605a",
+                        "tertiary": "#625f56",
+                        "surface-bright": "#fbf9f5",
+                        "on-tertiary-container": "#5e5c53",
+                        "tertiary-fixed": "#f9f3e8",
+                        "surface-container-highest": "#e2e3db",
+                        "surface-container": "#eeeee8",
+                        "on-background": "#31332e",
+                        "inverse-surface": "#0e0e0c",
+                        "surface-container-low": "#f5f4ee",
+                        "on-primary-fixed": "#3f3f3f",
+                        "error": "#9f403d",
+                        "primary-fixed": "#e4e2e1",
+                        "tertiary-fixed-dim": "#eae5da",
+                        "on-primary": "#faf7f6",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#5c5b5b",
+                        "surface": "#fbf9f5",
+                        "on-secondary-fixed": "#423f36",
+                        "outline-variant": "#b1b3ab",
+                        "primary": "#5f5e5e",
+                        "inverse-on-surface": "#9e9d99",
+                        "secondary-fixed": "#e9e2d5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hand-drawn-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 0;
+            filter: url(#rough-filter);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col items-center justify-center p-6">
+<!-- Top Navigation Anchor (As specified in JSON) -->
+<header class="fixed top-0 w-full bg-[#fbf9f5] flex items-center justify-between px-6 py-4 shadow-[0px_4px_16px_rgba(49,51,46,0.04)] z-50">
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-[#31332e] cursor-pointer hover:bg-[#f5f4ee] transition-colors p-2 rounded-full">arrow_back_ios</span>
+<h1 class="font-serif font-light tracking-widest text-[#31332e] text-lg uppercase">信笺</h1>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[#31332e] cursor-pointer hover:bg-[#f5f4ee] transition-colors p-2 rounded-full">more_horiz</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex flex-col items-center justify-center space-y-12 max-w-md w-full">
+<!-- The Stationery Content Card -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-12 flex flex-col items-center justify-center space-y-8 shadow-[0px_4px_16px_rgba(49,51,46,0.04)] relative overflow-hidden">
+<!-- SVG Roughness Filter for "Hand-drawn" effect -->
+<svg class="absolute" height="0" width="0">
+<filter id="rough-filter">
+<feturbulence basefrequency="0.05" numoctaves="3" result="noise" type="fractalNoise"></feturbulence>
+<fedisplacementmap in="SourceGraphic" in2="noise" scale="1.5"></fedisplacementmap>
+</filter>
+</svg>
+<!-- Hand-drawn Cloudy Icon Implementation -->
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="hand-drawn-path" fill="none" height="64" viewbox="0 0 24 24" width="64" xmlns="http://www.w3.org/2000/svg">
+<!-- Base cloud shape with slightly irregular paths for hand-drawn feel -->
+<path d="M17.5,19c2.5,0,4.5-2,4.5-4.5c0-2.3-1.7-4.2-3.9-4.5c-0.6-3.1-3.3-5.5-6.6-5.5c-3,0-5.6,1.9-6.5,4.6c-2.4,0.3-4.2,2.3-4.2,4.7 c0,2.6,2.1,4.7,4.7,4.7L17.5,19z" stroke="#333333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Typography & Label -->
+<div class="text-center">
+<p class="font-serif font-light text-2xl tracking-[0.3em] text-on-surface mb-2">多云</p>
+<p class="font-label text-xs uppercase tracking-widest text-secondary opacity-60">Cloudy</p>
+</div>
+<!-- Contextual Detail (Subtle editorial touch) -->
+<div class="pt-8 w-full border-t border-outline-variant/10 text-center">
+<span class="text-secondary font-serif italic text-sm">“纸上得来终觉浅，绝知此事要躬行”</span>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="flex flex-col items-center space-y-4 opacity-40">
+<div class="w-px h-16 bg-gradient-to-b from-on-surface to-transparent"></div>
+<p class="font-label text-[10px] tracking-[0.5em] uppercase text-secondary">Journal No. 042</p>
+</div>
+</main>
+<!-- Background texture simulation -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB9ww3CBfeiBQoKN7r0DWR4z8ZjPFa-QXDzPxgNdF_xo4ND0p6IVC-4dkoWOfIhYRC0WhDWdwTqE6mGzreYevFkzP065VJlTuxKomwi_8-zkr-j1oTOK5brBSjqAdNLgnAafbHtCSbSop2Kh99J1SHzvfju8YxaqqM-fg9yhXalj6gaDeC0atFykuv_l830sG-Y1mhyNP_Z-yHnTKzKcTy80iVtkBUgw8KqE_zxH5VkHulzXXTSQvRTnvl--Jpi9r9PBOWvFQ-Jc6k');"></div>
+<!-- Floating Action Button (The "Inkwell") as per Design System -->
+<button class="fixed bottom-10 right-10 w-14 h-14 bg-primary-dim text-on-primary rounded-full shadow-[0px_4px_16px_rgba(49,51,46,0.2)] flex items-center justify-center transition-all active:scale-95 hover:bg-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit</span>
+</button>
+</body></html>
