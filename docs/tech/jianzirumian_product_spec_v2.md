@@ -49,7 +49,8 @@
 - 不做企业级后端
 - 不做复杂统计分析
 - 不做复杂提醒系统
-- 不做图片/音频能力的正式功能，但要为未来预留结构
+- 不做图片音频混合编辑器
+- 不做云端图片上传与账号同步
 
 ---
 
@@ -62,6 +63,10 @@
 - 每个自然日最多 1 篇日记
 - 可多次追加和修改
 - 可通过日历补写历史日期
+- 进入 diary 编辑前可先选择天气和心情
+- 这组前序元信息只作用于 diary，不扩散到 jotting / future
+- 天气和心情允许跳过，跳过后仍可正常写作
+- 进入 diary 后，纸面顶部可展示缩略前序卡
 
 #### B. 随笔 Jotting
 - 随时记录灵感
@@ -102,7 +107,7 @@
 - 不放悬浮按钮
 
 ### 4.2 通用编辑页 Editor
-作用：统一承接日记、随笔、未来信的编辑态与阅读态。
+作用：继续承担统一路由入口与 orchestration，但内部按类型切到三套独立 editor shell。
 
 模式：
 - 日记模式
@@ -164,6 +169,8 @@
 - 正式保存后，当前页由编辑态切为阅读态
 - 阅读态右上角提供“续写”入口，进入编辑态
 - 不允许点正文直接进入编辑态
+- diary 编辑前若当前草稿没有前序元信息，可先展示天气 / 心情选择层
+- diary 编辑态与阅读态都可在顶部展示缩略前序卡
 
 ### 5.3 信箱页
 - 在“往日信件”查看已保存内容
@@ -229,8 +236,12 @@
 
 ### 规则 8：空白信纸不生成记录
 - 点击信封时，如果 `content.trim()` 为空：
-  - 若当前只是未正式保存草稿：静默丢弃，不生成记录，不打日历点
+  - 若当前只是未正式保存草稿，且没有图片、也没有正文：静默丢弃，不生成记录，不打日历点
   - 若当前是已正式存在的内容被编辑到全空：弹出“这封信已经空了，要销毁吗？”
+
+补充：
+- diary 已选天气 / 心情，但没有正文且没有图片时，仍视为空白 diary
+- 这类内容允许保留在草稿中，但不允许正式生成 entry
 
 ### 规则 9：删除
 -
@@ -305,6 +316,7 @@
 - 日记草稿必须按日期分槽
 - 随笔草稿第一版只保留一个活跃槽
 - 未来信草稿单独分槽，不能与随笔/日记混用
+- diary 的天气 / 心情前序元信息随对应 `draft_diary_{recordDate}` 一起暂存与恢复
 
 ### 规则 21：历史日记编辑不覆盖今日日记草稿
 - 编辑历史日记时，其草稿必须写入对应 `draft_diary_{recordDate}`
@@ -422,6 +434,7 @@
 - `cursorPosition`
 - `unlockDate`（未来信）
 - `mode`
+- `diaryPrelude`（仅 diary 使用，可为空）
 
 ### 9.3 草稿恢复策略
 - 点日记 → 恢复该日期日记草稿
@@ -444,7 +457,20 @@ interface Entry {
   updatedAt: string
   savedAt?: string
   unlockDate?: string // future only, YYYY-MM-DD
+  diaryPrelude?: DiaryPreludeMeta | null // diary only
   isDestroyed?: boolean
+}
+```
+
+```ts
+interface DiaryPreludeMeta {
+  weatherCode: string | null
+  weatherLabelZh: string | null
+  weatherLabelEn: string | null
+  moodCode: string | null
+  moodLabelZh: string | null
+  moodLabelEn: string | null
+  note?: string | null
 }
 ```
 
@@ -458,6 +484,7 @@ interface DraftEntry {
   updatedAt: string
   cursorPosition?: number
   unlockDate?: string
+  diaryPrelude?: DiaryPreludeMeta | null
   mode?: 'edit' | 'read'
 }
 ```
@@ -489,7 +516,8 @@ interface Settings {
 - 核心内容仓库：SQLite
 - 轻量配置：`uni.setStorageSync`
 - 删除动作统一走 `destroyEntry()`
-- 文件资源层：当前不做正式功能，但预留资源清理 Hook
+- 文件资源层：本地图片能力已经进入正式范围，继续保持本地引用与离线可用
+- 天气 / 心情资源必须本地化，不能依赖外链字体、CDN 或远程图片
 
 ### 11.3 架构原则
 - Android-only
@@ -544,6 +572,7 @@ Android 真机调试 / APK 打包的完整工具链尚未补齐，当前缺：
 - 历史编辑不能覆盖今天草稿
 - 空白内容不能污染数据库
 - 排序不能因更新旧内容而错乱
+- 飞行模式下 diary 的天气 / 心情前序卡也必须可恢复、可展示
 
 ### 13.3 可扩展性
 - 删除逻辑为未来附件预留清理 Hook

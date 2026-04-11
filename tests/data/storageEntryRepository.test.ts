@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createStorageEntryRepository } from "@/data/repositories/storageEntryRepository";
 import { createMemoryJsonStorage } from "@/shared/utils/storage";
+import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import { createEntry } from "@/domain/services/entryService";
 import type { Attachment } from "@/shared/types/attachment";
 
@@ -38,5 +39,30 @@ describe("storageEntryRepository", () => {
     const restoredEntry = await secondRepository.getById(entry.id);
 
     expect(restoredEntry?.attachments).toEqual([createImageAttachment({ entryId: "entry-1" })]);
+  });
+
+  it("persists diary prelude across repository re-creation", async () => {
+    const storage = createMemoryJsonStorage();
+    const firstRepository = createStorageEntryRepository(storage);
+    const entry = {
+      ...createEntry({
+        type: "diary",
+        content: "今天有风。",
+        recordDate: "2026-04-10",
+      }),
+      diaryPreludeStatus: "selected",
+      diaryPrelude: buildDiaryPreludeMeta({
+        weatherCode: "cloudy",
+        moodCode: "anxious",
+      }),
+    };
+
+    await firstRepository.save(entry);
+
+    const secondRepository = createStorageEntryRepository(storage);
+    const restoredEntry = await secondRepository.getById(entry.id);
+
+    expect(restoredEntry?.diaryPrelude).toEqual(entry.diaryPrelude);
+    expect(restoredEntry?.diaryPreludeStatus).toBe("selected");
   });
 });

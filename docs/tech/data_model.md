@@ -25,6 +25,7 @@
 - `unlockedAt`
 - `destroyedAt`
 - `attachments` (本地附件列表)
+- `diaryPrelude` (仅 diary 使用的天气 / 心情前序元信息，可为空)
 
 ### 2.2 Draft
 
@@ -43,6 +44,21 @@
 - `updatedAt`
 - `lastBackgroundSavedAt`
 - `attachments`
+- `diaryPrelude`
+
+### 2.2.1 DiaryPreludeMeta
+
+仅对 `diary` 生效的前序元信息。
+
+建议核心字段：
+
+- `weatherCode`
+- `weatherLabelZh`
+- `weatherLabelEn`
+- `moodCode`
+- `moodLabelZh`
+- `moodLabelEn`
+- `note`
 
 ### 2.3 Attachment
 
@@ -80,6 +96,7 @@
 
 - `recordDate` 在打开纸张时锁定
 - 只有正文为空且附件为空时，内容才算空白，不能正式保存
+- 仅有 `diaryPrelude`、没有正文且没有附件时，内容仍算空白，不能正式保存
 - 未来信最早只能选明天
 - 草稿按类型隔离
 - 日记草稿按日期分槽
@@ -90,6 +107,8 @@
 - 三套 editor shell 共享保存语义，但视觉层分离
 - 标题优先取正文首行；纯图片内容回退到类型专属图片标题
 - 附件只保留本地引用，不依赖远端 URL
+- `diaryPrelude` 只作用于 `diary`，`jotting / future` 默认可为空
+- diary 的天气 / 心情前序元信息需要同时进入草稿暂存、正式保存与阅读态展示
 
 ## 5. 数据层落地建议
 
@@ -125,6 +144,7 @@
   - 已解锁未来信：`unlocked`
 - 附件统一使用独立 `attachments` 概念，不把图片塞进 `content` 字段。
 - 第一版附件能力固定为本地图片插入、展示、删除、恢复，不做云同步和复杂编辑。
+- Stitch 导出资源只可参考，运行时不得依赖 Tailwind CDN、Google Fonts、Material Symbols 外链或远程图片。
 - 草稿槽位统一使用：
   - `draft_diary_YYYY-MM-DD`
   - `draft_jotting`

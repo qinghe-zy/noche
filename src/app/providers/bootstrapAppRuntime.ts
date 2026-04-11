@@ -40,6 +40,8 @@ function createDefaultBootstrapEntries(): Entry[] {
       unlockedAt: null,
       destroyedAt: null,
       attachments: [],
+      diaryPreludeStatus: "skipped",
+      diaryPrelude: null,
     },
     {
       id: "bootstrap-jotting-sample",
@@ -55,6 +57,8 @@ function createDefaultBootstrapEntries(): Entry[] {
       unlockedAt: null,
       destroyedAt: null,
       attachments: [],
+      diaryPreludeStatus: "skipped",
+      diaryPrelude: null,
     },
   ];
 }

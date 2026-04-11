@@ -12,4 +12,18 @@ describe("calendar interaction behavior", () => {
 
     expect(calendarPage).toContain("navigateBackOrFallback");
   });
+
+  it("uses the shared paper confirm dialog for locked future entry hints", () => {
+    const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+
+    expect(calendarPage).toContain("PaperConfirmDialog");
+    expect(calendarPage).not.toContain("uni.showModal({");
+  });
+
+  it("renders diary prelude icons in the day mailbox cards", () => {
+    const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+
+    expect(calendarPage).toContain("DiaryPreludeGlyph");
+    expect(calendarPage).toContain("calendar-page__day-mailbox-item-prelude");
+  });
 });

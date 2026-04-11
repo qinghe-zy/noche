@@ -9,6 +9,8 @@ import { createDraft, markDraftBackgroundSaved } from "@/domain/services/draftSe
 import { createEntryFromDraft } from "@/domain/services/entryService";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Attachment } from "@/shared/types/attachment";
+import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
+import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -21,6 +23,8 @@ interface SaveDraftPatch {
   content?: string;
   unlockDate?: string | null;
   attachments?: Attachment[];
+  diaryPreludeStatus?: DiaryPreludeStatus;
+  diaryPrelude?: DiaryPreludeMeta | null;
 }
 
 interface DraftState {
@@ -48,7 +52,18 @@ export const useDraftStore = defineStore("draft", {
   },
   actions: {
     upsertDraft(draft: Draft) {
-      this.drafts[draft.slotKey] = draft;
+      const diaryPrelude = cloneDiaryPrelude(draft.diaryPrelude);
+
+      this.drafts[draft.slotKey] = {
+        ...draft,
+        diaryPreludeStatus: draft.type === "diary"
+          ? normalizeDiaryPreludeStatus(draft.diaryPreludeStatus, {
+              isNewDiaryDraft: false,
+              prelude: diaryPrelude,
+            })
+          : "skipped",
+        diaryPrelude,
+      };
     },
     async peekDraft(input: CreateDraftInput): Promise<Draft | null> {
       this.error = null;
@@ -65,7 +80,18 @@ export const useDraftStore = defineStore("draft", {
           this.upsertDraft(draft);
         }
 
-        return draft;
+        return draft
+          ? {
+              ...draft,
+              diaryPreludeStatus: draft.type === "diary"
+                ? normalizeDiaryPreludeStatus(draft.diaryPreludeStatus, {
+                    isNewDiaryDraft: false,
+                    prelude: draft.diaryPrelude,
+                  })
+                : "skipped",
+              diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
+            }
+          : null;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to inspect draft.";
         throw error;
@@ -81,11 +107,24 @@ export const useDraftStore = defineStore("draft", {
       });
 
       try {
-        const draft = (await draftRepository.getBySlotKey(slotKey)) ?? createDraft(input);
-        await draftRepository.save(draft);
-        this.upsertDraft(draft);
+        const existingDraft = await draftRepository.getBySlotKey(slotKey);
+        const nextDraft = existingDraft
+          ? {
+              ...existingDraft,
+              diaryPrelude: cloneDiaryPrelude(existingDraft.diaryPrelude),
+              diaryPreludeStatus: existingDraft.type === "diary"
+                ? normalizeDiaryPreludeStatus(existingDraft.diaryPreludeStatus, {
+                    isNewDiaryDraft: false,
+                    prelude: existingDraft.diaryPrelude,
+                  })
+                : "skipped",
+            }
+          : createDraft(input);
+
+        await draftRepository.save(nextDraft);
+        this.upsertDraft(nextDraft);
         this.setActiveDraftKey(slotKey);
-        return draft;
+        return nextDraft;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to open draft.";
         throw error;
@@ -102,6 +141,9 @@ export const useDraftStore = defineStore("draft", {
       this.error = null;
 
       try {
+        const nextPrelude = cloneDiaryPrelude(
+          patch.diaryPrelude === undefined ? this.activeDraft.diaryPrelude : patch.diaryPrelude,
+        );
         const nextDraft = markDraftBackgroundSaved({
           ...this.activeDraft,
           title: patch.title ?? this.activeDraft.title,
@@ -110,6 +152,16 @@ export const useDraftStore = defineStore("draft", {
             ? patch.unlockDate ?? this.activeDraft.unlockDate ?? null
             : null,
           attachments: patch.attachments ?? this.activeDraft.attachments ?? [],
+          diaryPreludeStatus: this.activeDraft.type === "diary"
+            ? normalizeDiaryPreludeStatus(
+                patch.diaryPreludeStatus ?? this.activeDraft.diaryPreludeStatus,
+                {
+                  isNewDiaryDraft: false,
+                  prelude: nextPrelude,
+                },
+              )
+            : "skipped",
+          diaryPrelude: nextPrelude,
         });
 
         await draftRepository.save(nextDraft);
@@ -189,6 +241,13 @@ export const useDraftStore = defineStore("draft", {
             draftKey: draft.slotKey,
             sortOrder: index,
           })),
+          diaryPreludeStatus: entry.type === "diary"
+            ? normalizeDiaryPreludeStatus(entry.diaryPreludeStatus, {
+                isNewDiaryDraft: false,
+                prelude: entry.diaryPrelude,
+              })
+            : "skipped",
+          diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
         };
 
         await draftRepository.save(nextDraft);
