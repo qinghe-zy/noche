@@ -1,5 +1,11 @@
 import type { Entry, EntryType } from '../../domain/entry/types';
 
+export interface EntryProfileStats {
+  recordedDays: number;
+  totalWords: number;
+  diaryCount: number;
+}
+
 /**
  * 条目仓储接口
  */
@@ -39,4 +45,9 @@ export interface IEntryRepository {
    * 获取日历点标记数据（返回有记录的日期列表）
    */
   getCalendarMarkedDates(): Promise<string[]>;
+
+  /**
+   * 获取个人主页轻统计
+   */
+  getProfileStats(): Promise<EntryProfileStats>;
 }

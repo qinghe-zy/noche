@@ -23,6 +23,7 @@
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
+    :focused-attachment-id="focusedAttachmentId"
     :diary-prelude-status="diaryPreludeStatus"
     :diary-prelude="diaryPrelude"
     @go-back="handleGoBack"
@@ -47,6 +48,7 @@
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
+    :focused-attachment-id="focusedAttachmentId"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
@@ -80,6 +82,7 @@
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
+    :focused-attachment-id="focusedAttachmentId"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
@@ -106,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { onHide, onLoad, onUnload } from "@dcloudio/uni-app";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
@@ -170,6 +173,7 @@ const unlockDate = ref("");
 const pendingUnlockDate = ref("");
 const futurePickerMonth = ref(tomorrowDate());
 const savedEntry = ref<Entry | null>(null);
+const focusedAttachmentId = ref("");
 const isHydrating = ref(false);
 const isFutureDateSheetOpen = ref(false);
 const isDiaryPreludePickerOpen = ref(false);
@@ -404,6 +408,22 @@ function returnToHome(): void {
   });
 }
 
+async function focusAttachmentInReadMode(): Promise<void> {
+  if (mode.value !== "read" || !focusedAttachmentId.value) {
+    return;
+  }
+
+  await nextTick();
+
+  setTimeout(() => {
+    uni.pageScrollTo({
+      selector: `#entry-attachment-${focusedAttachmentId.value}`,
+      duration: 0,
+      fail: () => undefined,
+    });
+  }, 40);
+}
+
 function handleGoBack(): void {
   navigateBackOrFallback({
     fallbackUrl: `/${ROUTES.home}`,
@@ -536,6 +556,7 @@ async function openEntryForRead(entryId: string): Promise<void> {
     isDiaryPreludePickerOpen.value = false;
     draftStore.setActiveDraftKey(null);
     syncFormFromEntry(entry);
+    await focusAttachmentInReadMode();
   } finally {
     isHydrating.value = false;
   }
@@ -548,6 +569,7 @@ async function initializeFromRoute(query?: Record<string, unknown>): Promise<voi
   diaryPrelude.value = null;
   unlockDate.value = "";
   pendingUnlockDate.value = "";
+  focusedAttachmentId.value = typeof query?.attachmentId === "string" ? query.attachmentId : "";
   isDiaryPreludePickerOpen.value = false;
   diaryPreludePickerOrigin.value = "auto";
   clearAttachments();

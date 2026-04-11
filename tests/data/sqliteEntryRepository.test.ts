@@ -32,6 +32,7 @@ describe("sqliteEntryRepository", () => {
       [makeEntryRecord({ id: "entry-2", record_date: "2026-04-11" })],
       [makeEntryRecord({ id: "entry-3", type: "jotting", status: "saved", unlock_date: null })],
       [{ record_date: "2026-04-10" }],
+      [{ recorded_days: 2, total_words: 128, diary_count: 1 }],
     );
     const repository = createSQLiteEntryRepository(client);
 
@@ -40,6 +41,11 @@ describe("sqliteEntryRepository", () => {
     expect((await repository.getByDate("2026-04-11"))[0]?.recordDate).toBe("2026-04-11");
     expect((await repository.getByType("jotting"))[0]?.type).toBe("jotting");
     expect(await repository.getCalendarMarkedDates()).toEqual(["2026-04-10"]);
+    expect(await repository.getProfileStats()).toEqual({
+      recordedDays: 2,
+      totalWords: 128,
+      diaryCount: 1,
+    });
   });
 
   it("saves and deletes entries through mapped sqlite operations", async () => {

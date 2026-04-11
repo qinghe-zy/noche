@@ -51,6 +51,8 @@
             v-for="attachment in attachments"
             :key="attachment.id"
             class="editor-page__attachment-card"
+            :class="{ 'editor-page__attachment-card--focused': focusedAttachmentId === attachment.id }"
+            :id="`entry-attachment-${attachment.id}`"
             @click="$emit('preview-attachment', attachment.id)"
           >
             <image class="editor-page__attachment-image" :src="attachment.localUri" mode="aspectFill" />
@@ -200,6 +202,7 @@ defineProps<{
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
+  focusedAttachmentId?: string;
 }>();
 
 defineEmits<{
@@ -259,6 +262,7 @@ defineEmits<{
 .editor-page__future-ribbon-hint { font-size: 12px; color: rgba(138, 129, 120, 0.86); }
 .editor-page__attachments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16rpx; margin-bottom: 20rpx; padding: 0 8px; }
 .editor-page__attachment-card { position: relative; width: 100%; aspect-ratio: 4 / 3; padding: 0; border-radius: 20rpx; overflow: hidden; background: rgba(248, 246, 242, 0.72); }
+.editor-page__attachment-card--focused { box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38); }
 .editor-page__attachment-image { width: 100%; height: 100%; }
 .editor-page__attachment-remove { position: absolute; top: 10rpx; right: 10rpx; width: 44rpx; height: 44rpx; border-radius: 999rpx; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.72); }
 .editor-page__attachment-remove-svg { width: 28rpx; height: 28rpx; color: rgba(49, 51, 46, 0.72); }

@@ -1,4 +1,4 @@
-import type { IEntryRepository } from "@/data/repositories/entry.repository";
+import type { EntryProfileStats, IEntryRepository } from "@/data/repositories/entry.repository";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import type { JsonStorage } from "@/shared/utils/storage";
@@ -90,6 +90,15 @@ export function createStorageEntryRepository(
             .map((entry) => entry.recordDate),
         ),
       ).sort();
+    },
+    async getProfileStats(): Promise<EntryProfileStats> {
+      const active = activeEntries();
+
+      return {
+        recordedDays: new Set(active.map((entry) => entry.recordDate)).size,
+        totalWords: active.reduce((sum, entry) => sum + entry.content.length, 0),
+        diaryCount: active.filter((entry) => entry.type === "diary").length,
+      };
     },
   };
 }

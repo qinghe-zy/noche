@@ -6,180 +6,185 @@
       <view class="profile-page__topbar-spacer"></view>
     </view>
 
-    <view class="profile-page__content">
-      <view class="profile-page__portrait">
-        <view class="profile-page__portrait-ring">
-          <view class="profile-page__avatar">夜</view>
-        </view>
-        <text class="profile-page__name">夜书人</text>
-        <text class="profile-page__signature">把今天收好，也给未来留一封信。</text>
-      </view>
-
-      <view v-if="settingsStore.error || mailboxStore.error" class="profile-page__banner">
-        <text>{{ settingsStore.error ?? mailboxStore.error }}</text>
-      </view>
-
-      <view class="profile-page__stats-card">
-        <view class="profile-page__stat">
-          <text class="profile-page__stat-value">{{ diaryCount }}</text>
-          <text class="profile-page__stat-label">日记</text>
-        </view>
-        <view class="profile-page__stat-divider"></view>
-        <view class="profile-page__stat">
-          <text class="profile-page__stat-value">{{ futureCount }}</text>
-          <text class="profile-page__stat-label">未来信</text>
-        </view>
-        <view class="profile-page__stat-divider"></view>
-        <view class="profile-page__stat">
-          <text class="profile-page__stat-value">{{ mailboxCount }}</text>
-          <text class="profile-page__stat-label">信箱</text>
-        </view>
-      </view>
-
-      <view class="profile-page__menu">
-        <view class="profile-page__menu-group">
-          <view class="profile-page__menu-item profile-page__menu-item--stack">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">外观设置</text>
-              <text class="profile-page__menu-note">选择当前设备下最舒服的阅读方式。</text>
-            </view>
-            <view class="profile-page__chips">
-              <button
-                v-for="option in themeOptions"
-                :key="option.value"
-                class="profile-page__chip"
-                :class="{ 'profile-page__chip--active': settingsStore.theme === option.value }"
-                @click="settingsStore.setTheme(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            </view>
-          </view>
-
-          <view class="profile-page__menu-item profile-page__menu-item--stack">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">每周起始日</text>
-              <text class="profile-page__menu-note">影响日历视图的排布与阅读习惯。</text>
-            </view>
-            <view class="profile-page__chips">
-              <button
-                v-for="option in weekOptions"
-                :key="String(option.value)"
-                class="profile-page__chip"
-                :class="{ 'profile-page__chip--active': settingsStore.weekStartsOn === option.value }"
-                @click="settingsStore.setWeekStartsOn(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            </view>
-          </view>
+    <scroll-view scroll-y class="profile-page__scroll">
+      <view class="profile-page__content">
+        <view class="profile-page__portrait">
+          <ProfileHero
+            :display-name="identity.displayName"
+            :signature="identity.signature"
+            :avatar-uri="identity.avatarUri"
+            :cover-uri="identity.coverUri"
+          />
         </view>
 
-        <view class="profile-page__menu-group">
-          <view class="profile-page__menu-item profile-page__menu-item--stack">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">隐私锁</text>
-              <text class="profile-page__menu-note">主验收设备优先保证恢复与静默暂存体验。</text>
-            </view>
-            <view class="profile-page__chips">
-              <button
-                v-for="option in privacyLockOptions"
-                :key="option.label"
-                class="profile-page__chip"
-                :class="{ 'profile-page__chip--active': settingsStore.privacyLockEnabled === option.value }"
-                @click="settingsStore.setPrivacyLockEnabled(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            </view>
-          </view>
+        <view v-if="pageError" class="profile-page__banner">
+          <text class="profile-page__banner-text">{{ pageError }}</text>
+        </view>
 
-          <view class="profile-page__menu-item">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">语言</text>
-              <text class="profile-page__menu-note">当前版本以中文书写体验为主。</text>
-            </view>
-            <text class="profile-page__menu-value">{{ localeLabel }}</text>
-          </view>
+        <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
 
-          <view class="profile-page__menu-item">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">数据备份</text>
-              <text class="profile-page__menu-note">本地优先，云备份后续开放。</text>
-            </view>
-            <text class="profile-page__menu-value">稍后开放</text>
-          </view>
+        <ProfileMemoryAlbum
+          :items="visibleItems"
+          :is-loading="albumLoading"
+          :has-any-record="stats.recordedDays > 0"
+          :show-all-entry="hasMore"
+          @open-item="openViewer"
+          @open-all="handleOpenAllAlbum"
+        />
 
-          <view class="profile-page__menu-item">
-            <view class="profile-page__menu-copy">
-              <text class="profile-page__menu-label">关于 noche</text>
-              <text class="profile-page__menu-note">Android / local-first / 私人写信。</text>
-            </view>
-            <text class="profile-page__menu-value">v1 草案</text>
-          </view>
+        <view class="profile-page__menu">
+          <ProfileActionList :items="actionItems" @select="handleSelectAction" />
+        </view>
+
+        <view class="profile-page__footer">
+          <text class="profile-page__footer-text">岁月安好 · 纸短情长</text>
         </view>
       </view>
+    </scroll-view>
 
-      <view class="profile-page__footer">
-        <view class="profile-page__footer-line"></view>
-        <text class="profile-page__footer-copy">岁月安好，纸短情长</text>
-      </view>
-    </view>
+    <ProfileAlbumViewer
+      :open="isViewerOpen"
+      :item="currentViewerItem"
+      :current-index="viewerIndex"
+      :total="visibleItems.length"
+      :can-prev="viewerIndex > 0"
+      :can-next="viewerIndex < visibleItems.length - 1"
+      @close="closeViewer"
+      @prev="showPrevious"
+      @next="showNext"
+      @jump="jumpToCurrentEntry"
+    />
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import { onShow } from "@dcloudio/uni-app";
+import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
-import { useMailboxStore } from "@/app/store/useMailboxStore";
+import { ROUTES } from "@/shared/constants/routes";
+import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import ProfileActionList from "@/features/profile/components/ProfileActionList.vue";
+import ProfileAlbumViewer from "@/features/profile/components/ProfileAlbumViewer.vue";
+import ProfileHero from "@/features/profile/components/ProfileHero.vue";
+import ProfileMemoryAlbum from "@/features/profile/components/ProfileMemoryAlbum.vue";
+import ProfileStatsRow from "@/features/profile/components/ProfileStatsRow.vue";
+import { useProfileAlbum } from "@/features/profile/composables/useProfileAlbum";
+import { useProfileIdentity } from "@/features/profile/composables/useProfileIdentity";
+import { useProfileStats } from "@/features/profile/composables/useProfileStats";
+import {
+  formatProfileBackupLabel,
+  PROFILE_APP_VERSION,
+  PROFILE_PREVIEW_LIMIT,
+  type ProfileActionItem,
+} from "@/features/profile/profileData";
 
+const appStore = useAppStore();
 const settingsStore = useSettingsStore();
-const mailboxStore = useMailboxStore();
+const { identity, error: identityError, refresh: refreshIdentity } = useProfileIdentity();
+const { stats, isLoading: statsLoading, error: statsError, refresh: refreshStats } = useProfileStats();
+const {
+  visibleItems,
+  hasMore,
+  isLoading: albumLoading,
+  error: albumError,
+  isViewerOpen,
+  viewerIndex,
+  currentViewerItem,
+  refresh: refreshAlbum,
+  openViewer,
+  closeViewer,
+  showPrevious,
+  showNext,
+  jumpToCurrentEntry,
+} = useProfileAlbum(PROFILE_PREVIEW_LIMIT);
 
-const themeOptions = [
-  { value: "system" as const, label: "跟随系统" },
-  { value: "light" as const, label: "浅色" },
-  { value: "dark" as const, label: "深色" },
-];
+const actionItems = computed<ProfileActionItem[]>(() => [
+  {
+    key: "privacy-lock",
+    title: "隐私锁",
+    note: "离开前台时，用一层雾面遮住纸页。",
+    value: settingsStore.privacyLockEnabled ? "已开启" : "未开启",
+  },
+  {
+    key: "local-backup",
+    title: "本地备份",
+    note: "只认本地设备，不接云端。",
+    value: formatProfileBackupLabel(identity.value.lastBackupAt),
+  },
+  {
+    key: "about",
+    title: "关于",
+    note: "一间本地优先、离线可写的私人角落。",
+    value: `v${PROFILE_APP_VERSION}`,
+  },
+]);
+const pageError = computed(() => identityError.value ?? statsError.value ?? albumError.value);
 
-const weekOptions = [
-  { value: 1 as const, label: "周一开始" },
-  { value: 0 as const, label: "周日开始" },
-];
-const privacyLockOptions = [
-  { value: true, label: "已开启" },
-  { value: false, label: "未开启" },
-];
-
-const mailboxCount = computed(() => mailboxStore.pastEntries.length + mailboxStore.sealedFutureEntries.length);
-const diaryCount = computed(() => mailboxStore.pastEntries.filter((entry) => entry.type === "diary").length);
-const futureCount = computed(
-  () =>
-    mailboxStore.pastEntries.filter((entry) => entry.type === "future").length
-    + mailboxStore.sealedFutureEntries.length,
-);
-const localeLabel = computed(() => (settingsStore.locale === "zh-CN" ? "简体中文" : settingsStore.locale));
+async function refreshPage(): Promise<void> {
+  await settingsStore.hydrate();
+  await Promise.all([
+    refreshIdentity(),
+    refreshStats(),
+    refreshAlbum(),
+  ]);
+}
 
 function handleGoBack(): void {
-  uni.navigateBack({
-    delta: 1,
-    fail: () => {
-      uni.switchTab({
-        url: "/pages/index/index",
-        fail: () => {
-          uni.reLaunch({
-            url: "/pages/index/index",
-          });
-        },
-      });
-    },
+  navigateBackOrFallback({
+    fallbackUrl: `/${ROUTES.home}`,
+  });
+}
+
+function handleOpenAllAlbum(): void {
+  uni.navigateTo({
+    url: `/${ROUTES.profileAlbum}`,
+  });
+}
+
+function handleSelectAction(actionKey: ProfileActionItem["key"]): void {
+  if (actionKey === "privacy-lock") {
+    const nextEnabled = !settingsStore.privacyLockEnabled;
+    settingsStore.setPrivacyLockEnabled(nextEnabled);
+
+    if (!nextEnabled) {
+      appStore.unlockPrivacy();
+    }
+
+    uni.showToast({
+      title: nextEnabled ? "隐私锁已开启" : "隐私锁已关闭",
+      icon: "none",
+    });
+    return;
+  }
+
+  if (actionKey === "local-backup") {
+    uni.showModal({
+      title: "本地备份",
+      content: identity.value.lastBackupAt
+        ? `最近一次备份：${formatProfileBackupLabel(identity.value.lastBackupAt)}。\n当前版本先保留本地入口，下一轮再接真正的导出链路。`
+        : "当前还没有本地备份记录。入口已经留好，后续会接入真正的本地导出链路。",
+      showCancel: false,
+      confirmText: "知道了",
+    });
+    return;
+  }
+
+  uni.showModal({
+    title: "关于 noche",
+    content: `版本 v${PROFILE_APP_VERSION}\nAndroid / local-first / 离线可写。\n这间角落只依赖本地数据，不接账号，也不接云同步。`,
+    showCancel: false,
+    confirmText: "收好",
   });
 }
 
 onMounted(() => {
-  void settingsStore.hydrate();
-  void mailboxStore.refreshMailbox();
+  void refreshPage();
+});
+
+onShow(() => {
+  void refreshPage();
 });
 </script>
 
@@ -187,8 +192,9 @@ onMounted(() => {
 .profile-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top right, rgba(224, 214, 194, 0.26), transparent 28%),
-    #fbf9f5;
+    radial-gradient(circle at top, rgba(233, 226, 213, 0.34), transparent 28%),
+    #f8f5ef;
+  color: #31332e;
 }
 
 .profile-page__topbar {
@@ -196,19 +202,15 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 16rpx;
-  padding: 28rpx 32rpx 24rpx;
-}
-
-.profile-page__chip {
-  border: none;
-  background: transparent;
-  line-height: 1;
+  padding: 28rpx 32rpx 18rpx;
 }
 
 .profile-page__title {
   font-size: 30rpx;
-  letter-spacing: 6rpx;
+  line-height: 1.4;
   color: #31332e;
+  letter-spacing: 0.24em;
+  padding-left: 0.24em;
 }
 
 .profile-page__topbar-spacer {
@@ -216,187 +218,42 @@ onMounted(() => {
   height: 72rpx;
 }
 
+.profile-page__scroll {
+  min-height: calc(100vh - 118rpx);
+}
+
 .profile-page__content {
   max-width: 720rpx;
   margin: 0 auto;
-  padding: 12rpx 30rpx 72rpx;
-}
-
-.profile-page__portrait {
+  padding: 6rpx 30rpx 88rpx;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14rpx;
-  margin-bottom: 54rpx;
-}
-
-.profile-page__portrait-ring {
-  width: 150rpx;
-  height: 150rpx;
-  padding: 8rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12rpx 30rpx rgba(49, 51, 46, 0.04);
-}
-
-.profile-page__avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #6a6763, #31332e 72%);
-  color: #faf7f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48rpx;
-  letter-spacing: 6rpx;
-}
-
-.profile-page__name {
-  font-size: 44rpx;
-  color: #31332e;
-}
-
-.profile-page__signature {
-  font-size: 24rpx;
-  line-height: 1.8;
-  color: rgba(93, 96, 90, 0.92);
-  letter-spacing: 4rpx;
+  gap: 44rpx;
 }
 
 .profile-page__banner {
-  margin-bottom: 28rpx;
-  padding: 18rpx 22rpx;
-  background: rgba(159, 64, 61, 0.1);
-  color: #8a3d3a;
-  font-size: 24rpx;
-  line-height: 1.6;
+  padding: 20rpx 24rpx;
+  border-radius: 24rpx;
+  background: rgba(159, 64, 61, 0.08);
 }
 
-.profile-page__stats-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8rpx;
-  padding: 30rpx 28rpx;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12rpx 28rpx rgba(49, 51, 46, 0.04);
-  margin-bottom: 46rpx;
-}
-
-.profile-page__stat {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10rpx;
-}
-
-.profile-page__stat-value {
-  font-size: 40rpx;
-  color: #31332e;
-}
-
-.profile-page__stat-label,
-.profile-page__footer-copy {
-  font-size: 20rpx;
-  letter-spacing: 6rpx;
-  color: rgba(93, 96, 90, 0.82);
-}
-
-.profile-page__stat-divider {
-  width: 1rpx;
-  height: 54rpx;
-  background: rgba(177, 179, 171, 0.3);
-}
-
-.profile-page__menu {
-  display: flex;
-  flex-direction: column;
-  gap: 30rpx;
-}
-
-.profile-page__menu-group {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 8rpx 0;
-}
-
-.profile-page__menu-item {
-  padding: 24rpx 14rpx;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24rpx;
-}
-
-.profile-page__menu-item--stack {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.profile-page__menu-item + .profile-page__menu-item {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.18);
-}
-
-.profile-page__menu-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10rpx;
-}
-
-.profile-page__menu-label {
-  font-size: 28rpx;
-  color: #31332e;
-}
-
-.profile-page__menu-note,
-.profile-page__menu-value {
+.profile-page__banner-text {
   font-size: 22rpx;
   line-height: 1.7;
-  color: rgba(93, 96, 90, 0.9);
-}
-
-.profile-page__menu-value {
-  white-space: nowrap;
-}
-
-.profile-page__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  padding-top: 8rpx;
-}
-
-.profile-page__chip {
-  min-height: 66rpx;
-  padding: 0 24rpx;
-  font-size: 22rpx;
-  color: rgba(93, 96, 90, 0.92);
-  border: 1rpx solid rgba(177, 179, 171, 0.32);
-}
-
-.profile-page__chip--active {
-  background: #5f5e5e;
-  color: #faf7f6;
-  border-color: #5f5e5e;
+  color: #8a3d3a;
 }
 
 .profile-page__footer {
-  margin-top: 74rpx;
+  padding-top: 30rpx;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20rpx;
+  justify-content: center;
 }
 
-.profile-page__footer-line {
-  width: 120rpx;
-  height: 1rpx;
-  background: rgba(177, 179, 171, 0.42);
+.profile-page__footer-text {
+  font-size: 18rpx;
+  line-height: 1.6;
+  color: rgba(138, 129, 120, 0.58);
+  letter-spacing: 0.28em;
+  padding-left: 0.28em;
 }
 </style>

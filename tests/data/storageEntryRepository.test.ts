@@ -65,4 +65,32 @@ describe("storageEntryRepository", () => {
     expect(restoredEntry?.diaryPrelude).toEqual(entry.diaryPrelude);
     expect(restoredEntry?.diaryPreludeStatus).toBe("selected");
   });
+
+  it("aggregates local profile stats from persisted entries", async () => {
+    const storage = createMemoryJsonStorage();
+    const repository = createStorageEntryRepository(storage);
+
+    await repository.save(createEntry({
+      type: "diary",
+      content: "今天写下风声",
+      recordDate: "2026-04-10",
+    }));
+    await repository.save(createEntry({
+      type: "jotting",
+      content: "一行随笔",
+      recordDate: "2026-04-10",
+    }));
+    await repository.save(createEntry({
+      type: "future",
+      content: "写给明天",
+      recordDate: "2026-04-11",
+      unlockDate: "2026-04-12",
+    }));
+
+    expect(await repository.getProfileStats()).toEqual({
+      recordedDays: 2,
+      totalWords: "今天写下风声一行随笔写给明天".length,
+      diaryCount: 1,
+    });
+  });
 });

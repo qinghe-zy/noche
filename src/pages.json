@@ -35,6 +35,12 @@
       "style": {
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "features/profile/pages/ProfileAlbumPage",
+      "style": {
+        "navigationStyle": "custom"
+      }
     }
   ],
   "globalStyle": {

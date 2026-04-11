@@ -5,4 +5,5 @@ export const ROUTES = {
   calendar: "features/calendar/pages/CalendarPage",
   dayArchive: "features/day-archive/pages/DayArchivePage",
   profile: "features/profile/pages/ProfilePage",
+  profileAlbum: "features/profile/pages/ProfileAlbumPage",
 } as const;

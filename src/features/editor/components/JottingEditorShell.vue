@@ -32,6 +32,8 @@
             v-for="attachment in attachments"
             :key="attachment.id"
             class="jotting-editor-shell__attachment-card"
+            :class="{ 'jotting-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
+            :id="`entry-attachment-${attachment.id}`"
             @click="$emit('preview-attachment', attachment.id)"
           >
             <image class="jotting-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
@@ -94,6 +96,7 @@ defineProps<{
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
+  focusedAttachmentId?: string;
 }>();
 
 defineEmits<{
@@ -215,6 +218,10 @@ defineEmits<{
   overflow: hidden;
   border-radius: 20rpx;
   background: rgba(255, 255, 255, 0.64);
+}
+
+.jotting-editor-shell__attachment-card--focused {
+  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
 }
 
 .jotting-editor-shell__attachment-image {

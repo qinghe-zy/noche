@@ -25,6 +25,7 @@ export interface EntryRepo {
   findByDate(recordDate: string): Promise<EntryRecord[]>;
   findByType(type: string): Promise<EntryRecord[]>;
   listCalendarMarkedDates(): Promise<string[]>;
+  getProfileStats(): Promise<{ recordedDays: number; totalWords: number; diaryCount: number }>;
   upsert(record: EntryRecord): Promise<void>;
   destroyEntry(
     entryId: string,
@@ -69,6 +70,27 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
       );
 
       return rows.map((row) => row.record_date);
+    },
+    async getProfileStats() {
+      const rows = await client.query<{
+        recorded_days: number | string | null;
+        total_words: number | string | null;
+        diary_count: number | string | null;
+      }>(
+        `SELECT
+           COUNT(DISTINCT record_date) AS recorded_days,
+           COALESCE(SUM(LENGTH(content)), 0) AS total_words,
+           COALESCE(SUM(CASE WHEN type = 'diary' THEN 1 ELSE 0 END), 0) AS diary_count
+         FROM ${TABLES.entries}
+         WHERE destroyed_at IS NULL`,
+      );
+      const row = rows[0];
+
+      return {
+        recordedDays: Number(row?.recorded_days ?? 0),
+        totalWords: Number(row?.total_words ?? 0),
+        diaryCount: Number(row?.diary_count ?? 0),
+      };
     },
     async upsert(record) {
       await client.execute(

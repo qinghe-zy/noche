@@ -34,5 +34,8 @@ export function createSQLiteEntryRepository(client: SQLiteClient): IEntryReposit
     async getCalendarMarkedDates(): Promise<string[]> {
       return repo.listCalendarMarkedDates();
     },
+    async getProfileStats() {
+      return repo.getProfileStats();
+    },
   };
 }

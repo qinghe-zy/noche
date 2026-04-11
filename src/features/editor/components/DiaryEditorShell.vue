@@ -48,6 +48,8 @@
             v-for="attachment in attachments"
             :key="attachment.id"
             class="diary-editor-shell__attachment-card"
+            :class="{ 'diary-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
+            :id="`entry-attachment-${attachment.id}`"
             @click="$emit('preview-attachment', attachment.id)"
           >
             <image class="diary-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
@@ -119,6 +121,7 @@ defineProps<{
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
+  focusedAttachmentId?: string;
   diaryPreludeStatus: DiaryPreludeStatus;
   diaryPrelude: DiaryPreludeMeta | null;
 }>();
@@ -280,6 +283,10 @@ function handlePickImagesTrigger(): void {
   overflow: hidden;
   border-radius: 24rpx;
   background: rgba(245, 244, 238, 0.85);
+}
+
+.diary-editor-shell__attachment-card--focused {
+  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
 }
 
 .diary-editor-shell__attachment-image {

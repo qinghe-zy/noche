@@ -28,7 +28,14 @@ describe("entryRepo", () => {
     const active = makeEntryRecord({ id: "entry-1" });
     const byDate = makeEntryRecord({ id: "entry-2", record_date: "2026-04-11" });
     const byType = makeEntryRecord({ id: "entry-3", type: "jotting", status: "saved", unlock_date: null });
-    client.queryResults.push([active], [active], [byDate], [byType], [{ record_date: "2026-04-10" }]);
+    client.queryResults.push(
+      [active],
+      [active],
+      [byDate],
+      [byType],
+      [{ record_date: "2026-04-10" }],
+      [{ recorded_days: 2, total_words: 128, diary_count: 1 }],
+    );
     const repo = createEntryRepo(client);
 
     expect(await repo.listActive()).toEqual([active]);
@@ -36,6 +43,11 @@ describe("entryRepo", () => {
     expect(await repo.findByDate("2026-04-11")).toEqual([byDate]);
     expect(await repo.findByType("jotting")).toEqual([byType]);
     expect(await repo.listCalendarMarkedDates()).toEqual(["2026-04-10"]);
+    expect(await repo.getProfileStats()).toEqual({
+      recordedDays: 2,
+      totalWords: 128,
+      diaryCount: 1,
+    });
   });
 
   it("upserts and logically destroys entries with explicit timestamps", async () => {
