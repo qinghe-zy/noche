@@ -6,7 +6,6 @@
       'diary-prelude-inline-card--empty': !hasPrelude,
     }"
     @tap="handleTap"
-    @click="handleTap"
   >
     <view class="diary-prelude-inline-card__leading">
       <view class="diary-prelude-inline-card__glyph-wrap">

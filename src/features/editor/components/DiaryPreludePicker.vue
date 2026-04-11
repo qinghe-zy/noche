@@ -5,7 +5,7 @@
     <view class="diary-prelude-picker__topbar">
       <TopbarIconButton @tap="$emit('go-back')" />
       <text class="diary-prelude-picker__title">写之前，先收一下今天的气息</text>
-      <text class="diary-prelude-picker__skip" @tap="handleSkip" @click="handleSkip">跳过</text>
+      <text class="diary-prelude-picker__skip" @tap="handleSkip">跳过</text>
     </view>
 
     <scroll-view class="diary-prelude-picker__body" scroll-y>
@@ -36,9 +36,11 @@
             class="diary-prelude-picker__option"
             :class="{ 'diary-prelude-picker__option--active': weatherCode === option.code }"
             @tap="toggleWeather(option.code)"
-            @click="toggleWeather(option.code)"
           >
-            <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="weather" :code="option.code" />
+            <view class="diary-prelude-picker__option-glyph-wrap">
+              <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="weather" :code="option.code" />
+            </view>
+            <view v-if="weatherCode === option.code" class="diary-prelude-picker__option-mark"></view>
             <text class="diary-prelude-picker__option-zh">{{ option.labelZh }}</text>
             <text class="diary-prelude-picker__option-en">{{ option.labelEn.toUpperCase() }}</text>
           </view>
@@ -57,9 +59,11 @@
             class="diary-prelude-picker__option"
             :class="{ 'diary-prelude-picker__option--active': moodCode === option.code }"
             @tap="toggleMood(option.code)"
-            @click="toggleMood(option.code)"
           >
-            <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="mood" :code="option.code" />
+            <view class="diary-prelude-picker__option-glyph-wrap">
+              <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="mood" :code="option.code" />
+            </view>
+            <view v-if="moodCode === option.code" class="diary-prelude-picker__option-mark"></view>
             <text class="diary-prelude-picker__option-zh">{{ option.labelZh }}</text>
             <text class="diary-prelude-picker__option-en">{{ option.labelEn.toUpperCase() }}</text>
           </view>
@@ -71,7 +75,6 @@
           class="diary-prelude-picker__confirm"
           :class="{ 'diary-prelude-picker__confirm--disabled': !previewPrelude }"
           @tap="handleConfirm"
-          @click="handleConfirm"
         >
           <text class="diary-prelude-picker__confirm-label">带着它写下去</text>
         </view>
@@ -211,6 +214,12 @@ function handleSkip(): void {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 22rpx;
   color: rgba(138, 129, 120, 0.78);
+  transition: opacity 160ms ease, transform 180ms ease;
+}
+
+.diary-prelude-picker__skip:active {
+  opacity: 0.72;
+  transform: translateY(1rpx);
 }
 
 .diary-prelude-picker__body {
@@ -306,6 +315,7 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option {
+  position: relative;
   min-height: 156rpx;
   padding: 24rpx 18rpx;
   border-radius: 28rpx;
@@ -318,11 +328,61 @@ function handleSkip(): void {
   gap: 10rpx;
   text-align: center;
   color: rgba(49, 51, 46, 0.86);
+  transform: translateY(0) scale(1);
+  box-shadow: 0 0 0 rgba(49, 51, 46, 0);
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    background-color 220ms ease,
+    color 180ms ease;
+}
+
+.diary-prelude-picker__option:active {
+  transform: translateY(1rpx) scale(0.985);
+  box-shadow: 0 8rpx 18rpx rgba(49, 51, 46, 0.06);
 }
 
 .diary-prelude-picker__option--active {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(138, 129, 120, 0.34);
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(138, 129, 120, 0.48);
+  color: rgba(49, 51, 46, 0.96);
+  transform: translateY(-4rpx);
+  box-shadow:
+    0 14rpx 28rpx rgba(49, 51, 46, 0.08),
+    0 2rpx 0 rgba(255, 255, 255, 0.85) inset;
+}
+
+.diary-prelude-picker__option-glyph-wrap {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 999rpx;
+  background: rgba(245, 244, 238, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(99, 95, 85, 0.82);
+  transition:
+    background-color 220ms ease,
+    color 180ms ease,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.diary-prelude-picker__option--active .diary-prelude-picker__option-glyph-wrap {
+  background: rgba(234, 229, 218, 0.82);
+  color: rgba(49, 51, 46, 0.94);
+  transform: scale(1.05);
+}
+
+.diary-prelude-picker__option-mark {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 999rpx;
+  background: rgba(138, 129, 120, 0.82);
+  box-shadow: 0 0 0 6rpx rgba(234, 229, 218, 0.55);
 }
 
 .diary-prelude-picker__option-glyph {
@@ -333,6 +393,12 @@ function handleSkip(): void {
 .diary-prelude-picker__option-zh {
   font-size: 26rpx;
   line-height: 1.2;
+  transition: color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.diary-prelude-picker__option--active .diary-prelude-picker__option-zh {
+  color: rgba(49, 51, 46, 0.98);
+  transform: translateY(-1rpx);
 }
 
 .diary-prelude-picker__option-en {
@@ -340,6 +406,12 @@ function handleSkip(): void {
   font-size: 16rpx;
   color: rgba(138, 129, 120, 0.68);
   letter-spacing: 0.22em;
+  transition: color 180ms ease, letter-spacing 220ms ease;
+}
+
+.diary-prelude-picker__option--active .diary-prelude-picker__option-en {
+  color: rgba(99, 95, 85, 0.78);
+  letter-spacing: 0.24em;
 }
 
 .diary-prelude-picker__footer {
@@ -357,10 +429,22 @@ function handleSkip(): void {
   display: flex;
   align-items: center;
   justify-content: center;
+  transform: scale(1);
+  box-shadow: 0 10rpx 18rpx rgba(49, 51, 46, 0.1);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.diary-prelude-picker__confirm:active {
+  transform: scale(0.992);
+  box-shadow: 0 6rpx 12rpx rgba(49, 51, 46, 0.08);
 }
 
 .diary-prelude-picker__confirm--disabled {
   background: rgba(177, 179, 171, 0.56);
+  box-shadow: none;
 }
 
 .diary-prelude-picker__confirm-label {
@@ -374,5 +458,24 @@ function handleSkip(): void {
   font-size: 22rpx;
   line-height: 1.7;
   color: rgba(138, 129, 120, 0.72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diary-prelude-picker__skip,
+  .diary-prelude-picker__option,
+  .diary-prelude-picker__option-glyph-wrap,
+  .diary-prelude-picker__option-zh,
+  .diary-prelude-picker__option-en,
+  .diary-prelude-picker__confirm {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .diary-prelude-picker__option:active,
+  .diary-prelude-picker__confirm:active,
+  .diary-prelude-picker__skip:active,
+  .diary-prelude-picker__option--active {
+    transform: none !important;
+  }
 }
 </style>
