@@ -16,11 +16,13 @@ describe("home stitch parity", () => {
     expect(homePage).toContain("home-page__nav-entry");
   });
 
-  it("uses the stitch typography imports instead of the simplified local layout", () => {
+  it("keeps home runtime local-first without remote fonts or texture assets", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
 
-    expect(homePage).toContain("fonts.googleapis.com/css2?family=Noto+Serif+SC");
-    expect(homePage).toContain("fonts.googleapis.com/css2?family=Material+Symbols+Outlined");
+    expect(homePage).not.toContain("fonts.googleapis.com");
+    expect(homePage).not.toContain("googleusercontent.com");
+    expect(homePage).not.toContain("https://");
+    expect(homePage).not.toContain("Material Symbols");
   });
 
   it("keeps diary as the single primary entry and avoids a duplicated diary shortcut", () => {

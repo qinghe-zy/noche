@@ -29,7 +29,7 @@ export interface ProfileAlbumItem {
 }
 
 export interface ProfileActionItem {
-  key: "privacy-lock" | "local-backup" | "about";
+  key: "appearance-settings" | "privacy-lock" | "local-backup" | "about";
   title: string;
   note: string;
   value: string;
@@ -121,6 +121,42 @@ export function formatProfileBackupLabel(lastBackupAt: string | null): string {
   }
 
   return `最近一次 ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`;
+}
+
+export function formatProfileThemeLabel(theme: "system" | "light" | "dark"): string {
+  if (theme === "light") {
+    return "浅色";
+  }
+
+  if (theme === "dark") {
+    return "深色";
+  }
+
+  return "跟随系统";
+}
+
+export function formatProfileLocaleLabel(locale: string): string {
+  if (locale === "en-US") {
+    return "English";
+  }
+
+  if (locale === "ja-JP") {
+    return "日本語";
+  }
+
+  return "中文";
+}
+
+export function formatProfileWeekStartLabel(weekStartsOn: 0 | 1): string {
+  return weekStartsOn === 0 ? "周日开始" : "周一开始";
+}
+
+export function formatProfileAppearanceLabel(
+  theme: "system" | "light" | "dark",
+  locale: string,
+  weekStartsOn: 0 | 1,
+): string {
+  return `${formatProfileThemeLabel(theme)} · ${formatProfileWeekStartLabel(weekStartsOn)} · ${formatProfileLocaleLabel(locale)}`;
 }
 
 export function resolveProfileInitial(displayName: string): string {

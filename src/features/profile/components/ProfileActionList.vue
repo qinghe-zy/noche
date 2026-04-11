@@ -34,7 +34,7 @@ defineEmits<{
 
 <style scoped>
 .profile-action-list {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.26);
+  border-top: 1rpx solid rgba(177, 179, 171, 0.14);
 }
 
 .profile-action-list__item {
@@ -42,11 +42,11 @@ defineEmits<{
   align-items: center;
   justify-content: space-between;
   gap: 24rpx;
-  padding: 26rpx 4rpx;
+  padding: 20rpx 0;
 }
 
 .profile-action-list__item + .profile-action-list__item {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.18);
+  border-top: 1rpx solid rgba(177, 179, 171, 0.09);
 }
 
 .profile-action-list__copy {
@@ -54,36 +54,38 @@ defineEmits<{
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 4rpx;
 }
 
 .profile-action-list__title {
-  font-size: 28rpx;
-  line-height: 1.4;
+  font-size: 25rpx;
+  line-height: 1.35;
   color: #31332e;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
 }
 
 .profile-action-list__note,
 .profile-action-list__value {
-  font-size: 20rpx;
-  line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  font-size: 17rpx;
+  line-height: 1.58;
+  color: rgba(99, 95, 85, 0.58);
 }
 
 .profile-action-list__meta {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
+  max-width: 44%;
 }
 
 .profile-action-list__value {
-  white-space: nowrap;
+  white-space: normal;
+  text-align: right;
 }
 
 .profile-action-list__icon {
-  width: 28rpx;
-  height: 28rpx;
-  color: rgba(138, 129, 120, 0.72);
+  width: 24rpx;
+  height: 24rpx;
+  color: rgba(138, 129, 120, 0.46);
 }
 </style>

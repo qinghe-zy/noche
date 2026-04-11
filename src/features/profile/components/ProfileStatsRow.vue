@@ -54,43 +54,55 @@ const showEmptyHint = computed(() =>
 
 <style scoped>
 .profile-stats {
-  padding: 26rpx 20rpx 0;
+  padding: 4rpx 0 0;
 }
 
 .profile-stats__row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18rpx;
+  gap: 4rpx;
 }
 
 .profile-stats__item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10rpx;
+  gap: 6rpx;
+  padding: 8rpx 8rpx 0;
   text-align: center;
+}
+
+.profile-stats__item + .profile-stats__item::before {
+  content: "";
+  position: absolute;
+  left: -2rpx;
+  top: 14rpx;
+  width: 1rpx;
+  height: 42rpx;
+  background: rgba(177, 179, 171, 0.18);
 }
 
 .profile-stats__value {
   font-size: 48rpx;
   line-height: 1.1;
-  font-weight: 300;
+  font-weight: 400;
   color: #31332e;
 }
 
 .profile-stats__label {
-  font-size: 19rpx;
-  line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
-  letter-spacing: 0.16em;
+  font-size: 17rpx;
+  line-height: 1.45;
+  color: rgba(99, 95, 85, 0.54);
+  letter-spacing: 0.06em;
 }
 
 .profile-stats__empty {
   display: block;
-  margin-top: 24rpx;
-  font-size: 22rpx;
-  line-height: 1.8;
-  text-align: center;
-  color: rgba(99, 95, 85, 0.74);
+  margin-top: 18rpx;
+  font-size: 20rpx;
+  line-height: 1.7;
+  text-align: left;
+  color: rgba(99, 95, 85, 0.66);
 }
 </style>

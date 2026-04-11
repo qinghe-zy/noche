@@ -1,7 +1,5 @@
 <template>
   <view class="home-page">
-    <view class="home-page__vignette"></view>
-
     <view class="home-page__topnav">
       <view class="home-page__topnav-inner">
         <view class="home-page__topnav-spacer"></view>
@@ -19,15 +17,19 @@
       </view>
 
       <view class="home-page__focus">
-        <view class="home-page__paper-premium" @click="handleNavigate('editor', { type: 'diary' })">
-          <view class="home-page__paper-texture" :style="paperTextureStyle"></view>
+        <view
+          class="home-page__paper-premium"
+          @click="handleNavigate('editor', { type: 'diary' })"
+          @tap="handleNavigate('editor', { type: 'diary' })"
+        >
+          <view class="home-page__paper-texture"></view>
 
           <view class="home-page__paper-inner">
             <view class="home-page__paper-line"></view>
 
             <view class="home-page__paper-content">
               <view class="home-page__paper-icon-wrap">
-                <text class="home-page__material-symbols home-page__paper-icon">auto_stories</text>
+                <AppIcon name="stories" class="home-page__paper-icon" />
               </view>
 
               <view class="home-page__paper-copy">
@@ -44,23 +46,27 @@
       </view>
 
       <view class="home-page__secondary-nav">
-        <view class="home-page__nav-entry" @click="handleOpenJotting">
+        <view class="home-page__nav-entry" @click="handleOpenJotting" @tap="handleOpenJotting">
           <view class="home-page__nav-entry-icon">
-            <text class="home-page__material-symbols">edit_note</text>
+            <AppIcon name="edit-note" class="home-page__nav-entry-icon-svg" />
           </view>
           <text class="home-page__nav-entry-label">随笔</text>
         </view>
 
-        <view class="home-page__nav-entry" @click="handleNavigate('editor', { type: 'future' })">
+        <view
+          class="home-page__nav-entry"
+          @click="handleNavigate('editor', { type: 'future' })"
+          @tap="handleNavigate('editor', { type: 'future' })"
+        >
           <view class="home-page__nav-entry-icon">
-            <text class="home-page__material-symbols">history_edu</text>
+            <AppIcon name="mail" class="home-page__nav-entry-icon-svg" />
           </view>
           <text class="home-page__nav-entry-label">未来信</text>
         </view>
 
-        <view class="home-page__nav-entry" @click="handleNavigate('mailbox')">
+        <view class="home-page__nav-entry" @click="handleNavigate('mailbox')" @tap="handleNavigate('mailbox')">
           <view class="home-page__nav-entry-icon">
-            <text class="home-page__material-symbols">drafts</text>
+            <AppIcon name="mail-read" class="home-page__nav-entry-icon-svg" />
           </view>
           <text class="home-page__nav-entry-label">邮箱</text>
         </view>
@@ -109,19 +115,14 @@ import { ROUTES } from "@/shared/constants/routes";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import type { Draft } from "@/domain/draft/types";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
+import AppIcon from "@/shared/ui/AppIcon.vue";
 import HomeProfileMark from "@/features/home/components/HomeProfileMark.vue";
 
 const draftStore = useDraftStore();
 const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
 
-const paperTextureImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBWOsHrKELS9OzpBgav9btG0US__Q5LVLc5d_x1Vu7d-WYGRKP8MPrIfJpyg0fSeVm4vXpzCQ60I0lJ9sY6fds7DgEnasBrNYGgNWr83qla5Zvb8IBqT4a1X58MkOHjlWBNq39ZGMScTKh70f2TxEcHRksZ1S3QrfyfwEfWym1CX23p8hGNulas0eB0CwBEYPnBCGXRNeZEf9a2muY7EjUu8RaLEJAfc4LoaTYTQxjxpgtGF9x2yIhgtm2BoNbWVB_hYXjyMY5EPYU";
-
 const footerMark = computed(() => `${dayjs().format("YYYY年MM月")} · 安静书写`);
-const paperTextureStyle = {
-  backgroundImage: `url(${paperTextureImage})`,
-};
 
 const handleNavigate = (routeKey: keyof typeof ROUTES, query?: Record<string, string>) => {
   let url = `/${ROUTES[routeKey]}`;
@@ -179,9 +180,6 @@ async function handleCreateAnotherJottingDraft() {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;600&family=Inter:wght@300;400&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-
 .home-page,
 .home-page * {
   box-sizing: border-box;
@@ -193,18 +191,10 @@ async function handleCreateAnotherJottingDraft() {
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  background-color: #fdfbf7;
-  color: #2c2e2a;
-  font-family: "Noto Serif SC", serif;
-  -webkit-font-smoothing: antialiased;
+  background-color: #fbf9f5;
+  color: #31332e;
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
-}
-
-.home-page__vignette {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.01) 100%);
 }
 
 .home-page__topnav {
@@ -249,10 +239,7 @@ async function handleCreateAnotherJottingDraft() {
   opacity: 0.92;
 }
 
-.home-page__topnav-profile-entry:active {
-  color: #73695f;
-}
-
+.home-page__topnav-profile-entry:active,
 .home-page__topnav-profile-entry:hover {
   color: #73695f;
 }
@@ -280,7 +267,7 @@ async function handleCreateAnotherJottingDraft() {
   font-size: 38px;
   line-height: 1.15;
   font-weight: 200;
-  color: rgba(44, 46, 42, 0.9);
+  color: rgba(49, 51, 46, 0.92);
 }
 
 .home-page__letter-spacing-widest {
@@ -323,8 +310,15 @@ async function handleCreateAnotherJottingDraft() {
 .home-page__paper-texture {
   position: absolute;
   inset: 0;
-  background-blend-mode: multiply;
-  opacity: 0.04;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(160, 150, 136, 0.03) 0,
+      rgba(160, 150, 136, 0.03) 2px,
+      transparent 2px,
+      transparent 18px
+    );
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -365,14 +359,9 @@ async function handleCreateAnotherJottingDraft() {
   justify-content: center;
 }
 
-.home-page__material-symbols {
-  font-family: "Material Symbols Outlined", sans-serif;
-  font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24;
-  line-height: 1;
-}
-
 .home-page__paper-icon {
-  font-size: 40px;
+  width: 40px;
+  height: 40px;
   color: rgba(99, 95, 85, 0.3);
 }
 
@@ -387,7 +376,7 @@ async function handleCreateAnotherJottingDraft() {
   font-size: 30px;
   line-height: 1.3;
   font-weight: 300;
-  color: rgba(44, 46, 42, 0.82);
+  color: rgba(49, 51, 46, 0.84);
   text-align: center;
 }
 
@@ -444,6 +433,11 @@ async function handleCreateAnotherJottingDraft() {
   color: rgba(99, 95, 85, 0.72);
 }
 
+.home-page__nav-entry-icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
 .home-page__nav-entry-label {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 10px;
@@ -498,7 +492,7 @@ async function handleCreateAnotherJottingDraft() {
   display: block;
   font-size: 24px;
   line-height: 1.35;
-  color: #2c2e2a;
+  color: #31332e;
 }
 
 .home-page__jotting-modal-copy {
@@ -531,7 +525,7 @@ async function handleCreateAnotherJottingDraft() {
 .home-page__jotting-modal-action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: #2c2e2a;
+  color: #31332e;
 }
 
 .home-page__jotting-modal-action-copy {

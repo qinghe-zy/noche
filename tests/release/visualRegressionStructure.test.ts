@@ -22,10 +22,15 @@ describe("visual regression structure", () => {
 
   it("keeps profile page aligned to the private corner layout skeleton", () => {
     const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
+    const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
 
-    expect(profilePage).toContain("profile-page__topbar");
-    expect(profilePage).toContain("profile-page__portrait");
+    expect(profilePage).toContain("ProfileHero");
+    expect(profilePage).toContain("profile-page__content");
     expect(profilePage).toContain("profile-page__menu");
     expect(profilePage).toContain("profile-page__footer");
+    expect(profileHero).toContain("profile-hero__visual");
+    expect(profileHero).toContain("profile-hero__nav");
+    expect(profileHero).toContain("profile-hero__avatar-shell");
+    expect(profileHero).toContain("profile-hero__identity");
   });
 });

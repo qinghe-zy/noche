@@ -79,7 +79,7 @@ defineEmits<{
 .profile-album {
   display: flex;
   flex-direction: column;
-  gap: 26rpx;
+  gap: 18rpx;
 }
 
 .profile-album__head {
@@ -92,28 +92,28 @@ defineEmits<{
 .profile-album__title-wrap {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 
 .profile-album__title {
-  font-size: 30rpx;
+  font-size: 29rpx;
   line-height: 1.3;
   color: #31332e;
-  letter-spacing: 0.18em;
-  padding-left: 0.18em;
+  letter-spacing: 0.08em;
+  padding-left: 0.08em;
 }
 
 .profile-album__subtitle,
 .profile-album__all-text,
 .profile-album__date {
-  font-size: 18rpx;
+  font-size: 17rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
-  letter-spacing: 0.14em;
+  color: rgba(99, 95, 85, 0.56);
+  letter-spacing: 0.04em;
 }
 
 .profile-album__all {
-  padding: 8rpx 0;
+  padding: 4rpx 0;
 }
 
 .profile-album__grid {
@@ -125,36 +125,41 @@ defineEmits<{
 .profile-album__card {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: 10rpx;
 }
 
 .profile-album__image {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 18rpx;
+  border-radius: 20rpx;
   background: rgba(235, 231, 224, 0.88);
 }
 
 .profile-album__state {
-  padding: 42rpx 30rpx;
-  border-radius: 28rpx;
-  background: rgba(255, 255, 255, 0.5);
+  padding: 20rpx 0 8rpx;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14rpx;
-  text-align: center;
+  align-items: flex-start;
+  gap: 8rpx;
+  text-align: left;
 }
 
 .profile-album__state-title {
-  font-size: 28rpx;
+  font-size: 23rpx;
   line-height: 1.4;
   color: #4d4943;
 }
 
 .profile-album__state-text {
-  font-size: 22rpx;
-  line-height: 1.8;
-  color: rgba(99, 95, 85, 0.72);
+  font-size: 19rpx;
+  line-height: 1.72;
+  color: rgba(99, 95, 85, 0.6);
+}
+
+.profile-album__state--empty {
+  border-top: 1rpx solid rgba(177, 179, 171, 0.12);
+  border-bottom: 1rpx solid rgba(177, 179, 171, 0.08);
 }
 </style>

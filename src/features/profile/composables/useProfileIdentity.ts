@@ -54,10 +54,74 @@ export function useProfileIdentity() {
     }
   }
 
+  async function persistIdentityField(
+    key: string,
+    value: string,
+    apply: () => void,
+    fallbackError: string,
+  ): Promise<void> {
+    error.value = null;
+
+    try {
+      await getPrefsRepository().set({ key, value });
+      apply();
+    } catch (nextError) {
+      error.value = nextError instanceof Error ? nextError.message : fallbackError;
+    }
+  }
+
+  async function setDisplayName(displayName: string): Promise<void> {
+    const nextValue = sanitizeText(displayName, PROFILE_DEFAULT_IDENTITY.displayName);
+    await persistIdentityField(
+      PROFILE_PREF_KEYS.displayName,
+      nextValue,
+      () => {
+        identity.value = {
+          ...identity.value,
+          displayName: nextValue,
+        };
+      },
+      "保存昵称失败。",
+    );
+  }
+
+  async function setSignature(signature: string): Promise<void> {
+    const nextValue = sanitizeText(signature, PROFILE_DEFAULT_IDENTITY.signature);
+    await persistIdentityField(
+      PROFILE_PREF_KEYS.signature,
+      nextValue,
+      () => {
+        identity.value = {
+          ...identity.value,
+          signature: nextValue,
+        };
+      },
+      "保存签名失败。",
+    );
+  }
+
+  async function setAvatarUri(avatarUri: string | null): Promise<void> {
+    const nextValue = sanitizeUri(avatarUri) ?? "";
+    await persistIdentityField(
+      PROFILE_PREF_KEYS.avatarUri,
+      nextValue,
+      () => {
+        identity.value = {
+          ...identity.value,
+          avatarUri: sanitizeUri(nextValue),
+        };
+      },
+      "保存头像失败。",
+    );
+  }
+
   return {
     identity,
     isLoading,
     error,
     refresh,
+    setDisplayName,
+    setSignature,
+    setAvatarUri,
   };
 }
