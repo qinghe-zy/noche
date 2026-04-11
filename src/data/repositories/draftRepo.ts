@@ -14,6 +14,7 @@ export interface DraftRecord {
   last_background_saved_at: string | null;
   unlock_date: string | null;
   attachments_json?: string | null;
+  diary_prelude_status?: string | null;
   diary_prelude_json?: string | null;
 }
 
@@ -52,8 +53,9 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           last_background_saved_at,
           unlock_date,
           attachments_json,
+          diary_prelude_status,
           diary_prelude_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(slot_key) DO UPDATE SET
           id = excluded.id,
           type = excluded.type,
@@ -66,6 +68,7 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           last_background_saved_at = excluded.last_background_saved_at,
           unlock_date = excluded.unlock_date,
           attachments_json = excluded.attachments_json,
+          diary_prelude_status = excluded.diary_prelude_status,
           diary_prelude_json = excluded.diary_prelude_json`,
         [
           record.slot_key,
@@ -80,6 +83,7 @@ export function createDraftRepo(client: SQLiteClient): DraftRepo {
           record.last_background_saved_at,
           record.unlock_date,
           record.attachments_json ?? "[]",
+          record.diary_prelude_status ?? "skipped",
           record.diary_prelude_json ?? "null",
         ],
       );

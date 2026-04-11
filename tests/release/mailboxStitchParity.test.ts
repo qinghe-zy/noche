@@ -36,4 +36,18 @@ describe("mailbox stitch parity", () => {
     expect(mailboxPage).toContain("已启");
     expect(mailboxPage).toContain("待启");
   });
+
+  it("uses the shared paper confirm dialog for locked future letters", () => {
+    const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
+
+    expect(mailboxPage).toContain("PaperConfirmDialog");
+    expect(mailboxPage).not.toContain("uni.showModal({");
+  });
+
+  it("renders diary prelude icons on mailbox cards when weather or mood exists", () => {
+    const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
+
+    expect(mailboxPage).toContain("DiaryPreludeGlyph");
+    expect(mailboxPage).toContain("mailbox-page__entry-prelude");
+  });
 });

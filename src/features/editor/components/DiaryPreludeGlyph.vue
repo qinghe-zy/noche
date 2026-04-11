@@ -53,7 +53,7 @@
         <circle cx="9.6" cy="11.5" r="1.2" fill="currentColor" stroke="none" />
         <circle cx="14.4" cy="11.5" r="1.2" fill="currentColor" stroke="none" />
         <path d="M8.1 15.9C8.6 15.4 9.4 16.2 10 15.8C10.6 15.4 11.4 16.2 12 15.8C12.6 15.4 13.4 16.2 14 15.8C14.6 15.4 15.4 16.2 15.9 15.9" />
-        <path d="M17.5 7.4C17.5 8.1 16.9 8.6 16.3 8.6C15.6 8.6 16.3 7.4 16.3 7.4C16.3 7.4 16.9 6.8 17.5 7.4Z" />
+        <path class="diary-prelude-glyph__sweat-drop" d="M17.5 7.4C17.5 8.1 16.9 8.6 16.3 8.6C15.6 8.6 16.3 7.4 16.3 7.4C16.3 7.4 16.9 6.8 17.5 7.4Z" />
       </template>
 
       <template v-else-if="resolvedCode === 'melancholy'">
@@ -102,5 +102,11 @@ const resolvedCode = computed(() => props.code ?? fallbackCode.value);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.diary-prelude-glyph__sweat-drop {
+  fill: rgba(177, 179, 171, 0.22);
+  stroke: rgba(177, 179, 171, 0.72);
+  stroke-width: 1.15;
 }
 </style>

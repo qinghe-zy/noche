@@ -2,7 +2,8 @@
   <DiaryPreludePicker
     v-if="entryType === 'diary' && isDiaryPreludePickerOpen"
     :initial-prelude="diaryPrelude"
-    @go-back="handleGoBack"
+    :can-skip="canSkipDiaryPrelude"
+    @go-back="handleDiaryPreludePickerBack"
     @skip="handleDiaryPreludeSkip"
     @confirm="handleDiaryPreludeConfirm"
   />
@@ -12,20 +13,18 @@
     :mode="mode"
     :atmosphere-line="diaryAtmosphereLine"
     :headline-date="diaryHeadlineDate"
-    :meta-location="diaryMetaLocation"
-    :meta-moment="diaryMetaMoment"
+    :header-subtitle="diaryHeaderSubtitle"
+    :header-time-label="diaryHeaderTime"
     :content="content"
     :body-placeholder="bodyPlaceholder"
-    :read-title="readTitle"
-    :read-meta="readMeta"
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
+    :diary-prelude-status="diaryPreludeStatus"
     :diary-prelude="diaryPrelude"
-    :show-diary-prelude-card="showDiaryPreludeCard"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
@@ -95,6 +94,15 @@
     @next-future-picker-month="handleNextFuturePickerMonth"
     @confirm-future-date="handleConfirmFutureDate"
   />
+
+  <PaperConfirmDialog
+    :open="isDestroyDraftDialogOpen"
+    title="销毁这封信？"
+    copy="这封信已经被删空，确认后会被彻底销毁。"
+    :actions="destroyDraftDialogActions"
+    @close="resolveDestroyDraftDialog(false)"
+    @action="handleDestroyDraftDialogAction"
+  />
 </template>
 
 <script setup lang="ts">
@@ -102,8 +110,8 @@ import { computed, ref } from "vue";
 import { onHide, onLoad, onUnload } from "@dcloudio/uni-app";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
-import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
-import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
+import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
+import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { isValidFutureLetterDate, lockRecordDate } from "@/domain/time/rules";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, nowIso, tomorrowDate } from "@/shared/utils/date";
@@ -117,11 +125,12 @@ import { useEditorKeyboardViewport } from "@/features/editor/composables/useEdit
 import { shouldResetFutureUnlockDate } from "@/features/editor/editorFutureDraft";
 import { useEditorImageAttachments } from "@/features/editor/composables/useEditorImageAttachments";
 import { useEditorImagePicker } from "@/features/editor/composables/useEditorImagePicker";
-import { shouldOpenDiaryPreludePicker, shouldRenderDiaryPreludeInlineCard } from "@/features/editor/diaryPreludeState";
+import { shouldAllowDiaryPreludeEdit, shouldOpenDiaryPreludePicker } from "@/features/editor/diaryPreludeState";
 import DiaryEditorShell from "@/features/editor/components/DiaryEditorShell.vue";
 import DiaryPreludePicker from "@/features/editor/components/DiaryPreludePicker.vue";
 import JottingEditorShell from "@/features/editor/components/JottingEditorShell.vue";
 import FutureLetterEditorShell from "@/features/editor/components/FutureLetterEditorShell.vue";
+import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 
 type EditorMode = "edit" | "read";
 
@@ -155,6 +164,7 @@ const recordDate = ref(lockRecordDate());
 const mode = ref<EditorMode>("edit");
 const title = ref("");
 const content = ref("");
+const diaryPreludeStatus = ref<DiaryPreludeStatus>("skipped");
 const diaryPrelude = ref<DiaryPreludeMeta | null>(null);
 const unlockDate = ref("");
 const pendingUnlockDate = ref("");
@@ -163,7 +173,10 @@ const savedEntry = ref<Entry | null>(null);
 const isHydrating = ref(false);
 const isFutureDateSheetOpen = ref(false);
 const isDiaryPreludePickerOpen = ref(false);
+const diaryPreludePickerOrigin = ref<"auto" | "manual">("auto");
+const isDestroyDraftDialogOpen = ref(false);
 const futureHint = ref("");
+let destroyDraftDialogResolver: ((confirmed: boolean) => void) | null = null;
 
 const { showSavedHint, stampOpacity, markDirty, markSaved, reset: resetFeedback } = useEditorFeedbackState();
 const { cursorSpacing } = useEditorKeyboardViewport();
@@ -185,9 +198,8 @@ const autosave = useEditorAutosave({
 
 const errorMessage = computed(() => draftStore.error ?? entryStore.error);
 const canContinueWrite = computed(() => Boolean(savedEntry.value && savedEntry.value.type !== "future"));
-const showDiaryPreludeCard = computed(() =>
-  shouldRenderDiaryPreludeInlineCard(mode.value, diaryPrelude.value),
-);
+const canSkipDiaryPrelude = computed(() => entryType.value === "diary" && mode.value === "edit" && diaryPreludeStatus.value === "unseen");
+const canEditDiaryPrelude = computed(() => shouldAllowDiaryPreludeEdit(mode.value, diaryPreludeStatus.value));
 const paperDateDisplay = computed(() =>
   mode.value === "read" && savedEntry.value?.savedAt
     ? formatDate(savedEntry.value.savedAt, "YYYY年 · M月 · D日")
@@ -265,10 +277,22 @@ const readMeta = computed(() => {
 });
 const diaryAtmosphereLine = computed(() => `${toChineseYear(recordDate.value)} · ${resolveSeason(recordDate.value)}`);
 const diaryHeadlineDate = computed(() => formatDate(recordDate.value, "M月D日"));
-const diaryMetaLocation = computed(() => (mode.value === "read" ? "已经收好" : "写给今天的自己"));
-const diaryMetaMoment = computed(() =>
-  formatDate(savedEntry.value?.savedAt ?? nowIso(), "HH:mm"),
+const diaryHeaderSubtitle = computed(() => "写给今天的自己");
+const diaryHeaderTime = computed(() =>
+  formatDate(savedEntry.value?.savedAt ?? draftStore.activeDraft?.updatedAt ?? nowIso(), "HH:mm"),
 );
+const destroyDraftDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+  {
+    key: "cancel",
+    title: "再想想",
+    tone: "muted",
+  },
+  {
+    key: "confirm",
+    title: "确认销毁",
+    tone: "danger",
+  },
+]));
 const jottingHeadlineDate = computed(() => formatDate(recordDate.value, "M月D日"));
 
 function toChineseYear(dateString: string): string {
@@ -338,6 +362,12 @@ function syncFormFromEntry(entry: Entry): void {
   content.value = entry.content;
   recordDate.value = entry.recordDate;
   diaryPrelude.value = cloneDiaryPrelude(entry.diaryPrelude);
+  diaryPreludeStatus.value = entry.type === "diary"
+    ? normalizeDiaryPreludeStatus(entry.diaryPreludeStatus, {
+        isNewDiaryDraft: false,
+        prelude: diaryPrelude.value,
+      })
+    : "skipped";
   unlockDate.value = entry.type === "future" ? entry.unlockDate ?? "" : "";
   pendingUnlockDate.value = unlockDate.value;
   futureHint.value = "";
@@ -355,6 +385,12 @@ function syncFormFromDraft(): void {
   content.value = draft.content;
   recordDate.value = draft.recordDate ?? lockRecordDate();
   diaryPrelude.value = cloneDiaryPrelude(draft.diaryPrelude);
+  diaryPreludeStatus.value = draft.type === "diary"
+    ? normalizeDiaryPreludeStatus(draft.diaryPreludeStatus, {
+        isNewDiaryDraft: false,
+        prelude: diaryPrelude.value,
+      })
+    : "skipped";
   unlockDate.value = draft.type === "future" ? draft.unlockDate ?? "" : "";
   pendingUnlockDate.value = unlockDate.value;
   futureHint.value = "";
@@ -375,30 +411,72 @@ function handleGoBack(): void {
 }
 
 function syncDiaryPreludePresentation(): void {
-  isDiaryPreludePickerOpen.value = shouldOpenDiaryPreludePicker({
+  const shouldOpen = shouldOpenDiaryPreludePicker({
     entryType: entryType.value,
     mode: mode.value,
+    diaryPreludeStatus: diaryPreludeStatus.value,
     diaryPrelude: diaryPrelude.value,
   });
+
+  isDiaryPreludePickerOpen.value = shouldOpen;
+  if (shouldOpen) {
+    diaryPreludePickerOrigin.value = "auto";
+  }
 }
 
 function openDiaryPreludePicker(): void {
-  if (entryType.value !== "diary" || mode.value !== "edit") {
+  if (entryType.value !== "diary" || !canEditDiaryPrelude.value) {
     return;
   }
 
+  diaryPreludePickerOrigin.value = "manual";
   isDiaryPreludePickerOpen.value = true;
 }
 
-function handleDiaryPreludeSkip(): void {
-  isDiaryPreludePickerOpen.value = false;
+function handleDiaryPreludePickerBack(): void {
+  if (diaryPreludePickerOrigin.value === "manual") {
+    isDiaryPreludePickerOpen.value = false;
+    diaryPreludePickerOrigin.value = "auto";
+    return;
+  }
+
+  handleGoBack();
+}
+
+async function handleDiaryPreludeSkip(): Promise<void> {
+  if (!canSkipDiaryPrelude.value) {
+    return;
+  }
+
+  try {
+    diaryPreludeStatus.value = "skipped";
+    diaryPrelude.value = null;
+    isDiaryPreludePickerOpen.value = false;
+    diaryPreludePickerOrigin.value = "auto";
+    await persistDraftNow();
+    markSaved();
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : "暂存跳过状态失败",
+      icon: "none",
+    });
+  }
 }
 
 async function handleDiaryPreludeConfirm(nextPrelude: DiaryPreludeMeta): Promise<void> {
-  diaryPrelude.value = cloneDiaryPrelude(nextPrelude);
-  isDiaryPreludePickerOpen.value = false;
-  await persistDraftNow();
-  markSaved();
+  try {
+    diaryPreludeStatus.value = "selected";
+    diaryPrelude.value = cloneDiaryPrelude(nextPrelude);
+    isDiaryPreludePickerOpen.value = false;
+    diaryPreludePickerOrigin.value = "auto";
+    await persistDraftNow();
+    markSaved();
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : "保存前序信息失败",
+      icon: "none",
+    });
+  }
 }
 
 async function normalizeFutureDraftIfExpired(): Promise<void> {
@@ -466,10 +544,12 @@ async function openEntryForRead(entryId: string): Promise<void> {
 async function initializeFromRoute(query?: Record<string, unknown>): Promise<void> {
   entryType.value = normalizeEntryType(typeof query?.type === "string" ? query.type : undefined);
   recordDate.value = resolveRequestedRecordDate(query);
+  diaryPreludeStatus.value = "skipped";
   diaryPrelude.value = null;
   unlockDate.value = "";
   pendingUnlockDate.value = "";
   isDiaryPreludePickerOpen.value = false;
+  diaryPreludePickerOrigin.value = "auto";
   clearAttachments();
 
   if (query?.mode === "read" && typeof query.entryId === "string" && query.entryId.trim()) {
@@ -507,6 +587,7 @@ async function persistDraftNow(): Promise<void> {
   await draftStore.saveActiveDraft({
     title: title.value,
     content: content.value,
+    diaryPreludeStatus: diaryPreludeStatus.value,
     diaryPrelude: diaryPrelude.value,
     unlockDate: entryType.value === "future" ? unlockDate.value : null,
     attachments: attachments.value,
@@ -610,22 +691,31 @@ async function handleConfirmFutureDate(): Promise<void> {
   await handleFormalSave();
 }
 
+function openDestroyDraftDialog(): Promise<boolean> {
+  isDestroyDraftDialogOpen.value = true;
+
+  return new Promise<boolean>((resolve) => {
+    destroyDraftDialogResolver = resolve;
+  });
+}
+
+function resolveDestroyDraftDialog(confirmed: boolean): void {
+  isDestroyDraftDialogOpen.value = false;
+  destroyDraftDialogResolver?.(confirmed);
+  destroyDraftDialogResolver = null;
+}
+
+function handleDestroyDraftDialogAction(actionKey: string): void {
+  resolveDestroyDraftDialog(actionKey === "confirm");
+}
+
 async function handleDestroyLinkedEntryDraft(): Promise<void> {
   const draft = draftStore.activeDraft;
   if (!draft?.linkedEntryId) {
     return;
   }
 
-  const confirmed = await new Promise<boolean>((resolve) => {
-    uni.showModal({
-      title: "销毁这封信？",
-      content: "这封信已经被删空，确认后会被彻底销毁。",
-      confirmText: "确认销毁",
-      cancelText: "再想想",
-      success: (result) => resolve(Boolean(result.confirm)),
-      fail: () => resolve(false),
-    });
-  });
+  const confirmed = await openDestroyDraftDialog();
 
   if (!confirmed) {
     return;
@@ -655,6 +745,17 @@ async function handleFormalSave(): Promise<void> {
       return;
     }
 
+    if (action === "keep-draft") {
+      await persistDraftNow();
+      markSaved();
+      uni.showToast({
+        title: "已保留草稿",
+        icon: "none",
+      });
+      returnToHome();
+      return;
+    }
+
     if (action === "pick-future-date") {
       openFutureDateSheet();
       return;
@@ -673,8 +774,10 @@ async function handleFormalSave(): Promise<void> {
 
     savedEntry.value = entry;
     mode.value = "read";
+    diaryPreludeStatus.value = entry.diaryPreludeStatus;
     diaryPrelude.value = cloneDiaryPrelude(entry.diaryPrelude);
     isDiaryPreludePickerOpen.value = false;
+    diaryPreludePickerOrigin.value = "auto";
     futureHint.value = "";
     replaceAttachments(entry.attachments ?? []);
     resetFeedback();

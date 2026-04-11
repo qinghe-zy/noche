@@ -1,5 +1,5 @@
 import type { EntryType } from '../entry/types';
-import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
+import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import type { Attachment } from "@/shared/types/attachment";
 
 /**
@@ -30,6 +30,7 @@ export interface Draft {
   // 未来信特有
   unlockDate?: string | null;
   attachments?: Attachment[];
+  diaryPreludeStatus: DiaryPreludeStatus;
   diaryPrelude?: DiaryPreludeMeta | null;
 }
 
@@ -46,6 +47,7 @@ export interface DraftEntry {
   linkedEntryId?: string;
   cursorPosition?: number;
   unlockDate?: string;
+  diaryPreludeStatus: DiaryPreludeStatus;
   diaryPrelude?: DiaryPreludeMeta | null;
   mode?: 'edit' | 'read';
   lastBackgroundSavedAt?: number;

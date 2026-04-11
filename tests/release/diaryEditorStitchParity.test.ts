@@ -13,12 +13,30 @@ describe("diary editor stitch parity", () => {
 
     expect(diaryShell).toContain("diary-editor-shell");
     expect(diaryShell).toContain("AppIcon name=\"image\"");
-    expect(diaryShell).toContain("DiaryPreludeInlineCard");
+    expect(diaryShell).toContain("DiaryPreludeHeaderMeta");
     expect(diaryShell).toContain("TopbarIconButton");
     expect(diaryShell).not.toContain("diary-editor-shell__inkwell");
     expect(diaryShell).not.toContain("AppIcon name=\"palette\"");
     expect(diaryShell).toContain("handlePickImagesTrigger");
     expect(diaryShell).toContain("@click=\"handlePickImagesTrigger\"");
+    expect(diaryShell).not.toContain("DiaryPreludeInlineCard");
     expect(editorPage).toContain("DiaryPreludePicker");
+  });
+
+  it("uses the in-app paper confirm dialog instead of the system modal for destructive diary actions", () => {
+    const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
+
+    expect(editorPage).toContain("PaperConfirmDialog");
+    expect(editorPage).not.toContain("uni.showModal({");
+    expect(editorPage).toContain("isDestroyDraftDialogOpen");
+  });
+
+  it("renders diary prelude icons after time instead of text labels in the header row", () => {
+    const headerMeta = readProjectFile("src/features/editor/components/DiaryPreludeHeaderMeta.vue");
+
+    expect(headerMeta).toContain("DiaryPreludeGlyph");
+    expect(headerMeta).toContain("diary-prelude-header-meta__icon");
+    expect(headerMeta).not.toContain("weatherLabelZh");
+    expect(headerMeta).not.toContain("moodLabelZh");
   });
 });

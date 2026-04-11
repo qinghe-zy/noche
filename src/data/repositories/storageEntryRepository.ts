@@ -1,5 +1,5 @@
 import type { IEntryRepository } from "@/data/repositories/entry.repository";
-import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
+import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import type { JsonStorage } from "@/shared/utils/storage";
 
@@ -22,6 +22,22 @@ function writeEntries(storage: JsonStorage, entries: Record<string, Entry>): voi
   storage.setString(STORAGE_KEY, JSON.stringify(entries));
 }
 
+function normalizeEntry(entry: Entry): Entry {
+  const diaryPrelude = cloneDiaryPrelude(entry.diaryPrelude);
+
+  return {
+    ...entry,
+    attachments: entry.attachments ? [...entry.attachments] : [],
+    diaryPreludeStatus: entry.type === "diary"
+      ? normalizeDiaryPreludeStatus(entry.diaryPreludeStatus, {
+          isNewDiaryDraft: false,
+          prelude: diaryPrelude,
+        })
+      : "skipped",
+    diaryPrelude,
+  };
+}
+
 export function createStorageEntryRepository(
   storage: JsonStorage,
   seed: Entry[] = [],
@@ -31,11 +47,7 @@ export function createStorageEntryRepository(
   if (Object.keys(existing).length === 0 && seed.length > 0) {
     const seeded: Record<string, Entry> = {};
     for (const entry of seed) {
-      seeded[entry.id] = {
-        ...entry,
-        attachments: entry.attachments ? [...entry.attachments] : [],
-        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-      };
+      seeded[entry.id] = normalizeEntry(entry);
     }
     writeEntries(storage, seeded);
   }
@@ -43,32 +55,18 @@ export function createStorageEntryRepository(
   const activeEntries = (): Entry[] =>
     Object.values(readEntries(storage))
       .filter((entry) => !entry.destroyedAt)
-      .map((entry) => ({
-        ...entry,
-        attachments: entry.attachments ? [...entry.attachments] : [],
-        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-      }))
+      .map(normalizeEntry)
       .sort(compareEntryForMailbox);
 
   return {
     async save(entry) {
       const entries = readEntries(storage);
-      entries[entry.id] = {
-        ...entry,
-        attachments: entry.attachments ? [...entry.attachments] : [],
-        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-      };
+      entries[entry.id] = normalizeEntry(entry);
       writeEntries(storage, entries);
     },
     async getById(id) {
       const entry = readEntries(storage)[id];
-      return entry && !entry.destroyedAt
-        ? {
-            ...entry,
-            attachments: entry.attachments ? [...entry.attachments] : [],
-            diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-          }
-        : null;
+      return entry && !entry.destroyedAt ? normalizeEntry(entry) : null;
     },
     async getByDate(recordDate) {
       return activeEntries().filter((entry) => entry.recordDate === recordDate);

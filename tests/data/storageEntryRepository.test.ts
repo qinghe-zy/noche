@@ -50,6 +50,7 @@ describe("storageEntryRepository", () => {
         content: "今天有风。",
         recordDate: "2026-04-10",
       }),
+      diaryPreludeStatus: "selected",
       diaryPrelude: buildDiaryPreludeMeta({
         weatherCode: "cloudy",
         moodCode: "anxious",
@@ -62,5 +63,6 @@ describe("storageEntryRepository", () => {
     const restoredEntry = await secondRepository.getById(entry.id);
 
     expect(restoredEntry?.diaryPrelude).toEqual(entry.diaryPrelude);
+    expect(restoredEntry?.diaryPreludeStatus).toBe("selected");
   });
 });

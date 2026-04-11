@@ -17,6 +17,7 @@ function makeDraft(overrides: Partial<Draft> = {}): Draft {
     lastBackgroundSavedAt: overrides.lastBackgroundSavedAt ?? "2026-04-10T08:30:00.000Z",
     unlockDate: overrides.unlockDate ?? "2026-04-12",
     attachments: overrides.attachments ?? [],
+    diaryPreludeStatus: overrides.diaryPreludeStatus ?? "skipped",
     diaryPrelude: overrides.diaryPrelude ?? null,
   };
 }
@@ -38,6 +39,7 @@ describe("sqliteDraftRepository", () => {
         last_background_saved_at: "2026-04-10T08:30:00.000Z",
         unlock_date: "2026-04-12",
         attachments_json: "[]",
+        diary_prelude_status: "skipped",
         diary_prelude_json: "null",
       },
     ]);

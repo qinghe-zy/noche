@@ -4,8 +4,9 @@
 
     <view class="diary-prelude-picker__topbar">
       <TopbarIconButton @tap="$emit('go-back')" />
-      <text class="diary-prelude-picker__title">写之前，先收一下今天的气息</text>
-      <text class="diary-prelude-picker__skip" @tap="handleSkip">跳过</text>
+      <text class="diary-prelude-picker__title">落笔之前，先拾起今日的碎片</text>
+      <text v-if="canSkip" class="diary-prelude-picker__skip" @tap="handleSkip">跳过</text>
+      <view v-else class="diary-prelude-picker__skip-spacer"></view>
     </view>
 
     <scroll-view class="diary-prelude-picker__body" scroll-y>
@@ -78,7 +79,7 @@
         >
           <text class="diary-prelude-picker__confirm-label">带着它写下去</text>
         </view>
-        <text class="diary-prelude-picker__hint">可以只选一个，也可以先跳过，稍后再补。</text>
+        <text v-if="pickerHint" class="diary-prelude-picker__hint">{{ pickerHint }}</text>
       </view>
     </scroll-view>
   </view>
@@ -97,6 +98,7 @@ import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 const props = defineProps<{
   initialPrelude: DiaryPreludeMeta | null;
+  canSkip: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -122,26 +124,35 @@ const previewPrelude = computed(() =>
     moodCode: moodCode.value,
   }),
 );
+const selectedWeather = computed(() => DIARY_WEATHER_OPTIONS.find((option) => option.code === weatherCode.value) ?? null);
+const selectedMood = computed(() => DIARY_MOOD_OPTIONS.find((option) => option.code === moodCode.value) ?? null);
 const previewWeatherCode = computed(() => previewPrelude.value?.weatherCode ?? weatherCode.value);
 const previewMoodCode = computed(() => previewPrelude.value?.moodCode ?? moodCode.value);
 const previewHeadlineZh = computed(() => {
-  if (!previewPrelude.value) {
-    return "先把今天的天气和心情放在纸页边上";
+  if (!selectedWeather.value && !selectedMood.value) {
+    return "将天气与心事，安放于纸页边缘";
   }
 
-  return [previewPrelude.value.weatherLabelZh, previewPrelude.value.moodLabelZh].filter(Boolean).join(" · ");
+  return [selectedWeather.value?.labelZh, selectedMood.value?.labelZh].filter(Boolean).join(" · ");
 });
 const previewHeadlineEn = computed(() => {
-  if (!previewPrelude.value) {
+  if (!selectedWeather.value && !selectedMood.value) {
     return "WEATHER · MOOD";
   }
 
-  return [previewPrelude.value.weatherLabelEn, previewPrelude.value.moodLabelEn]
+  return [selectedWeather.value?.labelEn, selectedMood.value?.labelEn]
     .filter(Boolean)
     .map((segment) => segment?.toUpperCase())
     .join(" · ");
 });
-const previewNote = computed(() => previewPrelude.value?.note ?? "让这张纸先知道你从怎样的一天里走来。");
+const previewNote = computed(() => {
+  if (previewPrelude.value?.quote) {
+    return previewPrelude.value.quote;
+  }
+
+  return "让这页留白先感知，你从怎样的一天里走来。";
+});
+const pickerHint = computed(() => (props.canSkip ? "可以先跳过。" : ""));
 
 function toggleWeather(code: string): void {
   weatherCode.value = weatherCode.value === code ? null : code;
@@ -160,6 +171,10 @@ function handleConfirm(): void {
 }
 
 function handleSkip(): void {
+  if (!props.canSkip) {
+    return;
+  }
+
   emit("skip");
 }
 </script>
@@ -220,6 +235,11 @@ function handleSkip(): void {
 .diary-prelude-picker__skip:active {
   opacity: 0.72;
   transform: translateY(1rpx);
+}
+
+.diary-prelude-picker__skip-spacer {
+  min-width: 72rpx;
+  min-height: 32rpx;
 }
 
 .diary-prelude-picker__body {

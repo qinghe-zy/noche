@@ -28,19 +28,15 @@
     <view class="diary-editor-shell__canvas">
       <view class="diary-editor-shell__header">
         <text class="diary-editor-shell__date">{{ headlineDate }}</text>
-        <view class="diary-editor-shell__meta-row">
-          <text class="diary-editor-shell__meta-text">{{ metaLocation }}</text>
-          <text class="diary-editor-shell__meta-text">{{ metaMoment }}</text>
-        </view>
+        <DiaryPreludeHeaderMeta
+          :mode="mode"
+          :subtitle="headerSubtitle"
+          :time-label="headerTimeLabel"
+          :status="diaryPreludeStatus"
+          :prelude="diaryPrelude"
+          @edit="$emit('edit-diary-prelude')"
+        />
       </view>
-
-      <DiaryPreludeInlineCard
-        v-if="showDiaryPreludeCard"
-        class="diary-editor-shell__prelude"
-        :mode="mode"
-        :prelude="diaryPrelude"
-        @edit="$emit('edit-diary-prelude')"
-      />
 
       <view v-if="errorMessage" class="diary-editor-shell__notice">
         <text>{{ errorMessage }}</text>
@@ -79,8 +75,6 @@
         />
 
         <view v-else class="diary-editor-shell__read">
-          <text class="diary-editor-shell__read-title">{{ readTitle }}</text>
-          <text class="diary-editor-shell__read-meta">{{ readMeta }}</text>
           <text class="diary-editor-shell__read-content literary-text">{{ content }}</text>
         </view>
       </scroll-view>
@@ -101,9 +95,9 @@
 </template>
 
 <script setup lang="ts">
-import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
+import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import type { Attachment } from "@/shared/types/attachment";
-import DiaryPreludeInlineCard from "@/features/editor/components/DiaryPreludeInlineCard.vue";
+import DiaryPreludeHeaderMeta from "@/features/editor/components/DiaryPreludeHeaderMeta.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
@@ -115,20 +109,18 @@ defineProps<{
   mode: EditorMode;
   atmosphereLine: string;
   headlineDate: string;
-  metaLocation: string;
-  metaMoment: string;
+  headerSubtitle: string;
+  headerTimeLabel: string;
   content: string;
   bodyPlaceholder: string;
-  readTitle: string;
-  readMeta: string;
   errorMessage: string | null;
   showSavedHint: boolean;
   canContinueWrite: boolean;
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
+  diaryPreludeStatus: DiaryPreludeStatus;
   diaryPrelude: DiaryPreludeMeta | null;
-  showDiaryPreludeCard: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -251,10 +243,6 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__header {
-  margin-bottom: 48rpx;
-}
-
-.diary-editor-shell__prelude {
   margin-bottom: 26rpx;
 }
 
@@ -263,24 +251,11 @@ function handlePickImagesTrigger(): void {
   font-size: 72rpx;
   line-height: 1.08;
   letter-spacing: 0.06em;
-  margin-bottom: 28rpx;
-}
-
-.diary-editor-shell__meta-row {
-  display: flex;
-  gap: 40rpx;
-  flex-wrap: wrap;
-}
-
-.diary-editor-shell__meta-text {
-  font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 22rpx;
-  letter-spacing: 0.16em;
-  color: rgba(177, 179, 171, 0.96);
+  margin-bottom: 16rpx;
 }
 
 .diary-editor-shell__notice {
-  margin-bottom: 24rpx;
+  margin-bottom: 18rpx;
   font-size: 22rpx;
   color: #8a3d3a;
 }
@@ -348,20 +323,8 @@ function handlePickImagesTrigger(): void {
   font-weight: 300;
 }
 
-.diary-editor-shell__read-title {
-  display: block;
-  margin-bottom: 18rpx;
-  font-size: 42rpx;
-  line-height: 1.24;
-}
-
-.diary-editor-shell__read-meta {
-  display: block;
-  margin-bottom: 28rpx;
-  font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 22rpx;
-  letter-spacing: 0.16em;
-  color: rgba(177, 179, 171, 0.96);
+.diary-editor-shell__read {
+  padding-top: 2rpx;
 }
 
 .diary-editor-shell__read-content {
@@ -369,7 +332,7 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__footer {
-  margin-top: 48rpx;
+  margin-top: 36rpx;
   padding-top: 28rpx;
   border-top: 1rpx solid rgba(177, 179, 171, 0.18);
   display: flex;

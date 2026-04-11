@@ -85,7 +85,26 @@
                       <view class="mailbox-page__entry-dot"></view>
                       <text class="mailbox-page__entry-type">{{ formatTypeLabel(entry.type) }}</text>
                     </view>
-                    <text class="mailbox-page__entry-date">{{ formatDateLabel(entry, activeSection.dateTab) }}</text>
+                    <view class="mailbox-page__entry-meta-cluster">
+                      <text class="mailbox-page__entry-date">{{ formatDateLabel(entry, activeSection.dateTab) }}</text>
+                      <view
+                        v-if="hasDiaryPreludeGlyphs(entry)"
+                        class="mailbox-page__entry-prelude"
+                      >
+                        <DiaryPreludeGlyph
+                          v-if="entry.diaryPrelude?.weatherCode"
+                          class="mailbox-page__entry-prelude-glyph"
+                          kind="weather"
+                          :code="entry.diaryPrelude.weatherCode"
+                        />
+                        <DiaryPreludeGlyph
+                          v-if="entry.diaryPrelude?.moodCode"
+                          class="mailbox-page__entry-prelude-glyph"
+                          kind="mood"
+                          :code="entry.diaryPrelude.moodCode"
+                        />
+                      </view>
+                    </view>
                   </view>
 
                   <template v-if="activeSection.renderMode === 'paper'">
@@ -131,6 +150,15 @@
     <button class="mailbox-page__fab" @click="handleComposeCurrentSection">
       <AppIcon name="edit-square" class="mailbox-page__fab-icon" />
     </button>
+
+    <PaperConfirmDialog
+      :open="isLockedFutureDialogOpen"
+      title="尚未开启"
+      :copy="lockedFutureDialogCopy"
+      :actions="lockedFutureDialogActions"
+      @close="closeLockedFutureDialog"
+      @action="handleLockedFutureDialogAction"
+    />
   </view>
 </template>
 
@@ -142,6 +170,8 @@ import type { Entry, EntryType } from "@/domain/entry/types";
 import { ROUTES } from "@/shared/constants/routes";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
+import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
+import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import {
   formatMailboxDateLabel,
   formatMailboxExcerpt,
@@ -172,6 +202,8 @@ interface MailboxSection {
 const mailboxStore = useMailboxStore();
 const activeTab = ref<MailboxPrimaryTab>("documentary");
 const activeSecondaryTab = ref<MailboxSecondaryTab>(getDefaultMailboxSecondaryTab("documentary"));
+const lockedFutureEntry = ref<Entry | null>(null);
+const isLockedFutureDialogOpen = ref(false);
 
 const activeSections = computed<MailboxSection[]>(() => {
   if (activeTab.value === "documentary") {
@@ -240,6 +272,23 @@ const activeSection = computed<MailboxSection>(() => {
 
   return matched ?? activeSections.value[0];
 });
+const lockedFutureDialogCopy = computed(() =>
+  lockedFutureEntry.value?.unlockDate
+    ? `这封未来信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。你也可以现在销毁它。`
+    : "这封未来信还没有到开启的时候。你也可以现在销毁它。",
+);
+const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+  {
+    key: "keep",
+    title: "知道了",
+    tone: "muted",
+  },
+  {
+    key: "destroy",
+    title: "现在销毁",
+    tone: "danger",
+  },
+]));
 
 function isSealedFuture(entry: Entry): boolean {
   return entry.type === "future" && entry.status === "sealed";
@@ -267,6 +316,10 @@ function resolveMailboxMetaIcon(icon: string): "stories" | "edit-note" | "mail-r
   }
 
   return icon === "mail" ? "mail" : "stories";
+}
+
+function hasDiaryPreludeGlyphs(entry: Entry): boolean {
+  return entry.type === "diary" && Boolean(entry.diaryPrelude?.weatherCode || entry.diaryPrelude?.moodCode);
 }
 
 async function refresh() {
@@ -310,19 +363,16 @@ onMounted(() => {
   void refresh();
 });
 
-async function handleLockedFuture(entry: Entry): Promise<void> {
-  const shouldKeep = await new Promise<boolean>((resolve) => {
-    uni.showModal({
-      title: "尚未开启",
-      content: `这封未来信会在 ${entry.unlockDate} 当天开启。你也可以现在销毁它。`,
-      confirmText: "知道了",
-      cancelText: "销毁",
-      success: (result) => resolve(Boolean(result.confirm)),
-      fail: () => resolve(true),
-    });
-  });
+function closeLockedFutureDialog(): void {
+  isLockedFutureDialogOpen.value = false;
+  lockedFutureEntry.value = null;
+}
 
-  if (shouldKeep) {
+async function handleLockedFutureDialogAction(actionKey: string): Promise<void> {
+  const entry = lockedFutureEntry.value;
+  closeLockedFutureDialog();
+
+  if (actionKey !== "destroy" || !entry) {
     return;
   }
 
@@ -335,6 +385,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
     title: "已销毁",
     icon: "none",
   });
+}
+
+async function handleLockedFuture(entry: Entry): Promise<void> {
+  lockedFutureEntry.value = entry;
+  isLockedFutureDialogOpen.value = true;
 }
 </script>
 
@@ -600,6 +655,12 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   margin-bottom: 16px;
 }
 
+.mailbox-page__entry-meta-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .mailbox-page__entry-badge {
   display: flex;
   align-items: center;
@@ -628,6 +689,18 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__sealed-lock-label,
 .mailbox-page__footer-text {
   padding-left: 0.18em;
+}
+
+.mailbox-page__entry-prelude {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(121, 124, 117, 0.76);
+}
+
+.mailbox-page__entry-prelude-glyph {
+  width: 14px;
+  height: 14px;
 }
 
 .mailbox-page__entry-title {

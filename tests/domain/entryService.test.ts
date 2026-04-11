@@ -171,13 +171,15 @@ describe("entry service", () => {
       }),
       title: "",
       content: "今天先慢慢写。",
+      diaryPreludeStatus: "selected",
       diaryPrelude,
     });
 
     expect(entry.diaryPrelude).toEqual(diaryPrelude);
+    expect(entry.diaryPreludeStatus).toBe("selected");
   });
 
-  it("does not treat diary prelude alone as enough for formal save", () => {
+  it("keeps diary drafts with only prelude as draft-only instead of formal save", () => {
     const draft = {
       ...createDraft({
         type: "diary",
@@ -185,13 +187,14 @@ describe("entry service", () => {
       }),
       title: "",
       content: "   ",
+      diaryPreludeStatus: "selected",
       diaryPrelude: buildDiaryPreludeMeta({
         weatherCode: "sunny",
         moodCode: "joyful",
       }),
     };
 
-    expect(resolveDraftSaveAction(draft)).toBe("discard-empty");
+    expect(resolveDraftSaveAction(draft)).toBe("keep-draft");
   });
 
   it("uses image fallback titles when a draft has only attachments", () => {
@@ -225,5 +228,19 @@ describe("entry service", () => {
     expect(diaryEntry.title).toBe("图片日记");
     expect(jottingEntry.title).toBe("图片随笔");
     expect(futureEntry.title).toBe("图片未来信");
+  });
+
+  it("creates new diary drafts as unseen and other drafts as skipped", () => {
+    expect(
+      createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+      }).diaryPreludeStatus,
+    ).toBe("unseen");
+    expect(
+      createDraft({
+        type: "jotting",
+      }).diaryPreludeStatus,
+    ).toBe("skipped");
   });
 });

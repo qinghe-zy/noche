@@ -259,6 +259,7 @@ describe("draft store", () => {
     await draftStore.saveActiveDraft({
       title: "",
       content: "",
+      diaryPreludeStatus: "selected",
       diaryPrelude,
     });
 
@@ -269,6 +270,7 @@ describe("draft store", () => {
     });
 
     expect(restored.diaryPrelude).toEqual(diaryPrelude);
+    expect(restored.diaryPreludeStatus).toBe("selected");
   });
 
   it("formalizes image-only drafts into entries with attachments intact", async () => {
@@ -312,6 +314,7 @@ describe("draft store", () => {
     await draftStore.saveActiveDraft({
       title: "",
       content: "今天心里很满。",
+      diaryPreludeStatus: "selected",
       diaryPrelude,
     });
 
@@ -319,9 +322,34 @@ describe("draft store", () => {
     const reloadedEntry = entry ? await entryStore.fetchEntryById(entry.id) : null;
 
     expect(entry?.diaryPrelude).toEqual(diaryPrelude);
+    expect(entry?.diaryPreludeStatus).toBe("selected");
     expect(reloadedEntry?.diaryPrelude).toEqual(diaryPrelude);
+    expect(reloadedEntry?.diaryPreludeStatus).toBe("selected");
 
     const resumedDraft = entry ? await draftStore.resumeEntry(entry.id) : null;
     expect(resumedDraft?.diaryPrelude).toEqual(diaryPrelude);
+    expect(resumedDraft?.diaryPreludeStatus).toBe("selected");
+  });
+
+  it("persists skipped diary prelude status without creating a synthetic prelude", async () => {
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      diaryPreludeStatus: "skipped",
+      diaryPrelude: null,
+    });
+
+    draftStore.setActiveDraftKey(null);
+    const restored = await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+
+    expect(restored.diaryPreludeStatus).toBe("skipped");
+    expect(restored.diaryPrelude).toBeNull();
   });
 });

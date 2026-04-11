@@ -1,6 +1,6 @@
 import type { Entry, EntryType } from "@/domain/entry/types";
 import type { IEntryRepository } from "@/data/repositories/entry.repository";
-import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
+import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 
 function compareEntryForMailbox(a: Entry, b: Entry): number {
   if (a.recordDate !== b.recordDate) {
@@ -14,7 +14,7 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
   const entries = new Map<string, Entry>();
 
   for (const entry of seed) {
-    entries.set(entry.id, entry);
+    entries.set(entry.id, cloneEntry(entry));
   }
 
   const activeEntries = () =>
@@ -24,22 +24,12 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
 
   return {
     async save(entry) {
-      entries.set(entry.id, {
-        ...entry,
-        attachments: entry.attachments ? [...entry.attachments] : [],
-        diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-      });
+      entries.set(entry.id, cloneEntry(entry));
     },
 
     async getById(id) {
       const entry = entries.get(id);
-      return entry && !entry.destroyedAt
-        ? {
-            ...entry,
-            attachments: entry.attachments ? [...entry.attachments] : [],
-            diaryPrelude: cloneDiaryPrelude(entry.diaryPrelude),
-          }
-        : null;
+      return entry && !entry.destroyedAt ? cloneEntry(entry) : null;
     },
 
     async getByDate(recordDate) {
@@ -67,5 +57,21 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
         ),
       ).sort();
     },
+  };
+}
+
+function cloneEntry(entry: Entry): Entry {
+  const diaryPrelude = cloneDiaryPrelude(entry.diaryPrelude);
+
+  return {
+    ...entry,
+    attachments: entry.attachments ? [...entry.attachments] : [],
+    diaryPreludeStatus: entry.type === "diary"
+      ? normalizeDiaryPreludeStatus(entry.diaryPreludeStatus, {
+          isNewDiaryDraft: false,
+          prelude: diaryPrelude,
+        })
+      : "skipped",
+    diaryPrelude,
   };
 }

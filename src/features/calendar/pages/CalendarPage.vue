@@ -84,7 +84,26 @@
           >
               <view class="calendar-page__day-mailbox-item-head">
                 <text class="calendar-page__day-mailbox-item-type">{{ formatEntryTypeLabel(entry.type) }}</text>
-                <text class="calendar-page__day-mailbox-item-date">{{ formatDate(entry.savedAt ?? entry.createdAt, "HH:mm") }}</text>
+                <view class="calendar-page__day-mailbox-item-meta-cluster">
+                  <text class="calendar-page__day-mailbox-item-date">{{ formatDate(entry.savedAt ?? entry.createdAt, "HH:mm") }}</text>
+                  <view
+                    v-if="hasDiaryPreludeGlyphs(entry)"
+                    class="calendar-page__day-mailbox-item-prelude"
+                  >
+                    <DiaryPreludeGlyph
+                      v-if="entry.diaryPrelude?.weatherCode"
+                      class="calendar-page__day-mailbox-item-prelude-glyph"
+                      kind="weather"
+                      :code="entry.diaryPrelude.weatherCode"
+                    />
+                    <DiaryPreludeGlyph
+                      v-if="entry.diaryPrelude?.moodCode"
+                      class="calendar-page__day-mailbox-item-prelude-glyph"
+                      kind="mood"
+                      :code="entry.diaryPrelude.moodCode"
+                    />
+                  </view>
+                </view>
               </view>
               <text class="calendar-page__day-mailbox-item-title">{{ entry.title || fallbackEntryTitle(entry.type) }}</text>
               <text class="calendar-page__day-mailbox-item-content">{{ entry.content }}</text>
@@ -93,16 +112,25 @@
           </view>
         </view>
 
-      <view class="calendar-page__footer">
-        <view v-if="calendarStore.isLoading" class="calendar-page__status">
-          <text class="calendar-page__status-text">正在更新日期标记…</text>
-        </view>
+    <view class="calendar-page__footer">
+      <view v-if="calendarStore.isLoading" class="calendar-page__status">
+        <text class="calendar-page__status-text">正在更新日期标记…</text>
+      </view>
         <view v-else class="calendar-page__legend">
           <view class="calendar-page__legend-dot"></view>
           <text class="calendar-page__legend-text">有记录</text>
         </view>
       </view>
     </view>
+
+    <PaperConfirmDialog
+      :open="isLockedFutureDialogOpen"
+      title="尚未开启"
+      :copy="lockedFutureDialogCopy"
+      :actions="lockedFutureDialogActions"
+      @close="closeLockedFutureDialog"
+      @action="handleLockedFutureDialogAction"
+    />
   </view>
 </template>
 
@@ -113,7 +141,9 @@ import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, isSameDay } fr
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import AppIcon from "@/shared/ui/AppIcon.vue";
+import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import {
   formatCalendarMonthLabel,
   formatCalendarYearLabel,
@@ -126,6 +156,8 @@ const calendarStore = useCalendarStore();
 const currentMonthDate = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const selectedDate = ref<string | null>(null);
 const mailboxVariantIndex = ref(0);
+const lockedFutureEntry = ref<Entry | null>(null);
+const isLockedFutureDialogOpen = ref(false);
 const weekLabels = ["日", "一", "二", "三", "四", "五", "六"];
 
 const calendarDays = computed(() => {
@@ -151,6 +183,17 @@ const calendarDays = computed(() => {
 
 const contextDate = computed(() => (selectedDate.value ? selectedDate.value : "选择日期"));
 const selectedEntries = computed(() => calendarStore.selectedDateEntries);
+const lockedFutureDialogCopy = computed(() =>
+  lockedFutureEntry.value?.unlockDate
+    ? `这封未来信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。`
+    : "这封未来信还没有到开启的时候。",
+);
+const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+  {
+    key: "acknowledge",
+    title: "知道了",
+  },
+]));
 const mailboxState = computed(() => resolveCalendarMailboxState(
   selectedDate.value ?? formatDate(new Date(), "YYYY-MM-DD"),
   selectedEntries.value,
@@ -164,6 +207,10 @@ function formatEntryStatus(entry: Entry): string {
   }
 
   return "已收好";
+}
+
+function hasDiaryPreludeGlyphs(entry: Entry): boolean {
+  return entry.type === "diary" && Boolean(entry.diaryPrelude?.weatherCode || entry.diaryPrelude?.moodCode);
 }
 
 function handlePrimaryAction() {
@@ -189,18 +236,23 @@ function handleWriteDiary() {
 function handleOpenEntry(entryId: string) {
   const entry = selectedEntries.value.find((item) => item.id === entryId);
   if (entry?.type === "future" && entry.status === "sealed") {
-    uni.showModal({
-      title: "尚未开启",
-      content: `这封未来信会在 ${entry.unlockDate} 当天开启。`,
-      confirmText: "知道了",
-      showCancel: false,
-    });
+    lockedFutureEntry.value = entry;
+    isLockedFutureDialogOpen.value = true;
     return;
   }
 
   uni.navigateTo({
     url: `/${ROUTES.editor}?mode=read&entryId=${entryId}`,
   });
+}
+
+function closeLockedFutureDialog(): void {
+  isLockedFutureDialogOpen.value = false;
+  lockedFutureEntry.value = null;
+}
+
+function handleLockedFutureDialogAction(): void {
+  closeLockedFutureDialog();
 }
 
 const mailboxEmptyText = computed(() => {
@@ -573,6 +625,12 @@ onMounted(() => {
   margin-bottom: 10px;
 }
 
+.calendar-page__day-mailbox-item-meta-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .calendar-page__day-mailbox-item-type,
 .calendar-page__day-mailbox-item-date {
   font-family: "Inter", sans-serif;
@@ -581,6 +639,18 @@ onMounted(() => {
   color: rgba(121, 124, 117, 0.76);
   padding-left: 0.14em;
   text-transform: uppercase;
+}
+
+.calendar-page__day-mailbox-item-prelude {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(121, 124, 117, 0.76);
+}
+
+.calendar-page__day-mailbox-item-prelude-glyph {
+  width: 14px;
+  height: 14px;
 }
 
 .calendar-page__day-mailbox-item-title {

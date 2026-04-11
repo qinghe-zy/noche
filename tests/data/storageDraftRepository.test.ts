@@ -48,6 +48,7 @@ describe("storageDraftRepository", () => {
         type: "diary",
         recordDate: "2026-04-10",
       }),
+      diaryPreludeStatus: "selected",
       diaryPrelude: buildDiaryPreludeMeta({
         weatherCode: "sunny",
         moodCode: "calm",
@@ -60,5 +61,6 @@ describe("storageDraftRepository", () => {
     const restoredDraft = await secondRepository.getBySlotKey("draft_diary_2026-04-10");
 
     expect(restoredDraft?.diaryPrelude).toEqual(draft.diaryPrelude);
+    expect(restoredDraft?.diaryPreludeStatus).toBe("selected");
   });
 });

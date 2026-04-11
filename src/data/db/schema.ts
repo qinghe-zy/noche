@@ -19,6 +19,7 @@ export const SCHEMA_STATEMENTS = [
     unlocked_at TEXT,
     destroyed_at TEXT,
     attachments_json TEXT NOT NULL DEFAULT '[]',
+    diary_prelude_status TEXT NOT NULL DEFAULT 'skipped',
     diary_prelude_json TEXT NOT NULL DEFAULT 'null'
   );`,
   `CREATE TABLE IF NOT EXISTS ${TABLES.drafts} (
@@ -34,6 +35,7 @@ export const SCHEMA_STATEMENTS = [
     last_background_saved_at TEXT,
     unlock_date TEXT,
     attachments_json TEXT NOT NULL DEFAULT '[]',
+    diary_prelude_status TEXT NOT NULL DEFAULT 'skipped',
     diary_prelude_json TEXT NOT NULL DEFAULT 'null'
   );`,
   `CREATE TABLE IF NOT EXISTS ${TABLES.preferences} (

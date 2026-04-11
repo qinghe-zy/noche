@@ -9,27 +9,26 @@ function readProjectFile(relativePath: string): string {
 describe("diary prelude stitch parity", () => {
   it("keeps the picker and inline card local-first instead of depending on stitch export assets", () => {
     const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
-    const inlineCard = readProjectFile("src/features/editor/components/DiaryPreludeInlineCard.vue");
+    const headerMeta = readProjectFile("src/features/editor/components/DiaryPreludeHeaderMeta.vue");
 
     expect(picker).toContain("DiaryPreludeGlyph");
-    expect(inlineCard).toContain("DiaryPreludeGlyph");
     expect(picker).not.toContain("fonts.googleapis.com");
     expect(picker).not.toContain("cdn.tailwindcss.com");
     expect(picker).not.toContain("Material Symbols");
     expect(picker).not.toContain("https://");
-    expect(inlineCard).not.toContain("fonts.googleapis.com");
-    expect(inlineCard).not.toContain("cdn.tailwindcss.com");
-    expect(inlineCard).not.toContain("https://");
+    expect(headerMeta).not.toContain("fonts.googleapis.com");
+    expect(headerMeta).not.toContain("cdn.tailwindcss.com");
+    expect(headerMeta).not.toContain("https://");
   });
 
   it("avoids duplicate tap and click bindings on picker toggles in H5", () => {
     const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
-    const inlineCard = readProjectFile("src/features/editor/components/DiaryPreludeInlineCard.vue");
+    const headerMeta = readProjectFile("src/features/editor/components/DiaryPreludeHeaderMeta.vue");
 
     expect(picker).not.toContain('@tap="toggleWeather(option.code)"\n            @click="toggleWeather(option.code)"');
     expect(picker).not.toContain('@tap="toggleMood(option.code)"\n            @click="toggleMood(option.code)"');
     expect(picker).not.toContain('@tap="handleConfirm"\n          @click="handleConfirm"');
-    expect(inlineCard).not.toContain('@tap="handleTap"\n    @click="handleTap"');
+    expect(headerMeta).not.toContain('@tap="handleEdit"\n    @click="handleEdit"');
   });
 
   it("strengthens selected-state contrast and keeps click motion accessible", () => {
@@ -40,5 +39,12 @@ describe("diary prelude stitch parity", () => {
     expect(picker).toContain("transform:");
     expect(picker).toContain(".diary-prelude-picker__option:active");
     expect(picker).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
+  it("keeps the anxious sweat drop lightweight and hand-drawn after shrinking", () => {
+    const glyph = readProjectFile("src/features/editor/components/DiaryPreludeGlyph.vue");
+
+    expect(glyph).toContain("diary-prelude-glyph__sweat-drop");
+    expect(glyph).toContain("rgba(177, 179, 171");
   });
 });

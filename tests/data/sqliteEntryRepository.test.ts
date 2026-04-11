@@ -18,6 +18,7 @@ function makeEntry(overrides: Partial<Entry> = {}): Entry {
     unlockedAt: overrides.unlockedAt ?? null,
     destroyedAt: overrides.destroyedAt ?? null,
     attachments: overrides.attachments ?? [],
+    diaryPreludeStatus: overrides.diaryPreludeStatus ?? "skipped",
     diaryPrelude: overrides.diaryPrelude ?? null,
   };
 }
@@ -84,6 +85,7 @@ function makeEntryRecord(overrides: Partial<{
     unlocked_at: overrides.unlocked_at ?? null,
     destroyed_at: overrides.destroyed_at ?? null,
     attachments_json: overrides.attachments_json ?? "[]",
+    diary_prelude_status: overrides.diary_prelude_status ?? "skipped",
     diary_prelude_json: overrides.diary_prelude_json ?? "null",
   };
 }

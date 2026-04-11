@@ -1,5 +1,5 @@
 import { canPersistEntry } from "@/domain/entry/rules";
-import { cloneDiaryPrelude } from "@/domain/diaryPrelude/catalog";
+import { cloneDiaryPrelude, hasDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import type { Draft } from "@/domain/draft/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { lockRecordDate } from "@/domain/time/rules";
@@ -15,6 +15,7 @@ export interface CreateEntryInput {
   recordDate?: string;
   unlockDate?: string | null;
   attachments?: Attachment[];
+  diaryPreludeStatus?: Draft["diaryPreludeStatus"];
   diaryPrelude?: Draft["diaryPrelude"];
 }
 
@@ -22,7 +23,7 @@ export interface DestroyEntryOptions {
   cleanupHook?: (entry: Entry) => Promise<void> | void;
 }
 
-export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry" | "pick-future-date";
+export type DraftSaveAction = "save-entry" | "discard-empty" | "destroy-entry" | "pick-future-date" | "keep-draft";
 
 export function deriveEntryTitle(content: string, maxLength = 13): string | null {
   const firstLine = content
@@ -47,6 +48,7 @@ export function deriveImageOnlyEntryTitle(type: EntryType): string {
 
 export function createEntry(input: CreateEntryInput): Entry {
   const createdAt = nowIso();
+  const diaryPrelude = cloneDiaryPrelude(input.diaryPrelude);
 
   return {
     id: createId(),
@@ -62,7 +64,13 @@ export function createEntry(input: CreateEntryInput): Entry {
     unlockedAt: null,
     destroyedAt: null,
     attachments: normalizeAttachments(input.attachments),
-    diaryPrelude: cloneDiaryPrelude(input.diaryPrelude),
+    diaryPreludeStatus: input.type === "diary"
+      ? normalizeDiaryPreludeStatus(input.diaryPreludeStatus, {
+          isNewDiaryDraft: false,
+          prelude: diaryPrelude,
+        })
+      : "skipped",
+    diaryPrelude,
   };
 }
 
@@ -71,7 +79,7 @@ export function shouldSaveEntry(input: Pick<Entry, "title" | "content">): boolea
 }
 
 export function resolveDraftSaveAction(
-  draft: Pick<Draft, "type" | "title" | "content" | "linkedEntryId" | "unlockDate">,
+  draft: Pick<Draft, "type" | "title" | "content" | "linkedEntryId" | "unlockDate" | "diaryPreludeStatus" | "diaryPrelude" | "attachments">,
 ): DraftSaveAction {
   if (draft.type === "future" && canPersistEntry(draft) && !draft.unlockDate) {
     return "pick-future-date";
@@ -79,6 +87,17 @@ export function resolveDraftSaveAction(
 
   if (canPersistEntry(draft)) {
     return "save-entry";
+  }
+
+  if (
+    draft.type === "diary"
+    && normalizeDiaryPreludeStatus(draft.diaryPreludeStatus, {
+      isNewDiaryDraft: false,
+      prelude: draft.diaryPrelude,
+    }) === "selected"
+    && hasDiaryPrelude(draft.diaryPrelude)
+  ) {
+    return "keep-draft";
   }
 
   return draft.linkedEntryId ? "destroy-entry" : "discard-empty";
@@ -104,6 +123,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
   const derivedTitle = draft.title.trim()
     ? draft.title
     : deriveEntryTitle(draft.content) ?? deriveImageOnlyEntryTitle(draft.type);
+  const diaryPrelude = cloneDiaryPrelude(draft.diaryPrelude);
 
   return {
     id: entryId,
@@ -119,7 +139,13 @@ export function createEntryFromDraft(draft: Draft): Entry {
     unlockedAt: null,
     destroyedAt: null,
     attachments,
-    diaryPrelude: cloneDiaryPrelude(draft.diaryPrelude),
+    diaryPreludeStatus: draft.type === "diary"
+      ? normalizeDiaryPreludeStatus(draft.diaryPreludeStatus, {
+          isNewDiaryDraft: false,
+          prelude: diaryPrelude,
+        })
+      : "skipped",
+    diaryPrelude,
   };
 }
 
