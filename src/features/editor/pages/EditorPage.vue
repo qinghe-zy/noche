@@ -39,12 +39,14 @@
   <JottingEditorShell
     v-else-if="entryType === 'jotting'"
     :mode="mode"
+    :eyebrow-label="copy.editor.jottingEyebrow"
     :headline-date="jottingHeadlineDate"
     :content="content"
     :body-placeholder="bodyPlaceholder"
     :read-title="readTitle"
     :read-meta="readMeta"
     :can-continue-write="canContinueWrite"
+    :continue-write-label="copy.editor.continueWrite"
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
@@ -64,6 +66,7 @@
     :mode="mode"
     :paper-date-display="paperDateDisplay"
     :paper-subline="paperSubline"
+    :future-unlock-label="copy.editor.futureUnlockLabel"
     :future-date-label="futureDateLabel"
     :future-hint="futureHint"
     :pending-unlock-date="pendingUnlockDate"
@@ -76,6 +79,11 @@
     :body-placeholder="bodyPlaceholder"
     :read-title="readTitle"
     :read-meta="readMeta"
+    :continue-write-label="copy.editor.continueWrite"
+    :future-sheet-title="copy.editor.futureSheetTitle"
+    :future-sheet-copy="copy.editor.futureSheetCopy"
+    :future-sheet-skip-label="copy.editor.futureSheetSkip"
+    :future-sheet-confirm-label="copy.editor.futureSheetConfirm"
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
@@ -111,6 +119,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from "vue";
 import { onHide, onLoad, onUnload } from "@dcloudio/uni-app";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
@@ -136,6 +145,7 @@ import DiaryPreludePicker from "@/features/editor/components/DiaryPreludePicker.
 import JottingEditorShell from "@/features/editor/components/JottingEditorShell.vue";
 import FutureLetterEditorShell from "@/features/editor/components/FutureLetterEditorShell.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
+import { t } from "@/shared/i18n";
 
 type EditorMode = "edit" | "read";
 
@@ -152,8 +162,10 @@ const CHINESE_YEAR_DIGITS: Record<string, string> = {
   "9": "九",
 };
 
+const settingsStore = useSettingsStore();
 const draftStore = useDraftStore();
 const entryStore = useEntryStore();
+const copy = computed(() => t(settingsStore.locale));
 const imagePicker = useEditorImagePicker();
 const {
   attachments,
@@ -219,19 +231,27 @@ const paperSubline = computed(() => {
   return mode.value === "read" ? "READING LETTER" : "MONDAY AFTERNOON";
 });
 const futureDateLabel = computed(() =>
-  unlockDate.value ? formatDate(unlockDate.value, "YYYY年MM月DD日") : "选择一个未来日期",
+  unlockDate.value
+    ? formatDate(unlockDate.value, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年MM月DD日")
+    : copy.value.editor.futureDateEmpty,
 );
-const futurePickerWeekLabels = ["日", "一", "二", "三", "四", "五", "六"];
-const futurePickerMonthLabel = computed(() => formatDate(futurePickerMonth.value, "YYYY年 MM月"));
+const futurePickerWeekLabels = computed(() =>
+  settingsStore.locale === "en-US"
+    ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    : ["日", "一", "二", "三", "四", "五", "六"],
+);
+const futurePickerMonthLabel = computed(() =>
+  formatDate(futurePickerMonth.value, settingsStore.locale === "en-US" ? "MMMM YYYY" : "YYYY年 MM月"),
+);
 const futureQuickDateOptions = computed(() => {
   const tomorrow = tomorrowDate();
   const inOneWeek = addDays(tomorrow, 6);
   const inOneMonth = addMonth(tomorrow, 1);
 
   return [
-    { label: "明天", value: tomorrow },
-    { label: "一周后", value: inOneWeek },
-    { label: "一月后", value: inOneMonth },
+    { label: settingsStore.locale === "en-US" ? "Tomorrow" : "明天", value: tomorrow },
+    { label: settingsStore.locale === "en-US" ? "In a week" : "一周后", value: inOneWeek },
+    { label: settingsStore.locale === "en-US" ? "In a month" : "一月后", value: inOneMonth },
   ];
 });
 const futurePickerDays = computed(() => {
@@ -264,10 +284,10 @@ const futurePickerDays = computed(() => {
 });
 const bodyPlaceholder = computed(() => {
   if (entryType.value === "future") {
-    return "展信舒颜";
+    return copy.value.editor.futurePlaceholder;
   }
 
-  return entryType.value === "jotting" ? "记下一瞬..." : "今天的心情...";
+  return entryType.value === "jotting" ? copy.value.editor.jottingPlaceholder : copy.value.editor.diaryPlaceholder;
 });
 const readTitle = computed(() => savedEntry.value?.title ?? (entryType.value === "future" ? "未来信" : entryType.value === "jotting" ? "随笔" : "日记"));
 const readMeta = computed(() => {
@@ -277,7 +297,7 @@ const readMeta = computed(() => {
 
   if (savedEntry.value.type === "future" && savedEntry.value.unlockDate) {
     const openedAt = savedEntry.value.unlockedAt ?? savedEntry.value.unlockDate;
-    return `启封于 ${formatDate(openedAt, "YYYY年MM月DD日")}`;
+    return `${copy.value.editor.futureReadMetaPrefix}${formatDate(openedAt, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年MM月DD日")}`;
   }
 
   return `记录于 ${formatDate(savedEntry.value.recordDate, "YYYY年MM月DD日")}`;

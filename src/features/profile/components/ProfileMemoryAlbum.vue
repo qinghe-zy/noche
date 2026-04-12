@@ -11,12 +11,12 @@
         class="profile-album__all"
         @tap="$emit('open-all')"
       >
-        <text class="profile-album__all-text">全部</text>
+        <text class="profile-album__all-text">{{ copy.profile.albumAllShort }}</text>
       </view>
     </view>
 
     <view v-if="isLoading" class="profile-album__state">
-      <text class="profile-album__state-text">正在收拢这些画面…</text>
+      <text class="profile-album__state-text">{{ copy.profile.albumLoading }}</text>
     </view>
 
     <view v-else-if="items.length" class="profile-album__grid">
@@ -38,13 +38,13 @@
 
     <view v-else class="profile-album__state profile-album__state--empty">
       <text class="profile-album__state-title">
-        {{ hasAnyRecord ? "还没有收进图片" : "还没有任何画面" }}
+        {{ hasAnyRecord ? copy.profile.albumEmptyHasRecord : copy.profile.albumEmptyNoRecord }}
       </text>
       <text class="profile-album__state-text">
         {{
           hasAnyRecord
-            ? "带图片的日记、随笔，或已启封的未来信，会安静地留在这里。"
-            : "写下第一篇记录、放进第一张照片之后，这里会慢慢变成自己的相册。"
+            ? copy.profile.albumEmptyHasRecordCopy
+            : copy.profile.albumEmptyNoRecordCopy
         }}
       </text>
     </view>
@@ -52,7 +52,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
+import { t } from "@/shared/i18n";
 import { formatProfileRecordDate, type ProfileAlbumItem } from "@/features/profile/profileData";
+
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
 
 withDefaults(defineProps<{
   title?: string;
@@ -62,8 +68,8 @@ withDefaults(defineProps<{
   hasAnyRecord?: boolean;
   showAllEntry?: boolean;
 }>(), {
-  title: "时光相册",
-  subtitle: "只收本地留下的画面",
+  title: "",
+  subtitle: "",
   isLoading: false,
   hasAnyRecord: false,
   showAllEntry: false,

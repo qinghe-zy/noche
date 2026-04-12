@@ -21,7 +21,7 @@
               class="editor-page__topbar-button editor-page__topbar-button--continue"
               @tap="$emit('continue-write')"
             >
-              续写
+              {{ continueWriteLabel }}
             </view>
             <view v-else class="editor-page__topbar-spacer"></view>
           </view>
@@ -37,7 +37,7 @@
         </view>
 
         <view v-if="mode === 'edit'" class="editor-page__future-ribbon">
-          <text class="editor-page__future-ribbon-label">启封日期</text>
+          <text class="editor-page__future-ribbon-label">{{ futureUnlockLabel }}</text>
           <view class="editor-page__future-ribbon-copy">
             <view class="editor-page__future-ribbon-value" @tap="$emit('open-future-date-sheet')">
               {{ futureDateLabel }}
@@ -115,10 +115,10 @@
       v-if="isFutureDateSheetOpen"
       class="editor-page__sheet-mask"
       @click="$emit('close-future-date-sheet')"
-    >
+      >
       <view class="editor-page__date-sheet" @click.stop>
-        <text class="editor-page__sheet-title">选择开启日期</text>
-        <text class="editor-page__sheet-copy">这封未来信会在当天零点之后进入可阅读状态。</text>
+        <text class="editor-page__sheet-title">{{ futureSheetTitle }}</text>
+        <text class="editor-page__sheet-copy">{{ futureSheetCopy }}</text>
         <view class="editor-page__sheet-calendar-head">
           <view class="editor-page__sheet-calendar-nav" @tap="$emit('prev-future-picker-month')">
             <AppIcon name="chevron-left" class="editor-page__sheet-calendar-nav-icon" />
@@ -158,8 +158,8 @@
           </view>
         </view>
         <view class="editor-page__sheet-actions">
-          <view class="editor-page__sheet-button editor-page__sheet-button--secondary" @tap="$emit('close-future-date-sheet')">暂不设置</view>
-          <view class="editor-page__sheet-button editor-page__sheet-button--primary" @tap="$emit('confirm-future-date')">确认日期</view>
+          <view class="editor-page__sheet-button editor-page__sheet-button--secondary" @tap="$emit('close-future-date-sheet')">{{ futureSheetSkipLabel }}</view>
+          <view class="editor-page__sheet-button editor-page__sheet-button--primary" @tap="$emit('confirm-future-date')">{{ futureSheetConfirmLabel }}</view>
         </view>
       </view>
     </view>
@@ -179,6 +179,7 @@ defineProps<{
   mode: EditorMode;
   paperDateDisplay: string;
   paperSubline: string;
+  futureUnlockLabel: string;
   futureDateLabel: string;
   futureHint: string;
   pendingUnlockDate: string;
@@ -196,6 +197,11 @@ defineProps<{
   bodyPlaceholder: string;
   readTitle: string;
   readMeta: string;
+  continueWriteLabel: string;
+  futureSheetTitle: string;
+  futureSheetCopy: string;
+  futureSheetSkipLabel: string;
+  futureSheetConfirmLabel: string;
   errorMessage: string | null;
   showSavedHint: boolean;
   canContinueWrite: boolean;

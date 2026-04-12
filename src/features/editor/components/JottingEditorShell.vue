@@ -16,14 +16,14 @@
           class="jotting-editor-shell__continue-button"
           @tap="$emit('continue-write')"
         >
-          续写
+          {{ continueWriteLabel }}
         </view>
         <view v-else class="jotting-editor-shell__spacer"></view>
       </view>
 
       <view class="jotting-editor-shell__card">
         <view class="jotting-editor-shell__meta">
-          <text class="jotting-editor-shell__eyebrow">即时一页</text>
+          <text class="jotting-editor-shell__eyebrow">{{ eyebrowLabel }}</text>
           <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
         </view>
 
@@ -87,12 +87,14 @@ type EditorMode = "edit" | "read";
 
 defineProps<{
   mode: EditorMode;
+  eyebrowLabel: string;
   headlineDate: string;
   content: string;
   bodyPlaceholder: string;
   readTitle: string;
   readMeta: string;
   canContinueWrite: boolean;
+  continueWriteLabel: string;
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];

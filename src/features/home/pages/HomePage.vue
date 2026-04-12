@@ -66,7 +66,7 @@
 
         <view class="home-page__nav-entry" @click="handleNavigate('mailbox')" @tap="handleNavigate('mailbox')">
           <view class="home-page__nav-entry-icon">
-            <AppIcon name="mail-read" class="home-page__nav-entry-icon-svg" />
+            <AppIcon name="stories" class="home-page__nav-entry-icon-svg" />
           </view>
           <text class="home-page__nav-entry-label" :class="{ 'home-page__nav-entry-label--latin': settingsStore.locale === 'en-US' }">{{ copy.home.mailbox }}</text>
         </view>

@@ -1,3 +1,42 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
+import { t } from "@/shared/i18n";
+import {
+  formatProfileWordCount,
+  type ProfileStats,
+} from "@/features/profile/profileData";
+
+const props = defineProps<{
+  stats: ProfileStats;
+  isLoading?: boolean;
+}>();
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
+
+const statItems = computed(() => [
+  {
+    label: copy.value.profile.statsRecordedDays,
+    value: props.isLoading ? "..." : String(props.stats.recordedDays),
+  },
+  {
+    label: copy.value.profile.statsTotalWords,
+    value: props.isLoading ? "..." : formatProfileWordCount(props.stats.totalWords),
+  },
+  {
+    label: copy.value.profile.statsDiaryCount,
+    value: props.isLoading ? "..." : String(props.stats.diaryCount),
+  },
+]);
+
+const showEmptyHint = computed(() =>
+  !props.isLoading
+  && props.stats.recordedDays === 0
+  && props.stats.totalWords === 0
+  && props.stats.diaryCount === 0,
+);
+</script>
+
 <template>
   <view class="profile-stats">
     <view class="profile-stats__row">
@@ -12,45 +51,10 @@
     </view>
 
     <text v-if="showEmptyHint" class="profile-stats__empty">
-      还没有留下记录。写下第一张纸页后，这里会慢慢长出自己的刻度。
+      {{ copy.profile.statsEmpty }}
     </text>
   </view>
 </template>
-
-<script setup lang="ts">
-import { computed } from "vue";
-import {
-  formatProfileWordCount,
-  type ProfileStats,
-} from "@/features/profile/profileData";
-
-const props = defineProps<{
-  stats: ProfileStats;
-  isLoading?: boolean;
-}>();
-
-const statItems = computed(() => [
-  {
-    label: "记录天数",
-    value: props.isLoading ? "..." : String(props.stats.recordedDays),
-  },
-  {
-    label: "已记录总字数",
-    value: props.isLoading ? "..." : formatProfileWordCount(props.stats.totalWords),
-  },
-  {
-    label: "日记篇数",
-    value: props.isLoading ? "..." : String(props.stats.diaryCount),
-  },
-]);
-
-const showEmptyHint = computed(() =>
-  !props.isLoading
-  && props.stats.recordedDays === 0
-  && props.stats.totalWords === 0
-  && props.stats.diaryCount === 0,
-);
-</script>
 
 <style scoped>
 .profile-stats {
