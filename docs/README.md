@@ -19,6 +19,10 @@
   - [noche_codex_function_matrix_and_interaction_logic.md](./tech/noche_codex_function_matrix_and_interaction_logic.md)：Codex 执行用功能矩阵与交互主链说明。
   - [tech_frontend_backend_contract.md](./tech/tech_frontend_backend_contract.md)：前端可依赖的稳定契约面。
   - [tech_backend_feature_checklist.md](./tech/tech_backend_feature_checklist.md)：后端功能清单与推进顺序。
+- [release/](./release/)：发布与版本更新文档。
+  - [android_release_playbook.md](./release/android_release_playbook.md)：Android 发版执行手册。
+  - [version_update_checklist.md](./release/version_update_checklist.md)：版本更新固定检查单。
+  - [releases/v1.0.0.md](./release/releases/v1.0.0.md)：当前版本 release note。
 - [tasks/](./tasks/)：任务拆解与进度追踪。
   - 命名格式：`T-###_topic.md`
 - [handoffs/](./handoffs/)：阶段检查点与交接记录。

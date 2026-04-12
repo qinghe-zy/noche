@@ -14,12 +14,21 @@ describe("release readiness", () => {
   });
 
   it("points android app icons at the bundled local png asset", () => {
-    const manifest = readProjectFile("src/manifest.json");
+    const manifest = JSON.parse(readProjectFile("src/manifest.json")) as {
+      ["app-plus"]?: {
+        distribute?: {
+          icons?: {
+            android?: Record<string, string>;
+          };
+        };
+      };
+    };
+    const androidIcons = manifest["app-plus"]?.distribute?.icons?.android;
 
-    expect(manifest).toContain("\"hdpi\": \"screen.png\"");
-    expect(manifest).toContain("\"xhdpi\": \"screen.png\"");
-    expect(manifest).toContain("\"xxhdpi\": \"screen.png\"");
-    expect(manifest).toContain("\"xxxhdpi\": \"screen.png\"");
+    expect(androidIcons?.hdpi).toBe("screen.png");
+    expect(androidIcons?.xhdpi).toBe("screen.png");
+    expect(androidIcons?.xxhdpi).toBe("screen.png");
+    expect(androidIcons?.xxxhdpi).toBe("screen.png");
   });
 
   it("does not leave profile page as TODO placeholder", () => {
