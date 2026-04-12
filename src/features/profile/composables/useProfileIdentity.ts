@@ -1,8 +1,8 @@
 import { ref } from "vue";
 import { getPrefsRepository } from "@/app/store/settingsRepository";
 import {
-  PROFILE_DEFAULT_IDENTITY,
   PROFILE_PREF_KEYS,
+  createProfileDefaultIdentity,
   type ProfileIdentity,
 } from "@/features/profile/profileData";
 
@@ -15,7 +15,7 @@ function sanitizeUri(value: string | null | undefined): string | null {
 }
 
 export function useProfileIdentity() {
-  const identity = ref<ProfileIdentity>({ ...PROFILE_DEFAULT_IDENTITY });
+  const identity = ref<ProfileIdentity>({ ...createProfileDefaultIdentity() });
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -26,29 +26,32 @@ export function useProfileIdentity() {
     try {
       const repository = getPrefsRepository();
       const [
+        localeRecord,
         displayNameRecord,
         signatureRecord,
         avatarRecord,
         coverRecord,
         backupRecord,
       ] = await Promise.all([
+        repository.get("locale"),
         repository.get(PROFILE_PREF_KEYS.displayName),
         repository.get(PROFILE_PREF_KEYS.signature),
         repository.get(PROFILE_PREF_KEYS.avatarUri),
         repository.get(PROFILE_PREF_KEYS.coverUri),
         repository.get(PROFILE_PREF_KEYS.lastBackupAt),
       ]);
+      const fallbackIdentity = createProfileDefaultIdentity(localeRecord?.value ?? "zh-CN");
 
       identity.value = {
-        displayName: sanitizeText(displayNameRecord?.value, PROFILE_DEFAULT_IDENTITY.displayName),
-        signature: sanitizeText(signatureRecord?.value, PROFILE_DEFAULT_IDENTITY.signature),
+        displayName: sanitizeText(displayNameRecord?.value, fallbackIdentity.displayName),
+        signature: sanitizeText(signatureRecord?.value, fallbackIdentity.signature),
         avatarUri: sanitizeUri(avatarRecord?.value),
         coverUri: sanitizeUri(coverRecord?.value),
         lastBackupAt: sanitizeUri(backupRecord?.value),
       };
     } catch (nextError) {
       error.value = nextError instanceof Error ? nextError.message : "加载个人信息失败。";
-      identity.value = { ...PROFILE_DEFAULT_IDENTITY };
+      identity.value = { ...createProfileDefaultIdentity() };
     } finally {
       isLoading.value = false;
     }
@@ -71,7 +74,7 @@ export function useProfileIdentity() {
   }
 
   async function setDisplayName(displayName: string): Promise<void> {
-    const nextValue = sanitizeText(displayName, PROFILE_DEFAULT_IDENTITY.displayName);
+    const nextValue = sanitizeText(displayName, identity.value.displayName);
     await persistIdentityField(
       PROFILE_PREF_KEYS.displayName,
       nextValue,
@@ -86,7 +89,7 @@ export function useProfileIdentity() {
   }
 
   async function setSignature(signature: string): Promise<void> {
-    const nextValue = sanitizeText(signature, PROFILE_DEFAULT_IDENTITY.signature);
+    const nextValue = sanitizeText(signature, identity.value.signature);
     await persistIdentityField(
       PROFILE_PREF_KEYS.signature,
       nextValue,

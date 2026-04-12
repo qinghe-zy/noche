@@ -73,7 +73,7 @@
         </view>
       </view>
 
-      <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">Quiet moments, lasting words.</text>
+      <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
     </view>
   </view>
 </template>
@@ -95,6 +95,7 @@ defineProps<{
   readMeta: string;
   canContinueWrite: boolean;
   continueWriteLabel: string;
+  signatureLine: string;
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];

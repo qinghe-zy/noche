@@ -527,6 +527,45 @@
   - `pnpm test:unit` 通过：53 个测试文件、157 个测试通过
   - `pnpm type-check` 通过
   - `pnpm build:h5` 通过
+- 已进入“发版前总验收”模式，并确认当前仓库真实基线已超过用户口头基线：
+  - 用户给定 checkpoint：`CHECKPOINT_38_settings_and_local_backup_closure.md`
+  - 用户给定提交：`6526963`
+  - 当前仓库实际存在：`CHECKPOINT_39_release_edge_closure.md`
+  - 当前本地 HEAD：`1339e5f`
+- 已重新做总验收基线验证：
+  - `pnpm test:unit` 通过：57 个测试文件、169 个测试通过
+  - `pnpm type-check` 通过
+  - `pnpm build:h5` 通过
+  - 本地 `dev:h5` 已重新拉起在 `http://127.0.0.1:5173/`
+  - Playwright MCP 仍因 `C:\Windows\System32\.playwright-mcp` 写权限触发 `EPERM`
+  - 改用 `msedge --headless` 对 `Home / Editor(diary/future) / Mailbox / Calendar / Profile` 重新取图验收
+- 本轮新增发现并已收口的高风险问题：
+  - `locale` 切换后仍残留多处硬编码中文 / 英文，集中分布在：
+    - `calendarDisplay`
+    - `mailboxView`
+    - `profileData`
+    - `DiaryPreludePicker`
+    - `ProfilePage`
+  - 已补红灯并转绿：
+    - `tests/features/calendarDisplay.test.ts`
+    - `tests/features/mailboxView.test.ts`
+    - `tests/features/profileData.test.ts`
+    - `tests/release/coreI18nConsistency.test.ts`
+- 本轮实际收口：
+  - `src/shared/i18n.ts` 扩展 `common / profile / editor` 文案，支持：
+    - Profile 设置 sheet / 输入框 / about / backup 标签
+    - editor saved hint / diary prelude / diary read meta / jotting signature / future subline
+  - `calendarDisplay` 现在支持 locale-aware 月份标题与 guide 文案
+  - `mailboxView` 现在支持 locale-aware 次级 tab 标签
+  - `profileData` 的备份标签与默认 identity 已改为 locale-aware
+  - `DiaryPreludePicker` 不再直接写死中文标题 / 跳过 / 确认语，改走统一 i18n
+  - `ProfilePage` 的 sheet title / copy / avatar/profile 操作 / input dialog confirm/cancel / about 文案已改走统一 i18n
+  - `EditorPage` 已补：
+    - diary read meta locale
+    - diary header subtitle locale
+    - diary/jotting headline date locale
+    - future subline locale
+    - shell 级 saved hint / continue label / jotting signature 注入
 - 自主继续发版前最后一轮边界收口：
   - 已新增 `tests/features/editorAutosave.test.ts` 红灯，确认 `flush()` 在已有保存进行中时需要补跑一次最新保存
   - 已新增 `tests/shared/dateChange.test.ts`，固定“页面跨过午夜时触发一次日期刷新”的低频 watcher 行为

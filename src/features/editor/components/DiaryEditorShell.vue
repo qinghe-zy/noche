@@ -12,7 +12,7 @@
         class="diary-editor-shell__icon-button"
         @tap="$emit('formal-save')"
       >
-        <text v-if="showSavedHint" class="diary-editor-shell__saved-hint">已存</text>
+        <text v-if="showSavedHint" class="diary-editor-shell__saved-hint">{{ savedHintLabel }}</text>
         <AppIcon name="check" class="diary-editor-shell__topbar-svg" />
       </view>
       <view
@@ -20,7 +20,7 @@
         class="diary-editor-shell__continue-button"
         @tap="$emit('continue-write')"
       >
-        续写
+        {{ continueWriteLabel }}
       </view>
       <view v-else class="diary-editor-shell__spacer"></view>
     </view>
@@ -115,9 +115,11 @@ defineProps<{
   headerTimeLabel: string;
   content: string;
   bodyPlaceholder: string;
+  savedHintLabel: string;
   errorMessage: string | null;
   showSavedHint: boolean;
   canContinueWrite: boolean;
+  continueWriteLabel: string;
   cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];

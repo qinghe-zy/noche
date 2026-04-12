@@ -51,6 +51,7 @@
 - [completed] Phase 29: 完成架构核查与高优先级逻辑修复首轮收口
 - [completed] Phase 30: 完成 Settings 真可用与本地 backup / restore 最小闭环
 - [completed] Phase 31: 完成发版前最后一轮边界收口
+- [completed] Phase 32: 完成发版前总验收、locale 收口与打包前结论整理
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

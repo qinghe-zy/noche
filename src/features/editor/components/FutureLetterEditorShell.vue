@@ -13,7 +13,7 @@
               class="editor-page__topbar-button editor-page__topbar-button--action"
               @tap="$emit('formal-save')"
             >
-              <text v-if="showSavedHint" class="editor-page__saved-hint">已存</text>
+              <text v-if="showSavedHint" class="editor-page__saved-hint">{{ savedHintLabel }}</text>
               <AppIcon name="mail" class="editor-page__topbar-svg" />
             </view>
             <view
@@ -202,6 +202,7 @@ defineProps<{
   futureSheetCopy: string;
   futureSheetSkipLabel: string;
   futureSheetConfirmLabel: string;
+  savedHintLabel: string;
   errorMessage: string | null;
   showSavedHint: boolean;
   canContinueWrite: boolean;

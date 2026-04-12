@@ -10,17 +10,19 @@ export interface MailboxSecondaryOption {
 
 export function getMailboxSecondaryOptions(
   primary: MailboxPrimaryTab,
+  locale = "zh-CN",
 ): MailboxSecondaryOption[] {
+  const isEnglish = locale === "en-US";
   if (primary === "documentary") {
     return [
-      { value: "diary", label: "日记" },
-      { value: "jotting", label: "随笔" },
+      { value: "diary", label: isEnglish ? "Diary" : "日记" },
+      { value: "jotting", label: isEnglish ? "Jotting" : "随笔" },
     ];
   }
 
   return [
-    { value: "pending", label: "待启" },
-    { value: "opened", label: "已启" },
+    { value: "pending", label: isEnglish ? "Pending" : "待启" },
+    { value: "opened", label: isEnglish ? "Opened" : "已启" },
   ];
 }
 

@@ -108,7 +108,7 @@
                   </view>
 
                   <template v-if="activeSection.renderMode === 'paper'">
-                    <text class="mailbox-page__entry-title">{{ entry.title || "未命名" }}</text>
+                    <text class="mailbox-page__entry-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
                     <text class="mailbox-page__entry-excerpt">{{ formatExcerpt(entry) }}</text>
                     <view class="mailbox-page__entry-foot">
                       <text class="mailbox-page__entry-meta">{{ activeSection.metaLabel }}</text>
@@ -120,7 +120,7 @@
                     <view class="mailbox-page__sealed-center">
                       <view class="mailbox-page__sealed-lock">
                         <AppIcon name="lock" class="mailbox-page__sealed-lock-icon" />
-                        <text class="mailbox-page__sealed-lock-label">Reserved</text>
+                        <text class="mailbox-page__sealed-lock-label">{{ settingsStore.locale === "en-US" ? "Reserved" : "保留中" }}</text>
                       </view>
 
                       <view class="mailbox-page__sealed-icon-wrap">
@@ -182,6 +182,7 @@ import {
   formatMailboxLockedTitle,
   formatMailboxTypeLabel,
 } from "@/features/mailbox/mailboxDisplay";
+import { fallbackEntryTitle } from "@/features/entries/entryDisplay";
 import {
   getDefaultMailboxSecondaryTab,
   getMailboxSecondaryOptions,
@@ -237,7 +238,7 @@ const activeSections = computed<MailboxSection[]>(() => {
         renderMode: "paper",
         stackClass: "mailbox-page__paper-stack",
         cardClass: "",
-        metaLabel: "已经收好",
+        metaLabel: settingsStore.locale === "en-US" ? "Filed away" : "已经收好",
         metaIcon: "auto_stories",
         dateTab: "past",
       },
@@ -249,7 +250,7 @@ const activeSections = computed<MailboxSection[]>(() => {
         renderMode: "paper",
         stackClass: "mailbox-page__paper-stack",
         cardClass: "",
-        metaLabel: "已经收好",
+        metaLabel: settingsStore.locale === "en-US" ? "Filed away" : "已经收好",
         metaIcon: "edit_note",
         dateTab: "past",
       },
@@ -265,7 +266,7 @@ const activeSections = computed<MailboxSection[]>(() => {
       renderMode: "paper",
       stackClass: "mailbox-page__paper-stack",
       cardClass: "",
-      metaLabel: "已经开启",
+      metaLabel: settingsStore.locale === "en-US" ? "Opened now" : "已经开启",
       metaIcon: "mark_email_read",
       dateTab: "past",
     },
@@ -277,14 +278,14 @@ const activeSections = computed<MailboxSection[]>(() => {
       renderMode: "sealed",
       stackClass: "mailbox-page__sealed-stack",
       cardClass: "mailbox-page__entry-card--sealed",
-      metaLabel: "尚未开启",
+      metaLabel: settingsStore.locale === "en-US" ? "Not opened yet" : "尚未开启",
       metaIcon: "lock",
       dateTab: "future",
     },
   ];
 });
 
-const secondaryOptions = computed(() => getMailboxSecondaryOptions(activeTab.value));
+const secondaryOptions = computed(() => getMailboxSecondaryOptions(activeTab.value, settingsStore.locale));
 
 const activeSection = computed<MailboxSection>(() => {
   const matched = activeSections.value.find((section) =>

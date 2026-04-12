@@ -27,7 +27,7 @@ describe("profile page local-first constraints", () => {
     const inputDialog = readProjectFile("src/shared/ui/PaperInputDialog.vue");
 
     expect(profilePage).toContain("appearance-settings");
-    expect(profilePage).toContain("外观设置");
+    expect(profilePage).toContain("copy.value.profile.appearanceTitle");
     expect(profilePage).not.toContain("profile-page__topbar");
     expect(profilePage).not.toContain("uni.showModal");
     expect(profilePage).not.toContain("uni.showActionSheet");

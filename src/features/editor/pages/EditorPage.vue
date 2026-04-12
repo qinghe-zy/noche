@@ -17,9 +17,11 @@
     :header-time-label="diaryHeaderTime"
     :content="content"
     :body-placeholder="bodyPlaceholder"
+    :saved-hint-label="copy.editor.savedHint"
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
+    :continue-write-label="copy.editor.continueWrite"
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
@@ -47,6 +49,7 @@
     :read-meta="readMeta"
     :can-continue-write="canContinueWrite"
     :continue-write-label="copy.editor.continueWrite"
+    :signature-line="copy.editor.jottingSignature"
     :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
@@ -84,6 +87,7 @@
     :future-sheet-copy="copy.editor.futureSheetCopy"
     :future-sheet-skip-label="copy.editor.futureSheetSkip"
     :future-sheet-confirm-label="copy.editor.futureSheetConfirm"
+    :saved-hint-label="copy.editor.savedHint"
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
@@ -220,15 +224,17 @@ const canSkipDiaryPrelude = computed(() => entryType.value === "diary" && mode.v
 const canEditDiaryPrelude = computed(() => shouldAllowDiaryPreludeEdit(mode.value, diaryPreludeStatus.value));
 const paperDateDisplay = computed(() =>
   mode.value === "read" && savedEntry.value?.savedAt
-    ? formatDate(savedEntry.value.savedAt, "YYYY年 · M月 · D日")
-    : formatDate(recordDate.value, "YYYY年 · M月 · D日"),
+    ? formatDate(savedEntry.value.savedAt, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年 · M月 · D日")
+    : formatDate(recordDate.value, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年 · M月 · D日"),
 );
 const paperSubline = computed(() => {
   if (entryType.value === "future" && unlockDate.value) {
-    return `UNSEALING ON ${formatDate(unlockDate.value, "YYYY.MM.DD")}`;
+    return settingsStore.locale === "en-US"
+      ? `UNSEALING ON ${formatDate(unlockDate.value, "YYYY.MM.DD")}`
+      : `将在 ${formatDate(unlockDate.value, "YYYY.MM.DD")} 启封`;
   }
 
-  return mode.value === "read" ? "READING LETTER" : "MONDAY AFTERNOON";
+  return mode.value === "read" ? copy.value.editor.futureReadSubline : copy.value.editor.futureEditSubline;
 });
 const futureDateLabel = computed(() =>
   unlockDate.value
@@ -306,11 +312,15 @@ const readMeta = computed(() => {
     return `${copy.value.editor.futureReadMetaPrefix}${formatDate(openedAt, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年MM月DD日")}`;
   }
 
-  return `记录于 ${formatDate(savedEntry.value.recordDate, "YYYY年MM月DD日")}`;
+  return `${copy.value.editor.diaryRecordedAtPrefix}${formatDate(savedEntry.value.recordDate, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年MM月DD日")}`;
 });
-const diaryAtmosphereLine = computed(() => `${toChineseYear(recordDate.value)} · ${resolveSeason(recordDate.value)}`);
-const diaryHeadlineDate = computed(() => formatDate(recordDate.value, "M月D日"));
-const diaryHeaderSubtitle = computed(() => "写给今天的自己");
+const diaryAtmosphereLine = computed(() =>
+  settingsStore.locale === "en-US"
+    ? `${resolveSeason(recordDate.value, settingsStore.locale)} · ${formatDate(recordDate.value, "YYYY")}`
+    : `${toChineseYear(recordDate.value)} · ${resolveSeason(recordDate.value, settingsStore.locale)}`,
+);
+const diaryHeadlineDate = computed(() => formatDate(recordDate.value, settingsStore.locale === "en-US" ? "MMM DD" : "M月D日"));
+const diaryHeaderSubtitle = computed(() => copy.value.editor.diaryHeaderSubtitle);
 const diaryHeaderTime = computed(() =>
   formatDate(savedEntry.value?.savedAt ?? draftStore.activeDraft?.updatedAt ?? nowIso(), "HH:mm"),
 );
@@ -326,7 +336,7 @@ const destroyDraftDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
     tone: "danger",
   },
 ]));
-const jottingHeadlineDate = computed(() => formatDate(recordDate.value, "M月D日"));
+const jottingHeadlineDate = computed(() => formatDate(recordDate.value, settingsStore.locale === "en-US" ? "MMM DD" : "M月D日"));
 
 function toChineseYear(dateString: string): string {
   return dateString
@@ -336,22 +346,22 @@ function toChineseYear(dateString: string): string {
     .join("") + "年";
 }
 
-function resolveSeason(dateString: string): string {
+function resolveSeason(dateString: string, locale = "zh-CN"): string {
   const month = Number(dateString.slice(5, 7));
 
   if (month >= 3 && month <= 5) {
-    return "春";
+    return locale === "en-US" ? "Spring" : "春";
   }
 
   if (month >= 6 && month <= 8) {
-    return "夏";
+    return locale === "en-US" ? "Summer" : "夏";
   }
 
   if (month >= 9 && month <= 11) {
-    return "秋";
+    return locale === "en-US" ? "Autumn" : "秋";
   }
 
-  return "冬";
+  return locale === "en-US" ? "Winter" : "冬";
 }
 
 function addDays(dateString: string, value: number): string {

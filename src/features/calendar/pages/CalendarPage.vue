@@ -198,7 +198,9 @@ const calendarDays = computed(() => {
   return days;
 });
 
-const contextDate = computed(() => (selectedDate.value ? selectedDate.value : "选择日期"));
+const contextDate = computed(() => (selectedDate.value ? selectedDate.value : (
+  settingsStore.locale === "en-US" ? "Select a day" : "选择日期"
+)));
 const selectedEntries = computed(() => calendarStore.selectedDateEntries);
 const lockedFutureDialogCopy = computed(() =>
   settingsStore.locale === "en-US"
@@ -297,11 +299,11 @@ const mailboxEmptyText = computed(() => {
 });
 
 function formatMonthLabel(date: string) {
-  return formatCalendarMonthLabel(date);
+  return formatCalendarMonthLabel(date, settingsStore.locale);
 }
 
 function formatYearLabel(date: string) {
-  return formatCalendarYearLabel(date);
+  return formatCalendarYearLabel(date, settingsStore.locale);
 }
 
 function isToday(date: string) {

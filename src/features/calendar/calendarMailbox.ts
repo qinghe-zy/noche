@@ -29,6 +29,20 @@ const ENTRY_VARIANTS: CalendarCopyVariant[] = [
     body: (formattedDate) => `${formattedDate} 的光阴已被妥善珍藏。拾起任意一封，便能重新走入那段岁月。`,
   },
 ];
+const ENTRY_VARIANTS_EN: CalendarCopyVariant[] = [
+  {
+    title: "This day has already been written.",
+    body: (formattedDate) => `The thoughts from ${formattedDate} are resting here. Open one of the letters below and hear that moment again.`,
+  },
+  {
+    title: "A letter from that day is waiting.",
+    body: (formattedDate) => `The story of ${formattedDate} has already been folded into place. Open a page and revisit the feeling you left there.`,
+  },
+  {
+    title: "Memory is moored here.",
+    body: (formattedDate) => `The time from ${formattedDate} has been kept carefully. Pick any letter to walk back into that day.`,
+  },
+];
 
 const EMPTY_VARIANTS: CalendarCopyVariant[] = [
   {
@@ -42,6 +56,20 @@ const EMPTY_VARIANTS: CalendarCopyVariant[] = [
   {
     title: "光阴无声，此页空缺。",
     body: (formattedDate) => `属于 ${formattedDate} 的故事尚未落笔。轻启信笺，即可寻回并补写那一日的岁月。`,
+  },
+];
+const EMPTY_VARIANTS_EN: CalendarCopyVariant[] = [
+  {
+    title: "This day is still blank.",
+    body: (formattedDate) => `Nothing has been written for ${formattedDate} yet. If you want, you can still write down the part of that day you missed.`,
+  },
+  {
+    title: "A page is waiting quietly.",
+    body: (formattedDate) => `The mailbox for ${formattedDate} is still empty. Time has moved on, but this sheet is still waiting for your handwriting.`,
+  },
+  {
+    title: "Time passed, the page did not.",
+    body: (formattedDate) => `The story that belongs to ${formattedDate} has not been written yet. Open a page and complete that missing memory.`,
   },
 ];
 
@@ -69,9 +97,11 @@ export function resolveCalendarMailboxState(
   locale = "zh-CN",
 ): CalendarMailboxState {
   const formattedDate = formatMailboxDate(recordDate);
+  const entryVariants = locale === "en-US" ? ENTRY_VARIANTS_EN : ENTRY_VARIANTS;
+  const emptyVariants = locale === "en-US" ? EMPTY_VARIANTS_EN : EMPTY_VARIANTS;
 
   if (entries.length > 0) {
-    const variant = pickVariant(ENTRY_VARIANTS, variantIndex);
+    const variant = pickVariant(entryVariants, variantIndex);
 
     return {
       kind: "entries",
@@ -92,7 +122,7 @@ export function resolveCalendarMailboxState(
     };
   }
 
-  const variant = pickVariant(EMPTY_VARIANTS, variantIndex);
+  const variant = pickVariant(emptyVariants, variantIndex);
 
   if (isToday(recordDate, today)) {
     return {

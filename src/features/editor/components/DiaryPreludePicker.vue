@@ -4,8 +4,8 @@
 
     <view class="diary-prelude-picker__topbar">
       <TopbarIconButton @tap="$emit('go-back')" />
-      <text class="diary-prelude-picker__title">落笔之前，先拾起今日的碎片</text>
-      <text v-if="canSkip" class="diary-prelude-picker__skip" @tap="handleSkip">跳过</text>
+      <text class="diary-prelude-picker__title">{{ copy.editor.diaryPreludeTitle }}</text>
+      <text v-if="canSkip" class="diary-prelude-picker__skip" @tap="handleSkip">{{ copy.editor.diaryPreludeSkip }}</text>
       <view v-else class="diary-prelude-picker__skip-spacer"></view>
     </view>
 
@@ -27,8 +27,8 @@
 
       <view class="diary-prelude-picker__section">
         <view class="diary-prelude-picker__section-head">
-          <text class="diary-prelude-picker__section-title">天气</text>
-          <text class="diary-prelude-picker__section-subtitle">Weather</text>
+          <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeWeather }}</text>
+          <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "WEATHER" : "Weather" }}</text>
         </view>
         <view class="diary-prelude-picker__grid">
           <view
@@ -42,16 +42,16 @@
               <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="weather" :code="option.code" />
             </view>
             <view v-if="weatherCode === option.code" class="diary-prelude-picker__option-mark"></view>
-            <text class="diary-prelude-picker__option-zh">{{ option.labelZh }}</text>
-            <text class="diary-prelude-picker__option-en">{{ option.labelEn.toUpperCase() }}</text>
+            <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
+            <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
           </view>
         </view>
       </view>
 
       <view class="diary-prelude-picker__section">
         <view class="diary-prelude-picker__section-head">
-          <text class="diary-prelude-picker__section-title">心情</text>
-          <text class="diary-prelude-picker__section-subtitle">Mood</text>
+          <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeMood }}</text>
+          <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "MOOD" : "Mood" }}</text>
         </view>
         <view class="diary-prelude-picker__grid diary-prelude-picker__grid--mood">
           <view
@@ -65,8 +65,8 @@
               <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="mood" :code="option.code" />
             </view>
             <view v-if="moodCode === option.code" class="diary-prelude-picker__option-mark"></view>
-            <text class="diary-prelude-picker__option-zh">{{ option.labelZh }}</text>
-            <text class="diary-prelude-picker__option-en">{{ option.labelEn.toUpperCase() }}</text>
+            <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
+            <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
           </view>
         </view>
       </view>
@@ -77,7 +77,7 @@
           :class="{ 'diary-prelude-picker__confirm--disabled': !previewPrelude }"
           @tap="handleConfirm"
         >
-          <text class="diary-prelude-picker__confirm-label">带着它写下去</text>
+          <text class="diary-prelude-picker__confirm-label">{{ copy.editor.diaryPreludeConfirm }}</text>
         </view>
         <text v-if="pickerHint" class="diary-prelude-picker__hint">{{ pickerHint }}</text>
       </view>
@@ -87,6 +87,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import {
   buildDiaryPreludeMeta,
   DIARY_MOOD_OPTIONS,
@@ -94,6 +95,7 @@ import {
 } from "@/domain/diaryPrelude/catalog";
 import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
 import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
+import { t } from "@/shared/i18n";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 const props = defineProps<{
@@ -106,6 +108,8 @@ const emit = defineEmits<{
   (event: "skip"): void;
   (event: "go-back"): void;
 }>();
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
 
 const weatherCode = ref<string | null>(props.initialPrelude?.weatherCode ?? null);
 const moodCode = ref<string | null>(props.initialPrelude?.moodCode ?? null);
@@ -130,19 +134,25 @@ const previewWeatherCode = computed(() => previewPrelude.value?.weatherCode ?? w
 const previewMoodCode = computed(() => previewPrelude.value?.moodCode ?? moodCode.value);
 const previewHeadlineZh = computed(() => {
   if (!selectedWeather.value && !selectedMood.value) {
-    return "将天气与心事，安放于纸页边缘";
+    return copy.value.editor.diaryPreludeEmptyPrimary;
   }
 
-  return [selectedWeather.value?.labelZh, selectedMood.value?.labelZh].filter(Boolean).join(" · ");
+  return [
+    settingsStore.locale === "en-US" ? selectedWeather.value?.labelEn : selectedWeather.value?.labelZh,
+    settingsStore.locale === "en-US" ? selectedMood.value?.labelEn : selectedMood.value?.labelZh,
+  ].filter(Boolean).join(" · ");
 });
 const previewHeadlineEn = computed(() => {
   if (!selectedWeather.value && !selectedMood.value) {
-    return "WEATHER · MOOD";
+    return copy.value.editor.diaryPreludeEmptySecondary;
   }
 
-  return [selectedWeather.value?.labelEn, selectedMood.value?.labelEn]
+  return [
+    settingsStore.locale === "en-US" ? selectedWeather.value?.labelZh : selectedWeather.value?.labelEn,
+    settingsStore.locale === "en-US" ? selectedMood.value?.labelZh : selectedMood.value?.labelEn,
+  ]
     .filter(Boolean)
-    .map((segment) => segment?.toUpperCase())
+    .map((segment) => settingsStore.locale === "en-US" ? segment : segment?.toUpperCase())
     .join(" · ");
 });
 const previewNote = computed(() => {
@@ -150,9 +160,9 @@ const previewNote = computed(() => {
     return previewPrelude.value.quote;
   }
 
-  return "让这页留白先感知，你从怎样的一天里走来。";
+  return copy.value.editor.diaryPreludeNoteFallback;
 });
-const pickerHint = computed(() => (props.canSkip ? "可以先跳过。" : ""));
+const pickerHint = computed(() => (props.canSkip ? copy.value.editor.diaryPreludeHint : ""));
 
 function toggleWeather(code: string): void {
   weatherCode.value = weatherCode.value === code ? null : code;

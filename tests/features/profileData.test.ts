@@ -3,6 +3,7 @@ import type { Entry } from "@/domain/entry/types";
 import type { Attachment } from "@/shared/types/attachment";
 import {
   buildProfileAlbumItems,
+  createProfileDefaultIdentity,
   formatProfileBackupLabel,
   formatProfileTypeLabel,
   formatProfileWordCount,
@@ -101,9 +102,16 @@ describe("profileData", () => {
     expect(formatProfileTypeLabel("diary")).toBe("日记");
     expect(formatProfileTypeLabel("jotting")).toBe("随笔");
     expect(formatProfileTypeLabel("future")).toBe("致未来");
-    expect(formatProfileBackupLabel(null)).toBe("尚未备份");
-    expect(formatProfileBackupLabel("2026-04-11T09:30:00.000Z")).toBe("最近一次 2026.04.11 17:30");
+    expect(formatProfileBackupLabel(null, "zh-CN")).toBe("尚未备份");
+    expect(formatProfileBackupLabel("2026-04-11T09:30:00.000Z", "zh-CN")).toBe("最近一次 2026.04.11 17:30");
+    expect(formatProfileBackupLabel(null, "en-US")).toBe("No backup yet");
+    expect(formatProfileBackupLabel("2026-04-11T09:30:00.000Z", "en-US")).toBe("Last backup 2026.04.11 17:30");
+    expect(createProfileDefaultIdentity("en-US")).toMatchObject({
+      displayName: "Quiet Path",
+      signature: "Keep time gently",
+    });
     expect(resolveProfileInitial("林间小径")).toBe("林");
     expect(resolveProfileInitial("  ")).toBe("夜");
+    expect(resolveProfileInitial("  ", "en-US")).toBe("N");
   });
 });

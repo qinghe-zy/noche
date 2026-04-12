@@ -39,13 +39,25 @@ export const PROFILE_PREF_KEYS = {
   lastBackupAt: "profile.lastBackupAt",
 } as const;
 
-export const PROFILE_DEFAULT_IDENTITY: ProfileIdentity = {
-  displayName: "林间小径",
-  signature: "安静记录时光",
-  avatarUri: null,
-  coverUri: null,
-  lastBackupAt: null,
-};
+export function createProfileDefaultIdentity(locale = "zh-CN"): ProfileIdentity {
+  if (locale === "en-US") {
+    return {
+      displayName: "Quiet Path",
+      signature: "Keep time gently",
+      avatarUri: null,
+      coverUri: null,
+      lastBackupAt: null,
+    };
+  }
+
+  return {
+    displayName: "林间小径",
+    signature: "安静记录时光",
+    avatarUri: null,
+    coverUri: null,
+    lastBackupAt: null,
+  };
+}
 
 export function buildProfileAlbumItems(entries: Entry[]): ProfileAlbumItem[] {
   return buildEntryAlbumItems(entries);
@@ -87,12 +99,14 @@ export function formatProfileRecordDate(recordDate: string): string {
   return formatDate(recordDate, "YYYY.MM.DD");
 }
 
-export function formatProfileBackupLabel(lastBackupAt: string | null): string {
+export function formatProfileBackupLabel(lastBackupAt: string | null, locale = "zh-CN"): string {
   if (!lastBackupAt) {
-    return "尚未备份";
+    return locale === "en-US" ? "No backup yet" : "尚未备份";
   }
 
-  return `最近一次 ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`;
+  return locale === "en-US"
+    ? `Last backup ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`
+    : `最近一次 ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`;
 }
 
 export function formatProfileThemeLabel(theme: "system" | "light" | "dark", locale = "zh-CN"): string {
@@ -143,11 +157,11 @@ export function formatProfileAppearanceLabel(
   return `${formatProfileThemeLabel(theme, locale)} · ${formatProfileWeekStartLabel(weekStartsOn, locale)} · ${formatProfileLocaleLabel(locale)}`;
 }
 
-export function resolveProfileInitial(displayName: string): string {
+export function resolveProfileInitial(displayName: string, locale = "zh-CN"): string {
   const trimmed = displayName.trim();
 
   if (!trimmed) {
-    return "夜";
+    return locale === "en-US" ? "N" : "夜";
   }
 
   return trimmed.slice(0, 1);
