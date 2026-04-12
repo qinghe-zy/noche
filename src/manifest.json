@@ -17,6 +17,14 @@
     },
     "modules": {},
     "distribute": {
+      "icons": {
+        "android": {
+          "hdpi": "screen.png",
+          "xhdpi": "screen.png",
+          "xxhdpi": "screen.png",
+          "xxxhdpi": "screen.png"
+        }
+      },
       "android": {
         "permissions": [
           "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",

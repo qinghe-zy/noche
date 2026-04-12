@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 
 function readProjectFile(relativePath: string): string {
   return readFileSync(resolve(process.cwd(), relativePath), "utf8");
@@ -31,5 +32,14 @@ describe("home stitch parity", () => {
     expect(homePage).toContain("handleNavigate('editor', { type: 'diary', recordDate: todayDateKey })");
     expect(homePage).not.toContain(">日记</text>");
     expect(homePage).not.toContain(">写一张随笔</text>");
+  });
+
+  it("uses a date-stable daily prompt for the primary diary card", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+    const prompt = resolveHomeDailyPrompt("2026-04-12");
+
+    expect(homePage).toContain("resolveHomeDailyPrompt(todayDateKey.value)");
+    expect(prompt.subtitleZh).toBe("致今日");
+    expect(prompt.subtitleEn).toBe("To Today");
   });
 });

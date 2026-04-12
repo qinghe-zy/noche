@@ -33,8 +33,8 @@
               </view>
 
               <view class="home-page__paper-copy">
-                <text class="home-page__paper-heading home-page__letter-spacing-medium">{{ copy.home.openToday }}</text>
-                <text class="home-page__paper-subtitle">{{ copy.home.todayLetter }}</text>
+                <text class="home-page__paper-heading home-page__letter-spacing-medium">{{ settingsStore.locale === "en-US" ? dailyPrompt.primaryEn : dailyPrompt.primaryZh }}</text>
+                <text class="home-page__paper-subtitle">{{ settingsStore.locale === "en-US" ? dailyPrompt.subtitleEn : dailyPrompt.subtitleZh }}</text>
               </view>
             </view>
 
@@ -119,6 +119,7 @@ import type { Draft } from "@/domain/draft/types";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
 import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
+import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import HomeProfileMark from "@/features/home/components/HomeProfileMark.vue";
 import { t } from "@/shared/i18n";
@@ -129,6 +130,7 @@ const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
 const copy = computed(() => t(settingsStore.locale));
 const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
+const dailyPrompt = computed(() => resolveHomeDailyPrompt(todayDateKey.value));
 
 const footerMark = computed(() => `${dayjs(todayDateKey.value).format(settingsStore.locale === "en-US" ? "MMM YYYY" : "YYYY年MM月")} · ${copy.value.home.footerSuffix}`);
 const dateChangeWatcher = createDateChangeWatcher({

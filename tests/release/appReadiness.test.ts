@@ -13,6 +13,15 @@ describe("release readiness", () => {
     expect(manifest.appid?.trim()).toBeTruthy();
   });
 
+  it("points android app icons at the bundled local png asset", () => {
+    const manifest = readProjectFile("src/manifest.json");
+
+    expect(manifest).toContain("\"hdpi\": \"screen.png\"");
+    expect(manifest).toContain("\"xhdpi\": \"screen.png\"");
+    expect(manifest).toContain("\"xxhdpi\": \"screen.png\"");
+    expect(manifest).toContain("\"xxxhdpi\": \"screen.png\"");
+  });
+
   it("does not leave profile page as TODO placeholder", () => {
     const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
 
