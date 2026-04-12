@@ -16,8 +16,9 @@ export function getDaysInMonth(date: ConfigType): number {
   return dayjs(date).daysInMonth();
 }
 
-export function getFirstDayOfWeek(date: ConfigType): number {
-  return dayjs(date).startOf("month").day();
+export function getFirstDayOfWeek(date: ConfigType, weekStartsOn: 0 | 1 = 0): number {
+  const weekday = dayjs(date).startOf("month").day();
+  return (weekday - weekStartsOn + 7) % 7;
 }
 
 export function addMonth(date: ConfigType, value: number): string {

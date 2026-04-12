@@ -2,7 +2,7 @@
   <view class="profile-page">
     <scroll-view scroll-y class="profile-page__scroll">
       <ProfileHero
-        title="我的角落"
+        :title="copy.profile.title"
         :display-name="identity.displayName"
         :signature="identity.signature"
         :avatar-uri="identity.avatarUri"
@@ -33,7 +33,7 @@
         </view>
 
         <view class="profile-page__footer">
-          <text class="profile-page__footer-text">岁月安好 · 纸短情长</text>
+          <text class="profile-page__footer-text">{{ footerText }}</text>
         </view>
       </view>
     </scroll-view>
@@ -56,7 +56,7 @@
       :title="sheetTitle"
       :copy="sheetCopy"
       :options="sheetOptions"
-      cancel-text="取消"
+      :cancel-text="copy.home.cancel"
       @close="closeSheet"
       @select="handleSheetSelect"
     />
@@ -78,7 +78,7 @@
       :copy="infoDialogCopy"
       :actions="infoDialogActions"
       @close="closeInfoDialog"
-      @action="closeInfoDialog"
+      @action="handleInfoDialogAction"
     />
   </view>
 </template>
@@ -88,6 +88,7 @@ import { computed, onMounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
+import { getPrefsRepository } from "@/app/store/settingsRepository";
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
@@ -106,14 +107,24 @@ import {
   formatProfileBackupLabel,
   formatProfileLocaleLabel,
   PROFILE_APP_VERSION,
+  PROFILE_PREF_KEYS,
   PROFILE_PREVIEW_LIMIT,
   formatProfileThemeLabel,
   formatProfileWeekStartLabel,
   type ProfileActionItem,
 } from "@/features/profile/profileData";
+import {
+  exportLocalBackup,
+  importLocalBackup,
+  listLocalBackups,
+  restartAppAfterRestore,
+  type LocalBackupSummary,
+} from "@/features/profile/localBackup";
+import { t } from "@/shared/i18n";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
 const {
   identity,
   error: identityError,
@@ -147,6 +158,9 @@ type ActiveSheet =
   | "appearance-theme"
   | "appearance-week"
   | "appearance-locale"
+  | "privacy-root"
+  | "backup-root"
+  | "backup-restore"
   | "avatar-actions"
   | "profile-actions";
 type InputDialogKind = null | "display-name" | "signature";
@@ -171,19 +185,25 @@ const inputDialogMaxlength = ref(60);
 const infoDialogOpen = ref(false);
 const infoDialogTitle = ref("");
 const infoDialogCopy = ref("");
-const infoDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+const infoDialogActions = ref<PaperConfirmDialogAction[]>([
   {
     key: "close",
     title: "知道了",
     tone: "muted",
   },
-]));
+]);
+const infoDialogHandler = ref<((actionKey: string) => void) | null>(null);
+const availableBackups = ref<LocalBackupSummary[]>([]);
+const pendingRestoreBackup = ref<LocalBackupSummary | null>(null);
+const footerText = computed(() => settingsStore.locale === "en-US" ? "Quiet pages · Warm memories" : "岁月安好 · 纸短情长");
 
 const actionItems = computed<ProfileActionItem[]>(() => [
   {
     key: "appearance-settings",
-    title: "外观设置",
-    note: "主题、语言和每周起始日，都放在这里慢慢调顺。",
+    title: copy.value.profile.appearance,
+    note: settingsStore.locale === "en-US"
+      ? "Theme, language, and week start all live here."
+      : "主题、语言和每周起始日，都放在这里慢慢调顺。",
     value: formatProfileAppearanceLabel(
       settingsStore.theme,
       settingsStore.locale,
@@ -192,20 +212,26 @@ const actionItems = computed<ProfileActionItem[]>(() => [
   },
   {
     key: "privacy-lock",
-    title: "隐私锁",
-    note: "离开前台时，用一层雾面遮住纸页。",
-    value: settingsStore.privacyLockEnabled ? "已开启" : "未开启",
+    title: copy.value.profile.privacy,
+    note: settingsStore.locale === "en-US"
+      ? "Cover the page whenever the app returns to foreground."
+      : "离开前台时，用一层雾面遮住纸页。",
+    value: settingsStore.privacyLockEnabled ? copy.value.settings.privacyOn : copy.value.settings.privacyOff,
   },
   {
     key: "local-backup",
-    title: "本地备份",
-    note: "只认本地设备，不接云端。",
+    title: copy.value.profile.backup,
+    note: settingsStore.locale === "en-US"
+      ? "Export and restore only on this device."
+      : "只认本地设备，不接云端。",
     value: formatProfileBackupLabel(identity.value.lastBackupAt),
   },
   {
     key: "about",
-    title: "关于",
-    note: "一间本地优先、离线可写的私人角落。",
+    title: copy.value.profile.about,
+    note: settingsStore.locale === "en-US"
+      ? "A local-first, offline corner for quiet writing."
+      : "一间本地优先、离线可写的私人角落。",
     value: `v${PROFILE_APP_VERSION}`,
   },
 ]);
@@ -222,6 +248,12 @@ const sheetTitle = computed(() => {
       return "每周起始日";
     case "appearance-locale":
       return "语言";
+    case "privacy-root":
+      return copy.value.profile.privacy;
+    case "backup-root":
+      return copy.value.profile.backupRootTitle;
+    case "backup-restore":
+      return copy.value.profile.restoreTitle;
     case "avatar-actions":
       return "头像";
     case "profile-actions":
@@ -235,6 +267,14 @@ const sheetCopy = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
       return "把这间角落调到自己最舒服的阅读节奏。";
+    case "privacy-root":
+      return settingsStore.locale === "en-US"
+        ? "Control how quickly the app covers your pages."
+        : "调一下回前台和立即锁定的节奏。";
+    case "backup-root":
+      return copy.value.profile.backupRootCopy;
+    case "backup-restore":
+      return copy.value.profile.restoreCopy;
     case "avatar-actions":
       return "头像和名字都会留在本机。";
     case "profile-actions":
@@ -279,8 +319,39 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
       return [
         { key: "zh-CN", title: "简体中文", trailingIcon: settingsStore.locale === "zh-CN" ? "check" : undefined },
         { key: "en-US", title: "English", trailingIcon: settingsStore.locale === "en-US" ? "check" : undefined },
-        { key: "ja-JP", title: "日本語", trailingIcon: settingsStore.locale === "ja-JP" ? "check" : undefined },
       ];
+    case "privacy-root":
+      return [
+        {
+          key: "toggle-privacy",
+          title: settingsStore.privacyLockEnabled ? copy.value.profile.privacy : copy.value.profile.privacy,
+          copy: settingsStore.privacyLockEnabled ? copy.value.settings.privacyOn : copy.value.settings.privacyOff,
+        },
+        {
+          key: "lock-now",
+          title: copy.value.profile.lockNow,
+          copy: copy.value.profile.lockNowCopy,
+        },
+      ];
+    case "backup-root":
+      return [
+        {
+          key: "export-backup",
+          title: copy.value.profile.exportBackup,
+          copy: copy.value.profile.exportBackupCopy,
+        },
+        {
+          key: "restore-backup",
+          title: copy.value.profile.restoreBackup,
+          copy: copy.value.profile.restoreBackupCopy,
+        },
+      ];
+    case "backup-restore":
+      return availableBackups.value.map((backup) => ({
+        key: backup.backupId,
+        title: backup.createdAt.replace("T", " ").slice(0, 19),
+        copy: backup.absolutePath,
+      }));
     case "avatar-actions":
       return identity.value.avatarUri
         ? [
@@ -348,6 +419,14 @@ function closeInputDialog(): void {
 function openInfoDialog(title: string, copy: string): void {
   infoDialogTitle.value = title;
   infoDialogCopy.value = copy;
+  infoDialogActions.value = [
+    {
+      key: "close",
+      title: "知道了",
+      tone: "muted",
+    },
+  ];
+  infoDialogHandler.value = null;
   infoDialogOpen.value = true;
 }
 
@@ -355,6 +434,30 @@ function closeInfoDialog(): void {
   infoDialogOpen.value = false;
   infoDialogTitle.value = "";
   infoDialogCopy.value = "";
+  infoDialogHandler.value = null;
+  pendingRestoreBackup.value = null;
+}
+
+function openConfirmDialog(
+  title: string,
+  copyText: string,
+  actions: PaperConfirmDialogAction[],
+  handler: (actionKey: string) => void,
+): void {
+  infoDialogTitle.value = title;
+  infoDialogCopy.value = copyText;
+  infoDialogActions.value = actions;
+  infoDialogHandler.value = handler;
+  infoDialogOpen.value = true;
+}
+
+function handleInfoDialogAction(actionKey: string): void {
+  if (infoDialogHandler.value) {
+    infoDialogHandler.value(actionKey);
+    return;
+  }
+
+  closeInfoDialog();
 }
 
 function chooseSingleImage(): Promise<ChooseImageResult | null> {
@@ -446,6 +549,81 @@ async function handleSheetSelect(key: string): Promise<void> {
       settingsStore.setLocale(key as LocaleOption);
       closeSheet();
       return;
+    case "privacy-root":
+      if (key === "toggle-privacy") {
+        const nextEnabled = !settingsStore.privacyLockEnabled;
+        settingsStore.setPrivacyLockEnabled(nextEnabled);
+        if (!nextEnabled) {
+          appStore.unlockPrivacy();
+        }
+      } else {
+        appStore.lockPrivacy();
+      }
+      closeSheet();
+      return;
+    case "backup-root":
+      closeSheet();
+      if (key === "export-backup") {
+        try {
+          const result = await exportLocalBackup();
+          await getPrefsRepository().set({
+            key: PROFILE_PREF_KEYS.lastBackupAt,
+            value: result.createdAt,
+          });
+          await refreshIdentity();
+          openInfoDialog(copy.value.profile.exportSuccess, result.absolutePath);
+        } catch (error) {
+          openInfoDialog(copy.value.profile.exportFailed, error instanceof Error ? error.message : copy.value.profile.exportFailed);
+        }
+        return;
+      }
+
+      availableBackups.value = await listLocalBackups();
+      if (availableBackups.value.length === 0) {
+        openInfoDialog(copy.value.profile.backupRootTitle, copy.value.profile.noBackupYet);
+        return;
+      }
+      activeSheet.value = "backup-restore";
+      return;
+    case "backup-restore":
+      pendingRestoreBackup.value = availableBackups.value.find((backup) => backup.backupId === key) ?? null;
+      closeSheet();
+      if (!pendingRestoreBackup.value) {
+        return;
+      }
+      openConfirmDialog(
+        copy.value.profile.restoreConfirmTitle,
+        `${copy.value.profile.restoreConfirmCopy}\n\n${pendingRestoreBackup.value.absolutePath}`,
+        [
+          {
+            key: "cancel",
+            title: copy.value.home.cancel,
+            tone: "muted",
+          },
+          {
+            key: "confirm",
+            title: copy.value.profile.restoreConfirmAction,
+            tone: "danger",
+          },
+        ],
+        async (actionKey) => {
+          if (actionKey !== "confirm" || !pendingRestoreBackup.value) {
+            closeInfoDialog();
+            return;
+          }
+
+          try {
+            await importLocalBackup(pendingRestoreBackup.value.backupId);
+            openInfoDialog(copy.value.profile.restoreSuccess, pendingRestoreBackup.value.absolutePath);
+            setTimeout(() => {
+              restartAppAfterRestore();
+            }, 300);
+          } catch (error) {
+            openInfoDialog(copy.value.profile.restoreFailed, error instanceof Error ? error.message : copy.value.profile.restoreFailed);
+          }
+        },
+      );
+      return;
     case "avatar-actions":
       if (key === "clear-avatar") {
         await setAvatarUri(null);
@@ -518,22 +696,12 @@ async function handleSelectAction(actionKey: ProfileActionItem["key"]): Promise<
   }
 
   if (actionKey === "privacy-lock") {
-    const nextEnabled = !settingsStore.privacyLockEnabled;
-    settingsStore.setPrivacyLockEnabled(nextEnabled);
-
-    if (!nextEnabled) {
-      appStore.unlockPrivacy();
-    }
+    activeSheet.value = "privacy-root";
     return;
   }
 
   if (actionKey === "local-backup") {
-    openInfoDialog(
-      "本地备份",
-      identity.value.lastBackupAt
-        ? `最近一次备份：${formatProfileBackupLabel(identity.value.lastBackupAt)}。\n当前版本先保留本地入口，下一轮再接真正的导出链路。`
-        : "当前还没有本地备份记录。入口已经留好，后续会接入真正的本地导出链路。",
-    );
+    activeSheet.value = "backup-root";
     return;
   }
 
@@ -555,8 +723,8 @@ onShow(() => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background: #fbf9f5;
-  color: #31332e;
+  background: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 

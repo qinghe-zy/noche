@@ -83,7 +83,19 @@ export function formatProfileBackupLabel(lastBackupAt: string | null): string {
   return `最近一次 ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`;
 }
 
-export function formatProfileThemeLabel(theme: "system" | "light" | "dark"): string {
+export function formatProfileThemeLabel(theme: "system" | "light" | "dark", locale = "zh-CN"): string {
+  if (locale === "en-US") {
+    if (theme === "light") {
+      return "Light";
+    }
+
+    if (theme === "dark") {
+      return "Dark";
+    }
+
+    return "System";
+  }
+
   if (theme === "light") {
     return "浅色";
   }
@@ -100,14 +112,14 @@ export function formatProfileLocaleLabel(locale: string): string {
     return "English";
   }
 
-  if (locale === "ja-JP") {
-    return "日本語";
-  }
-
   return "中文";
 }
 
-export function formatProfileWeekStartLabel(weekStartsOn: 0 | 1): string {
+export function formatProfileWeekStartLabel(weekStartsOn: 0 | 1, locale = "zh-CN"): string {
+  if (locale === "en-US") {
+    return weekStartsOn === 0 ? "Sunday first" : "Monday first";
+  }
+
   return weekStartsOn === 0 ? "周日开始" : "周一开始";
 }
 
@@ -116,7 +128,7 @@ export function formatProfileAppearanceLabel(
   locale: string,
   weekStartsOn: 0 | 1,
 ): string {
-  return `${formatProfileThemeLabel(theme)} · ${formatProfileWeekStartLabel(weekStartsOn)} · ${formatProfileLocaleLabel(locale)}`;
+  return `${formatProfileThemeLabel(theme, locale)} · ${formatProfileWeekStartLabel(weekStartsOn, locale)} · ${formatProfileLocaleLabel(locale)}`;
 }
 
 export function resolveProfileInitial(displayName: string): string {

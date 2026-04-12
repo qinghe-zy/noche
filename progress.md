@@ -527,3 +527,32 @@
   - `pnpm test:unit` 通过：53 个测试文件、157 个测试通过
   - `pnpm type-check` 通过
   - `pnpm build:h5` 通过
+- 自主继续当前轮次，把 “Settings 真可用 + backup / restore 落地” 接上：
+  - 已新增 `src/features/profile/localBackup.ts`
+    - 导出格式：本地目录型备份包
+    - 默认路径：`_documents/noche-backups/<backupId>/`
+    - 包内内容：
+      - `manifest.json`
+      - `db/noche.db`
+      - `storage/preferences.json`
+      - `storage/draft-shadow.json`
+      - `files/**` 受管本地资源副本
+  - 已支持从 `ProfilePage` 的备份列表中选择本地备份恢复
+  - 恢复流程会：
+    - 关闭 SQLite
+    - 回写备份内的 `noche.db`
+    - 回写受管附件 / 头像 / 封面等本地资源
+    - 恢复 prefs 与 draft shadow
+    - 完成后重启 app
+  - 已补全 Settings 运行时接线：
+    - 深色模式通过 `App.vue + data-theme + CSS variables` 影响核心页面与共享弹层
+    - `CalendarPage` 已真正消费 `weekStartsOn`
+    - `Home / Mailbox / Calendar / Profile / ProfileAlbum / App privacy overlay` 已开始跟随 `locale` 切换核心文案
+    - `ProfilePage` 的隐私锁设置现在支持：
+      - 开关
+      - 立即锁定
+      - 改动后即时影响 app 行为
+- 已再次完成完整验证：
+  - `pnpm test:unit` 通过：53 个测试文件、157 个测试通过
+  - `pnpm type-check` 通过
+  - `pnpm build:h5` 通过

@@ -2,15 +2,15 @@
   <view class="profile-album-page">
     <view class="profile-album-page__topbar">
       <TopbarIconButton @tap="handleGoBack" />
-      <text class="profile-album-page__title">时光相册</text>
+      <text class="profile-album-page__title">{{ copy.profile.albumTitle }}</text>
       <view class="profile-album-page__spacer"></view>
     </view>
 
     <scroll-view scroll-y class="profile-album-page__scroll">
       <view class="profile-album-page__content">
         <ProfileMemoryAlbum
-          title="全部画面"
-          subtitle="只展示 diary / jotting / 已启封 future 的本地图片"
+          :title="copy.profile.albumAll"
+          :subtitle="copy.profile.albumSubtitle"
           :items="visibleItems"
           :is-loading="isLoading"
           :has-any-record="visibleItems.length > 0"
@@ -35,14 +35,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { onShow } from "@dcloudio/uni-app";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import ProfileAlbumViewer from "@/features/profile/components/ProfileAlbumViewer.vue";
 import ProfileMemoryAlbum from "@/features/profile/components/ProfileMemoryAlbum.vue";
 import { useProfileAlbum } from "@/features/profile/composables/useProfileAlbum";
+import { t } from "@/shared/i18n";
 
 const {
   visibleItems,
@@ -57,6 +59,8 @@ const {
   showNext,
   jumpToCurrentEntry,
 } = useProfileAlbum();
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
 
 function handleGoBack(): void {
   navigateBackOrFallback({
@@ -76,8 +80,8 @@ onShow(() => {
 <style scoped>
 .profile-album-page {
   min-height: 100vh;
-  background: #f8f5ef;
-  color: #31332e;
+  background: var(--noche-bg);
+  color: var(--noche-text);
 }
 
 .profile-album-page__topbar {

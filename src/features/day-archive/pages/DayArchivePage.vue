@@ -99,9 +99,7 @@ onLoad((query) => {
 .day-archive-page {
   min-height: 100vh;
   padding: 56rpx 32rpx 72rpx;
-  background:
-    radial-gradient(circle at top right, rgba(206, 184, 141, 0.16), transparent 34%),
-    linear-gradient(180deg, #f8f4ef 0%, #f3eee7 100%);
+  background: var(--noche-bg);
 }
 
 .day-archive-page__hero,
@@ -159,8 +157,8 @@ onLoad((query) => {
 .day-archive-page__item {
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1rpx solid rgba(34, 34, 34, 0.06);
+  background: var(--noche-surface);
+  border: 1rpx solid var(--noche-border);
 }
 
 .day-archive-page__state {

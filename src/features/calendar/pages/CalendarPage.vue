@@ -3,14 +3,14 @@
     <view class="calendar-page__topbar">
       <view class="calendar-page__topbar-inner">
         <TopbarIconButton @tap="handleBackToMailbox" />
-        <text class="calendar-page__topbar-title">日历</text>
-        <view class="calendar-page__topbar-button calendar-page__topbar-button--label" @tap="goToToday">今天</view>
+        <text class="calendar-page__topbar-title">{{ copy.calendar.title }}</text>
+        <view class="calendar-page__topbar-button calendar-page__topbar-button--label" @tap="goToToday">{{ copy.calendar.today }}</view>
       </view>
     </view>
 
     <view class="calendar-page__main">
       <view class="calendar-page__hero">
-        <text class="calendar-page__hero-title">日历</text>
+        <text class="calendar-page__hero-title">{{ copy.calendar.title }}</text>
         <text class="calendar-page__hero-subtitle">
           {{ formatMonthLabel(currentMonthDate) }} {{ formatYearLabel(currentMonthDate) }}
         </text>
@@ -32,7 +32,7 @@
         </view>
 
         <view class="calendar-page__weekdays">
-          <text v-for="day in weekLabels" :key="day" class="calendar-page__weekday">{{ day }}</text>
+          <text v-for="day in displayWeekLabels" :key="day" class="calendar-page__weekday">{{ day }}</text>
         </view>
 
         <view class="calendar-page__grid">
@@ -114,18 +114,18 @@
 
     <view class="calendar-page__footer">
       <view v-if="calendarStore.isLoading" class="calendar-page__status">
-        <text class="calendar-page__status-text">正在更新日期标记…</text>
+        <text class="calendar-page__status-text">{{ copy.calendar.refresh }}</text>
       </view>
         <view v-else class="calendar-page__legend">
           <view class="calendar-page__legend-dot"></view>
-          <text class="calendar-page__legend-text">有记录</text>
+          <text class="calendar-page__legend-text">{{ copy.calendar.recordMarker }}</text>
         </view>
       </view>
     </view>
 
     <PaperConfirmDialog
       :open="isLockedFutureDialogOpen"
-      title="尚未开启"
+      :title="copy.calendar.lockedTitle"
       :copy="lockedFutureDialogCopy"
       :actions="lockedFutureDialogActions"
       @close="closeLockedFutureDialog"
@@ -137,6 +137,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, isSameDay } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
@@ -152,18 +153,31 @@ import {
 import { fallbackEntryTitle, formatEntryTypeLabel } from "@/features/entries/entryDisplay";
 import { resolveCalendarMailboxState } from "@/features/calendar/calendarMailbox";
 import type { Entry } from "@/domain/entry/types";
+import { t } from "@/shared/i18n";
 
 const calendarStore = useCalendarStore();
+const settingsStore = useSettingsStore();
 const currentMonthDate = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const selectedDate = ref<string | null>(null);
 const mailboxVariantIndex = ref(0);
 const lockedFutureEntry = ref<Entry | null>(null);
 const isLockedFutureDialogOpen = ref(false);
-const weekLabels = ["日", "一", "二", "三", "四", "五", "六"];
+const copy = computed(() => t(settingsStore.locale));
+const displayWeekLabels = computed(() => {
+  if (settingsStore.locale === "en-US") {
+    return settingsStore.weekStartsOn === 1
+      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  }
+
+  return settingsStore.weekStartsOn === 1
+    ? ["一", "二", "三", "四", "五", "六", "日"]
+    : ["日", "一", "二", "三", "四", "五", "六"];
+});
 
 const calendarDays = computed(() => {
   const daysInMonth = getDaysInMonth(currentMonthDate.value);
-  const firstDay = getFirstDayOfWeek(currentMonthDate.value);
+  const firstDay = getFirstDayOfWeek(currentMonthDate.value, settingsStore.weekStartsOn);
   const days = [];
 
   for (let i = 0; i < firstDay; i++) {
@@ -192,7 +206,7 @@ const lockedFutureDialogCopy = computed(() =>
 const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   {
     key: "acknowledge",
-    title: "知道了",
+    title: copy.value.calendar.lockedKeep,
   },
 ]));
 const mailboxState = computed(() => resolveCalendarMailboxState(
@@ -334,8 +348,8 @@ onShow(() => {
 
 .calendar-page {
   min-height: 100vh;
-  background-color: #fbf9f5;
-  color: #31332e;
+  background-color: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
@@ -426,8 +440,8 @@ onShow(() => {
 }
 
 .calendar-page__paper-panel {
-  background: #ffffff;
-  border: 1px solid rgba(221, 212, 200, 0.88);
+  background: var(--noche-panel);
+  border: 1px solid var(--noche-border);
   border-radius: 18px;
   padding: 24px 18px 22px;
 }

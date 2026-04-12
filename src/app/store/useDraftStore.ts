@@ -22,6 +22,10 @@ export function setDraftRepository(repository: IDraftRepository): void {
   draftRepository = repository;
 }
 
+export function getDraftRepository(): IDraftRepository {
+  return draftRepository;
+}
+
 interface SaveDraftPatch {
   title?: string;
   content?: string;

@@ -22,6 +22,14 @@ export function collectManagedLocalAttachmentPaths(
     .filter(isManagedLocalFile);
 }
 
+export function collectManagedLocalResourcePaths(
+  localUris: Array<string | null | undefined>,
+): string[] {
+  return localUris
+    .map((localUri) => localUri?.trim() ?? "")
+    .filter(isManagedLocalFile);
+}
+
 export async function removeManagedLocalFiles(paths: string[]): Promise<void> {
   if (!paths.length || typeof uni === "undefined" || typeof uni.removeSavedFile !== "function") {
     return;

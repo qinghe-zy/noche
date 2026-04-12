@@ -171,3 +171,9 @@
     - `useAppStore` 初始状态会同步读取本地轻存储里的 `privacyLockEnabled`
     - 只要用户之前开过隐私锁，冷启动第一帧就会先遮挡
   - profile stats 现在会排除未解锁 future，避免把未开启内容统计进个人页
+  - Settings / backup 现在已经开始具备真实运行时行为：
+    - `App.vue` 已接入 `data-theme` 与 CSS 变量，核心页面和共享弹层会跟随 `theme`
+    - `CalendarPage` 已真正消费 `weekStartsOn`
+    - `Home / Mailbox / Calendar / Profile / ProfileAlbum / App privacy overlay` 已开始跟随 `locale` 切换核心文案
+    - `ProfilePage` 的“本地备份”已经接到导出 / 恢复操作，不再只是占位提示
+    - 本地备份包默认落在 app 私有目录 `_documents/noche-backups/<backupId>/`

@@ -77,8 +77,8 @@ function handleMaskClose(): void {
 
 .paper-confirm-dialog {
   width: min(100%, 420px);
-  background: rgba(252, 248, 241, 0.98);
-  border: 1px solid rgba(213, 204, 191, 0.82);
+  background: var(--noche-surface);
+  border: 1px solid var(--noche-border);
   border-radius: 22px;
   box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
   overflow: hidden;

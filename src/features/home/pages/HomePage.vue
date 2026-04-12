@@ -13,7 +13,7 @@
 
     <view class="home-page__main">
       <view class="home-page__hero">
-        <text class="home-page__hero-title home-page__letter-spacing-widest">见字如面</text>
+        <text class="home-page__hero-title home-page__letter-spacing-widest">{{ copy.home.title }}</text>
       </view>
 
       <view class="home-page__focus">
@@ -33,8 +33,8 @@
               </view>
 
               <view class="home-page__paper-copy">
-                <text class="home-page__paper-heading home-page__letter-spacing-medium">打开今日信纸</text>
-                <text class="home-page__paper-subtitle">Today&apos;s Letter</text>
+                <text class="home-page__paper-heading home-page__letter-spacing-medium">{{ copy.home.openToday }}</text>
+                <text class="home-page__paper-subtitle">{{ copy.home.todayLetter }}</text>
               </view>
             </view>
 
@@ -50,7 +50,7 @@
           <view class="home-page__nav-entry-icon">
             <AppIcon name="edit-note" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">随笔</text>
+          <text class="home-page__nav-entry-label">{{ copy.home.jotting }}</text>
         </view>
 
         <view
@@ -61,14 +61,14 @@
           <view class="home-page__nav-entry-icon">
             <AppIcon name="mail" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">未来信</text>
+          <text class="home-page__nav-entry-label">{{ copy.home.future }}</text>
         </view>
 
         <view class="home-page__nav-entry" @click="handleNavigate('mailbox')" @tap="handleNavigate('mailbox')">
           <view class="home-page__nav-entry-icon">
             <AppIcon name="mail-read" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">邮箱</text>
+          <text class="home-page__nav-entry-label">{{ copy.home.mailbox }}</text>
         </view>
       </view>
     </view>
@@ -84,23 +84,23 @@
     >
       <view class="home-page__jotting-modal" @click.stop>
         <view class="home-page__jotting-modal-head">
-          <text class="home-page__jotting-modal-title">这页随笔还没有收好</text>
-          <text class="home-page__jotting-modal-copy">要继续沿着上次的纸页写，还是重新起一张？</text>
+          <text class="home-page__jotting-modal-title">{{ copy.home.jottingModalTitle }}</text>
+          <text class="home-page__jotting-modal-copy">{{ copy.home.jottingModalCopy }}</text>
         </view>
 
         <view class="home-page__jotting-modal-actions">
           <view class="home-page__jotting-modal-action" @click="handleContinueJottingDraft">
-            <text class="home-page__jotting-modal-action-title">继续上次</text>
-            <text class="home-page__jotting-modal-action-copy">回到刚才那一页</text>
+            <text class="home-page__jotting-modal-action-title">{{ copy.home.continueLast }}</text>
+            <text class="home-page__jotting-modal-action-copy">{{ copy.home.continueLastCopy }}</text>
           </view>
 
           <view class="home-page__jotting-modal-action" @click="handleCreateAnotherJottingDraft">
-            <text class="home-page__jotting-modal-action-title">另起一张</text>
-            <text class="home-page__jotting-modal-action-copy">丢弃这一页草稿，改写新的这一刻</text>
+            <text class="home-page__jotting-modal-action-title">{{ copy.home.startAnother }}</text>
+            <text class="home-page__jotting-modal-action-copy">{{ copy.home.startAnotherCopy }}</text>
           </view>
 
           <view class="home-page__jotting-modal-action home-page__jotting-modal-action--muted" @click="handleCloseJottingModal">
-            <text class="home-page__jotting-modal-action-title">取消</text>
+            <text class="home-page__jotting-modal-action-title">{{ copy.home.cancel }}</text>
           </view>
         </view>
       </view>
@@ -111,18 +111,22 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import dayjs from "dayjs";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { ROUTES } from "@/shared/constants/routes";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import type { Draft } from "@/domain/draft/types";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import HomeProfileMark from "@/features/home/components/HomeProfileMark.vue";
+import { t } from "@/shared/i18n";
 
 const draftStore = useDraftStore();
+const settingsStore = useSettingsStore();
 const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
+const copy = computed(() => t(settingsStore.locale));
 
-const footerMark = computed(() => `${dayjs().format("YYYY年MM月")} · 安静书写`);
+const footerMark = computed(() => `${dayjs().format(settingsStore.locale === "en-US" ? "MMM YYYY" : "YYYY年MM月")} · ${copy.value.home.footerSuffix}`);
 
 const handleNavigate = (routeKey: keyof typeof ROUTES, query?: Record<string, string>) => {
   let url = `/${ROUTES[routeKey]}`;
@@ -166,7 +170,7 @@ async function handleCreateAnotherJottingDraft() {
   if (pendingJottingDraft.value) {
     await draftStore.removeDraft(pendingJottingDraft.value.slotKey);
     uni.showToast({
-      title: "上一张草稿已丢弃",
+      title: copy.value.home.discardedToast,
       icon: "none",
     });
   }
@@ -188,8 +192,8 @@ async function handleCreateAnotherJottingDraft() {
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  background-color: #fbf9f5;
-  color: #31332e;
+  background-color: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
 }
@@ -289,7 +293,7 @@ async function handleCreateAnotherJottingDraft() {
   width: min(100%, 340px);
   aspect-ratio: 1 / 1.4;
   padding: 48px;
-  background-color: #ffffff;
+  background-color: var(--noche-panel);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.03),
     0 10px 30px -5px rgba(0, 0, 0, 0.05),

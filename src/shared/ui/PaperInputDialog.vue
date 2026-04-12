@@ -108,8 +108,8 @@ function handleInput(event: Event): void {
 
 .paper-input-dialog {
   width: min(100%, 420px);
-  background: rgba(252, 248, 241, 0.98);
-  border: 1px solid rgba(213, 204, 191, 0.78);
+  background: var(--noche-surface);
+  border: 1px solid var(--noche-border);
   border-radius: 24px;
   box-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
   overflow: hidden;
@@ -149,7 +149,7 @@ function handleInput(event: Event): void {
   border-bottom: 1px solid rgba(221, 212, 200, 0.44);
   font-size: 16px;
   line-height: 1.75;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .paper-input-dialog__actions {

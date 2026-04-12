@@ -3,7 +3,7 @@
     <view class="mailbox-page__topbar">
       <view class="mailbox-page__topbar-inner">
         <TopbarIconButton @tap="handleGoHome" />
-        <text class="mailbox-page__topbar-title">私人信箱</text>
+        <text class="mailbox-page__topbar-title">{{ copy.mailbox.title }}</text>
         <TopbarIconButton icon-name="calendar" @tap="handleGoToCalendar" />
       </view>
     </view>
@@ -16,14 +16,14 @@
             :class="{ 'mailbox-page__tab-pill--active': activeTab === 'documentary' }"
             @click="handlePrimaryTabChange('documentary')"
           >
-            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">纪实</text>
+            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">{{ copy.mailbox.documentary }}</text>
           </button>
           <button
             class="mailbox-page__tab-pill mailbox-page__tab-pill--primary"
             :class="{ 'mailbox-page__tab-pill--active': activeTab === 'distant' }"
             @click="handlePrimaryTabChange('distant')"
           >
-            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">寄远</text>
+            <text class="mailbox-page__tab-pill-text mailbox-page__tab-pill-text--primary">{{ copy.mailbox.distant }}</text>
           </button>
         </view>
       </view>
@@ -44,12 +44,12 @@
 
       <scroll-view scroll-y class="mailbox-page__content">
         <view v-if="mailboxStore.isLoading" class="mailbox-page__state">
-          <text class="mailbox-page__state-text">正在整理信箱…</text>
+          <text class="mailbox-page__state-text">{{ copy.mailbox.loading }}</text>
         </view>
 
         <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
           <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
-          <button class="mailbox-page__retry" @click="refresh">重新加载</button>
+          <button class="mailbox-page__retry" @click="refresh">{{ copy.mailbox.reload }}</button>
         </view>
 
         <view v-else-if="activeSection.entries.length === 0" class="mailbox-page__state">
@@ -153,7 +153,7 @@
 
     <PaperConfirmDialog
       :open="isLockedFutureDialogOpen"
-      title="尚未开启"
+      :title="copy.mailbox.lockedTitle"
       :copy="lockedFutureDialogCopy"
       :actions="lockedFutureDialogActions"
       @close="closeLockedFutureDialog"
@@ -165,6 +165,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { useMailboxStore } from "@/app/store/useMailboxStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
@@ -186,6 +187,7 @@ import {
   type MailboxPrimaryTab,
   type MailboxSecondaryTab,
 } from "@/features/mailbox/mailboxView";
+import { t } from "@/shared/i18n";
 
 interface MailboxSection {
   key: string;
@@ -201,6 +203,16 @@ interface MailboxSection {
 }
 
 const mailboxStore = useMailboxStore();
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
+const defaultMailboxLabels = {
+  documentary: "纪实",
+  distant: "寄远",
+  diary: "日记",
+  jotting: "随笔",
+  opened: "已启",
+  pending: "待启",
+} as const;
 const activeTab = ref<MailboxPrimaryTab>("documentary");
 const activeSecondaryTab = ref<MailboxSecondaryTab>(getDefaultMailboxSecondaryTab("documentary"));
 const lockedFutureEntry = ref<Entry | null>(null);
@@ -211,7 +223,7 @@ const activeSections = computed<MailboxSection[]>(() => {
     return [
       {
         key: "documentary-diary",
-        title: "日记",
+        title: copy.value.mailbox.diary || defaultMailboxLabels.diary,
         emptyText: "这里还没有日记。",
         entries: mailboxStore.documentaryDiaries,
         renderMode: "paper",
@@ -223,7 +235,7 @@ const activeSections = computed<MailboxSection[]>(() => {
       },
       {
         key: "documentary-jotting",
-        title: "随笔",
+        title: copy.value.mailbox.jotting || defaultMailboxLabels.jotting,
         emptyText: "这里还没有随笔。",
         entries: mailboxStore.documentaryJottings,
         renderMode: "paper",
@@ -239,7 +251,7 @@ const activeSections = computed<MailboxSection[]>(() => {
   return [
     {
       key: "distant-opened",
-      title: "已启",
+      title: copy.value.mailbox.opened || defaultMailboxLabels.opened,
       emptyText: "这里还没有已启的未来信。",
       entries: mailboxStore.distantOpenedFutures,
       renderMode: "paper",
@@ -251,7 +263,7 @@ const activeSections = computed<MailboxSection[]>(() => {
     },
     {
       key: "distant-pending",
-      title: "待启",
+      title: copy.value.mailbox.pending || defaultMailboxLabels.pending,
       emptyText: "这里还没有待启的未来信。",
       entries: mailboxStore.distantPendingFutures,
       renderMode: "sealed",
@@ -281,12 +293,12 @@ const lockedFutureDialogCopy = computed(() =>
 const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   {
     key: "keep",
-    title: "知道了",
+    title: copy.value.mailbox.lockedKeep,
     tone: "muted",
   },
   {
     key: "destroy",
-    title: "现在销毁",
+    title: copy.value.mailbox.lockedDestroy,
     tone: "danger",
   },
 ]));
@@ -387,7 +399,7 @@ async function handleLockedFutureDialogAction(actionKey: string): Promise<void> 
   await refresh();
 
   uni.showToast({
-    title: "已销毁",
+    title: copy.value.mailbox.destroyedToast,
     icon: "none",
   });
 }
@@ -406,8 +418,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page {
   min-height: 100vh;
-  background-color: #f7f4ef;
-  color: #31332e;
+  background-color: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
   overflow-x: hidden;
@@ -641,15 +653,15 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__entry-card {
-  background: #fbf8f3;
-  border: 1px solid #ddd4c8;
+  background: var(--noche-surface);
+  border: 1px solid var(--noche-border);
   padding: 24px 22px;
   border-radius: 18px;
 }
 
 .mailbox-page__entry-card--sealed {
-  background: #f3ede6;
-  border-color: #ddd4c8;
+  background: var(--noche-panel);
+  border-color: var(--noche-border);
 }
 
 .mailbox-page__entry-head {
