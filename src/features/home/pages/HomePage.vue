@@ -19,8 +19,8 @@
       <view class="home-page__focus">
         <view
           class="home-page__paper-premium"
-          @click="handleNavigate('editor', { type: 'diary' })"
-          @tap="handleNavigate('editor', { type: 'diary' })"
+          @click="handleNavigate('editor', { type: 'diary', recordDate: todayDateKey })"
+          @tap="handleNavigate('editor', { type: 'diary', recordDate: todayDateKey })"
         >
           <view class="home-page__paper-texture"></view>
 
@@ -109,13 +109,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import dayjs from "dayjs";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { ROUTES } from "@/shared/constants/routes";
 import { useDraftStore } from "@/app/store/useDraftStore";
 import type { Draft } from "@/domain/draft/types";
 import { resolveDraftSaveAction } from "@/domain/services/entryService";
+import { formatDate } from "@/shared/utils/date";
+import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import HomeProfileMark from "@/features/home/components/HomeProfileMark.vue";
 import { t } from "@/shared/i18n";
@@ -125,8 +128,15 @@ const settingsStore = useSettingsStore();
 const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
 const copy = computed(() => t(settingsStore.locale));
+const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
 
-const footerMark = computed(() => `${dayjs().format(settingsStore.locale === "en-US" ? "MMM YYYY" : "YYYY年MM月")} · ${copy.value.home.footerSuffix}`);
+const footerMark = computed(() => `${dayjs(todayDateKey.value).format(settingsStore.locale === "en-US" ? "MMM YYYY" : "YYYY年MM月")} · ${copy.value.home.footerSuffix}`);
+const dateChangeWatcher = createDateChangeWatcher({
+  getDateKey: () => formatDate(new Date(), "YYYY-MM-DD"),
+  onDateChange: (nextDateKey) => {
+    todayDateKey.value = nextDateKey;
+  },
+});
 
 const handleNavigate = (routeKey: keyof typeof ROUTES, query?: Record<string, string>) => {
   let url = `/${ROUTES[routeKey]}`;
@@ -178,6 +188,19 @@ async function handleCreateAnotherJottingDraft() {
   handleCloseJottingModal();
   handleNavigate("editor", { type: "jotting" });
 }
+
+onMounted(() => {
+  dateChangeWatcher.start();
+});
+
+onUnmounted(() => {
+  dateChangeWatcher.stop();
+});
+
+onShow(() => {
+  todayDateKey.value = formatDate(new Date(), "YYYY-MM-DD");
+  dateChangeWatcher.sync();
+});
 </script>
 
 <style scoped>

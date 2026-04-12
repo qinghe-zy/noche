@@ -127,7 +127,7 @@
                         <AppIcon name="mail" class="mailbox-page__sealed-icon" />
                       </view>
 
-                      <text class="mailbox-page__sealed-title">{{ formatMailboxLockedTitle(entry) }}</text>
+                      <text class="mailbox-page__sealed-title">{{ formatMailboxLockedTitle(entry, settingsStore.locale) }}</text>
                     </view>
 
                     <view class="mailbox-page__sealed-bottom">
@@ -163,13 +163,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { useMailboxStore } from "@/app/store/useMailboxStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { ROUTES } from "@/shared/constants/routes";
+import { formatDate } from "@/shared/utils/date";
+import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
@@ -217,6 +219,12 @@ const activeTab = ref<MailboxPrimaryTab>("documentary");
 const activeSecondaryTab = ref<MailboxSecondaryTab>(getDefaultMailboxSecondaryTab("documentary"));
 const lockedFutureEntry = ref<Entry | null>(null);
 const isLockedFutureDialogOpen = ref(false);
+const dateChangeWatcher = createDateChangeWatcher({
+  getDateKey: () => formatDate(new Date(), "YYYY-MM-DD"),
+  onDateChange: async () => {
+    await refresh();
+  },
+});
 
 const activeSections = computed<MailboxSection[]>(() => {
   if (activeTab.value === "documentary") {
@@ -224,7 +232,7 @@ const activeSections = computed<MailboxSection[]>(() => {
       {
         key: "documentary-diary",
         title: copy.value.mailbox.diary || defaultMailboxLabels.diary,
-        emptyText: "这里还没有日记。",
+        emptyText: settingsStore.locale === "en-US" ? "No diary page is stored here yet." : "这里还没有日记。",
         entries: mailboxStore.documentaryDiaries,
         renderMode: "paper",
         stackClass: "mailbox-page__paper-stack",
@@ -236,7 +244,7 @@ const activeSections = computed<MailboxSection[]>(() => {
       {
         key: "documentary-jotting",
         title: copy.value.mailbox.jotting || defaultMailboxLabels.jotting,
-        emptyText: "这里还没有随笔。",
+        emptyText: settingsStore.locale === "en-US" ? "No jotting is stored here yet." : "这里还没有随笔。",
         entries: mailboxStore.documentaryJottings,
         renderMode: "paper",
         stackClass: "mailbox-page__paper-stack",
@@ -252,7 +260,7 @@ const activeSections = computed<MailboxSection[]>(() => {
     {
       key: "distant-opened",
       title: copy.value.mailbox.opened || defaultMailboxLabels.opened,
-      emptyText: "这里还没有已启的未来信。",
+      emptyText: settingsStore.locale === "en-US" ? "No opened To Future page is stored here yet." : "这里还没有已启的致未来。",
       entries: mailboxStore.distantOpenedFutures,
       renderMode: "paper",
       stackClass: "mailbox-page__paper-stack",
@@ -264,7 +272,7 @@ const activeSections = computed<MailboxSection[]>(() => {
     {
       key: "distant-pending",
       title: copy.value.mailbox.pending || defaultMailboxLabels.pending,
-      emptyText: "这里还没有待启的未来信。",
+      emptyText: settingsStore.locale === "en-US" ? "No pending To Future page is stored here yet." : "这里还没有待启的致未来。",
       entries: mailboxStore.distantPendingFutures,
       renderMode: "sealed",
       stackClass: "mailbox-page__sealed-stack",
@@ -286,9 +294,13 @@ const activeSection = computed<MailboxSection>(() => {
   return matched ?? activeSections.value[0];
 });
 const lockedFutureDialogCopy = computed(() =>
-  lockedFutureEntry.value?.unlockDate
-    ? `这封未来信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。你也可以现在销毁它。`
-    : "这封未来信还没有到开启的时候。你也可以现在销毁它。",
+  settingsStore.locale === "en-US"
+    ? (lockedFutureEntry.value?.unlockDate
+      ? `This note opens on ${lockedFutureEntry.value.unlockDate}. You can also destroy it now.`
+      : "This note is not ready to open yet. You can also destroy it now.")
+    : (lockedFutureEntry.value?.unlockDate
+      ? `这封信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。你也可以现在销毁它。`
+      : "这封信还没有到开启的时候。你也可以现在销毁它。"),
 );
 const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   {
@@ -308,15 +320,15 @@ function isSealedFuture(entry: Entry): boolean {
 }
 
 function formatDateLabel(entry: Entry, tab: "past" | "future"): string {
-  return formatMailboxDateLabel(entry, tab);
+  return formatMailboxDateLabel(entry, tab, settingsStore.locale);
 }
 
 function formatTypeLabel(type: EntryType): string {
-  return formatMailboxTypeLabel(type);
+  return formatMailboxTypeLabel(type, settingsStore.locale);
 }
 
 function formatExcerpt(entry: Entry): string {
-  return formatMailboxExcerpt(entry);
+  return formatMailboxExcerpt(entry, settingsStore.locale);
 }
 
 function resolveMailboxMetaIcon(icon: string): "stories" | "edit-note" | "mail-read" | "mail" {
@@ -374,10 +386,16 @@ function handleEntryClick(entry: Entry) {
 
 onMounted(() => {
   void refresh();
+  dateChangeWatcher.start();
 });
 
 onShow(() => {
   void refresh();
+  dateChangeWatcher.sync();
+});
+
+onUnmounted(() => {
+  dateChangeWatcher.stop();
 });
 
 function closeLockedFutureDialog(): void {

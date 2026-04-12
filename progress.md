@@ -527,6 +527,40 @@
   - `pnpm test:unit` 通过：53 个测试文件、157 个测试通过
   - `pnpm type-check` 通过
   - `pnpm build:h5` 通过
+- 自主继续发版前最后一轮边界收口：
+  - 已新增 `tests/features/editorAutosave.test.ts` 红灯，确认 `flush()` 在已有保存进行中时需要补跑一次最新保存
+  - 已新增 `tests/shared/dateChange.test.ts`，固定“页面跨过午夜时触发一次日期刷新”的低频 watcher 行为
+  - 已更新 `useEditorAutosave()`：保存进行中若又收到 `flush()` / 新一轮触发，会在当前保存结束后补跑一次
+  - 已新增 `src/shared/utils/dateChange.ts`，并接到：
+    - `HomePage`
+    - `CalendarPage`
+    - `MailboxPage`
+    - `ProfilePage`
+    让页面活着跨过午夜时只触发一次必要刷新
+  - `HomePage` 现在会显式把 `recordDate=todayDateKey` 传给 diary 入口，避免停留跨天时入口继续隐式指向昨天
+  - 已继续补齐语言覆盖：
+    - `DayArchivePage`
+    - `ProfileStatsRow`
+    - `ProfileMemoryAlbum`
+    - `ProfileAlbumViewer`
+    - `EditorPage`
+    - `JottingEditorShell`
+    - `FutureLetterEditorShell`
+    - `CalendarMailbox`
+    - `Mailbox` 的空态、锁定提示、类型标签
+  - 已统一主路径未来内容命名：
+    - 中文：`致未来`
+    - 英文：`To Future`
+  - 已修正 `mailboxDisplay / entryDisplay / profileData / entryService` 里的相关 fallback label 和兜底标题
+  - 已完成发版前代码扫查：
+    - demo seed 仅显式开启
+    - 未发现运行时远程资源强依赖
+    - manifest 仍缺明确 Android 包名与正式图标配置，属于剩余发版阻塞项
+    - 飞行模式链路从代码与构建结果看应可离线工作，但本轮未重做 Android 实机飞行模式验收
+- 已再次完成完整验证：
+  - `pnpm test:unit` 通过：55 个测试文件、163 个测试通过
+  - `pnpm type-check` 通过
+  - `pnpm build:h5` 通过
 - 自主继续当前轮次，把 “Settings 真可用 + backup / restore 落地” 接上：
   - 已新增 `src/features/profile/localBackup.ts`
     - 导出格式：本地目录型备份包

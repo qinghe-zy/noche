@@ -175,5 +175,23 @@
     - `App.vue` 已接入 `data-theme` 与 CSS 变量，核心页面和共享弹层会跟随 `theme`
     - `CalendarPage` 已真正消费 `weekStartsOn`
     - `Home / Mailbox / Calendar / Profile / ProfileAlbum / App privacy overlay` 已开始跟随 `locale` 切换核心文案
-    - `ProfilePage` 的“本地备份”已经接到导出 / 恢复操作，不再只是占位提示
-    - 本地备份包默认落在 app 私有目录 `_documents/noche-backups/<backupId>/`
+  - `ProfilePage` 的“本地备份”已经接到导出 / 恢复操作，不再只是占位提示
+  - 本地备份包默认落在 app 私有目录 `_documents/noche-backups/<backupId>/`
+- 发版前最后一轮收口后的关键事实：
+  - `useEditorAutosave()` 之前在保存进行中收到 `flush()` 时，只会等待旧保存，不会补跑最新一次；这是真正会让“最后一句只进 shadow、不进 repo”的根因
+  - 现在 autosave 已支持“进行中 flush 再补跑一次”，能把最后一版内容再往 repo 压一层
+  - 新增 `src/shared/utils/dateChange.ts` 后，`Home / Calendar / Mailbox / Profile` 都可以在页面活着跨过午夜时只触发一次必要刷新，不需要高频轮询
+  - 当前核心路径语言覆盖已经从“核心页面大致可切”提升到：
+    - Settings 弹层
+    - Day Archive
+    - Editor 可见文案与按钮
+    - 相册大图查看层
+    - 隐私锁文案
+    - backup / restore 确认与反馈文案
+  - “未来信”在主路径可见类型名已统一为“致未来”，英文模式统一为 `To Future`
+- 本轮发版检查结论：
+  - demo / seed：默认关闭，仅 `demoEntries` 显式传入时才会注入
+  - 远程资源：运行时代码仍未发现 `Google Fonts / Tailwind CDN / 远程图片 URL` 强依赖
+  - manifest：`appid / versionName / versionCode` 已有，但 Android 包名与正式图标配置仍未完全补齐，仍是发版阻塞项
+  - 本地路径：SQLite 在 `_doc/noche.db`，备份包与附件恢复路径已明确，首次安装不会依赖服务器
+  - 飞行模式：从架构和当前 H5/build 结果看核心主路径是本地可走通的，但真正 Android 飞行模式实机验收这轮没有重跑，因此仍应视为待最终设备验收项

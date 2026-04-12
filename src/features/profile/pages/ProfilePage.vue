@@ -84,13 +84,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { getPrefsRepository } from "@/app/store/settingsRepository";
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
+import { formatDate } from "@/shared/utils/date";
+import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import PaperInputDialog from "@/shared/ui/PaperInputDialog.vue";
 import PaperOptionSheet, { type PaperOptionSheetOption } from "@/shared/ui/PaperOptionSheet.vue";
@@ -203,6 +205,15 @@ const infoDialogHandler = ref<((actionKey: string) => void) | null>(null);
 const availableBackups = ref<LocalBackupSummary[]>([]);
 const pendingRestoreBackup = ref<LocalBackupSummary | null>(null);
 const footerText = computed(() => settingsStore.locale === "en-US" ? "Quiet pages · Warm memories" : "岁月安好 · 纸短情长");
+const dateChangeWatcher = createDateChangeWatcher({
+  getDateKey: () => formatDate(new Date(), "YYYY-MM-DD"),
+  onDateChange: async () => {
+    await Promise.all([
+      refreshStats(),
+      refreshAlbum(),
+    ]);
+  },
+});
 
 function resolveBackupErrorMessage(error: unknown): string {
   if (!isLocalBackupAvailable()) {
@@ -741,10 +752,16 @@ async function handleSelectAction(actionKey: ProfileActionItem["key"]): Promise<
 
 onMounted(() => {
   void refreshPage();
+  dateChangeWatcher.start();
 });
 
 onShow(() => {
   void refreshPage();
+  dateChangeWatcher.sync();
+});
+
+onUnmounted(() => {
+  dateChangeWatcher.stop();
 });
 </script>
 

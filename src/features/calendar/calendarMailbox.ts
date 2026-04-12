@@ -66,6 +66,7 @@ export function resolveCalendarMailboxState(
   entries: Entry[],
   today: string,
   variantIndex = 0,
+  locale = "zh-CN",
 ): CalendarMailboxState {
   const formattedDate = formatMailboxDate(recordDate);
 
@@ -83,8 +84,10 @@ export function resolveCalendarMailboxState(
   if (isFutureDate(recordDate, today)) {
     return {
       kind: "empty-future",
-      title: "这一天还没有可查看的信",
-      body: `${formattedDate} 还没有等到你可以翻开的那一封信。`,
+      title: locale === "en-US" ? "No page can be opened on this day yet" : "这一天还没有可查看的信",
+      body: locale === "en-US"
+        ? `${formattedDate} has no page ready to open yet.`
+        : `${formattedDate} 还没有等到你可以翻开的那一封信。`,
       actionLabel: null,
     };
   }
@@ -96,7 +99,7 @@ export function resolveCalendarMailboxState(
       kind: "empty-today",
       title: variant.title,
       body: variant.body(formattedDate),
-      actionLabel: "打开今日信纸",
+      actionLabel: locale === "en-US" ? "Open today's page" : "打开今日信纸",
     };
   }
 
@@ -104,6 +107,6 @@ export function resolveCalendarMailboxState(
     kind: "empty-past",
     title: variant.title,
     body: variant.body(formattedDate),
-    actionLabel: "补写这一天的日记",
+    actionLabel: locale === "en-US" ? "Write for this day" : "补写这一天的日记",
   };
 }

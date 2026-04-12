@@ -246,7 +246,7 @@ describe("entry service", () => {
 
     expect(diaryEntry.title).toBe("图片日记");
     expect(jottingEntry.title).toBe("图片随笔");
-    expect(futureEntry.title).toBe("图片未来信");
+    expect(futureEntry.title).toBe("图片致未来");
   });
 
   it("creates new diary drafts as unseen and other drafts as skipped", () => {

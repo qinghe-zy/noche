@@ -59,13 +59,25 @@ export function formatProfileWordCount(totalWords: number): string {
   return String(totalWords);
 }
 
-export function formatProfileTypeLabel(type: EntryType): string {
+export function formatProfileTypeLabel(type: EntryType, locale = "zh-CN"): string {
+  if (locale === "en-US") {
+    if (type === "jotting") {
+      return "Jotting";
+    }
+
+    if (type === "future") {
+      return "To Future";
+    }
+
+    return "Diary";
+  }
+
   if (type === "jotting") {
     return "随笔";
   }
 
   if (type === "future") {
-    return "未来信";
+    return "致未来";
   }
 
   return "日记";

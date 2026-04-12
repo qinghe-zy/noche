@@ -1,7 +1,7 @@
 <template>
   <view class="day-archive-page">
     <view class="day-archive-page__hero">
-      <text class="day-archive-page__eyebrow">当日归档</text>
+      <text class="day-archive-page__eyebrow">{{ copy.dayArchive.eyebrow }}</text>
       <text class="day-archive-page__title">{{ pageTitle }}</text>
       <text class="day-archive-page__subtitle">{{ pageSubtitle }}</text>
     </view>
@@ -11,13 +11,13 @@
     </view>
 
     <view v-if="calendarStore.isLoading" class="day-archive-page__state">
-      <text class="day-archive-page__state-text">正在整理这一天的内容…</text>
+      <text class="day-archive-page__state-text">{{ copy.dayArchive.loading }}</text>
     </view>
 
     <view v-else-if="entries.length === 0" class="day-archive-page__state">
       <text class="day-archive-page__state-text">{{ emptyText }}</text>
       <button class="day-archive-page__primary-button" @click="handleWriteDiary">
-        补写这一天
+        {{ copy.dayArchive.writeDiary }}
       </button>
     </view>
 
@@ -29,10 +29,10 @@
         @click="handleOpenEntry(entry.id)"
       >
         <view class="day-archive-page__item-head">
-          <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type) }}</text>
+          <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type, settingsStore.locale) }}</text>
           <text class="day-archive-page__item-date">{{ resolveEntryDateLabel(entry) }}</text>
         </view>
-        <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type) }}</text>
+        <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
         <text class="day-archive-page__item-content">{{ entry.content }}</text>
       </view>
     </view>
@@ -43,9 +43,11 @@
 import { computed, ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { lockRecordDate } from "@/domain/time/rules";
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDate } from "@/shared/utils/date";
+import { t } from "@/shared/i18n";
 import {
   formatDayArchiveEmptyText,
   formatDayArchiveSubtitle,
@@ -55,16 +57,20 @@ import { fallbackEntryTitle, formatEntryTypeLabel } from "@/features/entries/ent
 import type { Entry } from "@/domain/entry/types";
 
 const calendarStore = useCalendarStore();
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
 const recordDate = ref(lockRecordDate());
 
 const entries = computed(() => calendarStore.selectedDateEntries);
-const pageTitle = computed(() => formatDayArchiveTitle(recordDate.value));
-const pageSubtitle = computed(() => formatDayArchiveSubtitle(entries.value.length));
-const emptyText = computed(() => formatDayArchiveEmptyText(recordDate.value));
+const pageTitle = computed(() => formatDayArchiveTitle(recordDate.value, settingsStore.locale));
+const pageSubtitle = computed(() => formatDayArchiveSubtitle(entries.value.length, settingsStore.locale));
+const emptyText = computed(() => formatDayArchiveEmptyText(recordDate.value, settingsStore.locale));
 
 function resolveEntryDateLabel(entry: Entry): string {
   if (entry.type === "future" && entry.unlockDate) {
-    return `启封 ${formatDate(entry.unlockDate, "MM/DD")}`;
+    return settingsStore.locale === "en-US"
+      ? `Opened ${formatDate(entry.unlockDate, "MM/DD")}`
+      : `启封 ${formatDate(entry.unlockDate, "MM/DD")}`;
   }
 
   return formatDate(entry.recordDate, "MM/DD");
@@ -88,7 +94,7 @@ onLoad((query) => {
     : lockRecordDate();
 
   uni.setNavigationBarTitle({
-    title: formatDayArchiveTitle(recordDate.value),
+    title: formatDayArchiveTitle(recordDate.value, settingsStore.locale),
   });
 
   void calendarStore.fetchSelectedDateEntries(recordDate.value);

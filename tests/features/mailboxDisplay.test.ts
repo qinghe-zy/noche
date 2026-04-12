@@ -28,7 +28,7 @@ describe("mailbox display helpers", () => {
   it("formats entry type labels in project language", () => {
     expect(formatMailboxTypeLabel("diary")).toBe("日记");
     expect(formatMailboxTypeLabel("jotting")).toBe("随笔");
-    expect(formatMailboxTypeLabel("future")).toBe("未来信");
+    expect(formatMailboxTypeLabel("future")).toBe("致未来");
   });
 
   it("formats opened and pending future dates with unlock semantics instead of recordDate", () => {
@@ -68,7 +68,7 @@ describe("mailbox display helpers", () => {
           content: "不应显示出来",
         }),
       ),
-    ).toBe("这封未来信会在 2026-04-12 当天开启。");
+    ).toBe("这封信会在 2026-04-12 当天开启。");
   });
 
   it("uses a generic title for sealed future letters instead of leaking user-written title", () => {
@@ -81,6 +81,6 @@ describe("mailbox display helpers", () => {
           unlockDate: "2026-04-12",
         }),
       ),
-    ).toBe("写给未来的信");
+    ).toBe("致未来");
   });
 });

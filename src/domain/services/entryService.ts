@@ -40,7 +40,7 @@ export function deriveEntryTitle(content: string, maxLength = 13): string | null
 
 export function deriveImageOnlyEntryTitle(type: EntryType): string {
   if (type === "future") {
-    return "图片未来信";
+    return "图片致未来";
   }
 
   return type === "jotting" ? "图片随笔" : "图片日记";

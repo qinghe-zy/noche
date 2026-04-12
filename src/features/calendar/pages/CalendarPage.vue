@@ -83,7 +83,7 @@
             @click="handleOpenEntry(entry.id)"
           >
               <view class="calendar-page__day-mailbox-item-head">
-                <text class="calendar-page__day-mailbox-item-type">{{ formatEntryTypeLabel(entry.type) }}</text>
+                <text class="calendar-page__day-mailbox-item-type">{{ formatEntryTypeLabel(entry.type, settingsStore.locale) }}</text>
                 <view class="calendar-page__day-mailbox-item-meta-cluster">
                   <text class="calendar-page__day-mailbox-item-date">{{ formatDate(entry.savedAt ?? entry.createdAt, "HH:mm") }}</text>
                   <view
@@ -105,7 +105,7 @@
                   </view>
                 </view>
               </view>
-              <text class="calendar-page__day-mailbox-item-title">{{ entry.title || fallbackEntryTitle(entry.type) }}</text>
+              <text class="calendar-page__day-mailbox-item-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
               <text class="calendar-page__day-mailbox-item-content">{{ entry.content }}</text>
               <text class="calendar-page__day-mailbox-item-status">{{ formatEntryStatus(entry) }}</text>
             </view>
@@ -135,11 +135,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, isSameDay } from "@/shared/utils/date";
+import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import AppIcon from "@/shared/ui/AppIcon.vue";
@@ -158,6 +159,7 @@ import { t } from "@/shared/i18n";
 const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
 const currentMonthDate = ref(formatDate(new Date(), "YYYY-MM-DD"));
+const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const selectedDate = ref<string | null>(null);
 const mailboxVariantIndex = ref(0);
 const lockedFutureEntry = ref<Entry | null>(null);
@@ -199,9 +201,13 @@ const calendarDays = computed(() => {
 const contextDate = computed(() => (selectedDate.value ? selectedDate.value : "选择日期"));
 const selectedEntries = computed(() => calendarStore.selectedDateEntries);
 const lockedFutureDialogCopy = computed(() =>
-  lockedFutureEntry.value?.unlockDate
-    ? `这封未来信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。`
-    : "这封未来信还没有到开启的时候。",
+  settingsStore.locale === "en-US"
+    ? (lockedFutureEntry.value?.unlockDate
+      ? `This note opens on ${lockedFutureEntry.value.unlockDate}.`
+      : "This note is not ready to open yet.")
+    : (lockedFutureEntry.value?.unlockDate
+      ? `这封信会在 ${lockedFutureEntry.value.unlockDate} 当天开启。`
+      : "这封信还没有到开启的时候。"),
 );
 const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   {
@@ -210,18 +216,34 @@ const lockedFutureDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   },
 ]));
 const mailboxState = computed(() => resolveCalendarMailboxState(
-  selectedDate.value ?? formatDate(new Date(), "YYYY-MM-DD"),
+  selectedDate.value ?? todayDateKey.value,
   selectedEntries.value,
-  formatDate(new Date(), "YYYY-MM-DD"),
+  todayDateKey.value,
   mailboxVariantIndex.value,
+  settingsStore.locale,
 ));
+const dateChangeWatcher = createDateChangeWatcher({
+  getDateKey: () => formatDate(new Date(), "YYYY-MM-DD"),
+  onDateChange: async (nextDateKey) => {
+    const previousToday = todayDateKey.value;
+    todayDateKey.value = nextDateKey;
+    if (selectedDate.value === previousToday) {
+      selectedDate.value = nextDateKey;
+      currentMonthDate.value = nextDateKey;
+    }
+    await calendarStore.fetchMarkedDates();
+    await loadSelectedDatePanel(selectedDate.value ?? nextDateKey);
+  },
+});
 
 function formatEntryStatus(entry: Entry): string {
   if (entry.type === "future") {
-    return entry.status === "sealed" ? "待启" : "已启";
+    return settingsStore.locale === "en-US"
+      ? (entry.status === "sealed" ? "Pending" : "Opened")
+      : (entry.status === "sealed" ? "待启" : "已启");
   }
 
-  return "已收好";
+  return settingsStore.locale === "en-US" ? "Filed" : "已收好";
 }
 
 function hasDiaryPreludeGlyphs(entry: Entry): boolean {
@@ -283,7 +305,7 @@ function formatYearLabel(date: string) {
 }
 
 function isToday(date: string) {
-  return isSameDay(date, new Date());
+  return isSameDay(date, todayDateKey.value);
 }
 
 function isSelected(date: string) {
@@ -303,8 +325,8 @@ function nextMonth() {
 }
 
 function goToToday() {
-  currentMonthDate.value = formatDate(new Date(), "YYYY-MM-DD");
-  selectedDate.value = formatDate(new Date(), "YYYY-MM-DD");
+  currentMonthDate.value = todayDateKey.value;
+  selectedDate.value = todayDateKey.value;
   void loadSelectedDatePanel(selectedDate.value);
 }
 
@@ -325,18 +347,25 @@ async function handleDateClick(date: string) {
 }
 
 onMounted(() => {
-  selectedDate.value = formatDate(new Date(), "YYYY-MM-DD");
+  selectedDate.value = todayDateKey.value;
   void calendarStore.fetchMarkedDates();
   void loadSelectedDatePanel(selectedDate.value);
+  dateChangeWatcher.start();
+});
+
+onUnmounted(() => {
+  dateChangeWatcher.stop();
 });
 
 onShow(() => {
   const nextToday = formatDate(new Date(), "YYYY-MM-DD");
+  todayDateKey.value = nextToday;
   if (!selectedDate.value) {
     selectedDate.value = nextToday;
   }
   void calendarStore.fetchMarkedDates();
   void loadSelectedDatePanel(selectedDate.value ?? nextToday);
+  dateChangeWatcher.sync();
 });
 </script>
 

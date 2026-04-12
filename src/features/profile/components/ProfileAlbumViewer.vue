@@ -4,7 +4,7 @@
       <view class="profile-album-viewer__topbar">
         <text class="profile-album-viewer__counter">{{ currentIndex + 1 }} / {{ total }}</text>
         <view class="profile-album-viewer__close" @tap="$emit('close')">
-          <text class="profile-album-viewer__close-text">收起</text>
+          <text class="profile-album-viewer__close-text">{{ copy.home.cancel }}</text>
         </view>
       </view>
 
@@ -15,7 +15,7 @@
       <view class="profile-album-viewer__meta">
         <view class="profile-album-viewer__meta-copy">
           <text class="profile-album-viewer__date">{{ formatProfileRecordDate(item.recordDate) }}</text>
-          <text class="profile-album-viewer__type">{{ formatProfileTypeLabel(item.type) }}</text>
+          <text class="profile-album-viewer__type">{{ formatProfileTypeLabel(item.type, settingsStore.locale) }}</text>
         </view>
 
         <view class="profile-album-viewer__actions">
@@ -27,7 +27,7 @@
             <AppIcon name="chevron-left" class="profile-album-viewer__pager-icon" />
           </view>
           <view class="profile-album-viewer__jump" @tap="$emit('jump')">
-            <text class="profile-album-viewer__jump-text">跳转到对应文章</text>
+            <text class="profile-album-viewer__jump-text">{{ jumpLabel }}</text>
           </view>
           <view
             class="profile-album-viewer__pager"
@@ -43,12 +43,19 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+import { useSettingsStore } from "@/app/store/useSettingsStore";
+import { t } from "@/shared/i18n";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import {
   formatProfileRecordDate,
   formatProfileTypeLabel,
   type ProfileAlbumItem,
 } from "@/features/profile/profileData";
+
+const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
+const jumpLabel = computed(() => settingsStore.locale === "en-US" ? "Open linked page" : "跳转到对应文章");
 
 defineProps<{
   open: boolean;

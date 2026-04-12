@@ -13,6 +13,7 @@ export interface EditorAutosaveController {
 export function useEditorAutosave(options: EditorAutosaveOptions): EditorAutosaveController {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let runningPromise: Promise<void> | null = null;
+  let shouldRunAgain = false;
 
   const clearScheduledTimer = () => {
     if (timer) {
@@ -23,15 +24,18 @@ export function useEditorAutosave(options: EditorAutosaveOptions): EditorAutosav
 
   const runSave = async () => {
     if (runningPromise) {
+      shouldRunAgain = true;
       await runningPromise;
       return;
     }
+    do {
+      shouldRunAgain = false;
+      runningPromise = Promise.resolve(options.onSave()).finally(() => {
+        runningPromise = null;
+      });
 
-    runningPromise = Promise.resolve(options.onSave()).finally(() => {
-      runningPromise = null;
-    });
-
-    await runningPromise;
+      await runningPromise;
+    } while (shouldRunAgain);
   };
 
   return {

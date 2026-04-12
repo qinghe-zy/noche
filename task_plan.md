@@ -7,6 +7,7 @@
 - 当前追加目标：完成一轮本地 SQLite 数据库审计与优化，核心内容切向 SQLite，设置继续走本地轻存储，并保证 Android-only / local-first / offline 主链不回退。
 - 当前追加目标：完成一轮架构核查与高优先级逻辑修复，重点处理 seed 污染、future 时间语义、编辑保存可靠性、destroy 闭环、隐私锁前台时序与 jotting 冲突。
 - 当前追加目标：完成 Settings 真可用与本地 backup / restore 落地，并继续收口剩余“部分存在”的风险点。
+- 当前追加目标：完成发版前最后一轮边界收口，重点压缩编辑页最后保存风险、补前台跨午夜刷新、收口核心路径语言覆盖，并输出发版检查清单。
 
 ## Constraints
 - 主验收设备：`Redmi Note 11T Pro+`
@@ -49,6 +50,7 @@
 - [completed] Phase 28: 完成本地 SQLite 数据库审计、查询优化与迁移落地
 - [completed] Phase 29: 完成架构核查与高优先级逻辑修复首轮收口
 - [completed] Phase 30: 完成 Settings 真可用与本地 backup / restore 最小闭环
+- [completed] Phase 31: 完成发版前最后一轮边界收口
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

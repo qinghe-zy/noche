@@ -108,8 +108,8 @@
 
   <PaperConfirmDialog
     :open="isDestroyDraftDialogOpen"
-    title="销毁这封信？"
-    copy="这封信已经被删空，确认后会被彻底销毁。"
+    :title="copy.editor.destroyTitle"
+    :copy="copy.editor.destroyCopy"
     :actions="destroyDraftDialogActions"
     @close="resolveDestroyDraftDialog(false)"
     @action="handleDestroyDraftDialogAction"
@@ -289,7 +289,13 @@ const bodyPlaceholder = computed(() => {
 
   return entryType.value === "jotting" ? copy.value.editor.jottingPlaceholder : copy.value.editor.diaryPlaceholder;
 });
-const readTitle = computed(() => savedEntry.value?.title ?? (entryType.value === "future" ? "未来信" : entryType.value === "jotting" ? "随笔" : "日记"));
+const readTitle = computed(() => savedEntry.value?.title ?? (
+  entryType.value === "future"
+    ? copy.value.editor.futureLabel
+    : entryType.value === "jotting"
+      ? copy.value.editor.jottingLabel
+      : copy.value.editor.diaryLabel
+));
 const readMeta = computed(() => {
   if (!savedEntry.value) {
     return "";
@@ -311,12 +317,12 @@ const diaryHeaderTime = computed(() =>
 const destroyDraftDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   {
     key: "cancel",
-    title: "再想想",
+    title: copy.value.editor.destroyCancel,
     tone: "muted",
   },
   {
     key: "confirm",
-    title: "确认销毁",
+    title: copy.value.editor.destroyConfirm,
     tone: "danger",
   },
 ]));
@@ -500,7 +506,7 @@ async function handleDiaryPreludeSkip(): Promise<void> {
     markSaved();
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "暂存跳过状态失败",
+      title: error instanceof Error ? error.message : copy.value.editor.preludeSkipFailed,
       icon: "none",
     });
   }
@@ -516,7 +522,7 @@ async function handleDiaryPreludeConfirm(nextPrelude: DiaryPreludeMeta): Promise
     markSaved();
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "保存前序信息失败",
+      title: error instanceof Error ? error.message : copy.value.editor.preludeSaveFailed,
       icon: "none",
     });
   }
@@ -534,7 +540,7 @@ async function normalizeFutureDraftIfExpired(): Promise<void> {
 
   unlockDate.value = "";
   pendingUnlockDate.value = "";
-  futureHint.value = "原定日期已过，请重新选择开启时间";
+  futureHint.value = copy.value.editor.futureHintExpired;
 
   await draftStore.saveActiveDraft({
     title: title.value,
@@ -770,7 +776,7 @@ async function handlePickImages(): Promise<void> {
     markSaved();
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "图片插入失败",
+      title: error instanceof Error ? error.message : copy.value.editor.imageInsertFailed,
       icon: "none",
     });
   }
@@ -793,7 +799,7 @@ function handlePreviewAttachment(attachmentId: string): void {
 async function handleConfirmFutureDate(): Promise<void> {
   if (!pendingUnlockDate.value || !isValidFutureLetterDate(pendingUnlockDate.value)) {
     uni.showToast({
-      title: "请选择明天及以后的日期",
+      title: copy.value.editor.invalidFutureDate,
       icon: "none",
     });
     return;
@@ -841,7 +847,7 @@ async function handleDestroyLinkedEntryDraft(): Promise<void> {
   await draftStore.removeDraft(draft.slotKey);
 
   uni.showToast({
-    title: "已销毁",
+    title: copy.value.editor.destroyed,
     icon: "none",
   });
   returnToHome();
@@ -865,7 +871,7 @@ async function handleFormalSave(): Promise<void> {
       await persistDraftNow();
       markSaved();
       uni.showToast({
-        title: "已保留草稿",
+        title: copy.value.editor.keepDraft,
         icon: "none",
       });
       returnToHome();
@@ -885,7 +891,7 @@ async function handleFormalSave(): Promise<void> {
     const entry = await draftStore.saveActiveDraftAsEntry();
 
     if (!entry) {
-      throw new Error(draftStore.error ?? "正式保存失败");
+      throw new Error(draftStore.error ?? copy.value.editor.saveFailed);
     }
 
     savedEntry.value = entry;
@@ -899,7 +905,7 @@ async function handleFormalSave(): Promise<void> {
     resetFeedback();
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "正式保存失败",
+      title: error instanceof Error ? error.message : copy.value.editor.saveFailed,
       icon: "none",
     });
   }
@@ -924,7 +930,7 @@ async function handleContinueWrite(): Promise<void> {
     futureHint.value = "";
   } catch (error) {
     uni.showToast({
-      title: error instanceof Error ? error.message : "恢复续写失败",
+      title: error instanceof Error ? error.message : copy.value.editor.resumeFailed,
       icon: "none",
     });
   }

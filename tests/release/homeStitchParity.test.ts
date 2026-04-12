@@ -28,7 +28,7 @@ describe("home stitch parity", () => {
   it("keeps diary as the single primary entry and avoids a duplicated diary shortcut", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
 
-    expect(homePage).toContain("handleNavigate('editor', { type: 'diary' })");
+    expect(homePage).toContain("handleNavigate('editor', { type: 'diary', recordDate: todayDateKey })");
     expect(homePage).not.toContain(">日记</text>");
     expect(homePage).not.toContain(">写一张随笔</text>");
   });
