@@ -72,6 +72,7 @@
     :future-unlock-label="copy.editor.futureUnlockLabel"
     :future-date-label="futureDateLabel"
     :future-hint="futureHint"
+    :show-future-unlock-ribbon="showFutureUnlockRibbon"
     :pending-unlock-date="pendingUnlockDate"
     :is-future-date-sheet-open="isFutureDateSheetOpen"
     :future-picker-month-label="futurePickerMonthLabel"
@@ -240,6 +241,9 @@ const futureDateLabel = computed(() =>
   unlockDate.value
     ? formatDate(unlockDate.value, settingsStore.locale === "en-US" ? "MMM DD, YYYY" : "YYYY年MM月DD日")
     : copy.value.editor.futureDateEmpty,
+);
+const showFutureUnlockRibbon = computed(() =>
+  entryType.value === "future" && mode.value === "edit" && Boolean(unlockDate.value),
 );
 const futurePickerWeekLabels = computed(() =>
   settingsStore.locale === "en-US"

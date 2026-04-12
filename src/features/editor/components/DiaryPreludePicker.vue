@@ -220,7 +220,7 @@ function handleSkip(): void {
   grid-template-columns: 72rpx 1fr auto;
   align-items: center;
   gap: 20rpx;
-  padding: 28rpx 36rpx 24rpx;
+  padding: 24rpx 24rpx 10rpx;
   background: rgba(251, 249, 245, 0.96);
   backdrop-filter: blur(12rpx);
 }
@@ -254,12 +254,12 @@ function handleSkip(): void {
 
 .diary-prelude-picker__body {
   min-height: calc(100vh - 124rpx);
-  padding: 28rpx 36rpx 44rpx;
+  padding: 12rpx 24rpx 12rpx;
 }
 
 .diary-prelude-picker__preview-card {
-  padding: 68rpx 48rpx 56rpx;
-  border-radius: 36rpx;
+  padding: 24rpx 22rpx 18rpx;
+  border-radius: 30rpx;
   background: rgba(255, 255, 255, 0.88);
   display: flex;
   flex-direction: column;
@@ -268,68 +268,68 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__preview-glyph-wrap {
-  width: 128rpx;
-  height: 128rpx;
+  width: 76rpx;
+  height: 76rpx;
   border-radius: 999rpx;
   background: rgba(245, 244, 238, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(49, 51, 46, 0.88);
-  margin-bottom: 40rpx;
+  margin-bottom: 12rpx;
 }
 
 .diary-prelude-picker__preview-glyph {
-  width: 68rpx;
-  height: 68rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .diary-prelude-picker__preview-headline {
-  font-size: 56rpx;
+  font-size: 36rpx;
   line-height: 1.16;
   letter-spacing: 0.18em;
-  margin-bottom: 16rpx;
+  margin-bottom: 8rpx;
 }
 
 .diary-prelude-picker__preview-subline {
   font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 22rpx;
+  font-size: 15rpx;
   color: rgba(138, 129, 120, 0.72);
-  letter-spacing: 0.4em;
+  letter-spacing: 0.28em;
 }
 
 .diary-prelude-picker__preview-line {
   width: 72rpx;
   height: 1rpx;
   background: rgba(177, 179, 171, 0.28);
-  margin: 36rpx 0 28rpx;
+  margin: 14rpx 0 10rpx;
 }
 
 .diary-prelude-picker__preview-note {
-  font-size: 26rpx;
-  line-height: 1.8;
+  font-size: 18rpx;
+  line-height: 1.45;
   color: rgba(99, 95, 85, 0.76);
 }
 
 .diary-prelude-picker__section {
-  margin-top: 40rpx;
+  margin-top: 18rpx;
 }
 
 .diary-prelude-picker__section-head {
-  margin-bottom: 18rpx;
+  margin-bottom: 10rpx;
   display: flex;
   align-items: baseline;
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .diary-prelude-picker__section-title {
-  font-size: 28rpx;
+  font-size: 22rpx;
   letter-spacing: 0.1em;
 }
 
 .diary-prelude-picker__section-subtitle {
   font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 18rpx;
+  font-size: 13rpx;
   color: rgba(138, 129, 120, 0.72);
   letter-spacing: 0.24em;
 }
@@ -337,7 +337,7 @@ function handleSkip(): void {
 .diary-prelude-picker__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .diary-prelude-picker__grid--mood {
@@ -346,16 +346,16 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option {
   position: relative;
-  min-height: 156rpx;
-  padding: 24rpx 18rpx;
-  border-radius: 28rpx;
+  min-height: 104rpx;
+  padding: 12rpx 12rpx;
+  border-radius: 22rpx;
   background: rgba(255, 255, 255, 0.68);
   border: 1rpx solid rgba(177, 179, 171, 0.16);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10rpx;
+  gap: 4rpx;
   text-align: center;
   color: rgba(49, 51, 46, 0.86);
   transform: translateY(0) scale(1);
@@ -384,8 +384,8 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option-glyph-wrap {
-  width: 68rpx;
-  height: 68rpx;
+  width: 42rpx;
+  height: 42rpx;
   border-radius: 999rpx;
   background: rgba(245, 244, 238, 0.92);
   display: flex;
@@ -406,22 +406,22 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option-mark {
   position: absolute;
-  top: 16rpx;
-  right: 16rpx;
-  width: 14rpx;
-  height: 14rpx;
+  top: 12rpx;
+  right: 12rpx;
+  width: 10rpx;
+  height: 10rpx;
   border-radius: 999rpx;
   background: rgba(138, 129, 120, 0.82);
-  box-shadow: 0 0 0 6rpx rgba(234, 229, 218, 0.55);
+  box-shadow: 0 0 0 4rpx rgba(234, 229, 218, 0.55);
 }
 
 .diary-prelude-picker__option-glyph {
-  width: 42rpx;
-  height: 42rpx;
+  width: 24rpx;
+  height: 24rpx;
 }
 
 .diary-prelude-picker__option-zh {
-  font-size: 26rpx;
+  font-size: 20rpx;
   line-height: 1.2;
   transition: color 180ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -433,7 +433,7 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option-en {
   font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 16rpx;
+  font-size: 11rpx;
   color: rgba(138, 129, 120, 0.68);
   letter-spacing: 0.22em;
   transition: color 180ms ease, letter-spacing 220ms ease;
@@ -445,15 +445,15 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__footer {
-  margin-top: 36rpx;
-  padding-bottom: 24rpx;
+  margin-top: 18rpx;
+  padding-bottom: 2rpx;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .diary-prelude-picker__confirm {
-  min-height: 88rpx;
+  min-height: 68rpx;
   border-radius: 999rpx;
   background: rgba(95, 94, 94, 0.92);
   display: flex;
@@ -479,14 +479,14 @@ function handleSkip(): void {
 
 .diary-prelude-picker__confirm-label {
   color: #faf7f6;
-  font-size: 26rpx;
+  font-size: 20rpx;
   letter-spacing: 0.16em;
 }
 
 .diary-prelude-picker__hint {
   text-align: center;
-  font-size: 22rpx;
-  line-height: 1.7;
+  font-size: 16rpx;
+  line-height: 1.35;
   color: rgba(138, 129, 120, 0.72);
 }
 

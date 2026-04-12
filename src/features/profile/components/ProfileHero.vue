@@ -75,7 +75,7 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
   display: flex;
   flex-direction: column;
   gap: 22rpx;
-  background: #fbf9f5;
+  background: var(--noche-bg);
 }
 
 .profile-hero__visual {
@@ -108,17 +108,17 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26rpx 24rpx 0;
+  padding: 40rpx 24rpx 0;
 }
 
 .profile-hero__back {
-  color: rgba(83, 76, 67, 0.76);
+  color: var(--noche-muted);
 }
 
 .profile-hero__title {
   font-size: 28rpx;
   line-height: 1.4;
-  color: rgba(49, 51, 46, 0.88);
+  color: var(--noche-text);
   letter-spacing: 0.22em;
   padding-left: 0.22em;
 }
@@ -202,7 +202,7 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
   font-size: 44rpx;
   line-height: 1.22;
   font-weight: 400;
-  color: #31332e;
+  color: var(--noche-text);
   letter-spacing: 0.04em;
 }
 
@@ -226,7 +226,7 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
   max-width: 86%;
   font-size: 22rpx;
   line-height: 1.72;
-  color: rgba(93, 96, 90, 0.74);
+  color: var(--noche-muted);
   letter-spacing: 0.06em;
 }
 </style>

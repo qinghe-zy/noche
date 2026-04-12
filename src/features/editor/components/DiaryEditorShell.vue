@@ -68,6 +68,7 @@
           class="diary-editor-shell__textarea literary-text"
           :value="content"
           auto-height
+          adjust-position="false"
           maxlength="-1"
           :cursor-spacing="cursorSpacing"
           :show-confirm-bar="false"
@@ -159,8 +160,8 @@ function handlePickImagesTrigger(): void {
 
 .diary-editor-shell {
   min-height: 100vh;
-  background: #fbf9f5;
-  color: #31332e;
+  background: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
 }
@@ -190,7 +191,7 @@ function handlePickImagesTrigger(): void {
   align-items: center;
   gap: 16rpx;
   padding: 28rpx 36rpx 24rpx;
-  background: rgba(251, 249, 245, 0.95);
+  background: var(--noche-surface);
   backdrop-filter: blur(12rpx);
 }
 
@@ -201,20 +202,20 @@ function handlePickImagesTrigger(): void {
   align-items: center;
   justify-content: center;
   position: relative;
-  color: rgba(49, 51, 46, 0.82);
+  color: var(--noche-text);
 }
 
 .diary-editor-shell__topbar-center {
   text-align: center;
   font-size: 26rpx;
-  color: rgba(49, 51, 46, 0.7);
+  color: var(--noche-muted);
   letter-spacing: 0.28em;
 }
 
 .diary-editor-shell__topbar-svg {
   width: 38rpx;
   height: 38rpx;
-  color: rgba(49, 51, 46, 0.82);
+  color: var(--noche-text);
 }
 
 .diary-editor-shell__saved-hint {
@@ -225,14 +226,14 @@ function handlePickImagesTrigger(): void {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 18rpx;
   letter-spacing: 4rpx;
-  color: rgba(177, 179, 171, 0.88);
+  color: var(--noche-muted);
 }
 
 .diary-editor-shell__continue-button {
   min-height: 56rpx;
   justify-self: end;
   font-size: 24rpx;
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--noche-muted);
 }
 
 .diary-editor-shell__spacer {
@@ -284,7 +285,7 @@ function handlePickImagesTrigger(): void {
   padding: 0;
   overflow: hidden;
   border-radius: 24rpx;
-  background: rgba(245, 244, 238, 0.85);
+  background: var(--noche-surface);
 }
 
 .diary-editor-shell__attachment-card--focused {
@@ -306,13 +307,13 @@ function handlePickImagesTrigger(): void {
   align-items: center;
   justify-content: center;
   border-radius: 999rpx;
-  background: rgba(251, 249, 245, 0.82);
+  background: var(--noche-panel);
 }
 
 .diary-editor-shell__attachment-remove-svg {
   width: 28rpx;
   height: 28rpx;
-  color: rgba(49, 51, 46, 0.72);
+  color: var(--noche-text);
 }
 
 .diary-editor-shell__textarea,
@@ -322,13 +323,13 @@ function handlePickImagesTrigger(): void {
   border: none;
   background: transparent;
   padding: 0;
-  color: rgba(49, 51, 46, 0.92);
+  color: var(--noche-text);
   font-size: 18px;
   line-height: 2.2;
 }
 
 .diary-editor-shell__placeholder {
-  color: rgba(177, 179, 171, 0.42);
+  color: var(--noche-muted);
   font-weight: 300;
 }
 
@@ -343,7 +344,7 @@ function handlePickImagesTrigger(): void {
 .diary-editor-shell__footer {
   margin-top: 36rpx;
   padding-top: 28rpx;
-  border-top: 1rpx solid rgba(177, 179, 171, 0.18);
+  border-top: 1rpx solid var(--noche-border);
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -366,7 +367,7 @@ function handlePickImagesTrigger(): void {
 .diary-editor-shell__image-svg {
   width: 40rpx;
   height: 40rpx;
-  color: rgba(184, 180, 170, 0.9);
+  color: var(--noche-muted);
 }
 
 </style>

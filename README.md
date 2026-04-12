@@ -25,7 +25,7 @@
 
 ## 下载与安装
 
-当前版本：`v1.0.0`
+当前版本：`v1.0.1`
 
 发布包为 Android release APK。建议从 GitHub Releases 页面下载对应版本的 APK。
 

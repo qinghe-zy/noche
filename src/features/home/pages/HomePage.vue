@@ -66,7 +66,7 @@
 
         <view class="home-page__nav-entry" @click="handleNavigate('mailbox')" @tap="handleNavigate('mailbox')">
           <view class="home-page__nav-entry-icon">
-            <AppIcon name="stories" class="home-page__nav-entry-icon-svg" />
+            <AppIcon name="mailbox-post" class="home-page__nav-entry-icon-svg" />
           </view>
           <text class="home-page__nav-entry-label" :class="{ 'home-page__nav-entry-label--latin': settingsStore.locale === 'en-US' }">{{ copy.home.mailbox }}</text>
         </view>
@@ -232,7 +232,7 @@ onShow(() => {
   width: 100%;
   max-width: 768px;
   margin: 0 auto;
-  padding: 28px 22px 0;
+  padding: 40px 22px 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -250,7 +250,7 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(138, 129, 120, 0.82);
+  color: var(--noche-muted);
   padding: 0;
   box-shadow: none;
   outline: none;
@@ -267,7 +267,7 @@ onShow(() => {
 
 .home-page__topnav-profile-entry:active,
 .home-page__topnav-profile-entry:hover {
-  color: #73695f;
+  color: var(--noche-text);
 }
 
 .home-page__main {
@@ -280,7 +280,7 @@ onShow(() => {
   justify-content: center;
   padding: 0 24px 24px;
   position: relative;
-  margin-top: -24px;
+  margin-top: 12px;
   z-index: 1;
 }
 
@@ -293,7 +293,7 @@ onShow(() => {
   font-size: 38px;
   line-height: 1.15;
   font-weight: 200;
-  color: rgba(49, 51, 46, 0.92);
+  color: var(--noche-text);
 }
 
 .home-page__letter-spacing-widest {
@@ -351,7 +351,7 @@ onShow(() => {
 .home-page__paper-inner {
   width: 100%;
   height: 100%;
-  border: 0.5px solid rgba(201, 203, 192, 0.35);
+  border: 0.5px solid var(--noche-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -366,7 +366,7 @@ onShow(() => {
   transform: translateX(-50%);
   width: 24px;
   height: 0.5px;
-  background: rgba(201, 203, 192, 0.5);
+  background: var(--noche-border);
 }
 
 .home-page__paper-content {
@@ -388,7 +388,7 @@ onShow(() => {
 .home-page__paper-icon {
   width: 40px;
   height: 40px;
-  color: rgba(99, 95, 85, 0.3);
+  color: var(--noche-muted);
 }
 
 .home-page__paper-copy {
@@ -402,7 +402,7 @@ onShow(() => {
   font-size: 30px;
   line-height: 1.3;
   font-weight: 300;
-  color: rgba(49, 51, 46, 0.84);
+  color: var(--noche-text);
   text-align: center;
 }
 
@@ -411,7 +411,7 @@ onShow(() => {
   font-size: 10px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: rgba(138, 140, 130, 0.68);
+  color: var(--noche-muted);
   padding-left: 0.4em;
 }
 
@@ -427,7 +427,7 @@ onShow(() => {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  border: 1px solid #c9cbc0;
+  border: 1px solid var(--noche-border);
 }
 
 .home-page__secondary-nav {
@@ -455,8 +455,8 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(201, 203, 192, 0.45);
-  color: rgba(99, 95, 85, 0.72);
+  border: 1px solid var(--noche-border);
+  color: var(--noche-muted);
 }
 
 .home-page__nav-entry-icon-svg {
@@ -468,7 +468,7 @@ onShow(() => {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: rgba(99, 95, 85, 0.76);
+  color: var(--noche-muted);
   padding-left: 0.3em;
 }
 
@@ -490,7 +490,7 @@ onShow(() => {
   font-size: 10px;
   letter-spacing: 0.6em;
   text-transform: uppercase;
-  color: rgba(201, 203, 192, 0.88);
+  color: var(--noche-muted);
   padding-left: 0.6em;
 }
 
@@ -502,14 +502,14 @@ onShow(() => {
   align-items: flex-end;
   justify-content: center;
   padding: 24px 16px 28px;
-  background: rgba(44, 46, 42, 0.24);
+  background: var(--noche-overlay);
   backdrop-filter: blur(8px);
 }
 
 .home-page__jotting-modal {
   width: min(100%, 420px);
   background: rgba(252, 248, 241, 0.98);
-  border: 1px solid rgba(213, 204, 191, 0.82);
+  border: 1px solid var(--noche-border);
   border-radius: 22px;
   box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
   overflow: hidden;
@@ -518,14 +518,14 @@ onShow(() => {
 .home-page__jotting-modal-head {
   padding: 26px 24px 18px;
   text-align: center;
-  border-bottom: 1px solid rgba(221, 212, 200, 0.72);
+  border-bottom: 1px solid var(--noche-border);
 }
 
 .home-page__jotting-modal-title {
   display: block;
   font-size: 24px;
   line-height: 1.35;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .home-page__jotting-modal-copy {
@@ -533,7 +533,7 @@ onShow(() => {
   margin-top: 10px;
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-muted);
 }
 
 .home-page__jotting-modal-actions {
@@ -552,22 +552,22 @@ onShow(() => {
 }
 
 .home-page__jotting-modal-action + .home-page__jotting-modal-action {
-  border-top: 1px solid rgba(221, 212, 200, 0.58);
+  border-top: 1px solid var(--noche-border);
 }
 
 .home-page__jotting-modal-action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .home-page__jotting-modal-action-copy {
   font-size: 12px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--noche-muted);
 }
 
 .home-page__jotting-modal-action--muted .home-page__jotting-modal-action-title {
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-muted);
 }
 </style>

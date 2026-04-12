@@ -19,5 +19,8 @@ export function applyThemeMode(theme: AppThemeMode): void {
   if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = resolvedTheme;
     document.body?.setAttribute("data-theme", resolvedTheme);
+    document
+      .querySelectorAll(".uni-page-body, .uni-page-wrapper, page")
+      .forEach((node) => node.setAttribute("data-theme", resolvedTheme));
   }
 }

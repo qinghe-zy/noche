@@ -102,7 +102,7 @@ function handleInput(event: Event): void {
   align-items: center;
   justify-content: center;
   padding: 20px 16px;
-  background: rgba(44, 46, 42, 0.2);
+  background: var(--noche-overlay);
   backdrop-filter: blur(8px);
 }
 
@@ -124,7 +124,7 @@ function handleInput(event: Event): void {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .paper-input-dialog__copy {
@@ -132,7 +132,7 @@ function handleInput(event: Event): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-muted);
 }
 
 .paper-input-dialog__body {
@@ -145,8 +145,8 @@ function handleInput(event: Event): void {
   padding: 16px 0;
   background: transparent;
   border: none;
-  border-top: 1px solid rgba(221, 212, 200, 0.44);
-  border-bottom: 1px solid rgba(221, 212, 200, 0.44);
+  border-top: 1px solid var(--noche-border);
+  border-bottom: 1px solid var(--noche-border);
   font-size: 16px;
   line-height: 1.75;
   color: var(--noche-text);
@@ -155,7 +155,7 @@ function handleInput(event: Event): void {
 .paper-input-dialog__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 1px solid rgba(221, 212, 200, 0.44);
+  border-top: 1px solid var(--noche-border);
 }
 
 .paper-input-dialog__action {
@@ -166,16 +166,16 @@ function handleInput(event: Event): void {
 }
 
 .paper-input-dialog__action + .paper-input-dialog__action {
-  border-left: 1px solid rgba(221, 212, 200, 0.44);
+  border-left: 1px solid var(--noche-border);
 }
 
 .paper-input-dialog__action-text {
   font-size: 16px;
   line-height: 1.4;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-muted);
 }
 
 .paper-input-dialog__action-text--primary {
-  color: #31332e;
+  color: var(--noche-text);
 }
 </style>

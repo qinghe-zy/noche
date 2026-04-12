@@ -52,6 +52,7 @@
           class="jotting-editor-shell__textarea literary-text"
           :value="content"
           auto-height
+          adjust-position="false"
           maxlength="-1"
           :cursor-spacing="cursorSpacing"
           :show-confirm-bar="false"
@@ -121,8 +122,8 @@ defineEmits<{
 
 .jotting-editor-shell {
   min-height: 100vh;
-  background: #ebe8e0;
-  color: #31332e;
+  background: var(--noche-bg);
+  color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
@@ -158,13 +159,13 @@ defineEmits<{
 .jotting-editor-shell__icon-svg {
   width: 40rpx;
   height: 40rpx;
-  color: rgba(184, 180, 170, 0.92);
+  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__continue-button {
   min-height: 56rpx;
   font-size: 24rpx;
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__spacer {
@@ -178,7 +179,7 @@ defineEmits<{
   margin-bottom: 80rpx;
   padding: 92rpx 44rpx 40rpx;
   border-radius: 28rpx;
-  background: #f8f6f2;
+  background: var(--noche-surface);
   box-shadow: 0 8rpx 48rpx rgba(49, 51, 46, 0.06);
   position: relative;
   display: flex;
@@ -196,7 +197,7 @@ defineEmits<{
   font-size: 18rpx;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: rgba(99, 95, 85, 0.6);
+  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__date {
@@ -220,7 +221,7 @@ defineEmits<{
   padding: 0;
   overflow: hidden;
   border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.64);
+  background: var(--noche-panel);
 }
 
 .jotting-editor-shell__attachment-card--focused {
@@ -242,13 +243,13 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(248, 246, 242, 0.86);
+  background: var(--noche-panel);
 }
 
 .jotting-editor-shell__attachment-remove-svg {
   width: 28rpx;
   height: 28rpx;
-  color: rgba(49, 51, 46, 0.72);
+  color: var(--noche-text);
 }
 
 .jotting-editor-shell__textarea,
@@ -259,13 +260,13 @@ defineEmits<{
   border: none;
   background: transparent;
   padding: 0;
-  color: rgba(49, 51, 46, 0.92);
+  color: var(--noche-text);
   font-size: 18px;
   line-height: 2;
 }
 
 .jotting-editor-shell__placeholder {
-  color: rgba(177, 179, 171, 0.4);
+  color: var(--noche-muted);
   font-weight: 300;
 }
 
@@ -281,7 +282,7 @@ defineEmits<{
   margin-bottom: 24rpx;
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 20rpx;
-  color: rgba(99, 95, 85, 0.58);
+  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__read-content {
@@ -305,13 +306,13 @@ defineEmits<{
 .jotting-editor-shell__image-svg {
   width: 32rpx;
   height: 32rpx;
-  color: rgba(184, 180, 170, 0.92);
+  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__signature {
   text-align: center;
   font-size: 20rpx;
-  color: rgba(184, 180, 170, 0.86);
+  color: var(--noche-muted);
   font-style: italic;
 }
 </style>

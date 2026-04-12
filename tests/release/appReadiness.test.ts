@@ -31,6 +31,64 @@ describe("release readiness", () => {
     expect(androidIcons?.xxxhdpi).toBe("screen.png");
   });
 
+  it("enables sqlite support in app-plus modules for packaged runtime", () => {
+    const manifest = JSON.parse(readProjectFile("src/manifest.json")) as {
+      ["app-plus"]?: {
+        modules?: Record<string, unknown>;
+      };
+    };
+
+    expect(manifest["app-plus"]?.modules?.SQLite).toBeTruthy();
+  });
+
+  it("keeps dcloud runtime dependencies aligned above the 4.84 packaging line", () => {
+    const pkg = JSON.parse(readProjectFile("package.json")) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const versions = [
+      pkg.dependencies?.["@dcloudio/uni-app"],
+      pkg.dependencies?.["@dcloudio/uni-app-plus"],
+      pkg.devDependencies?.["@dcloudio/vite-plugin-uni"],
+      pkg.devDependencies?.["@dcloudio/uni-cli-shared"],
+    ];
+
+    for (const version of versions) {
+      expect(version).toBeTruthy();
+      expect(version).not.toContain("40804");
+    }
+  });
+
+  it("applies dark theme tokens to app and uni page containers instead of only document nodes", () => {
+    const appVue = readProjectFile("src/App.vue");
+    const themeFile = readProjectFile("src/shared/theme.ts");
+
+    expect(appVue).toContain(".uni-page-body[data-theme=\"dark\"]");
+    expect(themeFile).toContain("querySelectorAll");
+  });
+
+  it("removes the privacy-lock overlay from the shipped app shell", () => {
+    const appVue = readProjectFile("src/App.vue");
+
+    expect(appVue).not.toContain("privacy-lock");
+    expect(appVue).not.toContain("settingsStore.privacyLockEnabled");
+  });
+
+  it("keeps release-facing surfaces wired to shared dark-theme tokens", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+    const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
+    const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
+
+    expect(homePage).toContain("var(--noche-bg)");
+    expect(homePage).toContain("var(--noche-text)");
+    expect(diaryShell).toContain("var(--noche-bg)");
+    expect(jottingShell).toContain("var(--noche-bg)");
+    expect(futureShell).toContain("var(--noche-bg)");
+    expect(profileHero).toContain("var(--noche-bg)");
+  });
+
   it("does not leave profile page as TODO placeholder", () => {
     const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
 

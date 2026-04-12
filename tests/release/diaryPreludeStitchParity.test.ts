@@ -41,6 +41,24 @@ describe("diary prelude stitch parity", () => {
     expect(picker).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
+  it("keeps the picker compact enough to fit the main content on one screen", () => {
+    const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
+
+    expect(picker).toContain("padding: 24rpx 24rpx 10rpx;");
+    expect(picker).toContain("padding: 12rpx 24rpx 12rpx;");
+    expect(picker).toContain("min-height: 104rpx;");
+    expect(picker).toContain("margin-top: 18rpx;");
+  });
+
+  it("keeps the overall picker height closer to the home-page cadence to avoid first-screen scrolling", () => {
+    const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
+
+    expect(picker).toContain("padding: 24rpx 22rpx 18rpx;");
+    expect(picker).toContain("min-height: 68rpx;");
+    expect(picker).toContain("font-size: 36rpx;");
+    expect(picker).toContain("min-height: 68rpx;");
+  });
+
   it("keeps the anxious sweat drop lightweight and hand-drawn after shrinking", () => {
     const glyph = readProjectFile("src/features/editor/components/DiaryPreludeGlyph.vue");
 

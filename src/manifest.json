@@ -2,8 +2,8 @@
     "name" : "寄屿",
     "appid" : "__UNI__F0BA90F",
     "description" : "寄屿 私人写信与日记应用",
-    "versionName" : "1.0.0",
-    "versionCode" : "100",
+    "versionName" : "1.0.1",
+    "versionCode" : "101",
     "transformPx" : false,
     "app-plus" : {
         "usingComponents" : true,
@@ -15,7 +15,10 @@
             "autoclose" : true,
             "delay" : 0
         },
-        "modules" : {},
+        "modules" : {
+            "SQLite" : {},
+            "Camera" : {}
+        },
         "distribute" : {
             "icons" : {
                 "android" : {

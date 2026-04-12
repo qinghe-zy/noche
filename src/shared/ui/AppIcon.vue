@@ -1,24 +1,11 @@
 <template>
-  <svg
+  <image
     class="app-icon"
     :class="$attrs.class"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
+    :src="iconSource"
+    mode="aspectFit"
     aria-hidden="true"
-  >
-    <path
-      v-for="(path, index) in paths"
-      :key="`${name}-${index}`"
-      :d="path.d"
-      :fill="path.fill ?? 'none'"
-      :stroke="path.stroke ?? 'currentColor'"
-      :stroke-width="path.strokeWidth ?? 1.8"
-      :stroke-linecap="path.linecap ?? 'round'"
-      :stroke-linejoin="path.linejoin ?? 'round'"
-      :opacity="path.opacity ?? 1"
-    />
-  </svg>
+  />
 </template>
 
 <script setup lang="ts">
@@ -39,6 +26,7 @@ type IconName =
   | "chevron-right"
   | "lock"
   | "stories"
+  | "mailbox-post"
   | "edit-note"
   | "edit-square";
 
@@ -55,6 +43,8 @@ interface IconPath {
   linecap?: "round" | "butt" | "square";
   linejoin?: "round" | "miter" | "bevel";
 }
+
+const DEFAULT_ICON_COLOR = "#7a736b";
 
 const ICONS: Record<IconName, IconPath[]> = {
   back: [{ d: "M15 6L9 12L15 18" }],
@@ -110,6 +100,17 @@ const ICONS: Record<IconName, IconPath[]> = {
     { d: "M7 5.5H17.5V18.5H7V5.5Z" },
     { d: "M5 7.5H15.5V20.5H5V7.5Z", opacity: 0.68, strokeWidth: 1.4 },
   ],
+  "mailbox-post": [
+    { d: "M6 10C6 6.96243 8.46243 4.5 11.5 4.5H12.5C15.5376 4.5 18 6.96243 18 10V18.5H6V10Z" },
+    { d: "M6 10H18" },
+    { d: "M9 7.2H15C15.2761 7.2 15.5 7.42386 15.5 7.7V8.7C15.5 8.97614 15.2761 9.2 15 9.2H9C8.72386 9.2 8.5 8.97614 8.5 8.7V7.7C8.5 7.42386 8.72386 7.2 9 7.2Z" },
+    { d: "M18 13H20V9.2" },
+    { d: "M19.5 8.2H21" },
+    { d: "M12 14.2C12.3314 14.2 12.6 13.9314 12.6 13.6C12.6 13.2686 12.3314 13 12 13C11.6686 13 11.4 13.2686 11.4 13.6C11.4 13.9314 11.6686 14.2 12 14.2Z", fill: "currentColor", stroke: "none" },
+    { d: "M9 18.5V20.5" },
+    { d: "M15 18.5V20.5" },
+    { d: "M8 20.5H16" },
+  ],
   "edit-note": [
     { d: "M6 5.5H14.5" },
     { d: "M6 9.5H12.5" },
@@ -124,7 +125,39 @@ const ICONS: Record<IconName, IconPath[]> = {
   ],
 };
 
-const paths = computed(() => ICONS[props.name]);
+function escapeSvg(value: string): string {
+  return encodeURIComponent(value)
+    .replace(/%20/g, " ")
+    .replace(/%3D/g, "=")
+    .replace(/%3A/g, ":")
+    .replace(/%2F/g, "/")
+    .replace(/%22/g, "'")
+    .replace(/%2C/g, ",")
+    .replace(/%3B/g, ";")
+    .replace(/%28/g, "(")
+    .replace(/%29/g, ")");
+}
+
+function buildSvgDataUri(paths: IconPath[]): string {
+  const svgPaths = paths
+    .map((path) => {
+      const fill = path.fill === "currentColor" ? DEFAULT_ICON_COLOR : (path.fill ?? "none");
+      const stroke = path.stroke === "currentColor" || path.stroke === undefined
+        ? DEFAULT_ICON_COLOR
+        : path.stroke;
+
+      return `<path d="${path.d}" fill="${fill}" stroke="${stroke}" stroke-width="${path.strokeWidth ?? 1.8}" stroke-linecap="${path.linecap ?? "round"}" stroke-linejoin="${path.linejoin ?? "round"}" opacity="${path.opacity ?? 1}" />`;
+    })
+    .join("");
+
+  return `data:image/svg+xml;utf8,${escapeSvg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">${svgPaths}</svg>`)}`;
+}
+
+const ICON_SOURCES = Object.fromEntries(
+  Object.entries(ICONS).map(([name, paths]) => [name, buildSvgDataUri(paths)]),
+) as Record<IconName, string>;
+
+const iconSource = computed(() => ICON_SOURCES[props.name]);
 </script>
 
 <style scoped>

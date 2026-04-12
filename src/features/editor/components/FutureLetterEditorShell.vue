@@ -36,7 +36,7 @@
           <text>{{ errorMessage }}</text>
         </view>
 
-        <view v-if="mode === 'edit'" class="editor-page__future-ribbon">
+        <view v-if="showFutureUnlockRibbon" class="editor-page__future-ribbon">
           <text class="editor-page__future-ribbon-label">{{ futureUnlockLabel }}</text>
           <view class="editor-page__future-ribbon-copy">
             <view class="editor-page__future-ribbon-value" @tap="$emit('open-future-date-sheet')">
@@ -67,14 +67,15 @@
         </view>
 
         <view v-if="mode === 'edit'" class="editor-page__writing-area">
-          <textarea
-            class="editor-page__textarea editor-page__writing-lines literary-text"
-            :value="content"
-            auto-height
-            maxlength="-1"
-            :cursor-spacing="cursorSpacing"
-            :show-confirm-bar="false"
-            :placeholder="bodyPlaceholder"
+        <textarea
+          class="editor-page__textarea editor-page__writing-lines literary-text"
+          :value="content"
+          auto-height
+          adjust-position="false"
+          maxlength="-1"
+          :cursor-spacing="cursorSpacing"
+          :show-confirm-bar="false"
+          :placeholder="bodyPlaceholder"
             placeholder-class="editor-page__placeholder"
             @input="$emit('content-input', $event)"
           />
@@ -182,6 +183,7 @@ defineProps<{
   futureUnlockLabel: string;
   futureDateLabel: string;
   futureHint: string;
+  showFutureUnlockRibbon: boolean;
   pendingUnlockDate: string;
   isFutureDateSheetOpen: boolean;
   futurePickerMonthLabel: string;
@@ -240,17 +242,17 @@ defineEmits<{
   background:
     radial-gradient(circle at top left, rgba(240, 222, 197, 0.36), transparent 24%),
     radial-gradient(circle at top right, rgba(222, 214, 233, 0.15), transparent 24%),
-    #faf7f1;
+    var(--noche-bg);
   position: relative;
   overflow: hidden;
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .editor-page__paper-noise { position: fixed; inset: 0; pointer-events: none; opacity: 0.03; background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.01) 100%); }
 .literary-text { letter-spacing: 0.05em; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-.editor-page__canvas { padding: 0 8px 24px; display: flex; justify-content: center; }
-.editor-page__paper-surface { width: 100%; max-width: 680rpx; min-height: calc(100vh - 12px); padding: 10px 18px 22px; background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.02); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; position: relative; }
+.editor-page__canvas { padding: 0; display: flex; justify-content: stretch; width: 100%; }
+.editor-page__paper-surface { width: 100%; max-width: none; min-height: 100vh; padding: 18px 20px 28px; background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 243, 235, 0.98)); border: none; box-shadow: none; display: flex; flex-direction: column; position: relative; }
 .editor-page__topbar { width: 100%; margin-bottom: 10px; }
 .editor-page__topbar-inner { width: 100%; padding: 28rpx 32rpx 24rpx; display: flex; align-items: center; justify-content: space-between; }
 .editor-page__topbar-button { width: 72rpx; height: 72rpx; padding: 0; display: flex; align-items: center; justify-content: center; position: relative; color: rgba(138, 129, 120, 0.82); border: none; background: transparent; }

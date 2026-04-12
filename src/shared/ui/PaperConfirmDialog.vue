@@ -71,7 +71,7 @@ function handleMaskClose(): void {
   align-items: flex-end;
   justify-content: center;
   padding: 24px 16px 28px;
-  background: rgba(44, 46, 42, 0.24);
+  background: var(--noche-overlay);
   backdrop-filter: blur(8px);
 }
 
@@ -87,14 +87,14 @@ function handleMaskClose(): void {
 .paper-confirm-dialog__head {
   padding: 26px 24px 18px;
   text-align: center;
-  border-bottom: 1px solid rgba(221, 212, 200, 0.72);
+  border-bottom: 1px solid var(--noche-border);
 }
 
 .paper-confirm-dialog__title {
   display: block;
   font-size: 24px;
   line-height: 1.35;
-  color: #2c2e2a;
+  color: var(--noche-text);
 }
 
 .paper-confirm-dialog__copy {
@@ -102,7 +102,7 @@ function handleMaskClose(): void {
   margin-top: 10px;
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-muted);
 }
 
 .paper-confirm-dialog__actions {
@@ -121,23 +121,23 @@ function handleMaskClose(): void {
 }
 
 .paper-confirm-dialog__action + .paper-confirm-dialog__action {
-  border-top: 1px solid rgba(221, 212, 200, 0.58);
+  border-top: 1px solid var(--noche-border);
 }
 
 .paper-confirm-dialog__action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: #2c2e2a;
+  color: var(--noche-text);
 }
 
 .paper-confirm-dialog__action-copy {
   font-size: 12px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--noche-muted);
 }
 
 .paper-confirm-dialog__action--muted .paper-confirm-dialog__action-title {
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-muted);
 }
 
 .paper-confirm-dialog__action--danger .paper-confirm-dialog__action-title {

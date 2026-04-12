@@ -107,11 +107,22 @@ describe("profileData", () => {
     expect(formatProfileBackupLabel(null, "en-US")).toBe("No backup yet");
     expect(formatProfileBackupLabel("2026-04-11T09:30:00.000Z", "en-US")).toBe("Last backup 2026.04.11 17:30");
     expect(createProfileDefaultIdentity("en-US")).toMatchObject({
-      displayName: "Quiet Path",
-      signature: "Keep time gently",
+      displayName: "",
+      signature: "",
+    });
+    expect(createProfileDefaultIdentity("zh-CN")).toMatchObject({
+      displayName: "",
+      signature: "",
     });
     expect(resolveProfileInitial("林间小径")).toBe("林");
-    expect(resolveProfileInitial("  ")).toBe("夜");
-    expect(resolveProfileInitial("  ", "en-US")).toBe("N");
+    expect(resolveProfileInitial("  ")).toBe("");
+    expect(resolveProfileInitial("  ", "en-US")).toBe("");
+  });
+
+  it("does not expose privacy-lock as a profile action anymore", () => {
+    type ActionKey = import("@/features/profile/profileData").ProfileActionItem["key"];
+    const keys: ActionKey[] = ["appearance-settings", "local-backup", "about"];
+
+    expect(keys).not.toContain("privacy-lock" as ActionKey);
   });
 });

@@ -10,8 +10,8 @@
 - [version_update_checklist.md](./version_update_checklist.md)
   - 每次版本更新都要过一遍的固定检查单
   - 用于避免漏改版本号、漏传 APK、漏更新 release note
-- [releases/v1.0.0.md](./releases/v1.0.0.md)
-  - 当前版本 `1.0.0` 的本地 release note
+- [releases/v1.0.1.md](./releases/v1.0.1.md)
+  - 当前版本 `1.0.1` 的本地 release note
   - 可直接复用为 GitHub Release 描述
 
 ## 当前已确认的正式发布基线
@@ -19,8 +19,8 @@
 - 应用名：`寄屿`
 - Android 包名：`com.qinghezy.jiyu`
 - AppID：`__UNI__F0BA90F`
-- 当前版本：`1.0.0`
-- 当前 versionCode：`100`
+- 当前版本：`1.0.1`
+- 当前 versionCode：`101`
 - 当前 release APK：
   - `D:\Project\noche\dist\release\apk\__UNI__F0BA90F__20260412135557.apk`
 

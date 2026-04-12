@@ -83,7 +83,7 @@ function handleMaskClose(): void {
   align-items: flex-end;
   justify-content: center;
   padding: 24px 16px 28px;
-  background: rgba(44, 46, 42, 0.2);
+  background: var(--noche-overlay);
   backdrop-filter: blur(8px);
 }
 
@@ -99,14 +99,14 @@ function handleMaskClose(): void {
 .paper-option-sheet__head {
   padding: 24px 22px 14px;
   text-align: center;
-  border-bottom: 1px solid rgba(221, 212, 200, 0.5);
+  border-bottom: 1px solid var(--noche-border);
 }
 
 .paper-option-sheet__title {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .paper-option-sheet__copy {
@@ -114,7 +114,7 @@ function handleMaskClose(): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-muted);
 }
 
 .paper-option-sheet__options {
@@ -131,7 +131,7 @@ function handleMaskClose(): void {
 }
 
 .paper-option-sheet__option + .paper-option-sheet__option {
-  border-top: 1px solid rgba(221, 212, 200, 0.44);
+  border-top: 1px solid var(--noche-border);
 }
 
 .paper-option-sheet__option-copy {
@@ -145,13 +145,13 @@ function handleMaskClose(): void {
 .paper-option-sheet__option-title {
   font-size: 17px;
   line-height: 1.45;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .paper-option-sheet__option-copy-text {
   font-size: 12px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.68);
+  color: var(--noche-muted);
 }
 
 .paper-option-sheet__option--danger .paper-option-sheet__option-title {
@@ -161,11 +161,11 @@ function handleMaskClose(): void {
 .paper-option-sheet__option-icon {
   width: 16px;
   height: 16px;
-  color: rgba(138, 129, 120, 0.48);
+  color: var(--noche-muted);
 }
 
 .paper-option-sheet__footer {
-  border-top: 1px solid rgba(221, 212, 200, 0.5);
+  border-top: 1px solid var(--noche-border);
   padding: 16px 22px 18px;
   display: flex;
   align-items: center;
@@ -175,6 +175,6 @@ function handleMaskClose(): void {
 .paper-option-sheet__footer-text {
   font-size: 15px;
   line-height: 1.4;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-muted);
 }
 </style>

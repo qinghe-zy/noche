@@ -39,4 +39,24 @@ describe("editor stitch parity", () => {
     expect(jottingShell).not.toContain("fonts.googleapis.com");
     expect(futureShell).not.toContain("fonts.googleapis.com");
   });
+
+  it("prevents keyboard focus from pushing the whole writing page upward", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+    const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
+
+    expect(diaryShell).toContain("adjust-position=\"false\"");
+    expect(jottingShell).toContain("adjust-position=\"false\"");
+    expect(futureShell).toContain("adjust-position=\"false\"");
+  });
+
+  it("keeps the future letter shell full-screen and immersive instead of a centered white card", () => {
+    const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
+
+    expect(futureShell).toContain(".editor-page__canvas { padding: 0;");
+    expect(futureShell).toContain("max-width: none;");
+    expect(futureShell).toContain("min-height: 100vh;");
+    expect(futureShell).toContain("box-shadow: none;");
+    expect(futureShell).toContain("border: none;");
+  });
 });

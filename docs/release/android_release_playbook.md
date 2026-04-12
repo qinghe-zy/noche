@@ -88,9 +88,9 @@ D:\Project\noche\dist\release\apk\
    - 当前版本 release note
 2. 提交并推送到 `main`
 3. 在 GitHub 创建对应版本 tag，例如：
-   - `v1.0.0`
+   - `v1.0.1`
 4. 上传 APK 作为 release asset
-5. 将 `docs/release/releases/v1.0.0.md` 内容作为 release 描述
+5. 将 `docs/release/releases/v1.0.1.md` 内容作为 release 描述
 
 ## 7. 真机前的干净安装要求
 

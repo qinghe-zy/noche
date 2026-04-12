@@ -22,14 +22,14 @@ export interface ProfileStats {
 export type ProfileAlbumItem = EntryAlbumItem;
 
 export interface ProfileActionItem {
-  key: "appearance-settings" | "privacy-lock" | "local-backup" | "about";
+  key: "appearance-settings" | "local-backup" | "about";
   title: string;
   note: string;
   value: string;
 }
 
 export const PROFILE_PREVIEW_LIMIT = 6;
-export const PROFILE_APP_VERSION = "1.0.0";
+export const PROFILE_APP_VERSION = "1.0.1";
 
 export const PROFILE_PREF_KEYS = {
   displayName: "profile.displayName",
@@ -40,19 +40,9 @@ export const PROFILE_PREF_KEYS = {
 } as const;
 
 export function createProfileDefaultIdentity(locale = "zh-CN"): ProfileIdentity {
-  if (locale === "en-US") {
-    return {
-      displayName: "Quiet Path",
-      signature: "Keep time gently",
-      avatarUri: null,
-      coverUri: null,
-      lastBackupAt: null,
-    };
-  }
-
   return {
-    displayName: "林间小径",
-    signature: "安静记录时光",
+    displayName: "",
+    signature: "",
     avatarUri: null,
     coverUri: null,
     lastBackupAt: null,
@@ -161,7 +151,7 @@ export function resolveProfileInitial(displayName: string, locale = "zh-CN"): st
   const trimmed = displayName.trim();
 
   if (!trimmed) {
-    return locale === "en-US" ? "N" : "夜";
+    return "";
   }
 
   return trimmed.slice(0, 1);

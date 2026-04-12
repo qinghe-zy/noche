@@ -88,7 +88,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { onShow } from "@dcloudio/uni-app";
-import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { getPrefsRepository } from "@/app/store/settingsRepository";
 import { ROUTES } from "@/shared/constants/routes";
@@ -127,7 +126,6 @@ import {
 } from "@/features/profile/localBackup";
 import { t } from "@/shared/i18n";
 
-const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const copy = computed(() => t(settingsStore.locale));
 const {
@@ -163,7 +161,6 @@ type ActiveSheet =
   | "appearance-theme"
   | "appearance-week"
   | "appearance-locale"
-  | "privacy-root"
   | "backup-root"
   | "backup-restore"
   | "avatar-actions"
@@ -235,14 +232,6 @@ const actionItems = computed<ProfileActionItem[]>(() => [
     ),
   },
   {
-    key: "privacy-lock",
-    title: copy.value.profile.privacy,
-    note: settingsStore.locale === "en-US"
-      ? copy.value.profile.privacyCopy
-      : copy.value.profile.privacyCopy,
-    value: settingsStore.privacyLockEnabled ? copy.value.settings.privacyOn : copy.value.settings.privacyOff,
-  },
-  {
     key: "local-backup",
     title: copy.value.profile.backup,
     note: copy.value.profile.backupLocalOnlyCopy,
@@ -268,8 +257,6 @@ const sheetTitle = computed(() => {
       return copy.value.profile.weekTitle;
     case "appearance-locale":
       return copy.value.profile.localeTitle;
-    case "privacy-root":
-      return copy.value.profile.privacy;
     case "backup-root":
       return copy.value.profile.backupRootTitle;
     case "backup-restore":
@@ -287,8 +274,6 @@ const sheetCopy = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
       return copy.value.profile.appearanceCopy;
-    case "privacy-root":
-      return copy.value.profile.privacyCopy;
     case "backup-root":
       return copy.value.profile.backupRootCopy;
     case "backup-restore":
@@ -337,19 +322,6 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
       return [
         { key: "zh-CN", title: copy.value.settings.chinese, trailingIcon: settingsStore.locale === "zh-CN" ? "check" : undefined },
         { key: "en-US", title: copy.value.settings.english, trailingIcon: settingsStore.locale === "en-US" ? "check" : undefined },
-      ];
-    case "privacy-root":
-      return [
-        {
-          key: "toggle-privacy",
-          title: settingsStore.privacyLockEnabled ? copy.value.profile.privacy : copy.value.profile.privacy,
-          copy: settingsStore.privacyLockEnabled ? copy.value.settings.privacyOn : copy.value.settings.privacyOff,
-        },
-        {
-          key: "lock-now",
-          title: copy.value.profile.lockNow,
-          copy: copy.value.profile.lockNowCopy,
-        },
       ];
     case "backup-root":
       return [
@@ -567,18 +539,6 @@ async function handleSheetSelect(key: string): Promise<void> {
       settingsStore.setLocale(key as LocaleOption);
       activeSheet.value = "appearance-root";
       return;
-    case "privacy-root":
-      if (key === "toggle-privacy") {
-        const nextEnabled = !settingsStore.privacyLockEnabled;
-        settingsStore.setPrivacyLockEnabled(nextEnabled);
-        if (!nextEnabled) {
-          appStore.unlockPrivacy();
-        }
-      } else {
-        appStore.lockPrivacy();
-      }
-      closeSheet();
-      return;
     case "backup-root":
       closeSheet();
       if (key === "export-backup") {
@@ -722,11 +682,6 @@ async function handleSelectAction(actionKey: ProfileActionItem["key"]): Promise<
     return;
   }
 
-  if (actionKey === "privacy-lock") {
-    activeSheet.value = "privacy-root";
-    return;
-  }
-
   if (actionKey === "local-backup") {
     activeSheet.value = "backup-root";
     return;
@@ -793,7 +748,7 @@ onUnmounted(() => {
 .profile-page__footer-text {
   font-size: 18rpx;
   line-height: 1.6;
-  color: rgba(138, 129, 120, 0.58);
+  color: var(--noche-muted);
   letter-spacing: 0.28em;
   padding-left: 0.28em;
 }

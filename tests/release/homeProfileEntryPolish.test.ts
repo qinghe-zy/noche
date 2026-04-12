@@ -15,4 +15,10 @@ describe("home profile entry polish", () => {
     expect(homePage).toContain(".home-page__topnav-profile-entry {");
     expect(homePage).toContain("border: none;");
   });
+
+  it("keeps the home main area slightly lower instead of crowding the title near the top edge", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+
+    expect(homePage).toContain("margin-top: 12px;");
+  });
 });

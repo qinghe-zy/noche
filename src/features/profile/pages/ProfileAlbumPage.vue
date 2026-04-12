@@ -89,13 +89,13 @@ onShow(() => {
   align-items: center;
   justify-content: space-between;
   gap: 16rpx;
-  padding: 28rpx 32rpx 18rpx;
+  padding: 40rpx 32rpx 18rpx;
 }
 
 .profile-album-page__title {
   font-size: 30rpx;
   line-height: 1.4;
-  color: #31332e;
+  color: var(--noche-text);
   letter-spacing: 0.24em;
   padding-left: 0.24em;
 }

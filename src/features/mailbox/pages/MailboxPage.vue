@@ -448,7 +448,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   position: sticky;
   top: 0;
   width: 100%;
-  background: rgba(247, 244, 239, 0.96);
+  background: var(--noche-surface);
   z-index: 20;
 }
 
@@ -456,7 +456,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 28rpx 32rpx 24rpx;
+  padding: 40rpx 32rpx 24rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -466,7 +466,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 30rpx;
   font-weight: 300;
   letter-spacing: 0.25em;
-  color: #31332e;
+  color: var(--noche-text);
   padding-left: 0.25em;
 }
 
@@ -493,8 +493,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   gap: 4px;
   padding: 4px;
   border-radius: 18px;
-  border: 1px solid #ddd4c8;
-  background: #f4eee6;
+  border: 1px solid var(--noche-border);
+  background: var(--noche-surface);
 }
 
 .mailbox-page__tab-group--primary {
@@ -536,7 +536,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__tab-pill-text {
   font-family: "Inter", sans-serif;
-  color: #8f857b;
+  color: var(--noche-muted);
 }
 
 .mailbox-page__tab-pill-text--primary {
@@ -552,12 +552,12 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill--active {
-  background: #fff9f2;
-  border: 1px solid rgba(221, 212, 200, 0.92);
+  background: var(--noche-panel);
+  border: 1px solid var(--noche-border);
 }
 
 .mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
-  color: #6b6259;
+  color: var(--noche-text);
   font-weight: 600;
 }
 
@@ -583,10 +583,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__retry {
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid rgba(177, 179, 171, 0.42);
-  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--noche-border);
+  background: var(--noche-panel);
   font-size: 14px;
-  color: #31332e;
+  color: var(--noche-text);
 }
 
 .mailbox-page__module-list {
@@ -629,7 +629,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-family: "Inter", sans-serif;
   font-size: 11px;
   letter-spacing: 0.3em;
-  color: #31332e;
+  color: var(--noche-text);
   font-weight: 600;
   padding-left: 0.3em;
 }
@@ -641,7 +641,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 14px;
   height: 1px;
   transform: translateX(-50%);
-  background: rgba(138, 129, 120, 0.8);
+  background: var(--noche-muted);
 }
 
 .mailbox-page__module-empty {
@@ -743,7 +743,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: block;
   font-size: 22px;
   line-height: 1.5;
-  color: #31332e;
+  color: var(--noche-text);
   margin-bottom: 12px;
 }
 
@@ -853,8 +853,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   height: 56px;
   border: none;
   border-radius: 18px;
-  background: #8a8178;
-  color: #fff9f2;
+  background: var(--noche-text);
+  color: var(--noche-bg);
   box-shadow: 0 8px 18px rgba(49, 51, 46, 0.1);
   display: flex;
   align-items: center;

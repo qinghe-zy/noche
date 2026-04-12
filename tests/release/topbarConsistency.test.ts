@@ -18,11 +18,14 @@ describe("topbar consistency", () => {
   it("uses shared topbar icon buttons for mailbox and calendar topbars", () => {
     const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
     const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+    const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
 
     expect(mailboxPage).toContain("TopbarIconButton");
     expect(calendarPage).toContain("TopbarIconButton");
-    expect(mailboxPage).toContain("padding: 28rpx 32rpx 24rpx;");
-    expect(calendarPage).toContain("padding: 28rpx 32rpx 24rpx;");
+    expect(profileHero).toContain("TopbarIconButton");
+    expect(mailboxPage).toContain("padding: 40rpx 32rpx 24rpx;");
+    expect(calendarPage).toContain("padding: 40rpx 32rpx 24rpx;");
+    expect(profileHero).toContain("padding: 40rpx 24rpx 0;");
   });
 
   it("keeps the home profile entry borderless and not implemented as the old framed button avatar", () => {

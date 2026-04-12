@@ -42,4 +42,11 @@ describe("home stitch parity", () => {
     expect(prompt.subtitleZh).toBe("致今日");
     expect(prompt.subtitleEn).toBe("To Today");
   });
+
+  it("does not rely on inline svg icons for the packaged app runtime", () => {
+    const appIcon = readProjectFile("src/shared/ui/AppIcon.vue");
+
+    expect(appIcon).toContain("<image");
+    expect(appIcon).toContain("data:image/svg+xml;utf8,");
+  });
 });
