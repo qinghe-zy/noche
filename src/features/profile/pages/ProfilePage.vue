@@ -116,6 +116,7 @@ import {
 import {
   exportLocalBackup,
   importLocalBackup,
+  isLocalBackupAvailable,
   listLocalBackups,
   restartAppAfterRestore,
   type LocalBackupSummary,
@@ -125,6 +126,12 @@ import { t } from "@/shared/i18n";
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const copy = computed(() => t(settingsStore.locale));
+const defaultProfileLabels = {
+  appearance: "外观设置",
+  theme: "主题",
+  week: "每周起始日",
+  locale: "语言",
+} as const;
 const {
   identity,
   error: identityError,
@@ -151,7 +158,7 @@ const {
 } = useProfileAlbum(PROFILE_PREVIEW_LIMIT);
 
 type ThemeOption = "system" | "light" | "dark";
-type LocaleOption = "zh-CN" | "en-US" | "ja-JP";
+type LocaleOption = "zh-CN" | "en-US";
 type ActiveSheet =
   | null
   | "appearance-root"
@@ -188,7 +195,7 @@ const infoDialogCopy = ref("");
 const infoDialogActions = ref<PaperConfirmDialogAction[]>([
   {
     key: "close",
-    title: "知道了",
+    title: "Close",
     tone: "muted",
   },
 ]);
@@ -196,6 +203,14 @@ const infoDialogHandler = ref<((actionKey: string) => void) | null>(null);
 const availableBackups = ref<LocalBackupSummary[]>([]);
 const pendingRestoreBackup = ref<LocalBackupSummary | null>(null);
 const footerText = computed(() => settingsStore.locale === "en-US" ? "Quiet pages · Warm memories" : "岁月安好 · 纸短情长");
+
+function resolveBackupErrorMessage(error: unknown): string {
+  if (!isLocalBackupAvailable()) {
+    return copy.value.profile.backupUnavailable;
+  }
+
+  return copy.value.profile.exportFailed;
+}
 
 const actionItems = computed<ProfileActionItem[]>(() => [
   {
@@ -241,13 +256,13 @@ const pageError = computed(() => identityError.value ?? statsError.value ?? albu
 const sheetTitle = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
-      return "外观设置";
+      return copy.value.profile.appearance || defaultProfileLabels.appearance;
     case "appearance-theme":
-      return "主题";
+      return settingsStore.locale === "en-US" ? "Theme" : defaultProfileLabels.theme;
     case "appearance-week":
-      return "每周起始日";
+      return settingsStore.locale === "en-US" ? "Week Start" : defaultProfileLabels.week;
     case "appearance-locale":
-      return "语言";
+      return settingsStore.locale === "en-US" ? "Language" : defaultProfileLabels.locale;
     case "privacy-root":
       return copy.value.profile.privacy;
     case "backup-root":
@@ -266,7 +281,9 @@ const sheetTitle = computed(() => {
 const sheetCopy = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
-      return "把这间角落调到自己最舒服的阅读节奏。";
+      return settingsStore.locale === "en-US"
+        ? "Adjust the corner until it feels right for reading."
+        : "把这间角落调到自己最舒服的阅读节奏。";
     case "privacy-root":
       return settingsStore.locale === "en-US"
         ? "Control how quickly the app covers your pages."
@@ -290,35 +307,35 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
       return [
         {
           key: "theme",
-          title: `主题：${formatProfileThemeLabel(settingsStore.theme)}`,
+          title: `${settingsStore.locale === "en-US" ? "Theme" : defaultProfileLabels.theme}：${formatProfileThemeLabel(settingsStore.theme, settingsStore.locale)}`,
           trailingIcon: "chevron-right",
         },
         {
           key: "week",
-          title: `每周起始日：${formatProfileWeekStartLabel(settingsStore.weekStartsOn)}`,
+          title: `${settingsStore.locale === "en-US" ? "Week Start" : defaultProfileLabels.week}：${formatProfileWeekStartLabel(settingsStore.weekStartsOn, settingsStore.locale)}`,
           trailingIcon: "chevron-right",
         },
         {
           key: "locale",
-          title: `语言：${formatProfileLocaleLabel(settingsStore.locale)}`,
+          title: `${settingsStore.locale === "en-US" ? "Language" : defaultProfileLabels.locale}：${formatProfileLocaleLabel(settingsStore.locale)}`,
           trailingIcon: "chevron-right",
         },
       ];
     case "appearance-theme":
       return [
-        { key: "system", title: "跟随系统", trailingIcon: settingsStore.theme === "system" ? "check" : undefined },
-        { key: "light", title: "浅色", trailingIcon: settingsStore.theme === "light" ? "check" : undefined },
-        { key: "dark", title: "深色", trailingIcon: settingsStore.theme === "dark" ? "check" : undefined },
+        { key: "system", title: copy.value.settings.followSystem, trailingIcon: settingsStore.theme === "system" ? "check" : undefined },
+        { key: "light", title: copy.value.settings.light, trailingIcon: settingsStore.theme === "light" ? "check" : undefined },
+        { key: "dark", title: copy.value.settings.dark, trailingIcon: settingsStore.theme === "dark" ? "check" : undefined },
       ];
     case "appearance-week":
       return [
-        { key: "0", title: "周日开始", trailingIcon: settingsStore.weekStartsOn === 0 ? "check" : undefined },
-        { key: "1", title: "周一开始", trailingIcon: settingsStore.weekStartsOn === 1 ? "check" : undefined },
+        { key: "0", title: copy.value.settings.weekStartsSunday, trailingIcon: settingsStore.weekStartsOn === 0 ? "check" : undefined },
+        { key: "1", title: copy.value.settings.weekStartsMonday, trailingIcon: settingsStore.weekStartsOn === 1 ? "check" : undefined },
       ];
     case "appearance-locale":
       return [
-        { key: "zh-CN", title: "简体中文", trailingIcon: settingsStore.locale === "zh-CN" ? "check" : undefined },
-        { key: "en-US", title: "English", trailingIcon: settingsStore.locale === "en-US" ? "check" : undefined },
+        { key: "zh-CN", title: copy.value.settings.chinese, trailingIcon: settingsStore.locale === "zh-CN" ? "check" : undefined },
+        { key: "en-US", title: copy.value.settings.english, trailingIcon: settingsStore.locale === "en-US" ? "check" : undefined },
       ];
     case "privacy-root":
       return [
@@ -356,15 +373,15 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
       return identity.value.avatarUri
         ? [
             { key: "pick-avatar", title: "从本机换一张" },
-            { key: "clear-avatar", title: "恢复默认头像", tone: "danger" },
+            { key: "clear-avatar", title: settingsStore.locale === "en-US" ? "Reset avatar" : "恢复默认头像", tone: "danger" },
           ]
         : [
-            { key: "pick-avatar", title: "从本机选头像" },
+            { key: "pick-avatar", title: settingsStore.locale === "en-US" ? "Pick from device" : "从本机选头像" },
           ];
     case "profile-actions":
       return [
-        { key: "edit-name", title: "修改昵称", trailingIcon: "chevron-right" },
-        { key: "edit-signature", title: "修改签名", trailingIcon: "chevron-right" },
+        { key: "edit-name", title: settingsStore.locale === "en-US" ? "Edit display name" : "修改昵称", trailingIcon: "chevron-right" },
+        { key: "edit-signature", title: settingsStore.locale === "en-US" ? "Edit signature" : "修改签名", trailingIcon: "chevron-right" },
       ];
     default:
       return [];
@@ -422,7 +439,7 @@ function openInfoDialog(title: string, copy: string): void {
   infoDialogActions.value = [
     {
       key: "close",
-      title: "知道了",
+      title: settingsStore.locale === "en-US" ? "Close" : "知道了",
       tone: "muted",
     },
   ];
@@ -539,15 +556,15 @@ async function handleSheetSelect(key: string): Promise<void> {
       return;
     case "appearance-theme":
       settingsStore.setTheme(key as ThemeOption);
-      closeSheet();
+      activeSheet.value = "appearance-root";
       return;
     case "appearance-week":
       settingsStore.setWeekStartsOn(key === "0" ? 0 : 1);
-      closeSheet();
+      activeSheet.value = "appearance-root";
       return;
     case "appearance-locale":
       settingsStore.setLocale(key as LocaleOption);
-      closeSheet();
+      activeSheet.value = "appearance-root";
       return;
     case "privacy-root":
       if (key === "toggle-privacy") {
@@ -564,6 +581,10 @@ async function handleSheetSelect(key: string): Promise<void> {
     case "backup-root":
       closeSheet();
       if (key === "export-backup") {
+        if (!isLocalBackupAvailable()) {
+          openInfoDialog(copy.value.profile.exportFailed, copy.value.profile.backupUnavailable);
+          return;
+        }
         try {
           const result = await exportLocalBackup();
           await getPrefsRepository().set({
@@ -573,8 +594,13 @@ async function handleSheetSelect(key: string): Promise<void> {
           await refreshIdentity();
           openInfoDialog(copy.value.profile.exportSuccess, result.absolutePath);
         } catch (error) {
-          openInfoDialog(copy.value.profile.exportFailed, error instanceof Error ? error.message : copy.value.profile.exportFailed);
+          openInfoDialog(copy.value.profile.exportFailed, resolveBackupErrorMessage(error));
         }
+        return;
+      }
+
+      if (!isLocalBackupAvailable()) {
+        openInfoDialog(copy.value.profile.backupRootTitle, copy.value.profile.backupUnavailable);
         return;
       }
 
@@ -619,7 +645,7 @@ async function handleSheetSelect(key: string): Promise<void> {
               restartAppAfterRestore();
             }, 300);
           } catch (error) {
-            openInfoDialog(copy.value.profile.restoreFailed, error instanceof Error ? error.message : copy.value.profile.restoreFailed);
+            openInfoDialog(copy.value.profile.restoreFailed, copy.value.profile.restoreFailed);
           }
         },
       );
@@ -650,9 +676,9 @@ async function handleSheetSelect(key: string): Promise<void> {
       if (key === "edit-name") {
         openInputDialog(
           "display-name",
-          "修改昵称",
-          "给这间角落起个名字。",
-          "给这间角落起个名字",
+          settingsStore.locale === "en-US" ? "Edit display name" : "修改昵称",
+          settingsStore.locale === "en-US" ? "Give this corner a name." : "给这间角落起个名字。",
+          settingsStore.locale === "en-US" ? "Give this corner a name" : "给这间角落起个名字",
           identity.value.displayName,
           20,
         );
@@ -661,9 +687,9 @@ async function handleSheetSelect(key: string): Promise<void> {
 
       openInputDialog(
         "signature",
-        "修改签名",
-        "写一句留给自己的话。",
-        "写一句留给自己的话",
+        settingsStore.locale === "en-US" ? "Edit signature" : "修改签名",
+        settingsStore.locale === "en-US" ? "Write a short line for yourself." : "写一句留给自己的话。",
+        settingsStore.locale === "en-US" ? "Write a line for yourself" : "写一句留给自己的话",
         identity.value.signature,
         40,
       );
@@ -706,8 +732,10 @@ async function handleSelectAction(actionKey: ProfileActionItem["key"]): Promise<
   }
 
   openInfoDialog(
-    "关于 noche",
-    `版本 v${PROFILE_APP_VERSION}\nAndroid / local-first / 离线可写。\n这间角落只依赖本地数据，不接账号，也不接云同步。`,
+    settingsStore.locale === "en-US" ? "About noche" : "关于 noche",
+    settingsStore.locale === "en-US"
+      ? `Version v${PROFILE_APP_VERSION}\nAndroid / local-first / offline writing.\nThis corner only relies on local data, without accounts or cloud sync.`
+      : `版本 v${PROFILE_APP_VERSION}\nAndroid / local-first / 离线可写。\n这间角落只依赖本地数据，不接账号，也不接云同步。`,
   );
 }
 

@@ -50,7 +50,7 @@
           <view class="home-page__nav-entry-icon">
             <AppIcon name="edit-note" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">{{ copy.home.jotting }}</text>
+          <text class="home-page__nav-entry-label" :class="{ 'home-page__nav-entry-label--latin': settingsStore.locale === 'en-US' }">{{ copy.home.jotting }}</text>
         </view>
 
         <view
@@ -61,14 +61,14 @@
           <view class="home-page__nav-entry-icon">
             <AppIcon name="mail" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">{{ copy.home.future }}</text>
+          <text class="home-page__nav-entry-label" :class="{ 'home-page__nav-entry-label--latin': settingsStore.locale === 'en-US' }">{{ copy.home.future }}</text>
         </view>
 
         <view class="home-page__nav-entry" @click="handleNavigate('mailbox')" @tap="handleNavigate('mailbox')">
           <view class="home-page__nav-entry-icon">
             <AppIcon name="mail-read" class="home-page__nav-entry-icon-svg" />
           </view>
-          <text class="home-page__nav-entry-label">{{ copy.home.mailbox }}</text>
+          <text class="home-page__nav-entry-label" :class="{ 'home-page__nav-entry-label--latin': settingsStore.locale === 'en-US' }">{{ copy.home.mailbox }}</text>
         </view>
       </view>
     </view>
@@ -445,6 +445,13 @@ async function handleCreateAnotherJottingDraft() {
   letter-spacing: 0.3em;
   color: rgba(99, 95, 85, 0.76);
   padding-left: 0.3em;
+}
+
+.home-page__nav-entry-label--latin {
+  letter-spacing: 0.08em;
+  padding-left: 0.08em;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .home-page__footer {

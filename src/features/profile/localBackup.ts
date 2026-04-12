@@ -36,6 +36,10 @@ export interface LocalBackupSummary {
   absolutePath: string;
 }
 
+export function isLocalBackupAvailable(): boolean {
+  return isAppPlusRuntime();
+}
+
 function isAppPlusRuntime(): boolean {
   return typeof plus !== "undefined" && Boolean(plus.io);
 }
