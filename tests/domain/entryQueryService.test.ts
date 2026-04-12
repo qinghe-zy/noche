@@ -91,6 +91,30 @@ describe("entry query service", () => {
     expect(result.distantPendingFutures.map((entry) => entry.id)).toEqual(["future-locked"]);
   });
 
+  it("orders pending future letters by unlockDate ascending", () => {
+    const laterUnlock = makeEntry({
+      id: "future-late",
+      type: "future",
+      status: "sealed",
+      recordDate: "2026-04-18",
+      unlockDate: "2026-04-20",
+    });
+    const earlierUnlock = makeEntry({
+      id: "future-early",
+      type: "future",
+      status: "sealed",
+      recordDate: "2026-04-02",
+      unlockDate: "2026-04-12",
+    });
+
+    const result = buildMailboxCollections([laterUnlock, earlierUnlock]);
+
+    expect(result.distantPendingFutures.map((entry) => entry.id)).toEqual([
+      "future-early",
+      "future-late",
+    ]);
+  });
+
   it("collects unique marked dates from calendar-visible entries", () => {
     const visibleDiary = makeEntry({
       id: "diary-1",

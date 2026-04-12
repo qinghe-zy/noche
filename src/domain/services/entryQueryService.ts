@@ -31,6 +31,17 @@ export function sortEntriesByRecordDateDesc(a: Entry, b: Entry): number {
   return b.createdAt.localeCompare(a.createdAt);
 }
 
+function sortPendingFutureEntries(a: Entry, b: Entry): number {
+  const aUnlockDate = a.unlockDate ?? a.recordDate;
+  const bUnlockDate = b.unlockDate ?? b.recordDate;
+
+  if (aUnlockDate !== bUnlockDate) {
+    return aUnlockDate.localeCompare(bUnlockDate);
+  }
+
+  return a.createdAt.localeCompare(b.createdAt);
+}
+
 function isCalendarVisibleEntry(entry: Entry): boolean {
   return entry.type !== "future" || entry.status === "unlocked";
 }
@@ -94,7 +105,7 @@ export function buildMailboxCollections(entries: Entry[]): MailboxCollections {
     .sort(sortEntriesByRecordDateDesc);
   const distantPendingFutures = entries
     .filter((entry) => entry.type === "future" && entry.status === "sealed")
-    .sort(sortEntriesByRecordDateDesc);
+    .sort(sortPendingFutureEntries);
 
   return {
     documentaryDiaries,
@@ -131,19 +142,19 @@ export function resolveCalendarDateSelection(
   entries: Entry[],
   recordDate: string,
 ): CalendarResolveResult {
-  const visibleEntries = listDayArchiveEntries(entries, recordDate);
+  const previewEntries = listCalendarPreviewEntries(entries, recordDate);
 
-  if (visibleEntries.length === 0) {
+  if (previewEntries.length === 0) {
     return {
       kind: "new-diary",
       recordDate,
     };
   }
 
-  if (visibleEntries.length === 1) {
+  if (previewEntries.length === 1) {
     return {
       kind: "entry",
-      entryId: visibleEntries[0].id,
+      entryId: previewEntries[0].id,
     };
   }
 

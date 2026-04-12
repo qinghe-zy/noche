@@ -1,7 +1,10 @@
 import { defineStore } from "pinia";
 import type { Entry } from "@/domain/entry/types";
-import { getEntryByIdWithFutureState, listActiveEntriesWithFutureState } from "@/app/store/entryReadFacade";
-import { buildMailboxCollections } from "@/domain/services/entryQueryService";
+import {
+  getEntryByIdWithFutureState,
+  refreshUnlockableFutureEntries,
+} from "@/app/store/entryReadFacade";
+import { getEntryRepository } from "@/app/store/entryRepository";
 
 interface MailboxState {
   documentaryDiaries: Entry[];
@@ -42,8 +45,8 @@ export const useMailboxStore = defineStore("mailbox", {
       this.error = null;
 
       try {
-        const entries = await listActiveEntriesWithFutureState();
-        const collections = buildMailboxCollections(entries);
+        await refreshUnlockableFutureEntries();
+        const collections = await getEntryRepository().getMailboxCollections();
         this.documentaryDiaries = collections.documentaryDiaries;
         this.documentaryJottings = collections.documentaryJottings;
         this.distantOpenedFutures = collections.distantOpenedFutures;

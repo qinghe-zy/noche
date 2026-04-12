@@ -28,9 +28,13 @@ describe("sqliteEntryRepository", () => {
     const client = new FakeSQLiteClient();
     client.queryResults.push(
       [makeEntryRecord({ id: "entry-1" })],
+      [],
       [makeEntryRecord({ id: "entry-1" })],
+      [],
       [makeEntryRecord({ id: "entry-2", record_date: "2026-04-11" })],
+      [],
       [makeEntryRecord({ id: "entry-3", type: "jotting", status: "saved", unlock_date: null })],
+      [],
       [{ record_date: "2026-04-10" }],
       [{ recorded_days: 2, total_words: 128, diary_count: 1 }],
     );
@@ -56,7 +60,17 @@ describe("sqliteEntryRepository", () => {
     await repository.save(makeEntry());
     await repository.deleteById("entry-1", { cleanupHook });
 
-    expect(client.executed).toHaveLength(2);
+    expect(client.executed).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        sql: expect.stringContaining("ON CONFLICT(id) DO UPDATE"),
+      }),
+      expect.objectContaining({
+        sql: expect.stringContaining("DELETE FROM attachments WHERE entry_id = ?"),
+      }),
+      expect.objectContaining({
+        sql: expect.stringContaining("UPDATE entries SET destroyed_at = ? WHERE id = ?"),
+      }),
+    ]));
     expect(cleanupHook).toHaveBeenCalledTimes(1);
   });
 });

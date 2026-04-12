@@ -1,10 +1,7 @@
 import { computed, ref } from "vue";
-import { listActiveEntriesWithFutureState } from "@/app/store/entryReadFacade";
+import { getEntryRepository } from "@/app/store/entryRepository";
 import { ROUTES } from "@/shared/constants/routes";
-import {
-  buildProfileAlbumItems,
-  type ProfileAlbumItem,
-} from "@/features/profile/profileData";
+import type { ProfileAlbumItem } from "@/features/profile/profileData";
 
 export function useProfileAlbum(limit?: number) {
   const allItems = ref<ProfileAlbumItem[]>([]);
@@ -26,8 +23,7 @@ export function useProfileAlbum(limit?: number) {
     error.value = null;
 
     try {
-      const entries = await listActiveEntriesWithFutureState();
-      allItems.value = buildProfileAlbumItems(entries);
+      allItems.value = await getEntryRepository().getProfileAlbumItems();
     } catch (nextError) {
       error.value = nextError instanceof Error ? nextError.message : "加载相册失败。";
       allItems.value = [];

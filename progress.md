@@ -415,3 +415,74 @@
   - `pnpm.cmd run test:unit` 通过：47 个测试文件、116 个测试通过
   - `pnpm.cmd run type-check` 通过
   - 本地 `dev:h5` 可重新拉起并返回 200
+- 已开始接入 `HBuilderX` APK 打包链：
+  - 已确认本机存在 `D:\Develop\HBuilderX`，其中 `cli.exe` 可正常调用
+  - 已确认 `noche` 项目已被 `HBuilderX` 导入，`cli project list` 可见 `noche(UniApp_VUE)`
+  - 已确认 `cli user info` 能返回当前登录邮箱 `qinghe.zy@gmail.com`
+  - 已在打包前再次验证：`pnpm type-check` 通过
+- 已定位当前 APK 打包入口与阻塞：
+  - `cli publish app-android --type appResource` 仍返回“此功能需要先登录”，即便 `HBuilderX` 主程序已拉起
+  - `cli pack --project D:\Project\noche --platform android --android.packagename com.noche.app --android.androidpacktype 1` 已开始响应，说明云打包链路方向正确
+  - 首次 `cli pack` 会提示“正在下载依赖插件，请稍后重试”
+  - `HBuilderX` 日志已记录开始下载 `uniapp-cli-vite`，并拉起依赖 `unicloud / uni_modules`
+  - 当前临时测试打包假设为：
+    - 包名：`com.noche.app`
+    - 证书：公共证书（仅用于先产出测试安装包）
+- 当前未完成项：
+  - 依赖插件尚未完成安装或尚未被 CLI 激活
+  - 最终 `apk` 产物尚未生成
+  - `adb devices -l` 仍为空，后续 `Redmi Note 11T Pro+` 实机安装验收尚未开始
+- 已补记本轮续接断点：
+  - 重新进入打包链时，`D:\Develop\HBuilderX\cli.exe --help` 提示“与主程序的连接已中断，可能已关闭。请运行 cli open 重新启动后再试”
+  - 已执行 `D:\Develop\HBuilderX\cli.exe open` 并成功拉起 `HBuilderX` 主程序，说明当前阻塞已从“主程序未连接”收敛回“等待继续检查登录态 / 项目连接 / pack 重试”
+  - 下次续接 APK 打包时，优先顺序固定为：`cli user info` -> `cli project list` -> 重试 `cli pack`
+- 已确认用户重新提供了真实图标源文件：`D:\Project\screen.png`
+  - 文件当前可正常读取
+  - 尺寸为 `483 x 482`
+  - 视觉内容为米白纸面底上的深灰描边信封图形
+- 已开始接入“项目图标 + 继续打包”链路：
+  - 先检查了当前 `src/manifest.json` 与 `index.html`
+  - 确认 H5 目前仍使用 `public/favicon.svg`
+  - 确认 App 侧 `manifest` 里尚未补入专用图标配置
+- 已确认一个新的工程级事实：
+  - `D:\Project\screen.png` 现在已是真实 PNG，不再是之前那个只有 `<FIFE Image failed to fetch>` 文本的假文件
+  - 因此后续可以直接以它为源生成多尺寸应用图标
+- 已继续检查打包链最新状态：
+  - `D:\Project\noche\dist\build\app` 被 `HBuilderX` 导入后，会被识别为单独的 `app(App)` 项目
+  - 对源码项目与 `dist/build/app` 项目执行 `publish app-android` / `publish app --type wgt` 仍返回：`appid 不存在，请在 manifest.json 中重新获取`
+  - 对 `dist/build/app` 执行 `cli pack` 仍返回：`当前操作依赖插件【app-safe-pack】，请安装后再试`
+- 已确认 `app-safe-pack` 当前仍未实际落盘到 `D:\Develop\HBuilderX\plugins`
+- 已从 `HBuilderX` 日志再次收集到持续性证据：
+  - 多次出现 `操作失败，未获取到 token`
+  - 多次出现 `validate-token` / `check-token` 超时或异常
+  - 说明当前 APK 云打包链除了插件缺失，还叠加了 HBuilder 插件侧 token 校验不稳定
+- 已验证外部网络连通性不是完全断网：
+  - 使用 `curl.exe -I` 请求 `https://ide-global.dcloud.io/http/user/validate-token` 与 `https://ide.liuyingyong.cn/askApi/check-token` 都能拿到 `HTTP/1.1 200 OK`
+  - 当前更像是 `HBuilderX` 内部插件安装 / token 校验链异常，而不是机器完全无法访问外网
+- 已尝试开始生成多尺寸图标资源，但尚未落盘成功：
+  - 原因是当前 PowerShell 环境找不到 `System.Drawing.Common`
+  - 因此“从 `screen.png` 自动生成 `public/app-icons/*.png`”这一步还需要换一种实现方式继续
+- 自主切入本地数据库专项：先完整审计了 `src/data/db/**`、`src/data/repositories/**`、`app/store`、`profile` composables 与相关测试，确认 SQLite 之前只停留在边界层，真实 runtime 仍走 JSON storage。
+- 已先写红灯并转绿：
+  - `CalendarStore` 现在会让 future 真正按 `unlockDate` 参与当天解析与当天预览
+  - `buildMailboxCollections()` 里待启 future 改为按 `unlockDate ASC` 排序
+  - `DraftStore.saveActiveDraft()` 在内容未变化时不再重复落库
+- 已扩展 repository 能力面，避免页面层继续无脑全量读取：
+  - `getCalendarPreviewEntries()`
+  - `getUnlockableFutureEntries()`
+  - `getMailboxCollections()`
+  - `getProfileAlbumItems()`
+- 已在 SQLite 侧补齐真正可落地的本地数据库链：
+  - 新增 `src/data/db/migrations.ts`
+  - `schema.ts` 新增 `attachments / profile_stats_cache / record_date_counters`
+  - `sqlite.ts` 不再是空 client，而是 app-plus SQLite client
+  - `sqliteEntryRepository / sqliteDraftRepository` 已同步附件表与统计缓存
+- 已在 `bootstrapAppRuntime()` 中加入 app-plus SQLite 启动链：
+  - 尝试开启 SQLite
+  - 执行 migration
+  - 若数据库为空，则从旧 storage 导入 entry / draft
+  - 设置仍继续走 `storagePrefsRepository`
+- 已完成本轮验证：
+  - `pnpm test:unit` 通过：52 个测试文件、151 个测试通过
+  - `pnpm type-check` 通过
+  - `pnpm build:h5` 通过

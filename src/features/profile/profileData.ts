@@ -1,4 +1,8 @@
 import type { Entry, EntryType } from "@/domain/entry/types";
+import {
+  buildEntryAlbumItems,
+  type EntryAlbumItem,
+} from "@/domain/services/entryAlbumService";
 import { formatDate } from "@/shared/utils/date";
 
 export interface ProfileIdentity {
@@ -15,18 +19,7 @@ export interface ProfileStats {
   diaryCount: number;
 }
 
-export interface ProfileAlbumItem {
-  id: string;
-  entryId: string;
-  attachmentId: string;
-  type: EntryType;
-  recordDate: string;
-  createdAt: string;
-  localUri: string;
-  sortOrder: number;
-  width: number | null;
-  height: number | null;
-}
+export type ProfileAlbumItem = EntryAlbumItem;
 
 export interface ProfileActionItem {
   key: "appearance-settings" | "privacy-lock" | "local-backup" | "about";
@@ -55,40 +48,7 @@ export const PROFILE_DEFAULT_IDENTITY: ProfileIdentity = {
 };
 
 export function buildProfileAlbumItems(entries: Entry[]): ProfileAlbumItem[] {
-  return entries
-    .filter((entry) => (
-      entry.type === "diary"
-      || entry.type === "jotting"
-      || (entry.type === "future" && entry.status === "unlocked")
-    ))
-    .flatMap((entry) =>
-      (entry.attachments ?? [])
-        .filter((attachment) => attachment.type === "image" && attachment.localUri.trim().length > 0)
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map((attachment) => ({
-          id: `${entry.id}:${attachment.id}`,
-          entryId: entry.id,
-          attachmentId: attachment.id,
-          type: entry.type,
-          recordDate: entry.recordDate,
-          createdAt: entry.createdAt,
-          localUri: attachment.localUri,
-          sortOrder: attachment.sortOrder,
-          width: attachment.width ?? null,
-          height: attachment.height ?? null,
-        })),
-    )
-    .sort((a, b) => {
-      if (a.recordDate !== b.recordDate) {
-        return b.recordDate.localeCompare(a.recordDate);
-      }
-
-      if (a.createdAt !== b.createdAt) {
-        return b.createdAt.localeCompare(a.createdAt);
-      }
-
-      return a.sortOrder - b.sortOrder;
-    });
+  return buildEntryAlbumItems(entries);
 }
 
 export function formatProfileWordCount(totalWords: number): string {

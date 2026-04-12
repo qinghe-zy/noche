@@ -116,3 +116,32 @@
   - 无边框无底色
   - 主内边距 28rpx / 32rpx / 24rpx
   后续新页面若偏离，应视为回归而不是自由发挥。
+- 当前仓库要产出 Android `apk`，在 `HBuilderX CLI` 下真正可走的入口是 `cli pack`；`publish app-android --type appResource` 更偏向生成本地打包资源，不等于直接落 `apk`。
+- 当前仓库里还没有现成的 Android 包名与 keystore 配置；若只是先产出测试包，现阶段可先走“公共证书 + 临时包名”的保守路径，再补正式证书。
+- 这台机器上的 `HBuilderX` 会在首次 `cli pack` 时按需下载 `uniapp-cli-vite` 及其依赖插件；在插件完成安装并被激活前，CLI 会持续提示“正在下载依赖插件，请稍后重试”。
+- 用户已重新提供真实图标源文件：`D:\Project\screen.png`，当前可正常读取，尺寸约为 `483 x 482`，可作为后续项目图标与应用图标的单一来源。
+- 当前工程里的图标接线仍未完成：
+  - H5 仍指向 `public/favicon.svg`
+  - `src/manifest.json` 尚未写入应用图标配置
+- `D:\Project\noche\dist\build\app` 导入 `HBuilderX` 后会被识别成一个单独的 `app(App)` 项目，这说明 `app-plus` 产物本身是可被 HBuilder 识别的。
+- 但无论对源码项目还是对 `dist/build/app` 执行 `publish app-android` / `publish app --type wgt`，当前都仍报 `appid 不存在，请在 manifest.json 中重新获取`，所以这条线暂时不能作为可靠出包入口。
+- `cli pack` 依旧是最接近 APK 产出的正路线，但当前被 `app-safe-pack` 插件缺失卡住；而且该插件并未实际出现在 `D:\Develop\HBuilderX\plugins` 中。
+- `HBuilderX` 日志里持续出现 `操作失败，未获取到 token`，并伴随 `validate-token` / `check-token` 超时，说明插件安装与云打包链不是单纯“命令没重试”，而是确有内部鉴权不稳定。
+- 机器对相关云端地址并非完全不通：`curl.exe -I` 能拿到 `200 OK`；因此当前更像是 `HBuilderX` 自身插件 / token 状态异常，而不是整机网络阻断。
+- 当前 PowerShell 环境缺少 `System.Drawing.Common`，导致“直接用 PowerShell 从 `screen.png` 生成多尺寸 PNG 图标”这条路径暂时不可用，需要改用别的方式生成图标资源。
+- 当前数据库真实状态不是“已经在跑 SQLite”，而是：
+  - `src/data/db/**` 里只有 schema / repo SQL / fake client
+  - 真正运行时默认仍走 `storageEntryRepository` / `storageDraftRepository`
+  - migration 在本轮之前没有任何执行入口
+- 本轮数据库审计确认的高风险点：
+  - `Mailbox / Calendar / Profile Album / future status refresh` 大量依赖 `getAllActive()` 后在 JS 层二次过滤
+  - `CalendarStore` 之前只按 `recordDate` 查当天内容，future 没有真正按 `unlockDate` 参与当天查询
+  - 待启 future 在信箱里之前按 `recordDate` 排序，而不是按 `unlockDate`
+  - `attachment` 没有独立表，图片路径只塞在 `attachments_json`
+  - `Profile` 统计每次实时聚合，图片相册每次全量扁平化
+  - draft autosave 在内容没变时也会重复写入
+- 本轮已落地的数据库优化方向：
+  - app-plus 运行时尝试切到真实 SQLite，并保留 H5 / 非 app-plus 的 storage fallback
+  - 新增 SQLite migration 与版本管理，补 `attachments / profile_stats_cache / record_date_counters`
+  - SQLite entry/draft repository 已改为同步附件表，并在写入/删除后刷新统计缓存
+  - `Calendar / Mailbox / Profile Album` 已改为优先走 repository 的定向查询，而不是页面层全量扫

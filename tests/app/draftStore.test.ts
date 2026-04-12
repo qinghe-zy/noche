@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
 import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
+import type { IDraftRepository } from "@/data/repositories/draft.repository";
 import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import { createEntry } from "@/domain/services/entryService";
 import { setEntryRepository, useEntryStore } from "@/app/store/useEntryStore";
@@ -351,5 +352,37 @@ describe("draft store", () => {
 
     expect(restored.diaryPreludeStatus).toBe("skipped");
     expect(restored.diaryPrelude).toBeNull();
+  });
+
+  it("skips redundant persistence when the draft payload has not changed", async () => {
+    let saveCount = 0;
+    const backingRepository = createMemoryDraftRepository();
+    const countingRepository: IDraftRepository = {
+      async save(draft) {
+        saveCount += 1;
+        await backingRepository.save(draft);
+      },
+      async getBySlotKey(slotKey) {
+        return backingRepository.getBySlotKey(slotKey);
+      },
+      async getAll() {
+        return backingRepository.getAll();
+      },
+      async deleteBySlotKey(slotKey) {
+        await backingRepository.deleteBySlotKey(slotKey);
+      },
+    };
+    setDraftRepository(countingRepository);
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "jotting",
+    });
+    saveCount = 0;
+
+    const savedDraft = await draftStore.saveActiveDraft();
+
+    expect(savedDraft?.slotKey).toBe("draft_jotting");
+    expect(saveCount).toBe(0);
   });
 });

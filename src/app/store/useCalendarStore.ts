@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import type { Entry } from "@/domain/entry/types";
 import {
-  collectCalendarMarkedDates,
-  listDayArchiveEntries,
+  listCalendarPreviewEntries,
   resolveCalendarDateSelection,
   type CalendarResolveResult,
 } from "@/domain/services/entryQueryService";
-import { getEntriesByDateWithFutureState, listActiveEntriesWithFutureState } from "@/app/store/entryReadFacade";
+import { getCalendarPreviewEntriesWithFutureState } from "@/app/store/entryReadFacade";
+import { getEntryRepository } from "@/app/store/entryRepository";
 
 interface CalendarState {
   markedDates: string[];
@@ -30,8 +30,7 @@ export const useCalendarStore = defineStore("calendar", {
       this.error = null;
 
       try {
-        const entries = await listActiveEntriesWithFutureState();
-        this.markedDates = collectCalendarMarkedDates(entries);
+        this.markedDates = await getEntryRepository().getCalendarMarkedDates();
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to fetch marked dates.";
         throw error;
@@ -44,7 +43,7 @@ export const useCalendarStore = defineStore("calendar", {
       this.error = null;
 
       try {
-        const entries = await getEntriesByDateWithFutureState(recordDate);
+        const entries = await getCalendarPreviewEntriesWithFutureState(recordDate);
         return resolveCalendarDateSelection(entries, recordDate);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to resolve calendar date.";
@@ -58,8 +57,8 @@ export const useCalendarStore = defineStore("calendar", {
       this.error = null;
 
       try {
-        const entries = await getEntriesByDateWithFutureState(recordDate);
-        this.selectedDateEntries = listDayArchiveEntries(entries, recordDate);
+        const entries = await getCalendarPreviewEntriesWithFutureState(recordDate);
+        this.selectedDateEntries = listCalendarPreviewEntries(entries, recordDate);
         return this.selectedDateEntries;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to fetch selected date entries.";

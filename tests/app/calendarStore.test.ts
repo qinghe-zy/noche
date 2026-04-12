@@ -77,7 +77,7 @@ describe("calendar store", () => {
     setEntryRepository(repository);
     const store = useCalendarStore();
 
-    await expect(store.resolveDate("2026-04-08")).resolves.toEqual({
+    await expect(store.resolveDate("2026-04-10")).resolves.toEqual({
       kind: "entry",
       entryId: "future-open",
     });
@@ -152,6 +152,24 @@ describe("calendar store", () => {
     expect(store.selectedDateEntries.map((entry) => entry.id)).toEqual(["jotting-1", "diary-1"]);
   });
 
+  it("includes future letters on their unlockDate when loading the selected day preview", async () => {
+    const repository = createMemoryEntryRepository([
+      makeEntry({
+        id: "future-open",
+        type: "future",
+        status: "sealed",
+        recordDate: "2026-04-08",
+        createdAt: "2026-04-08T09:00:00.000Z",
+        unlockDate: "2026-04-10",
+      }),
+    ]);
+    setEntryRepository(repository);
+    const store = useCalendarStore();
+
+    await expect(store.fetchSelectedDateEntries("2026-04-10")).resolves.toHaveLength(1);
+    expect(store.selectedDateEntries.map((entry) => entry.id)).toEqual(["future-open"]);
+  });
+
   it("degrades to an empty selected-date preview instead of throwing when reading fails", async () => {
     const brokenRepository: IEntryRepository = {
       async save() {},
@@ -161,6 +179,24 @@ describe("calendar store", () => {
       async getByType() { return []; },
       async deleteById() {},
       async getCalendarMarkedDates() { return []; },
+      async getProfileStats() {
+        return {
+          recordedDays: 0,
+          totalWords: 0,
+          diaryCount: 0,
+        };
+      },
+      async getCalendarPreviewEntries() { throw new Error("broken"); },
+      async getUnlockableFutureEntries() { return []; },
+      async getMailboxCollections() {
+        return {
+          documentaryDiaries: [],
+          documentaryJottings: [],
+          distantOpenedFutures: [],
+          distantPendingFutures: [],
+        };
+      },
+      async getProfileAlbumItems() { return []; },
     };
     setEntryRepository(brokenRepository);
     const store = useCalendarStore();

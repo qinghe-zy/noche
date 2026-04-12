@@ -4,11 +4,12 @@
 - 在 `D:\Project\noche` 保留现有骨架的前提下，补齐“可开工的最小文件集”，把项目推进到可安装、可运行、可继续开发的状态。
 - 当前追加目标：以 `docs/tech` 为功能准绳，主攻底层、数据与可验证闭环，并补齐前端可独立开发的契约文档。
 - 当前追加目标：将 `noche_codex_function_matrix_and_interaction_logic.md` 纳入项目真相入口，并据此优先补主链路：`写入 -> 保存 -> 阅读 -> 信箱查看 -> 日历跳转 -> 续写恢复`。
+- 当前追加目标：完成一轮本地 SQLite 数据库审计与优化，核心内容切向 SQLite，设置继续走本地轻存储，并保证 Android-only / local-first / offline 主链不回退。
 
 ## Constraints
 - 主验收设备：`Redmi Note 11T Pro+`
 - 不写业务功能。
-- 不接数据库。
+- 设置继续走轻存储；核心内容允许接入本地 SQLite，但不接服务器。
 - 不做 UI 细节。
 - 尽量不打乱现有目录骨架。
 - 使用 `pnpm` 作为包管理器。
@@ -43,6 +44,7 @@
 - [in_progress] Phase 25: 接入 HBuilderX 打包链，并完成 Redmi Note 11T Pro+ 实机安装验收
 - [in_progress] Phase 26: 完成与 `docs/stitch/**` 对齐的视觉回归收口
 - [in_progress] Phase 27: 固化视觉收口方法、线程交接文档与真机验收基线
+- [completed] Phase 28: 完成本地 SQLite 数据库审计、查询优化与迁移落地
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。
@@ -71,4 +73,6 @@
 | Gemini CLI 两次 headless editor 调用在 10 分钟超时内未写出文件 | 1 | 保留 handoff 文档和调用记录，本轮由 Codex 本地接管 editor feature 实现与验收 |
 | Playwright MCP 导航本地 dev server 时尝试写入 `C:\Windows\System32\.playwright-mcp\...` 并触发 `EPERM` | 1 | 本轮已保留 dev server 正常启动证据与完整报错，待后续切换可写目录或 MCP 环境后再继续浏览器自动化验收 |
 | 需要进一步将 `dist/build/app` 打成 APK，但本机未找到 HBuilderX 安装或可执行程序 | 1 | 代码侧已完成 app-plus 产物准备；APK 最终打包目前受限于本机缺少 HBuilderX 工具链 |
-| HBuilderX 已接入，但 `cli publish app-android --type appResource` 返回“此功能需要先登录”，同时 `adb devices -l` 为空 | 1 | 代码与 app-plus 产物已就绪；当前 APK 产出与 Redmi 实机验收受限于 HBuilderX 登录态和设备未连接 |
+| HBuilderX 已接入，但 `cli publish app-android --type appResource` 返回“此功能需要先登录”，同时 `adb devices -l` 为空 | 1 | 已确认项目已导入、`cli user info` 可读；当前改走 `cli pack` 云打包链继续推进，Redmi 实机验收仍受设备未连接限制 |
+| `cli pack` 首次执行提示“正在下载依赖插件，请稍后重试” | 1 | 已从 `HBuilderX` 日志确认正在下载 `uniapp-cli-vite` 及其依赖 `unicloud / uni_modules`；待插件安装完成后重试，当前 APK 尚未产出 |
+| 再次续接时 `cli.exe --help` 提示与 HBuilderX 主程序连接中断 | 1 | 已执行 `D:\Develop\HBuilderX\cli.exe open` 成功重新拉起主程序；下次优先复核 `cli user info`、`cli project list` 后继续重试 `cli pack` |

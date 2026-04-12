@@ -63,10 +63,22 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
     },
     async listCalendarMarkedDates() {
       const rows = await client.query<{ record_date: string }>(
-        `SELECT DISTINCT record_date FROM ${TABLES.entries}
-         WHERE destroyed_at IS NULL
-           AND (type IN ('diary', 'jotting') OR (type = 'future' AND status = 'unlocked'))
-         ORDER BY record_date ASC`,
+        `SELECT DISTINCT calendar_date AS record_date
+         FROM (
+           SELECT record_date AS calendar_date
+           FROM ${TABLES.entries}
+           WHERE destroyed_at IS NULL
+             AND type IN ('diary', 'jotting')
+
+           UNION
+
+           SELECT unlock_date AS calendar_date
+           FROM ${TABLES.entries}
+           WHERE destroyed_at IS NULL
+             AND type = 'future'
+             AND unlock_date IS NOT NULL
+         )
+         ORDER BY calendar_date ASC`,
       );
 
       return rows.map((row) => row.record_date);

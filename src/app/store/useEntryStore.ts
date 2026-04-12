@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import type { Entry } from "@/domain/entry/types";
-import { getEntriesByDateWithFutureState, getEntryByIdWithFutureState, listActiveEntriesWithFutureState } from "@/app/store/entryReadFacade";
+import {
+  getEntriesByDateWithFutureState,
+  getEntryByIdWithFutureState,
+  refreshUnlockableFutureEntries,
+} from "@/app/store/entryReadFacade";
 import { getEntryRepository, setEntryRepository } from "@/app/store/entryRepository";
 
 export { setEntryRepository };
@@ -92,7 +96,7 @@ export const useEntryStore = defineStore("entry", {
       this.error = null;
 
       try {
-        const entries = await listActiveEntriesWithFutureState();
+        const entries = await refreshUnlockableFutureEntries();
         for (const entry of entries) {
           this.upsertEntry(entry);
         }

@@ -2,12 +2,13 @@ import type { Pinia } from "pinia";
 import { configurePersistenceAdapters } from "@/app/providers/configurePersistenceAdapters";
 import { useAppStore } from "@/app/store/useAppStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
-import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
-import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
-import { createMemoryPrefsRepository } from "@/data/repositories/memoryPrefsRepository";
+import { ensureLatestSQLiteSchema } from "@/data/db/migrations";
+import { createSQLiteClient } from "@/data/db/sqlite";
 import { createStorageDraftRepository } from "@/data/repositories/storageDraftRepository";
 import { createStorageEntryRepository } from "@/data/repositories/storageEntryRepository";
 import { createStoragePrefsRepository } from "@/data/repositories/storagePrefsRepository";
+import { createSQLiteDraftRepository } from "@/data/repositories/sqliteDraftRepository";
+import { createSQLiteEntryRepository } from "@/data/repositories/sqliteEntryRepository";
 import type { IDraftRepository } from "@/data/repositories/draft.repository";
 import type { IEntryRepository } from "@/data/repositories/entry.repository";
 import type { PrefsRepo } from "@/data/repositories/prefsRepo";
@@ -19,6 +20,18 @@ interface BootstrapPersistenceAdapters {
   draftRepository?: IDraftRepository;
   entryRepository?: IEntryRepository;
   prefsRepository?: PrefsRepo;
+}
+
+function shouldUseSQLitePersistence(): boolean {
+  if (typeof plus !== "undefined" && Boolean(plus.sqlite)) {
+    return true;
+  }
+
+  if (typeof navigator !== "undefined") {
+    return /Html5Plus/iu.test(navigator.userAgent);
+  }
+
+  return false;
 }
 
 function createDefaultBootstrapEntries(): Entry[] {
@@ -68,11 +81,55 @@ export async function bootstrapAppRuntime(
   adapters: BootstrapPersistenceAdapters = {},
 ): Promise<void> {
   const storage = createUniJsonStorage();
+  const storageDraftRepository = createStorageDraftRepository(storage);
+  const storageEntryRepository = createStorageEntryRepository(storage, createDefaultBootstrapEntries());
+  const storagePrefsRepository = createStoragePrefsRepository(storage);
+  let draftRepository = adapters.draftRepository ?? storageDraftRepository;
+  let entryRepository = adapters.entryRepository ?? storageEntryRepository;
+  const prefsRepository = adapters.prefsRepository ?? storagePrefsRepository;
+
+  if (!adapters.draftRepository && !adapters.entryRepository && shouldUseSQLitePersistence()) {
+    try {
+      const client = createSQLiteClient();
+      await ensureLatestSQLiteSchema(client);
+      const sqliteDraftRepository = createSQLiteDraftRepository(client);
+      const sqliteEntryRepository = createSQLiteEntryRepository(client);
+      const existingEntries = await sqliteEntryRepository.getAllActive();
+      const existingDrafts = await sqliteDraftRepository.getAll();
+
+      if (existingEntries.length === 0 && existingDrafts.length === 0) {
+        const [legacyEntries, legacyDrafts] = await Promise.all([
+          storageEntryRepository.getAllActive(),
+          storageDraftRepository.getAll(),
+        ]);
+
+        for (const entry of legacyEntries) {
+          await sqliteEntryRepository.save(entry);
+        }
+
+        for (const draft of legacyDrafts) {
+          await sqliteDraftRepository.save(draft);
+        }
+      }
+
+      const seededEntries = await sqliteEntryRepository.getAllActive();
+      if (seededEntries.length === 0) {
+        for (const entry of createDefaultBootstrapEntries()) {
+          await sqliteEntryRepository.save(entry);
+        }
+      }
+
+      draftRepository = sqliteDraftRepository;
+      entryRepository = sqliteEntryRepository;
+    } catch (error) {
+      console.warn("[bootstrapAppRuntime] Failed to enable SQLite persistence, falling back to storage.", error);
+    }
+  }
 
   configurePersistenceAdapters({
-    draftRepository: adapters.draftRepository ?? createStorageDraftRepository(storage),
-    entryRepository: adapters.entryRepository ?? createStorageEntryRepository(storage, createDefaultBootstrapEntries()),
-    prefsRepository: adapters.prefsRepository ?? createStoragePrefsRepository(storage),
+    draftRepository,
+    entryRepository,
+    prefsRepository,
   });
 
   const settingsStore = useSettingsStore(pinia);

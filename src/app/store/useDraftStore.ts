@@ -11,6 +11,7 @@ import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Attachment } from "@/shared/types/attachment";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
+import { normalizeAttachments } from "@/domain/entry/rules";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -32,6 +33,20 @@ interface DraftState {
   activeDraftKey: string | null;
   isLoading: boolean;
   error: string | null;
+}
+
+function areDraftAttachmentsEqual(
+  left: Attachment[] | null | undefined,
+  right: Attachment[] | null | undefined,
+): boolean {
+  return JSON.stringify(normalizeAttachments(left)) === JSON.stringify(normalizeAttachments(right));
+}
+
+function areDiaryPreludesEqual(
+  left: DiaryPreludeMeta | null | undefined,
+  right: DiaryPreludeMeta | null | undefined,
+): boolean {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
 export const useDraftStore = defineStore("draft", {
@@ -144,23 +159,38 @@ export const useDraftStore = defineStore("draft", {
         const nextPrelude = cloneDiaryPrelude(
           patch.diaryPrelude === undefined ? this.activeDraft.diaryPrelude : patch.diaryPrelude,
         );
+        const nextAttachments = patch.attachments ?? this.activeDraft.attachments ?? [];
+        const nextUnlockDate = this.activeDraft.type === "future"
+          ? patch.unlockDate ?? this.activeDraft.unlockDate ?? null
+          : null;
+        const nextDiaryPreludeStatus = this.activeDraft.type === "diary"
+          ? normalizeDiaryPreludeStatus(
+              patch.diaryPreludeStatus ?? this.activeDraft.diaryPreludeStatus,
+              {
+                isNewDiaryDraft: false,
+                prelude: nextPrelude,
+              },
+            )
+          : "skipped";
+
+        if (
+          (patch.title ?? this.activeDraft.title) === this.activeDraft.title
+          && (patch.content ?? this.activeDraft.content) === this.activeDraft.content
+          && nextUnlockDate === (this.activeDraft.type === "future" ? this.activeDraft.unlockDate ?? null : null)
+          && areDraftAttachmentsEqual(nextAttachments, this.activeDraft.attachments)
+          && nextDiaryPreludeStatus === this.activeDraft.diaryPreludeStatus
+          && areDiaryPreludesEqual(nextPrelude, this.activeDraft.diaryPrelude)
+        ) {
+          return this.activeDraft;
+        }
+
         const nextDraft = markDraftBackgroundSaved({
           ...this.activeDraft,
           title: patch.title ?? this.activeDraft.title,
           content: patch.content ?? this.activeDraft.content,
-          unlockDate: this.activeDraft.type === "future"
-            ? patch.unlockDate ?? this.activeDraft.unlockDate ?? null
-            : null,
-          attachments: patch.attachments ?? this.activeDraft.attachments ?? [],
-          diaryPreludeStatus: this.activeDraft.type === "diary"
-            ? normalizeDiaryPreludeStatus(
-                patch.diaryPreludeStatus ?? this.activeDraft.diaryPreludeStatus,
-                {
-                  isNewDiaryDraft: false,
-                  prelude: nextPrelude,
-                },
-              )
-            : "skipped",
+          unlockDate: nextUnlockDate,
+          attachments: nextAttachments,
+          diaryPreludeStatus: nextDiaryPreludeStatus,
           diaryPrelude: nextPrelude,
         });
 

@@ -1,6 +1,16 @@
-import type { EntryProfileStats, IEntryRepository } from "@/data/repositories/entry.repository";
+import type {
+  EntryMailboxCollections,
+  EntryProfileStats,
+  IEntryRepository,
+} from "@/data/repositories/entry.repository";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import type { Entry, EntryType } from "@/domain/entry/types";
+import { buildEntryAlbumItems } from "@/domain/services/entryAlbumService";
+import {
+  buildMailboxCollections,
+  listCalendarPreviewEntries,
+} from "@/domain/services/entryQueryService";
+import { isFutureUnlockable } from "@/domain/time/rules";
 import type { JsonStorage } from "@/shared/utils/storage";
 
 const STORAGE_KEY = "noche.entries.v1";
@@ -86,8 +96,8 @@ export function createStorageEntryRepository(
       return Array.from(
         new Set(
           activeEntries()
-            .filter((entry) => entry.type === "diary" || entry.type === "jotting")
-            .map((entry) => entry.recordDate),
+            .map((entry) => (entry.type === "future" ? entry.unlockDate : entry.recordDate))
+            .filter((date): date is string => Boolean(date)),
         ),
       ).sort();
     },
@@ -99,6 +109,28 @@ export function createStorageEntryRepository(
         totalWords: active.reduce((sum, entry) => sum + entry.content.length, 0),
         diaryCount: active.filter((entry) => entry.type === "diary").length,
       };
+    },
+
+    async getCalendarPreviewEntries(recordDate) {
+      return listCalendarPreviewEntries(activeEntries(), recordDate);
+    },
+
+    async getUnlockableFutureEntries(recordDate) {
+      return activeEntries().filter((entry) =>
+        entry.type === "future"
+        && entry.status === "sealed"
+        && Boolean(entry.unlockDate)
+        && isFutureUnlockable(entry.unlockDate!, recordDate),
+      );
+    },
+
+    async getMailboxCollections(): Promise<EntryMailboxCollections> {
+      return buildMailboxCollections(activeEntries());
+    },
+
+    async getProfileAlbumItems(limit?: number) {
+      const items = buildEntryAlbumItems(activeEntries());
+      return typeof limit === "number" ? items.slice(0, limit) : items;
     },
   };
 }
