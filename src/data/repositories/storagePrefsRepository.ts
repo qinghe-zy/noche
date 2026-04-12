@@ -1,7 +1,7 @@
 import type { PreferenceRecord, PrefsRepo } from "@/data/repositories/prefsRepo";
 import type { JsonStorage } from "@/shared/utils/storage";
 
-const STORAGE_KEY = "noche.preferences.v1";
+export const STORAGE_KEY = "noche.preferences.v1";
 
 function readPrefs(storage: JsonStorage): Record<string, string> {
   const raw = storage.getString(STORAGE_KEY);
@@ -10,6 +10,10 @@ function readPrefs(storage: JsonStorage): Record<string, string> {
 
 function writePrefs(storage: JsonStorage, prefs: Record<string, string>): void {
   storage.setString(STORAGE_KEY, JSON.stringify(prefs));
+}
+
+export function readStoredPreferenceMap(storage: JsonStorage): Record<string, string> {
+  return readPrefs(storage);
 }
 
 export function createStoragePrefsRepository(storage: JsonStorage): PrefsRepo {

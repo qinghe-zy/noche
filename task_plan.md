@@ -5,6 +5,7 @@
 - 当前追加目标：以 `docs/tech` 为功能准绳，主攻底层、数据与可验证闭环，并补齐前端可独立开发的契约文档。
 - 当前追加目标：将 `noche_codex_function_matrix_and_interaction_logic.md` 纳入项目真相入口，并据此优先补主链路：`写入 -> 保存 -> 阅读 -> 信箱查看 -> 日历跳转 -> 续写恢复`。
 - 当前追加目标：完成一轮本地 SQLite 数据库审计与优化，核心内容切向 SQLite，设置继续走本地轻存储，并保证 Android-only / local-first / offline 主链不回退。
+- 当前追加目标：完成一轮架构核查与高优先级逻辑修复，重点处理 seed 污染、future 时间语义、编辑保存可靠性、destroy 闭环、隐私锁前台时序与 jotting 冲突。
 
 ## Constraints
 - 主验收设备：`Redmi Note 11T Pro+`
@@ -45,6 +46,7 @@
 - [in_progress] Phase 26: 完成与 `docs/stitch/**` 对齐的视觉回归收口
 - [in_progress] Phase 27: 固化视觉收口方法、线程交接文档与真机验收基线
 - [completed] Phase 28: 完成本地 SQLite 数据库审计、查询优化与迁移落地
+- [completed] Phase 29: 完成架构核查与高优先级逻辑修复首轮收口
 
 ## Assumptions
 - 使用官方 Uni-app Vue3 + Vite + TypeScript 模板作为初始化基线。

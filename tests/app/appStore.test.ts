@@ -1,10 +1,14 @@
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAppStore } from "@/app/store/useAppStore";
 
 describe("app store", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("locks and unlocks privacy overlay state", () => {
@@ -17,5 +21,24 @@ describe("app store", () => {
 
     store.unlockPrivacy();
     expect(store.isPrivacyLocked).toBe(false);
+  });
+
+  it("starts locked when the stored settings already enable privacy lock", () => {
+    vi.stubGlobal("uni", {
+      getStorageSync(key: string) {
+        if (key === "noche.preferences.v1") {
+          return JSON.stringify({
+            privacyLockEnabled: "1",
+          });
+        }
+
+        return "";
+      },
+    });
+    setActivePinia(createPinia());
+
+    const store = useAppStore();
+
+    expect(store.isPrivacyLocked).toBe(true);
   });
 });

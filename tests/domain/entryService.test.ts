@@ -73,6 +73,25 @@ describe("entry service", () => {
     expect(entry.updatedAt).toBe(entry.savedAt);
   });
 
+  it("preserves the original createdAt when formal-saving a resumed draft", () => {
+    const draft = {
+      ...createDraft({
+        type: "diary",
+        recordDate: "2026-04-10",
+        linkedEntryId: "entry-1",
+      }),
+      createdAt: "2026-04-09T08:00:00.000Z",
+      title: "旧页",
+      content: "补写一些内容。",
+    };
+
+    const entry = createEntryFromDraft(draft);
+
+    expect(entry.id).toBe("entry-1");
+    expect(entry.createdAt).toBe("2026-04-09T08:00:00.000Z");
+    expect(entry.updatedAt).toBe(entry.savedAt);
+  });
+
   it("derives a title from the first content line when title is blank", () => {
     const draft = {
       ...createDraft({

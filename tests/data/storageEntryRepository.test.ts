@@ -88,8 +88,8 @@ describe("storageEntryRepository", () => {
     }));
 
     expect(await repository.getProfileStats()).toEqual({
-      recordedDays: 2,
-      totalWords: "今天写下风声一行随笔写给明天".length,
+      recordedDays: 1,
+      totalWords: "今天写下风声一行随笔".length,
       diaryCount: 1,
     });
   });

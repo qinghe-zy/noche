@@ -94,7 +94,8 @@ export function createEntryRepo(client: SQLiteClient): EntryRepo {
            COALESCE(SUM(LENGTH(content)), 0) AS total_words,
            COALESCE(SUM(CASE WHEN type = 'diary' THEN 1 ELSE 0 END), 0) AS diary_count
          FROM ${TABLES.entries}
-         WHERE destroyed_at IS NULL`,
+         WHERE destroyed_at IS NULL
+           AND NOT (type = 'future' AND status = 'sealed')`,
       );
       const row = rows[0];
 

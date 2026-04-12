@@ -32,7 +32,7 @@ describe("bootstrapAppRuntime", () => {
     expect(settingsStore.weekStartsOn).toBe(0);
   });
 
-  it("seeds one diary and one jotting in the default in-memory runtime", async () => {
+  it("does not inject demo entries into the default runtime", async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
 
@@ -40,8 +40,6 @@ describe("bootstrapAppRuntime", () => {
 
     const entries = await getEntryRepository().getAllActive();
 
-    expect(entries).toHaveLength(2);
-    expect(entries.map((entry) => entry.type).sort()).toEqual(["diary", "jotting"]);
-    expect(new Set(entries.map((entry) => entry.recordDate)).size).toBe(1);
+    expect(entries).toEqual([]);
   });
 });

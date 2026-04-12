@@ -12,8 +12,8 @@ export function formatMailboxDateLabel(entry: Entry, tab: "past" | "future"): st
   }
 
   return tab === "past"
-    ? `启封于 ${formatDate(entry.recordDate, "MMM DD, YYYY")}`
-    : `将于 ${entry.unlockDate} 开启`;
+    ? `已于 ${formatDate(entry.unlockedAt ?? entry.unlockDate ?? entry.recordDate, "YYYY.MM.DD")} 启封`
+    : `将于 ${formatDate(entry.unlockDate ?? entry.recordDate, "YYYY.MM.DD")} 开启`;
 }
 
 export function formatMailboxExcerpt(entry: Entry): string {

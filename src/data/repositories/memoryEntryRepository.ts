@@ -20,6 +20,10 @@ function compareEntryForMailbox(a: Entry, b: Entry): number {
   return b.createdAt.localeCompare(a.createdAt);
 }
 
+function shouldIncludeEntryInProfileStats(entry: Entry): boolean {
+  return !(entry.type === "future" && entry.status === "sealed");
+}
+
 export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepository {
   const entries = new Map<string, Entry>();
 
@@ -54,7 +58,8 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
       return activeEntries().filter((entry) => entry.type === type);
     },
 
-    async deleteById(id) {
+    async deleteById(id, options) {
+      await options?.cleanupHook?.();
       entries.delete(id);
     },
 
@@ -69,7 +74,7 @@ export function createMemoryEntryRepository(seed: Entry[] = []): IEntryRepositor
     },
 
     async getProfileStats(): Promise<EntryProfileStats> {
-      const active = activeEntries();
+      const active = activeEntries().filter(shouldIncludeEntryInProfileStats);
 
       return {
         recordedDays: new Set(active.map((entry) => entry.recordDate)).size,

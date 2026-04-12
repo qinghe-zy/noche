@@ -14,6 +14,7 @@ describe("home jotting conflict modal", () => {
     expect(homePage).toContain("home-page__jotting-modal");
     expect(homePage).toContain("handleContinueJottingDraft");
     expect(homePage).toContain("handleCreateAnotherJottingDraft");
-    expect(homePage).toContain("saveActiveDraftAsEntry");
+    expect(homePage).toContain("removeDraft");
+    expect(homePage).not.toContain("saveActiveDraftAsEntry");
   });
 });

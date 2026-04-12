@@ -48,6 +48,10 @@ function normalizeEntry(entry: Entry): Entry {
   };
 }
 
+function shouldIncludeEntryInProfileStats(entry: Entry): boolean {
+  return !(entry.type === "future" && entry.status === "sealed");
+}
+
 export function createStorageEntryRepository(
   storage: JsonStorage,
   seed: Entry[] = [],
@@ -87,7 +91,8 @@ export function createStorageEntryRepository(
     async getByType(type: EntryType) {
       return activeEntries().filter((entry) => entry.type === type);
     },
-    async deleteById(id) {
+    async deleteById(id, options) {
+      await options?.cleanupHook?.();
       const entries = readEntries(storage);
       delete entries[id];
       writeEntries(storage, entries);
@@ -102,7 +107,7 @@ export function createStorageEntryRepository(
       ).sort();
     },
     async getProfileStats(): Promise<EntryProfileStats> {
-      const active = activeEntries();
+      const active = activeEntries().filter(shouldIncludeEntryInProfileStats);
 
       return {
         recordedDays: new Set(active.map((entry) => entry.recordDate)).size,

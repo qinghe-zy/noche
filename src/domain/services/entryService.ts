@@ -114,6 +114,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
 
   const savedAt = nowIso();
   const entryId = draft.linkedEntryId ?? createId();
+  const createdAt = draft.linkedEntryId ? draft.createdAt : savedAt;
   const attachments = normalizeAttachments(draft.attachments).map((attachment, index) => ({
     ...attachment,
     draftKey: null,
@@ -132,7 +133,7 @@ export function createEntryFromDraft(draft: Draft): Entry {
     title: derivedTitle,
     content: draft.content,
     recordDate: draft.recordDate ?? lockRecordDate(),
-    createdAt: savedAt,
+    createdAt,
     updatedAt: savedAt,
     savedAt,
     unlockDate: draft.type === "future" ? draft.unlockDate ?? null : null,

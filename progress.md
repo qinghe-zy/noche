@@ -486,3 +486,44 @@
   - `pnpm test:unit` 通过：52 个测试文件、151 个测试通过
   - `pnpm type-check` 通过
   - `pnpm build:h5` 通过
+- 自主进入下一轮“架构核查 + 高优先级逻辑修复”：
+  - 先逐条复核 seed、future 时间语义、编辑保存可靠性、destroy 闭环、隐私锁、profile 返回、jotting 冲突、跨天刷新
+  - 已明确状态：
+    - `seed 污染`：仍存在
+    - `future / calendar / mailbox / day archive 时间语义`：仍存在
+    - `编辑页最终保存链路`：部分存在
+    - `destroy / attachment 文件清理`：仍存在
+    - `隐私锁前台时序`：部分存在
+    - `profile 返回与导航`：当前未发现阻塞问题
+    - `jotting 冲突`：仍存在
+    - `跨天刷新`：部分存在
+- 已按红灯推进修复：
+  - `tests/app/bootstrapAppRuntime.test.ts`
+  - `tests/features/mailboxDisplay.test.ts`
+  - `tests/domain/entryService.test.ts`
+  - `tests/app/entryStore.test.ts`
+  - `tests/app/draftStore.test.ts`
+  - `tests/release/homeJottingConflictModal.test.ts`
+  - `tests/release/calendarDayArchiveSemanticParity.test.ts`
+- 已落地修复：
+  - `bootstrapAppRuntime()` 默认不再注入示例 entry；仅 `demoEntries` 显式传入时才允许 seed
+  - `Mailbox` 已启 future 文案改为优先按 `unlockedAt / unlockDate` 展示启封时间
+  - `DayArchivePage` 改为走 `CalendarStore.fetchSelectedDateEntries()`，与 calendar preview 语义一致
+  - `createEntryFromDraft()` 在 linked draft 场景下保留原始 `createdAt`
+  - `useDraftStore.saveActiveDraftAsEntry()` 新增补偿式回滚：
+    - 新 entry 保存后若 draft 清理失败，会删除新 entry
+    - 续写旧 entry 时若 draft 清理失败，会恢复保存前的旧 entry
+  - `EditorPage` 新增 draft shadow：
+    - `onHide / onUnload` 先同步写 shadow
+    - 重新进入 editor 时会优先尝试恢复 shadow 并补写回 repository
+  - 新增 `src/shared/utils/localFiles.ts`
+    - `destroyEntry()` 会清受管本地图片文件
+    - `removeDraft()` 也会清受管本地图片文件
+  - `HomePage` 里 jotting 冲突的“另起一张”改为丢弃旧草稿并新建，不再偷偷 formal save
+  - `useAppStore` 初始 `isPrivacyLocked` 改为同步读取本地轻存储里的 `privacyLockEnabled`
+  - `MailboxPage` / `CalendarPage` 新增 `onShow` 刷新，跨天或回前台后会重新拉取状态
+  - `ProfileStats` 统计口径改为排除未解锁 future
+- 已再次完成完整验证：
+  - `pnpm test:unit` 通过：53 个测试文件、157 个测试通过
+  - `pnpm type-check` 通过
+  - `pnpm build:h5` 通过

@@ -26,8 +26,8 @@ describe("memory entry repository", () => {
     expect(await repository.getByType("future")).toEqual([future]);
     expect(await repository.getCalendarMarkedDates()).toEqual(["2026-04-09", "2026-04-10", "2026-04-11"]);
     expect(await repository.getProfileStats()).toEqual({
-      recordedDays: 3,
-      totalWords: "oldernewerfuture".length,
+      recordedDays: 2,
+      totalWords: "oldernewer".length,
       diaryCount: 1,
     });
 

@@ -59,7 +59,7 @@ export interface IEntryRepository {
   /**
    * 逻辑删除条目
    */
-  deleteById(id: string): Promise<void>;
+  deleteById(id: string, options?: { cleanupHook?: () => Promise<void> | void }): Promise<void>;
 
   /**
    * 获取日历点标记数据（返回有记录的日期列表）

@@ -7,11 +7,14 @@ import { buildDraftSlotKey } from "@/domain/draft/rules";
 import type { CreateDraftInput } from "@/domain/services/draftService";
 import { createDraft, markDraftBackgroundSaved } from "@/domain/services/draftService";
 import { createEntryFromDraft } from "@/domain/services/entryService";
+import { getEntryRepository } from "@/app/store/entryRepository";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Attachment } from "@/shared/types/attachment";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import { normalizeAttachments } from "@/domain/entry/rules";
+import { collectManagedLocalAttachmentPaths, removeManagedLocalFiles } from "@/shared/utils/localFiles";
+import { clearDraftShadow } from "@/features/editor/draftShadow";
 
 let draftRepository: IDraftRepository = createMemoryDraftRepository();
 
@@ -209,7 +212,12 @@ export const useDraftStore = defineStore("draft", {
       this.error = null;
 
       try {
+        const targetDraft = this.drafts[slotKey] ?? await draftRepository.getBySlotKey(slotKey);
+        const managedPaths = collectManagedLocalAttachmentPaths(targetDraft?.attachments);
+
+        await removeManagedLocalFiles(managedPaths);
         await draftRepository.deleteBySlotKey(slotKey);
+        clearDraftShadow(slotKey);
         delete this.drafts[slotKey];
         if (this.activeDraftKey === slotKey) {
           this.activeDraftKey = null;
@@ -232,19 +240,31 @@ export const useDraftStore = defineStore("draft", {
       try {
         const draft = this.activeDraft;
         const entry = createEntryFromDraft(draft);
-        const entryStore = useEntryStore();
-        await entryStore.saveEntry(entry);
+        const entryRepository = getEntryRepository();
+        const previousLinkedEntry = draft.linkedEntryId
+          ? await entryRepository.getById(draft.linkedEntryId)
+          : null;
 
-        if (entryStore.error) {
-          this.error = entryStore.error;
-          return null;
+        await entryRepository.save(entry);
+
+        try {
+          await this.removeDraft(draft.slotKey);
+        } catch (cleanupError) {
+          if (previousLinkedEntry) {
+            await entryRepository.save(previousLinkedEntry);
+          } else {
+            await entryRepository.deleteById(entry.id);
+          }
+
+          throw cleanupError;
         }
 
-        await this.removeDraft(draft.slotKey);
+        useEntryStore().upsertEntry(entry);
+        clearDraftShadow(draft.slotKey);
         return entry;
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to save draft as entry.";
-        throw error;
+        return null;
       } finally {
         this.isLoading = false;
       }
@@ -261,6 +281,7 @@ export const useDraftStore = defineStore("draft", {
         });
         const nextDraft: Draft = {
           ...draft,
+          createdAt: entry.createdAt,
           title: entry.title ?? "",
           content: entry.content,
           recordDate: entry.recordDate,

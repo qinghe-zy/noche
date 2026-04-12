@@ -31,7 +31,7 @@ describe("mailbox display helpers", () => {
     expect(formatMailboxTypeLabel("future")).toBe("未来信");
   });
 
-  it("formats past and pending future dates without english copy", () => {
+  it("formats opened and pending future dates with unlock semantics instead of recordDate", () => {
     expect(
       formatMailboxDateLabel(
         makeEntry({
@@ -39,10 +39,11 @@ describe("mailbox display helpers", () => {
           status: "unlocked",
           recordDate: "2026-04-08",
           unlockDate: "2026-04-10",
+          unlockedAt: "2026-04-10T09:00:00.000Z",
         }),
         "past",
       ),
-    ).toBe("启封于 Apr 08, 2026");
+    ).toBe("已于 2026.04.10 启封");
 
     expect(
       formatMailboxDateLabel(
@@ -54,7 +55,7 @@ describe("mailbox display helpers", () => {
         }),
         "future",
       ),
-    ).toBe("将于 2026-04-12 开启");
+    ).toBe("将于 2026.04.12 开启");
   });
 
   it("formats sealed future excerpts without leaking content", () => {

@@ -1,8 +1,9 @@
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoryDraftRepository } from "@/data/repositories/memoryDraftRepository";
 import { createMemoryEntryRepository } from "@/data/repositories/memoryEntryRepository";
 import type { IDraftRepository } from "@/data/repositories/draft.repository";
+import type { IEntryRepository } from "@/data/repositories/entry.repository";
 import { buildDiaryPreludeMeta } from "@/domain/diaryPrelude/catalog";
 import { createEntry } from "@/domain/services/entryService";
 import { setEntryRepository, useEntryStore } from "@/app/store/useEntryStore";
@@ -69,6 +70,34 @@ describe("draft store", () => {
     expect(store.activeDraftKey).toBeNull();
     expect(store.activeDraft).toBeNull();
     expect(store.drafts[draft.slotKey]).toBeUndefined();
+  });
+
+  it("cleans up managed local attachment files when removing a draft", async () => {
+    const removeSavedFile = vi.fn(({ success }: { filePath: string; success?: () => void }) => {
+      success?.();
+    });
+    vi.stubGlobal("uni", {
+      removeSavedFile,
+    });
+    const store = useDraftStore();
+    const draft = await store.openDraft({
+      type: "jotting",
+    });
+    await store.saveActiveDraft({
+      attachments: [
+        createImageAttachment({ draftKey: draft.slotKey, localUri: "_doc/noche/draft-image-1.png" }),
+        createImageAttachment({ id: "attachment-2", draftKey: draft.slotKey, localUri: "data:image/png;base64,abc" }),
+      ],
+    });
+
+    await store.removeDraft(draft.slotKey);
+
+    expect(removeSavedFile).toHaveBeenCalledTimes(1);
+    expect(removeSavedFile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filePath: "_doc/noche/draft-image-1.png",
+      }),
+    );
   });
 
   it("formalizes the active draft into an entry and removes the draft", async () => {
@@ -384,5 +413,39 @@ describe("draft store", () => {
 
     expect(savedDraft?.slotKey).toBe("draft_jotting");
     expect(saveCount).toBe(0);
+  });
+
+  it("rolls back a new formal save if the draft cleanup step fails", async () => {
+    const failingDraftRepository: IDraftRepository = {
+      async save() {},
+      async getBySlotKey() {
+        return null;
+      },
+      async getAll() {
+        return [];
+      },
+      async deleteBySlotKey() {
+        throw new Error("draft delete failed");
+      },
+    };
+    const entryRepository = createMemoryEntryRepository();
+    setDraftRepository(failingDraftRepository);
+    setEntryRepository(entryRepository);
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      title: "今天",
+      content: "写一点内容",
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+
+    expect(entry).toBeNull();
+    expect(draftStore.error).toBe("draft delete failed");
+    expect(await entryRepository.getAllActive()).toEqual([]);
   });
 });

@@ -164,6 +164,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useMailboxStore } from "@/app/store/useMailboxStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import type { Entry, EntryType } from "@/domain/entry/types";
@@ -360,6 +361,10 @@ function handleEntryClick(entry: Entry) {
 }
 
 onMounted(() => {
+  void refresh();
+});
+
+onShow(() => {
   void refresh();
 });
 

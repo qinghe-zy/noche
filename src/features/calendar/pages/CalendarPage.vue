@@ -136,6 +136,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useCalendarStore } from "@/app/store/useCalendarStore";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, isSameDay } from "@/shared/utils/date";
 import { ROUTES } from "@/shared/constants/routes";
@@ -313,6 +314,15 @@ onMounted(() => {
   selectedDate.value = formatDate(new Date(), "YYYY-MM-DD");
   void calendarStore.fetchMarkedDates();
   void loadSelectedDatePanel(selectedDate.value);
+});
+
+onShow(() => {
+  const nextToday = formatDate(new Date(), "YYYY-MM-DD");
+  if (!selectedDate.value) {
+    selectedDate.value = nextToday;
+  }
+  void calendarStore.fetchMarkedDates();
+  void loadSelectedDatePanel(selectedDate.value ?? nextToday);
 });
 </script>
 

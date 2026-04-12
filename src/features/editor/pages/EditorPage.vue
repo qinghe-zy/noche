@@ -115,6 +115,7 @@ import { useDraftStore } from "@/app/store/useDraftStore";
 import { useEntryStore } from "@/app/store/useEntryStore";
 import { cloneDiaryPrelude, normalizeDiaryPreludeStatus } from "@/domain/diaryPrelude/catalog";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
+import type { Draft } from "@/domain/draft/types";
 import type { Entry, EntryType } from "@/domain/entry/types";
 import { isValidFutureLetterDate, lockRecordDate } from "@/domain/time/rules";
 import { addMonth, formatDate, getDaysInMonth, getFirstDayOfWeek, nowIso, tomorrowDate } from "@/shared/utils/date";
@@ -129,6 +130,7 @@ import { shouldResetFutureUnlockDate } from "@/features/editor/editorFutureDraft
 import { useEditorImageAttachments } from "@/features/editor/composables/useEditorImageAttachments";
 import { useEditorImagePicker } from "@/features/editor/composables/useEditorImagePicker";
 import { shouldAllowDiaryPreludeEdit, shouldOpenDiaryPreludePicker } from "@/features/editor/diaryPreludeState";
+import { clearDraftShadow, readDraftShadow, writeDraftShadow } from "@/features/editor/draftShadow";
 import DiaryEditorShell from "@/features/editor/components/DiaryEditorShell.vue";
 import DiaryPreludePicker from "@/features/editor/components/DiaryPreludePicker.vue";
 import JottingEditorShell from "@/features/editor/components/JottingEditorShell.vue";
@@ -274,7 +276,8 @@ const readMeta = computed(() => {
   }
 
   if (savedEntry.value.type === "future" && savedEntry.value.unlockDate) {
-    return `启封日期 ${formatDate(savedEntry.value.unlockDate, "YYYY年MM月DD日")}`;
+    const openedAt = savedEntry.value.unlockedAt ?? savedEntry.value.unlockDate;
+    return `启封于 ${formatDate(openedAt, "YYYY年MM月DD日")}`;
   }
 
   return `记录于 ${formatDate(savedEntry.value.recordDate, "YYYY年MM月DD日")}`;
@@ -533,11 +536,81 @@ async function openCurrentDraft(): Promise<void> {
     mode.value = "edit";
     savedEntry.value = null;
     syncFormFromDraft();
+    await hydrateDraftFromShadow();
     await normalizeFutureDraftIfExpired();
     syncDiaryPreludePresentation();
   } finally {
     isHydrating.value = false;
   }
+}
+
+function buildCurrentDraftSnapshot(): Draft | null {
+  const draft = draftStore.activeDraft;
+
+  if (!draft || mode.value !== "edit") {
+    return null;
+  }
+
+  return {
+    ...draft,
+    title: title.value,
+    content: content.value,
+    recordDate: recordDate.value,
+    unlockDate: entryType.value === "future" ? unlockDate.value || null : null,
+    attachments: attachments.value,
+    diaryPreludeStatus: diaryPreludeStatus.value,
+    diaryPrelude: cloneDiaryPrelude(diaryPrelude.value),
+    updatedAt: nowIso(),
+  };
+}
+
+function writeDraftShadowSnapshot(): void {
+  const snapshot = buildCurrentDraftSnapshot();
+
+  if (!snapshot) {
+    return;
+  }
+
+  writeDraftShadow(snapshot);
+}
+
+async function hydrateDraftFromShadow(): Promise<void> {
+  const draft = draftStore.activeDraft;
+
+  if (!draft) {
+    return;
+  }
+
+  const shadow = readDraftShadow(draft.slotKey);
+  if (!shadow) {
+    return;
+  }
+
+  const hasShadowChanges =
+    shadow.updatedAt > draft.updatedAt
+    || shadow.content !== draft.content
+    || shadow.title !== draft.title
+    || JSON.stringify(shadow.attachments ?? []) !== JSON.stringify(draft.attachments ?? [])
+    || shadow.unlockDate !== draft.unlockDate
+    || shadow.diaryPreludeStatus !== draft.diaryPreludeStatus
+    || JSON.stringify(shadow.diaryPrelude ?? null) !== JSON.stringify(draft.diaryPrelude ?? null);
+
+  if (!hasShadowChanges) {
+    clearDraftShadow(draft.slotKey);
+    return;
+  }
+
+  title.value = shadow.title;
+  content.value = shadow.content;
+  recordDate.value = shadow.recordDate ?? recordDate.value;
+  unlockDate.value = entryType.value === "future" ? shadow.unlockDate ?? "" : "";
+  pendingUnlockDate.value = unlockDate.value;
+  replaceAttachments(shadow.attachments ?? []);
+  diaryPreludeStatus.value = shadow.diaryPreludeStatus;
+  diaryPrelude.value = cloneDiaryPrelude(shadow.diaryPrelude);
+
+  await persistDraftNow();
+  markSaved();
 }
 
 async function openEntryForRead(entryId: string): Promise<void> {
@@ -614,6 +687,7 @@ async function persistDraftNow(): Promise<void> {
     unlockDate: entryType.value === "future" ? unlockDate.value : null,
     attachments: attachments.value,
   });
+  clearDraftShadow(draftStore.activeDraft.slotKey);
 }
 
 function queueDraftSave(): void {
@@ -841,10 +915,12 @@ onLoad((query) => {
 });
 
 onHide(() => {
+  writeDraftShadowSnapshot();
   void autosave.flush();
 });
 
 onUnload(() => {
+  writeDraftShadowSnapshot();
   void autosave.flush();
 });
 </script>

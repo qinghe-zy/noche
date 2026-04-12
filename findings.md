@@ -145,3 +145,29 @@
   - 新增 SQLite migration 与版本管理，补 `attachments / profile_stats_cache / record_date_counters`
   - SQLite entry/draft repository 已改为同步附件表，并在写入/删除后刷新统计缓存
   - `Calendar / Mailbox / Profile Album` 已改为优先走 repository 的定向查询，而不是页面层全量扫
+- 当前新一轮架构复核后的关键结论：
+  - `bootstrapAppRuntime()` 之前仍会默认注入两条示例内容，存在正式运行时 seed 污染风险
+  - future 时间语义虽然已接通数据库层，但页面层仍残留错口径：`Mailbox` 已启 future 用 `recordDate` 写“启封于”，`DayArchive` 仍按 `recordDate` 拉而不是按 calendar preview 语义拉
+  - `saveActiveDraftAsEntry()` 之前是“先存 entry，再删 draft”的顺序提交，没有补偿回滚；续写旧 entry 时还会重置 `createdAt`
+  - `destroyEntry()` / `removeDraft()` 之前只删数据库或 JSON 记录，不清理由 `saveFile()` 落到本地的图片文件
+  - `Home` 的 jotting 冲突处理里，“另起一张”之前会直接把旧草稿正式保存，属于越权替用户收好
+  - 隐私锁之前只依赖异步 hydrate 后的 settings 状态，冷启动时存在短暂暴露窗口
+- 本轮已修复的高优先级逻辑：
+  - 关闭默认 seed；demo data 现在只能显式传入 `bootstrapAppRuntime({ demoEntries })`
+  - future 时间语义统一：
+    - `Mailbox` 已启 future 优先按 `unlockedAt` / `unlockDate` 展示“已于…启封”
+    - `DayArchivePage` 改走 `CalendarStore.fetchSelectedDateEntries()`，跟 calendar preview 语义一致
+    - editor 阅读态 future 元信息改为“启封于 …”，不再拿 `recordDate` 冒充启封时间
+  - 编辑保存链增强：
+    - 续写旧 entry 时保留原始 `createdAt`
+    - `saveActiveDraftAsEntry()` 新增补偿式回滚，避免 entry 成功而 draft 清理失败时留下半状态
+    - editor 在 `onHide / onUnload` 前会同步写一份 draft shadow，重新进入时优先恢复最后一版未刷新的内容
+  - 删除闭环增强：
+    - `destroyEntry()` 会清理受管本地图片文件
+    - `removeDraft()` 同样会清理受管本地图片文件
+  - jotting 冲突修正：
+    - “另起一张”现在改为丢弃旧草稿并新建，不再擅自正式保存
+  - 隐私锁增强：
+    - `useAppStore` 初始状态会同步读取本地轻存储里的 `privacyLockEnabled`
+    - 只要用户之前开过隐私锁，冷启动第一帧就会先遮挡
+  - profile stats 现在会排除未解锁 future，避免把未开启内容统计进个人页

@@ -96,7 +96,7 @@
 
           <view class="home-page__jotting-modal-action" @click="handleCreateAnotherJottingDraft">
             <text class="home-page__jotting-modal-action-title">另起一张</text>
-            <text class="home-page__jotting-modal-action-copy">先把上一页收好，再写这一刻</text>
+            <text class="home-page__jotting-modal-action-copy">丢弃这一页草稿，改写新的这一刻</text>
           </view>
 
           <view class="home-page__jotting-modal-action home-page__jotting-modal-action--muted" @click="handleCloseJottingModal">
@@ -164,12 +164,9 @@ function handleContinueJottingDraft() {
 
 async function handleCreateAnotherJottingDraft() {
   if (pendingJottingDraft.value) {
-    await draftStore.openDraft({
-      type: "jotting",
-    });
-    await draftStore.saveActiveDraftAsEntry();
+    await draftStore.removeDraft(pendingJottingDraft.value.slotKey);
     uni.showToast({
-      title: "上一张随笔已收好",
+      title: "上一张草稿已丢弃",
       icon: "none",
     });
   }

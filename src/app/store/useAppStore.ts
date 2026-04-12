@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ROUTES } from "@/shared/constants/routes";
+import { readStoredPrivacyLockEnabled } from "@/app/store/privacyLockState";
 
 export type AppBootStatus = "idle" | "ready";
 
@@ -13,7 +14,7 @@ export const useAppStore = defineStore("app", {
   state: (): AppState => ({
     bootStatus: "idle",
     currentRoute: ROUTES.home,
-    isPrivacyLocked: false,
+    isPrivacyLocked: readStoredPrivacyLockEnabled(),
   }),
   actions: {
     markReady() {

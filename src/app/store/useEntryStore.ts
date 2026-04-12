@@ -6,6 +6,7 @@ import {
   refreshUnlockableFutureEntries,
 } from "@/app/store/entryReadFacade";
 import { getEntryRepository, setEntryRepository } from "@/app/store/entryRepository";
+import { collectManagedLocalAttachmentPaths, removeManagedLocalFiles } from "@/shared/utils/localFiles";
 
 export { setEntryRepository };
 
@@ -66,7 +67,14 @@ export const useEntryStore = defineStore("entry", {
       this.error = null;
 
       try {
-        await getEntryRepository().deleteById(entryId);
+        const entry = await getEntryRepository().getById(entryId);
+        const managedPaths = collectManagedLocalAttachmentPaths(entry?.attachments);
+
+        await getEntryRepository().deleteById(entryId, {
+          cleanupHook: async () => {
+            await removeManagedLocalFiles(managedPaths);
+          },
+        });
         this.removeEntry(entryId);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to destroy entry.";

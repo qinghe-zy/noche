@@ -6,11 +6,11 @@
       <text class="day-archive-page__subtitle">{{ pageSubtitle }}</text>
     </view>
 
-    <view v-if="entryStore.error" class="day-archive-page__banner day-archive-page__banner--error">
-      <text>{{ entryStore.error }}</text>
+    <view v-if="calendarStore.error" class="day-archive-page__banner day-archive-page__banner--error">
+      <text>{{ calendarStore.error }}</text>
     </view>
 
-    <view v-if="entryStore.isLoading" class="day-archive-page__state">
+    <view v-if="calendarStore.isLoading" class="day-archive-page__state">
       <text class="day-archive-page__state-text">正在整理这一天的内容…</text>
     </view>
 
@@ -30,7 +30,7 @@
       >
         <view class="day-archive-page__item-head">
           <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type) }}</text>
-          <text class="day-archive-page__item-date">{{ formatDate(entry.recordDate, "MM/DD") }}</text>
+          <text class="day-archive-page__item-date">{{ resolveEntryDateLabel(entry) }}</text>
         </view>
         <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type) }}</text>
         <text class="day-archive-page__item-content">{{ entry.content }}</text>
@@ -42,8 +42,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
-import { useEntryStore } from "@/app/store/useEntryStore";
-import { listDayArchiveEntries } from "@/domain/services/entryQueryService";
+import { useCalendarStore } from "@/app/store/useCalendarStore";
 import { lockRecordDate } from "@/domain/time/rules";
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDate } from "@/shared/utils/date";
@@ -53,14 +52,23 @@ import {
   formatDayArchiveTitle,
 } from "@/features/day-archive/dayArchiveDisplay";
 import { fallbackEntryTitle, formatEntryTypeLabel } from "@/features/entries/entryDisplay";
+import type { Entry } from "@/domain/entry/types";
 
-const entryStore = useEntryStore();
+const calendarStore = useCalendarStore();
 const recordDate = ref(lockRecordDate());
 
-const entries = computed(() => listDayArchiveEntries(entryStore.entryList, recordDate.value));
+const entries = computed(() => calendarStore.selectedDateEntries);
 const pageTitle = computed(() => formatDayArchiveTitle(recordDate.value));
 const pageSubtitle = computed(() => formatDayArchiveSubtitle(entries.value.length));
 const emptyText = computed(() => formatDayArchiveEmptyText(recordDate.value));
+
+function resolveEntryDateLabel(entry: Entry): string {
+  if (entry.type === "future" && entry.unlockDate) {
+    return `启封 ${formatDate(entry.unlockDate, "MM/DD")}`;
+  }
+
+  return formatDate(entry.recordDate, "MM/DD");
+}
 
 function handleOpenEntry(entryId: string): void {
   uni.navigateTo({
@@ -83,7 +91,7 @@ onLoad((query) => {
     title: formatDayArchiveTitle(recordDate.value),
   });
 
-  void entryStore.fetchEntriesByDate(recordDate.value);
+  void calendarStore.fetchSelectedDateEntries(recordDate.value);
 });
 </script>
 
