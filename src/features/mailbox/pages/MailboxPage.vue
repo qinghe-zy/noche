@@ -1,12 +1,17 @@
 <template>
-  <view class="mailbox-page noche-mobile-page">
-    <view class="mailbox-page__topbar">
-      <view class="mailbox-page__topbar-inner">
-        <TopbarIconButton @tap="handleGoHome" />
-        <text class="mailbox-page__topbar-title">{{ copy.mailbox.title }}</text>
-        <TopbarIconButton icon-name="calendar" @tap="handleGoToCalendar" />
-      </view>
-    </view>
+  <PageScaffold
+    class="mailbox-page"
+    :title="copy.mailbox.title"
+    :show-left="true"
+    left-icon="back"
+    :reserve-right="false"
+    :topbar-bordered="true"
+    :max-width="'720px'"
+    @left-tap="handleGoHome"
+  >
+    <template #right>
+      <TopbarIconButton icon-name="calendar" @tap="handleGoToCalendar" />
+    </template>
 
     <view class="mailbox-page__main noche-mobile-main">
       <view class="mailbox-page__switcher">
@@ -143,8 +148,6 @@
               </view>
             </view>
           </view>
-
-          <view class="mailbox-page__footer"></view>
         </view>
       </scroll-view>
     </view>
@@ -161,7 +164,7 @@
       @close="closeLockedFutureDialog"
       @action="handleLockedFutureDialogAction"
     />
-  </view>
+  </PageScaffold>
 </template>
 
 <script setup lang="ts">
@@ -176,6 +179,7 @@ import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
+import PageScaffold from "@/shared/ui/PageScaffold.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import {
@@ -362,10 +366,6 @@ function handleGoToCalendar() {
   uni.navigateTo({ url: `/${ROUTES.calendar}` });
 }
 
-function handleOpenJotting() {
-  uni.navigateTo({ url: `/${ROUTES.editor}?type=jotting` });
-}
-
 function handlePrimaryTabChange(nextTab: MailboxPrimaryTab): void {
   activeTab.value = nextTab;
   activeSecondaryTab.value = getDefaultMailboxSecondaryTab(nextTab);
@@ -438,75 +438,50 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page {
-  background-color: var(--noche-bg);
+  background: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
 }
 
-.mailbox-page__topbar {
-  width: 100%;
-  background: var(--noche-surface);
-  z-index: 20;
-  flex-shrink: 0;
-}
-
-.mailbox-page__topbar-inner {
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-  min-height: var(--noche-nav-bar-height);
-  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.mailbox-page__topbar-title {
-  font-size: 30rpx;
-  font-weight: 300;
-  letter-spacing: 0.25em;
-  color: var(--noche-text);
-  padding-left: 0.25em;
-}
-
 .mailbox-page__main {
   width: 100%;
-  max-width: 640px;
   min-height: var(--noche-content-min-height);
-  margin: 0 auto;
-  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) 0;
+  padding: 12rpx var(--noche-page-padding-x) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
 }
 
 .mailbox-page__switcher {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
 }
 
 .mailbox-page__switcher--secondary {
-  margin-bottom: 14px;
+  margin-bottom: 2rpx;
 }
 
 .mailbox-page__tab-group {
+  width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 18px;
+  gap: 8rpx;
+  padding: 8rpx;
+  border-radius: 24rpx;
   border: 1px solid var(--noche-border);
-  background: var(--noche-surface);
+  background: color-mix(in srgb, var(--noche-surface) 96%, transparent);
 }
 
 .mailbox-page__tab-group--primary {
-  width: min(100%, 296px);
-  min-height: 44px;
+  max-width: 520rpx;
+  min-height: 88rpx;
 }
 
 .mailbox-page__tab-group--secondary {
-  width: min(100%, 216px);
-  min-height: 36px;
-  border-radius: 9999px;
+  max-width: 420rpx;
+  min-height: 76rpx;
+  border-radius: 9999rpx;
 }
 
 .mailbox-page__content {
@@ -519,7 +494,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__tab-pill {
   border: none;
-  border-radius: 9999px;
+  border-radius: 9999rpx;
   background: transparent;
   display: flex;
   align-items: center;
@@ -528,15 +503,15 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__tab-pill--primary {
   flex: 1;
-  min-height: 38px;
-  padding: 0 18px;
-  border-radius: 14px;
+  min-height: 72rpx;
+  padding: 0 24rpx;
+  border-radius: 18rpx;
 }
 
 .mailbox-page__tab-pill--secondary {
   flex: 1;
-  min-height: 30px;
-  padding: 0 12px;
+  min-height: 60rpx;
+  padding: 0 18rpx;
 }
 
 .mailbox-page__tab-pill-text {
@@ -545,13 +520,13 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill-text--primary {
-  font-size: 14px;
-  letter-spacing: 0.14em;
-  padding-left: 0.14em;
+  font-size: 24rpx;
+  letter-spacing: 0.12em;
+  padding-left: 0.12em;
 }
 
 .mailbox-page__tab-pill-text--secondary {
-  font-size: 12px;
+  font-size: 20rpx;
   letter-spacing: 0.08em;
   padding-left: 0.08em;
 }
@@ -568,18 +543,18 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__state {
   min-height: var(--noche-empty-state-min-height);
-  padding: 52px 12px 24px;
+  padding: 72rpx 28rpx 28rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 18rpx;
+  text-align: center;
 }
 
 .mailbox-page__state-text {
-  font-size: 15px;
+  font-size: 26rpx;
   line-height: 1.8;
-  text-align: center;
   color: var(--noche-ink-soft);
 }
 
@@ -588,40 +563,40 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__retry {
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 72rpx;
+  padding: 0 28rpx;
   border: 1px solid var(--noche-border);
   background: var(--noche-panel);
-  font-size: 14px;
+  font-size: 24rpx;
   color: var(--noche-text);
 }
 
 .mailbox-page__module-list {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 22rpx;
 }
 
 .mailbox-page__module {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 2px;
+  gap: 16rpx;
+  padding-top: 4rpx;
 }
 
 .mailbox-page__module-head {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 16rpx;
   position: relative;
 }
 
 .mailbox-page__module-count {
   position: absolute;
-  right: 0;
+  right: 4rpx;
   font-family: "Inter", sans-serif;
-  font-size: 10px;
+  font-size: 18rpx;
   letter-spacing: 0.18em;
   color: var(--noche-ink-subtle);
   padding-left: 0.18em;
@@ -629,42 +604,32 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__module-tab {
   position: relative;
-  padding: 0 0 8px;
+  padding: 0 0 10rpx;
 }
 
 .mailbox-page__module-tab-text {
   font-family: "Inter", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.3em;
+  font-size: 20rpx;
+  letter-spacing: 0.28em;
   color: var(--noche-text);
   font-weight: 600;
-  padding-left: 0.3em;
+  padding-left: 0.28em;
 }
 
 .mailbox-page__module-tab-underline {
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: 14px;
+  width: 18px;
   height: 1px;
   transform: translateX(-50%);
   background: var(--noche-muted);
 }
 
-.mailbox-page__module-empty {
-  padding: 20px 0 8px;
-}
-
-.mailbox-page__module-empty-text {
-  font-size: 13px;
-  line-height: 1.7;
-  color: var(--noche-ink-faint);
-}
-
 .mailbox-page__list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16rpx;
 }
 
 .mailbox-page__entry-shell {
@@ -681,8 +646,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-card {
   background: var(--noche-surface);
   border: 1px solid var(--noche-border);
-  padding: 20px 18px;
-  border-radius: 18px;
+  padding: 26rpx 24rpx;
+  border-radius: 24rpx;
 }
 
 .mailbox-page__entry-card--sealed {
@@ -694,20 +659,20 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
 }
 
 .mailbox-page__entry-meta-cluster {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10rpx;
 }
 
 .mailbox-page__entry-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 8rpx;
 }
 
 .mailbox-page__entry-dot {
@@ -719,25 +684,23 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-type,
 .mailbox-page__entry-date,
 .mailbox-page__entry-meta,
-.mailbox-page__sealed-lock-label,
-.mailbox-page__footer-text {
+.mailbox-page__sealed-lock-label {
   font-family: "Inter", sans-serif;
-  font-size: 9px;
+  font-size: 18rpx;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--noche-ink-subtle);
 }
 
 .mailbox-page__entry-type,
-.mailbox-page__sealed-lock-label,
-.mailbox-page__footer-text {
+.mailbox-page__sealed-lock-label {
   padding-left: 0.18em;
 }
 
 .mailbox-page__entry-prelude {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 6rpx;
   color: var(--noche-ink-subtle);
 }
 
@@ -748,22 +711,22 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__entry-title {
   display: block;
-  font-size: 19px;
+  font-size: 34rpx;
   line-height: 1.4;
   color: var(--noche-text);
-  margin-bottom: 10px;
+  margin-bottom: 12rpx;
 }
 
 .mailbox-page__entry-excerpt {
   display: block;
-  font-size: 12px;
-  line-height: 1.75;
+  font-size: 22rpx;
+  line-height: 1.82;
   color: var(--noche-ink-soft);
 }
 
 .mailbox-page__entry-foot {
-  margin-top: 14px;
-  padding-top: 10px;
+  margin-top: 18rpx;
+  padding-top: 12rpx;
   border-top: 1px solid var(--noche-border);
   display: flex;
   justify-content: space-between;
@@ -771,8 +734,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__entry-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--noche-ink-ghost);
 }
 
@@ -780,16 +743,16 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 0 10px;
+  padding: 0 0 14rpx;
 }
 
 .mailbox-page__sealed-lock {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 6rpx;
   opacity: 0.6;
-  margin-bottom: 14px;
+  margin-bottom: 16rpx;
 }
 
 .mailbox-page__sealed-lock-icon {
@@ -798,17 +761,17 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-icon-wrap {
-  margin-bottom: 10px;
+  margin-bottom: 12rpx;
   opacity: 0.24;
 }
 
 .mailbox-page__sealed-icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .mailbox-page__sealed-title {
-  font-size: 15px;
+  font-size: 28rpx;
   font-weight: 400;
   letter-spacing: 0.12em;
   color: var(--noche-ink-strong);
@@ -820,19 +783,19 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 10rpx;
 }
 
 .mailbox-page__sealed-copy {
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 22rpx;
+  line-height: 1.72;
   text-align: center;
   color: var(--noche-ink-faint);
 }
 
 .mailbox-page__sealed-wax {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 9999px;
   background: color-mix(in srgb, var(--noche-accent) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--noche-accent) 28%, transparent);
@@ -842,34 +805,31 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-wax-core {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 9999px;
   background: color-mix(in srgb, var(--noche-accent) 36%, transparent);
 }
 
-.mailbox-page__footer {
-  height: 8px;
-}
-
 .mailbox-page__fab {
-  position: fixed;
-  right: calc(var(--noche-page-padding-x) + 4px);
+  position: absolute;
+  right: calc(var(--noche-page-padding-x) + 2px);
   bottom: var(--noche-fab-bottom);
-  width: 56px;
-  height: 56px;
+  width: 112rpx;
+  height: 112rpx;
   border: none;
-  border-radius: 18px;
+  border-radius: 26rpx;
   background: var(--noche-text);
   color: var(--noche-bg);
-  box-shadow: 0 8px 18px rgba(var(--noche-paper-shadow-rgb), 0.2);
+  box-shadow: 0 10px 24px rgba(var(--noche-paper-shadow-rgb), 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 18;
 }
 
 .mailbox-page__fab-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 </style>

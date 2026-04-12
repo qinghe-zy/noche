@@ -25,11 +25,11 @@ describe("visual regression structure", () => {
     const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
 
     expect(profilePage).toContain("ProfileHero");
+    expect(profilePage).toContain("PageScaffold");
     expect(profilePage).toContain("profile-page__content");
     expect(profilePage).toContain("profile-page__menu");
     expect(profilePage).toContain("profile-page__footer");
     expect(profileHero).toContain("profile-hero__visual");
-    expect(profileHero).toContain("profile-hero__nav");
     expect(profileHero).toContain("profile-hero__avatar-shell");
     expect(profileHero).toContain("profile-hero__identity");
   });

@@ -9,7 +9,7 @@ import {
   watch,
   type Ref,
 } from "vue";
-import { syncMobileLayoutVars } from "@/shared/layout/mobileLayout";
+import { useMobileLayout } from "@/shared/layout/useMobileLayout";
 import {
   estimateCaretLine,
   resolvePlainTextLineCount,
@@ -137,12 +137,13 @@ export function useWritingSurfaceController(options: UseWritingSurfaceController
   let measureFrame = 0;
   let scrollFrame = 0;
   let pendingScrollTop: number | null = null;
+  const { metrics, refresh: refreshMobileLayout } = useMobileLayout();
 
   function refreshViewportMetrics(): void {
-    stableViewportHeight = syncMobileLayoutVars(stableViewportHeight);
+    stableViewportHeight = refreshMobileLayout(stableViewportHeight).viewportHeight;
     const fallbackViewportHeight = stableViewportHeight || uni.getSystemInfoSync().windowHeight || 800;
-    viewportHeight.value = readCssPixelVar("--noche-viewport-height", fallbackViewportHeight);
-    safeAreaBottom.value = readCssPixelVar("--noche-safe-bottom", 0);
+    viewportHeight.value = metrics.viewportHeight || readCssPixelVar("--noche-viewport-height", fallbackViewportHeight);
+    safeAreaBottom.value = metrics.safeBottom || readCssPixelVar("--noche-safe-bottom", 0);
   }
 
   function syncRenderedLines(nextContent: string, allowShrink: boolean): void {

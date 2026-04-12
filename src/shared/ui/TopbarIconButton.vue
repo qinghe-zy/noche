@@ -22,17 +22,22 @@ defineEmits<{
 
 <style scoped>
 .topbar-icon-button {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  min-width: 88rpx;
+  height: 88rpx;
+  min-height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(138, 129, 120, 0.82);
+  border-radius: 9999rpx;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .topbar-icon-button__icon {
-  width: 40rpx;
-  height: 40rpx;
+  width: 38rpx;
+  height: 38rpx;
   color: currentColor;
 }
 </style>

@@ -1,6 +1,7 @@
-interface MobileLayoutSystemInfo {
+export interface MobileLayoutSystemInfo {
   windowHeight?: number;
   windowWidth?: number;
+  screenWidth?: number;
   screenHeight?: number;
   statusBarHeight?: number;
   safeArea?: {
@@ -19,6 +20,10 @@ interface LayoutStyleTarget {
 }
 
 export interface MobileLayoutMetrics {
+  screenWidth: number;
+  screenHeight: number;
+  windowWidth: number;
+  windowHeight: number;
   viewportHeight: number;
   statusBarHeight: number;
   navBarHeight: number;
@@ -26,6 +31,7 @@ export interface MobileLayoutMetrics {
   contentMinHeight: number;
   safeTop: number;
   safeBottom: number;
+  sizeClass: "S" | "M" | "L";
   topbarPaddingTop: number;
   topbarPaddingBottom: number;
   topbarPaddingX: number;
@@ -51,6 +57,8 @@ const DESIGN_RPX = {
   editorTextareaMinHeight: 560,
 } as const;
 const FIXED_NAV_BAR_HEIGHT_PX = 44;
+const TOPBAR_VISUAL_OFFSET_PX = 10;
+const MIN_VIEWPORT_HEIGHT = 640;
 
 function toNumber(value: number | undefined): number {
   return Number.isFinite(value) ? Number(value) : 0;
@@ -65,6 +73,20 @@ export function computeMobileLayoutMetrics(
   previousViewportHeight = 0,
 ): MobileLayoutMetrics {
   const windowWidth = Math.max(320, toNumber(systemInfo.windowWidth) || 375);
+  const screenWidth = Math.max(windowWidth, toNumber(systemInfo.screenWidth) || windowWidth);
+  const screenHeight = Math.max(
+    toNumber(systemInfo.screenHeight),
+    toNumber(systemInfo.windowHeight),
+    previousViewportHeight,
+    0,
+  );
+  const windowHeight = Math.max(
+    toNumber(systemInfo.windowHeight)
+      || toNumber(systemInfo.safeArea?.height)
+      || previousViewportHeight
+      || 780,
+    0,
+  );
   const rawSafeTop = Math.max(
     toNumber(systemInfo.statusBarHeight),
     toNumber(systemInfo.safeAreaInsets?.top),
@@ -72,23 +94,20 @@ export function computeMobileLayoutMetrics(
   );
   const rawSafeBottom = Math.max(
     toNumber(systemInfo.safeAreaInsets?.bottom),
-    systemInfo.screenHeight && systemInfo.safeArea?.bottom
-      ? Math.max(0, Math.round(systemInfo.screenHeight - systemInfo.safeArea.bottom))
+    screenHeight && systemInfo.safeArea?.bottom
+      ? Math.max(0, Math.round(screenHeight - systemInfo.safeArea.bottom))
       : 0,
   );
-  const rawViewportHeight = Math.round(
-    toNumber(systemInfo.windowHeight)
-      || toNumber(systemInfo.safeArea?.height)
-      || previousViewportHeight
-      || 780,
-  );
-  const viewportHeight = Math.max(previousViewportHeight, rawViewportHeight, 640);
+  const rawViewportHeight = Math.round(windowHeight);
+  const viewportHeight = Math.max(previousViewportHeight, rawViewportHeight, MIN_VIEWPORT_HEIGHT);
   const statusBarHeight = rawSafeTop;
   const navBarHeight = FIXED_NAV_BAR_HEIGHT_PX;
-  const pageTopInset = statusBarHeight + navBarHeight;
+  const sizeClass = windowWidth <= 360 ? "S" : (windowWidth <= 430 ? "M" : "L");
+  const topbarPaddingBottom = TOPBAR_VISUAL_OFFSET_PX;
   const topbarPaddingTop = statusBarHeight;
-  const topbarPaddingBottom = 0;
   const topbarRowHeight = navBarHeight;
+  const topbarBlockHeight = topbarPaddingTop + topbarRowHeight + topbarPaddingBottom;
+  const pageTopInset = topbarBlockHeight;
   const pageBottomPadding = rawSafeBottom + rpxToPx(DESIGN_RPX.pageBottomPadding, windowWidth);
   const contentMinHeight = Math.max(
     280,
@@ -96,6 +115,10 @@ export function computeMobileLayoutMetrics(
   );
 
   return {
+    screenWidth,
+    screenHeight,
+    windowWidth,
+    windowHeight: rawViewportHeight,
     viewportHeight,
     statusBarHeight,
     navBarHeight,
@@ -103,11 +126,12 @@ export function computeMobileLayoutMetrics(
     contentMinHeight,
     safeTop: rawSafeTop,
     safeBottom: rawSafeBottom,
+    sizeClass,
     topbarPaddingTop,
     topbarPaddingBottom,
     topbarPaddingX: rpxToPx(DESIGN_RPX.topbarPaddingX, windowWidth),
     topbarRowHeight,
-    topbarBlockHeight: topbarPaddingTop + topbarPaddingBottom + topbarRowHeight,
+    topbarBlockHeight,
     pagePaddingX: rpxToPx(DESIGN_RPX.pagePaddingX, windowWidth),
     pageSectionGap: rpxToPx(DESIGN_RPX.pageSectionGap, windowWidth),
     pageSectionGapTight: rpxToPx(DESIGN_RPX.pageSectionGapTight, windowWidth),
@@ -128,6 +152,10 @@ export function applyMobileLayoutVars(
   target: LayoutStyleTarget,
   metrics: MobileLayoutMetrics,
 ): void {
+  target.setProperty("--noche-screen-width", `${metrics.screenWidth}px`);
+  target.setProperty("--noche-screen-height", `${metrics.screenHeight}px`);
+  target.setProperty("--noche-window-width", `${metrics.windowWidth}px`);
+  target.setProperty("--noche-window-height", `${metrics.windowHeight}px`);
   target.setProperty("--noche-safe-top", `${metrics.safeTop}px`);
   target.setProperty("--noche-safe-bottom", `${metrics.safeBottom}px`);
   target.setProperty("--noche-viewport-height", `${metrics.viewportHeight}px`);

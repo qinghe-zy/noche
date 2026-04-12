@@ -8,12 +8,6 @@
       />
       <view class="profile-hero__mist"></view>
 
-      <view class="profile-hero__nav">
-        <TopbarIconButton class="profile-hero__back" icon-name="back-ios" @tap="$emit('go-back')" />
-        <text class="profile-hero__title">{{ title }}</text>
-        <view class="profile-hero__nav-spacer"></view>
-      </view>
-
       <view class="profile-hero__avatar-shell" @tap="$emit('edit-avatar')">
         <image
           v-if="avatarUri"
@@ -46,21 +40,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
-import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import { resolveProfileInitial } from "@/features/profile/profileData";
 
-const props = withDefaults(defineProps<{
-  title?: string;
+const props = defineProps<{
   displayName: string;
   signature: string;
   avatarUri: string | null;
   coverUri: string | null;
-}>(), {
-  title: "我的角落",
-});
+}>();
 
 defineEmits<{
-  (event: "go-back"): void;
   (event: "edit-avatar"): void;
   (event: "edit-profile"): void;
 }>();
@@ -74,14 +63,15 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 22rpx;
+  gap: 20rpx;
   background: var(--noche-bg);
 }
 
 .profile-hero__visual {
   position: relative;
-  min-height: 452rpx;
+  min-height: clamp(220px, 34vh, 320px);
   overflow: visible;
+  border-radius: 0 0 30rpx 30rpx;
 }
 
 .profile-hero__cover-image,
@@ -98,44 +88,17 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
 
 .profile-hero__mist {
   background:
-    linear-gradient(180deg, rgba(var(--noche-shadow-rgb), 0.06), rgba(var(--noche-shadow-rgb), 0.08) 34%, rgba(var(--noche-shadow-rgb), 0.18) 68%, rgba(var(--noche-shadow-rgb), 0.3));
+    linear-gradient(180deg, rgba(var(--noche-shadow-rgb), 0.04), rgba(var(--noche-shadow-rgb), 0.08) 34%, rgba(var(--noche-shadow-rgb), 0.22) 72%, rgba(var(--noche-shadow-rgb), 0.3));
   backdrop-filter: blur(10rpx) saturate(0.94);
-}
-
-.profile-hero__nav {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: var(--noche-nav-bar-height);
-  padding: var(--noche-status-bar-height) var(--noche-page-padding-x) 0;
-}
-
-.profile-hero__back {
-  color: var(--noche-muted);
-}
-
-.profile-hero__title {
-  font-size: 28rpx;
-  line-height: 1.4;
-  color: var(--noche-text);
-  letter-spacing: 0.22em;
-  padding-left: 0.22em;
-}
-
-.profile-hero__nav-spacer {
-  width: 72rpx;
-  height: 72rpx;
 }
 
 .profile-hero__avatar-shell {
   position: absolute;
   left: var(--noche-page-padding-x);
-  bottom: -48rpx;
+  bottom: -38rpx;
   z-index: 3;
-  width: 136rpx;
-  height: 136rpx;
+  width: 124rpx;
+  height: 124rpx;
   border-radius: 999rpx;
   padding: 6rpx;
   background: var(--noche-surface-strong);
@@ -159,7 +122,7 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
 }
 
 .profile-hero__avatar-initial {
-  font-size: 56rpx;
+  font-size: 52rpx;
   line-height: 1;
   color: var(--noche-accent-contrast);
   letter-spacing: 0.08em;
@@ -200,11 +163,11 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
 }
 
 .profile-hero__name {
-  font-size: 44rpx;
-  line-height: 1.22;
+  font-size: 42rpx;
+  line-height: 1.2;
   font-weight: 400;
   color: var(--noche-text);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .profile-hero__profile-edit {
@@ -224,10 +187,10 @@ const resolvedCoverUri = computed(() => props.coverUri ?? "/profile-corner-cover
 }
 
 .profile-hero__signature {
-  max-width: 86%;
+  max-width: 88%;
   font-size: 22rpx;
   line-height: 1.72;
   color: var(--noche-muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 </style>

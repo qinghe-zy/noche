@@ -19,11 +19,9 @@ describe("calendar stitch parity", () => {
   it("uses local shared icons for navigation controls", () => {
     const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
 
-    expect(calendarPage).toContain("TopbarIconButton");
+    expect(calendarPage).toContain("PageScaffold");
     expect(calendarPage).toContain("AppIcon");
-    expect(calendarPage).toContain("noche-mobile-page");
-    expect(calendarPage).toContain("min-height: var(--noche-nav-bar-height);");
-    expect(calendarPage).toContain("padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;");
+    expect(calendarPage).toContain("calendar-page__today-button");
     expect(calendarPage).toContain("min-height: var(--noche-content-min-height);");
   });
 });

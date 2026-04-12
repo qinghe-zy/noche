@@ -1,25 +1,31 @@
 <template>
   <view class="jotting-editor-shell noche-mobile-page">
     <view class="jotting-editor-shell__surface noche-mobile-main">
-      <view class="jotting-editor-shell__top-icons">
-        <TopbarIconButton @tap="$emit('go-back')" />
-
-        <view
-          v-if="mode === 'edit'"
-          class="jotting-editor-shell__icon-button"
-          @tap="$emit('formal-save')"
-        >
-          <AppIcon name="check" class="jotting-editor-shell__icon-svg" />
-        </view>
-        <view
-          v-else-if="canContinueWrite"
-          class="jotting-editor-shell__continue-button"
-          @tap="$emit('continue-write')"
-        >
-          {{ continueWriteLabel }}
-        </view>
-        <view v-else class="jotting-editor-shell__spacer"></view>
-      </view>
+      <SafeTopbar
+        :show-left="true"
+        :reserve-right="false"
+        :max-width="'100%'"
+        :translucent="true"
+        @left-tap="$emit('go-back')"
+      >
+        <template #right>
+          <view
+            v-if="mode === 'edit'"
+            class="jotting-editor-shell__icon-button"
+            @tap="$emit('formal-save')"
+          >
+            <AppIcon name="check" class="jotting-editor-shell__icon-svg" />
+          </view>
+          <view
+            v-else-if="canContinueWrite"
+            class="jotting-editor-shell__continue-button"
+            @tap="$emit('continue-write')"
+          >
+            {{ continueWriteLabel }}
+          </view>
+          <view v-else class="jotting-editor-shell__spacer"></view>
+        </template>
+      </SafeTopbar>
 
       <scroll-view
         :id="writingSurfaceIds.body"
@@ -103,7 +109,7 @@ import { computed, toRefs } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
 import { useWritingSurfaceController } from "@/features/editor/composables/useWritingSurfaceController";
 import AppIcon from "@/shared/ui/AppIcon.vue";
-import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import SafeTopbar from "@/shared/ui/SafeTopbar.vue";
 import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 type EditorMode = "edit" | "read";
@@ -184,7 +190,7 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
 }
 
 .jotting-editor-shell__surface {
-  padding: 0 var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+  padding: 0 calc(var(--noche-page-padding-x) + 4px) calc(var(--noche-safe-bottom) + 18px);
   display: flex;
   flex-direction: column;
 }
@@ -195,18 +201,9 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
   -webkit-font-smoothing: antialiased;
 }
 
-.jotting-editor-shell__top-icons {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: var(--noche-nav-bar-height);
-  padding-top: var(--noche-status-bar-height);
-  margin-bottom: var(--noche-page-section-gap);
-  flex-shrink: 0;
-}
-
 .jotting-editor-shell__body {
-  min-height: var(--noche-content-min-height);
+  min-height: 0;
+  flex: 1;
 }
 
 .jotting-editor-shell__body-fill {
@@ -214,8 +211,8 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
 }
 
 .jotting-editor-shell__icon-button {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -228,20 +225,24 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
 }
 
 .jotting-editor-shell__continue-button {
-  min-height: 56rpx;
-  font-size: 24rpx;
+  min-height: 72rpx;
+  padding: 0 10rpx;
+  font-size: 20rpx;
   color: var(--noche-muted);
 }
 
 .jotting-editor-shell__spacer {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  height: 88rpx;
 }
 
 .jotting-editor-shell__card {
-  margin-top: 48rpx;
-  margin-bottom: 32rpx;
-  padding: 72rpx 32rpx 32rpx;
+  width: 100%;
+  max-width: 680px;
+  align-self: center;
+  margin-top: 16rpx;
+  margin-bottom: 20rpx;
+  padding: 60rpx 36rpx 36rpx;
   border-radius: 28rpx;
   background: var(--noche-surface);
   box-shadow: 0 8rpx 48rpx rgba(var(--noche-paper-shadow-rgb), 0.16);
@@ -322,9 +323,9 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
   flex: 1;
   border: none;
   background: transparent;
-  padding-right: 0;
+  padding-right: 10px;
   padding-bottom: 0;
-  padding-left: 0;
+  padding-left: 10px;
   color: var(--noche-text);
   font-size: 18px;
 }
@@ -375,6 +376,7 @@ function handleWritingInput(event: Event | { detail?: { value?: string; cursor?:
 
 .jotting-editor-shell__signature {
   margin-top: 4rpx;
+  margin-bottom: max(0px, var(--noche-safe-bottom));
   text-align: center;
   font-size: 20rpx;
   color: var(--noche-muted);

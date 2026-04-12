@@ -1,88 +1,92 @@
 <template>
-  <view class="calendar-page noche-mobile-page">
-    <view class="calendar-page__topbar">
-      <view class="calendar-page__topbar-inner">
-        <TopbarIconButton @tap="handleBackToMailbox" />
-        <text class="calendar-page__topbar-title">{{ copy.calendar.title }}</text>
-        <view class="calendar-page__topbar-button calendar-page__topbar-button--label" @tap="goToToday">{{ copy.calendar.today }}</view>
-      </view>
-    </view>
+  <PageScaffold
+    class="calendar-page"
+    :title="copy.calendar.title"
+    :show-left="true"
+    :reserve-right="false"
+    :topbar-bordered="true"
+    :max-width="'720px'"
+    @left-tap="handleBackToMailbox"
+  >
+    <template #right>
+      <view class="calendar-page__today-button" @tap="goToToday">{{ copy.calendar.today }}</view>
+    </template>
 
     <scroll-view class="calendar-page__scroll noche-mobile-scroll" scroll-y>
       <view class="calendar-page__main noche-mobile-scroll-fill">
-      <view class="calendar-page__hero">
-        <text class="calendar-page__hero-title">{{ copy.calendar.title }}</text>
-        <text class="calendar-page__hero-subtitle">
-          {{ formatMonthLabel(currentMonthDate) }} {{ formatYearLabel(currentMonthDate) }}
-        </text>
-      </view>
-
-      <view v-if="calendarStore.error" class="calendar-page__banner calendar-page__banner--error">
-        <text>{{ calendarStore.error }}</text>
-      </view>
-
-      <view class="calendar-page__paper-panel">
-        <view class="calendar-page__panel-head">
-          <view class="calendar-page__month-button" @tap="prevMonth">
-            <AppIcon name="chevron-left" class="calendar-page__month-button-icon" />
-          </view>
-          <text class="calendar-page__month-label">{{ formatMonthLabel(currentMonthDate) }}</text>
-          <view class="calendar-page__month-button" @tap="nextMonth">
-            <AppIcon name="chevron-right" class="calendar-page__month-button-icon" />
-          </view>
+        <view class="calendar-page__hero">
+          <text class="calendar-page__hero-title">{{ formatMonthLabel(currentMonthDate) }}</text>
+          <text class="calendar-page__hero-subtitle">
+            {{ formatYearLabel(currentMonthDate) }}
+          </text>
         </view>
 
-        <view class="calendar-page__weekdays">
-          <text v-for="day in displayWeekLabels" :key="day" class="calendar-page__weekday">{{ day }}</text>
+        <view v-if="calendarStore.error" class="calendar-page__banner calendar-page__banner--error">
+          <text>{{ calendarStore.error }}</text>
         </view>
 
-        <view class="calendar-page__grid">
-          <view
-            v-for="(day, index) in calendarDays"
-            :key="index"
-            class="calendar-page__day"
-            :class="{
-              'calendar-page__day--empty': !day,
-              'calendar-page__day--today': day && isToday(day.fullDate),
-              'calendar-page__day--selected': day && isSelected(day.fullDate),
-            }"
-            @click="day && handleDateClick(day.fullDate)"
-          >
-            <view v-if="day" class="calendar-page__day-inner">
-              <text class="calendar-page__day-number">{{ day.date }}</text>
-              <view v-if="hasMarker(day.fullDate)" class="calendar-page__marker"></view>
+        <view class="calendar-page__paper-panel">
+          <view class="calendar-page__panel-head">
+            <view class="calendar-page__month-button" @tap="prevMonth">
+              <AppIcon name="chevron-left" class="calendar-page__month-button-icon" />
+            </view>
+            <text class="calendar-page__month-label">{{ formatMonthLabel(currentMonthDate) }}</text>
+            <view class="calendar-page__month-button" @tap="nextMonth">
+              <AppIcon name="chevron-right" class="calendar-page__month-button-icon" />
+            </view>
+          </view>
+
+          <view class="calendar-page__weekdays">
+            <text v-for="day in displayWeekLabels" :key="day" class="calendar-page__weekday">{{ day }}</text>
+          </view>
+
+          <view class="calendar-page__grid">
+            <view
+              v-for="(day, index) in calendarDays"
+              :key="index"
+              class="calendar-page__day"
+              :class="{
+                'calendar-page__day--empty': !day,
+                'calendar-page__day--today': day && isToday(day.fullDate),
+                'calendar-page__day--selected': day && isSelected(day.fullDate),
+              }"
+              @click="day && handleDateClick(day.fullDate)"
+            >
+              <view v-if="day" class="calendar-page__day-inner">
+                <text class="calendar-page__day-number">{{ day.date }}</text>
+                <view v-if="hasMarker(day.fullDate)" class="calendar-page__marker"></view>
+              </view>
             </view>
           </view>
         </view>
-      </view>
 
-      <view class="calendar-page__day-mailbox">
-        <view class="calendar-page__day-mailbox-head">
-          <text class="calendar-page__day-mailbox-date">{{ contextDate }}</text>
-          <view class="calendar-page__day-mailbox-copy">
-            <text class="calendar-page__day-mailbox-title">{{ mailboxState.title }}</text>
-            <text class="calendar-page__day-mailbox-body">{{ mailboxState.body }}</text>
+        <view class="calendar-page__day-mailbox">
+          <view class="calendar-page__day-mailbox-head">
+            <text class="calendar-page__day-mailbox-date">{{ contextDate }}</text>
+            <view class="calendar-page__day-mailbox-copy">
+              <text class="calendar-page__day-mailbox-title">{{ mailboxState.title }}</text>
+              <text class="calendar-page__day-mailbox-body">{{ mailboxState.body }}</text>
+            </view>
           </view>
-        </view>
 
-        <view v-if="mailboxState.kind !== 'entries'" class="calendar-page__day-mailbox-empty">
-          <button
-            v-if="mailboxState.actionLabel"
-            class="calendar-page__day-mailbox-action"
-            @click="handlePrimaryAction"
-          >
-            {{ mailboxState.actionLabel }}
-          </button>
-          <text v-else class="calendar-page__day-mailbox-empty-text">{{ mailboxState.body }}</text>
-        </view>
+          <view v-if="mailboxState.kind !== 'entries'" class="calendar-page__day-mailbox-empty">
+            <button
+              v-if="mailboxState.actionLabel"
+              class="calendar-page__day-mailbox-action"
+              @click="handlePrimaryAction"
+            >
+              {{ mailboxState.actionLabel }}
+            </button>
+            <text v-else class="calendar-page__day-mailbox-empty-text">{{ mailboxState.body }}</text>
+          </view>
 
-        <view v-else class="calendar-page__day-mailbox-list">
-          <view
-            v-for="entry in selectedEntries"
-            :key="entry.id"
-            class="calendar-page__day-mailbox-item"
-            @click="handleOpenEntry(entry.id)"
-          >
+          <view v-else class="calendar-page__day-mailbox-list">
+            <view
+              v-for="entry in selectedEntries"
+              :key="entry.id"
+              class="calendar-page__day-mailbox-item"
+              @click="handleOpenEntry(entry.id)"
+            >
               <view class="calendar-page__day-mailbox-item-head">
                 <text class="calendar-page__day-mailbox-item-type">{{ formatEntryTypeLabel(entry.type, settingsStore.locale) }}</text>
                 <view class="calendar-page__day-mailbox-item-meta-cluster">
@@ -133,7 +137,7 @@
       @close="closeLockedFutureDialog"
       @action="handleLockedFutureDialogAction"
     />
-  </view>
+  </PageScaffold>
 </template>
 
 <script setup lang="ts">
@@ -146,8 +150,8 @@ import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import AppIcon from "@/shared/ui/AppIcon.vue";
+import PageScaffold from "@/shared/ui/PageScaffold.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
-import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import {
   formatCalendarMonthLabel,
@@ -296,10 +300,6 @@ function handleLockedFutureDialogAction(): void {
   closeLockedFutureDialog();
 }
 
-const mailboxEmptyText = computed(() => {
-  return mailboxState.value.body;
-});
-
 function formatMonthLabel(date: string) {
   return formatCalendarMonthLabel(date, settingsStore.locale);
 }
@@ -380,93 +380,64 @@ onShow(() => {
 }
 
 .calendar-page {
-  background-color: var(--noche-bg);
+  background: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
-.calendar-page__topbar {
-  width: 100%;
-  background: var(--noche-surface);
-  flex-shrink: 0;
-}
-
-.calendar-page__topbar-inner {
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
-  min-height: var(--noche-nav-bar-height);
-  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.calendar-page__topbar-button {
-  width: 72rpx;
-  height: 72rpx;
-  border: none;
-  background: transparent;
-  color: var(--noche-muted);
-  display: flex;
+.calendar-page__today-button {
+  min-width: 88rpx;
+  min-height: 88rpx;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-}
-
-.calendar-page__topbar-button--label {
   font-family: "Inter", sans-serif;
   font-size: 20rpx;
-  letter-spacing: 0.18em;
-  padding-left: 0.18em;
-}
-
-.calendar-page__topbar-title {
-  font-size: 30rpx;
-  letter-spacing: 0.14em;
-  color: var(--noche-text);
-  padding-left: 0.14em;
+  letter-spacing: 0.16em;
+  color: var(--noche-muted);
+  padding-left: 0.16em;
 }
 
 .calendar-page__main {
   width: 100%;
-  max-width: 640px;
   min-height: var(--noche-content-min-height);
-  margin: 0 auto;
-  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+  padding: 12rpx var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
 }
 
 .calendar-page__hero {
-  margin-bottom: 24px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8rpx;
 }
 
 .calendar-page__hero-title {
   display: block;
-  font-size: 30px;
-  line-height: 1.2;
+  font-size: 54rpx;
+  line-height: 1.08;
   color: var(--noche-text);
 }
 
 .calendar-page__hero-subtitle {
   display: block;
-  margin-top: 8px;
   font-family: "Inter", sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.36em;
+  font-size: 18rpx;
+  letter-spacing: 0.3em;
   color: var(--noche-muted);
-  padding-left: 0.36em;
+  padding-left: 0.3em;
   text-transform: uppercase;
 }
 
 .calendar-page__banner {
-  margin-bottom: 14px;
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
   background: var(--noche-panel);
   border: 1px solid var(--noche-border);
   color: var(--noche-muted);
-  font-size: 13px;
+  font-size: 22rpx;
   line-height: 1.7;
 }
 
@@ -477,66 +448,66 @@ onShow(() => {
 .calendar-page__paper-panel {
   background: var(--noche-panel);
   border: 1px solid var(--noche-border);
-  border-radius: 18px;
-  padding: 20px 16px 18px;
+  border-radius: 22rpx;
+  padding: 24rpx 18rpx 20rpx;
 }
 
 .calendar-page__panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18rpx;
 }
 
 .calendar-page__month-button {
-  width: 56rpx;
-  height: 56rpx;
+  width: 88rpx;
+  height: 88rpx;
   border: none;
   background: transparent;
   color: var(--noche-muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
 }
 
 .calendar-page__month-button-icon {
-  width: 32rpx;
-  height: 32rpx;
+  width: 34rpx;
+  height: 34rpx;
   color: currentColor;
 }
 
 .calendar-page__month-label {
   font-family: "Inter", sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: 22rpx;
+  letter-spacing: 0.24em;
   color: var(--noche-text);
-  padding-left: 0.28em;
+  padding-left: 0.24em;
 }
 
 .calendar-page__weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 18px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6rpx;
+  margin-bottom: 16rpx;
 }
 
 .calendar-page__weekday {
   text-align: center;
   font-family: "Inter", sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 18rpx;
+  letter-spacing: 0.12em;
   color: var(--noche-muted);
-  padding-left: 0.14em;
+  padding-left: 0.12em;
 }
 
 .calendar-page__grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  row-gap: 20px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10rpx 4rpx;
 }
 
 .calendar-page__day {
-  min-height: 32px;
+  min-height: 76rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -547,17 +518,22 @@ onShow(() => {
 }
 
 .calendar-page__day-inner {
+  width: 100%;
+  max-width: 76rpx;
+  aspect-ratio: 1;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 6rpx;
+  border-radius: 20rpx;
   z-index: 0;
 }
 
 .calendar-page__day-number {
   font-family: "Inter", sans-serif;
-  font-size: 18px;
+  font-size: 28rpx;
   color: var(--noche-text);
   position: relative;
   z-index: 1;
@@ -567,48 +543,35 @@ onShow(() => {
   font-weight: 700;
 }
 
-.calendar-page__day--selected .calendar-page__day-number {
-  color: var(--noche-ink-strong);
-}
-
-.calendar-page__day--selected .calendar-page__day-inner::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28px;
-  height: 28px;
-  border-radius: 9999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--noche-surface-soft) 96%, transparent) 0%, color-mix(in srgb, var(--noche-surface-soft) 52%, transparent) 48%, rgba(246, 240, 232, 0) 72%);
-  transform: translate(-50%, -58%);
-  z-index: -1;
+.calendar-page__day--selected .calendar-page__day-inner {
+  background: color-mix(in srgb, var(--noche-surface-soft) 94%, transparent);
 }
 
 .calendar-page__marker,
 .calendar-page__legend-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 9999rpx;
   background: var(--noche-accent);
 }
 
 .calendar-page__day-mailbox {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--noche-border);
+  padding-top: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .calendar-page__day-mailbox-head {
   display: grid;
-  grid-template-columns: 108px 1fr;
-  gap: 18px;
+  grid-template-columns: minmax(120rpx, 148rpx) minmax(0, 1fr);
+  gap: 18rpx;
   align-items: start;
-  margin-bottom: 16px;
 }
 
 .calendar-page__day-mailbox-date {
   font-family: "Inter", sans-serif;
-  font-size: 10px;
+  font-size: 18rpx;
   letter-spacing: 0.22em;
   color: var(--noche-ink-soft);
   padding-left: 0.22em;
@@ -621,79 +584,78 @@ onShow(() => {
 
 .calendar-page__day-mailbox-title {
   display: block;
-  font-size: 20px;
+  font-size: 34rpx;
   line-height: 1.35;
   color: var(--noche-text);
-  margin-bottom: 8px;
+  margin-bottom: 10rpx;
 }
 
 .calendar-page__day-mailbox-body {
   display: block;
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: 22rpx;
+  line-height: 1.82;
   color: var(--noche-muted);
 }
 
 .calendar-page__day-mailbox-empty {
-  padding: 10px 0 6px;
+  padding: 12rpx 0 8rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 14rpx;
   text-align: center;
 }
 
 .calendar-page__day-mailbox-empty-text {
-  font-size: 13px;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--noche-ink-faint);
 }
 
 .calendar-page__day-mailbox-action {
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 9999px;
+  min-height: 72rpx;
+  padding: 0 24rpx;
+  border-radius: 9999rpx;
   border: 1px solid var(--noche-border);
   background: var(--noche-panel);
   color: var(--noche-text);
-  font-size: 12px;
+  font-size: 22rpx;
 }
 
 .calendar-page__day-mailbox-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-left: 0;
-  max-width: 360px;
-  margin: 0 auto;
+  gap: 14rpx;
 }
 
 .calendar-page__day-mailbox-item {
-  padding: 18px 0 20px;
-  background: transparent;
+  padding: 22rpx 20rpx;
+  background: color-mix(in srgb, var(--noche-surface-strong) 94%, transparent);
   border: 1px solid color-mix(in srgb, var(--noche-border) 72%, transparent);
-  text-align: center;
-  border-radius: 2px;
+  border-radius: 20rpx;
 }
 
 .calendar-page__day-mailbox-item-head {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 10px;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
 }
 
 .calendar-page__day-mailbox-item-meta-cluster {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 8rpx;
 }
 
 .calendar-page__day-mailbox-item-type,
-.calendar-page__day-mailbox-item-date {
+.calendar-page__day-mailbox-item-date,
+.calendar-page__day-mailbox-item-status,
+.calendar-page__status-text,
+.calendar-page__legend-text {
   font-family: "Inter", sans-serif;
-  font-size: 10px;
+  font-size: 18rpx;
   letter-spacing: 0.14em;
   color: var(--noche-ink-subtle);
   padding-left: 0.14em;
@@ -703,7 +665,7 @@ onShow(() => {
 .calendar-page__day-mailbox-item-prelude {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6rpx;
   color: var(--noche-ink-subtle);
 }
 
@@ -714,16 +676,15 @@ onShow(() => {
 
 .calendar-page__day-mailbox-item-title {
   display: block;
-  font-size: 18px;
-  line-height: 1.45;
+  font-size: 30rpx;
+  line-height: 1.42;
   color: var(--noche-ink-strong);
-  margin-bottom: 8px;
-  text-align: center;
+  margin-bottom: 8rpx;
 }
 
 .calendar-page__day-mailbox-item-content {
   display: block;
-  font-size: 13px;
+  font-size: 22rpx;
   line-height: 1.8;
   color: var(--noche-ink-soft);
   white-space: pre-wrap;
@@ -731,39 +692,33 @@ onShow(() => {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  text-align: center;
 }
 
 .calendar-page__day-mailbox-item-status {
   display: block;
-  margin-top: 10px;
-  font-family: "Inter", sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: var(--noche-ink-subtle);
-  padding-left: 0.14em;
-  text-transform: uppercase;
-  text-align: center;
+  margin-top: 12rpx;
 }
 
 .calendar-page__footer {
-  padding-top: 18px;
+  padding-top: 10rpx;
   display: flex;
   justify-content: center;
-}
-
-.calendar-page__status-text,
-.calendar-page__legend-text {
-  font-family: "Inter", sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  color: var(--noche-ink-subtle);
-  padding-left: 0.22em;
 }
 
 .calendar-page__legend {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10rpx;
+}
+
+@media (max-width: 380px) {
+  .calendar-page__day-mailbox-head {
+    grid-template-columns: 1fr;
+    gap: 10rpx;
+  }
+
+  .calendar-page__hero-title {
+    font-size: 48rpx;
+  }
 }
 </style>

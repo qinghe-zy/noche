@@ -2,28 +2,37 @@
   <view class="diary-editor-shell noche-mobile-page">
     <view class="diary-editor-shell__grain"></view>
 
-    <view class="diary-editor-shell__topbar">
-      <TopbarIconButton @tap="$emit('go-back')" />
+    <SafeTopbar
+      class="diary-editor-shell__topbar"
+      :show-left="true"
+      :reserve-right="false"
+      :max-width="'100%'"
+      :translucent="true"
+      @left-tap="$emit('go-back')"
+    >
+      <template #title>
+        <text class="diary-editor-shell__topbar-center literary-text">{{ atmosphereLine }}</text>
+      </template>
 
-      <text class="diary-editor-shell__topbar-center literary-text">{{ atmosphereLine }}</text>
-
-      <view
-        v-if="mode === 'edit'"
-        class="diary-editor-shell__icon-button"
-        @tap="$emit('formal-save')"
-      >
-        <text v-if="showSavedHint" class="diary-editor-shell__saved-hint">{{ savedHintLabel }}</text>
-        <AppIcon name="check" class="diary-editor-shell__topbar-svg" />
-      </view>
-      <view
-        v-else-if="canContinueWrite"
-        class="diary-editor-shell__continue-button"
-        @tap="$emit('continue-write')"
-      >
-        {{ continueWriteLabel }}
-      </view>
-      <view v-else class="diary-editor-shell__spacer"></view>
-    </view>
+      <template #right>
+        <view
+          v-if="mode === 'edit'"
+          class="diary-editor-shell__icon-button"
+          @tap="$emit('formal-save')"
+        >
+          <text v-if="showSavedHint" class="diary-editor-shell__saved-hint">{{ savedHintLabel }}</text>
+          <AppIcon name="check" class="diary-editor-shell__topbar-svg" />
+        </view>
+        <view
+          v-else-if="canContinueWrite"
+          class="diary-editor-shell__continue-button"
+          @tap="$emit('continue-write')"
+        >
+          {{ continueWriteLabel }}
+        </view>
+        <view v-else class="diary-editor-shell__spacer"></view>
+      </template>
+    </SafeTopbar>
 
     <view class="diary-editor-shell__canvas noche-mobile-main">
       <view class="diary-editor-shell__header">
@@ -122,7 +131,7 @@ import type { Attachment } from "@/shared/types/attachment";
 import { useWritingSurfaceController } from "@/features/editor/composables/useWritingSurfaceController";
 import DiaryPreludeHeaderMeta from "@/features/editor/components/DiaryPreludeHeaderMeta.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
-import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import SafeTopbar from "@/shared/ui/SafeTopbar.vue";
 import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 type EditorMode = "edit" | "read";
@@ -242,22 +251,9 @@ function handlePickImagesTrigger(): void {
   -webkit-font-smoothing: antialiased;
 }
 
-.diary-editor-shell__topbar {
-  z-index: 10;
-  display: grid;
-  grid-template-columns: 72rpx 1fr 72rpx;
-  align-items: center;
-  min-height: var(--noche-nav-bar-height);
-  gap: 16rpx;
-  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
-  background: var(--noche-surface);
-  backdrop-filter: blur(12rpx);
-  flex-shrink: 0;
-}
-
 .diary-editor-shell__icon-button {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -267,9 +263,10 @@ function handlePickImagesTrigger(): void {
 
 .diary-editor-shell__topbar-center {
   text-align: center;
-  font-size: 26rpx;
+  font-size: 22rpx;
   color: var(--noche-muted);
-  letter-spacing: 0.28em;
+  letter-spacing: 0.2em;
+  padding-left: 0.2em;
 }
 
 .diary-editor-shell__topbar-svg {
@@ -290,26 +287,27 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__continue-button {
-  min-height: 56rpx;
+  min-height: 72rpx;
   justify-self: end;
-  font-size: 24rpx;
+  padding: 0 10rpx;
+  font-size: 20rpx;
   color: var(--noche-muted);
 }
 
 .diary-editor-shell__spacer {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  height: 88rpx;
 }
 
 .diary-editor-shell__canvas {
   min-height: var(--noche-content-min-height);
-  padding: var(--noche-page-section-gap) calc(var(--noche-page-padding-x) + 8px) var(--noche-page-bottom-padding);
+  padding: 18rpx calc(var(--noche-page-padding-x) + 12px) calc(var(--noche-safe-bottom) + 18px);
   display: flex;
   flex-direction: column;
 }
 
 .diary-editor-shell__header {
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .diary-editor-shell__date {
@@ -385,9 +383,9 @@ function handlePickImagesTrigger(): void {
   width: 100%;
   border: none;
   background: transparent;
-  padding-right: 0;
+  padding-right: 8px;
   padding-bottom: 0;
-  padding-left: 0;
+  padding-left: 8px;
   color: var(--noche-text);
   font-size: 18px;
 }
@@ -406,8 +404,9 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__footer {
-  margin-top: 24rpx;
-  padding-top: 18rpx;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  padding-bottom: max(8px, var(--noche-safe-bottom));
   border-top: 1rpx solid var(--noche-border);
   display: flex;
   align-items: center;

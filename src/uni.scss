@@ -9,18 +9,23 @@ page {
   --noche-space-4: 16rpx;
   --noche-space-6: 24rpx;
   --noche-space-8: 32rpx;
+  --noche-screen-width: 375px;
+  --noche-screen-height: 780px;
+  --noche-window-width: 375px;
+  --noche-window-height: 780px;
   --noche-safe-top: 0px;
   --noche-safe-bottom: 0px;
   --noche-viewport-height: 100vh;
   --noche-status-bar-height: 0px;
   --noche-nav-bar-height: 44px;
-  --noche-page-top-inset: 44px;
+  --noche-page-top-inset: 54px;
   --noche-content-min-height: calc(100vh - var(--noche-page-top-inset) - var(--noche-safe-bottom));
   --noche-topbar-padding-top: 0px;
-  --noche-topbar-padding-bottom: 0px;
+  --noche-topbar-padding-bottom: 10px;
   --noche-topbar-padding-x: 16px;
   --noche-topbar-row-height: 44px;
-  --noche-topbar-block-height: 44px;
+  --noche-topbar-block-height: 54px;
+  --noche-topbar-control-size: 44px;
   --noche-page-padding-x: 14px;
   --noche-page-section-gap: 12px;
   --noche-page-section-gap-tight: 8px;
@@ -47,6 +52,7 @@ body,
 .noche-mobile-page {
   min-height: var(--noche-viewport-height);
   height: var(--noche-viewport-height);
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;

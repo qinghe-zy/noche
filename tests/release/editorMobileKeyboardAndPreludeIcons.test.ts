@@ -7,11 +7,11 @@ function readProjectFile(relativePath: string): string {
 }
 
 describe("editor mobile keyboard and prelude icons", () => {
-  it("sets app-plus editor pages to resize the webview instead of panning the whole page", () => {
+  it("sets app-plus editor pages to avoid the system resize path so keyboard shifts stay under app control", () => {
     const pagesJson = readProjectFile("src/pages.json");
 
     expect(pagesJson).toContain("\"path\": \"features/editor/pages/EditorPage\"");
-    expect(pagesJson).toContain("\"softinputMode\": \"adjustResize\"");
+    expect(pagesJson).toContain("\"softinputMode\": \"adjustPan\"");
   });
 
   it("keeps diary prelude glyphs on image tags but resolves them from embedded svg data uris", () => {

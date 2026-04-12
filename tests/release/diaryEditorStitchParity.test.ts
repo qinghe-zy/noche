@@ -14,7 +14,7 @@ describe("diary editor stitch parity", () => {
     expect(diaryShell).toContain("diary-editor-shell");
     expect(diaryShell).toContain("AppIcon name=\"image\"");
     expect(diaryShell).toContain("DiaryPreludeHeaderMeta");
-    expect(diaryShell).toContain("TopbarIconButton");
+    expect(diaryShell).toContain("SafeTopbar");
     expect(diaryShell).not.toContain("diary-editor-shell__inkwell");
     expect(diaryShell).not.toContain("AppIcon name=\"palette\"");
     expect(diaryShell).toContain("handlePickImagesTrigger");

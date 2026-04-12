@@ -1,44 +1,47 @@
 <template>
-  <view class="profile-page noche-mobile-page">
-    <scroll-view scroll-y class="profile-page__scroll noche-mobile-scroll">
-      <view class="profile-page__scroll-fill noche-mobile-scroll-fill">
-        <ProfileHero
-          :title="copy.profile.title"
-          :display-name="identity.displayName"
-          :signature="identity.signature"
-          :avatar-uri="identity.avatarUri"
-          :cover-uri="identity.coverUri"
-          @go-back="handleGoBack"
-          @edit-avatar="activeSheet = 'avatar-actions'"
-          @edit-profile="activeSheet = 'profile-actions'"
-        />
+  <PageScaffold
+    class="profile-page"
+    :title="copy.profile.title"
+    :show-left="true"
+    :topbar-translucent="true"
+    :topbar-bordered="false"
+    :max-width="'760px'"
+    scrollable
+    @left-tap="handleGoBack"
+  >
+    <ProfileHero
+      :display-name="identity.displayName"
+      :signature="identity.signature"
+      :avatar-uri="identity.avatarUri"
+      :cover-uri="identity.coverUri"
+      @edit-avatar="activeSheet = 'avatar-actions'"
+      @edit-profile="activeSheet = 'profile-actions'"
+    />
 
-        <view class="profile-page__content">
-          <view v-if="pageError" class="profile-page__banner">
-            <text class="profile-page__banner-text">{{ pageError }}</text>
-          </view>
-
-          <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
-
-          <ProfileMemoryAlbum
-            :items="visibleItems"
-            :is-loading="albumLoading"
-            :has-any-record="stats.recordedDays > 0"
-            :show-all-entry="hasMore"
-            @open-item="openViewer"
-            @open-all="handleOpenAllAlbum"
-          />
-
-          <view class="profile-page__menu">
-            <ProfileActionList :items="actionItems" @select="handleSelectAction" />
-          </view>
-
-          <view class="profile-page__footer">
-            <text class="profile-page__footer-text">{{ footerText }}</text>
-          </view>
-        </view>
+    <view class="profile-page__content">
+      <view v-if="pageError" class="profile-page__banner">
+        <text class="profile-page__banner-text">{{ pageError }}</text>
       </view>
-    </scroll-view>
+
+      <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
+
+      <ProfileMemoryAlbum
+        :items="visibleItems"
+        :is-loading="albumLoading"
+        :has-any-record="stats.recordedDays > 0"
+        :show-all-entry="hasMore"
+        @open-item="openViewer"
+        @open-all="handleOpenAllAlbum"
+      />
+
+      <view class="profile-page__menu">
+        <ProfileActionList :items="actionItems" @select="handleSelectAction" />
+      </view>
+
+      <view class="profile-page__footer">
+        <text class="profile-page__footer-text">{{ footerText }}</text>
+      </view>
+    </view>
 
     <ProfileAlbumViewer
       :open="isViewerOpen"
@@ -84,7 +87,7 @@
       @close="closeInfoDialog"
       @action="handleInfoDialogAction"
     />
-  </view>
+  </PageScaffold>
 </template>
 
 <script setup lang="ts">
@@ -96,6 +99,7 @@ import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
+import PageScaffold from "@/shared/ui/PageScaffold.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import PaperInputDialog from "@/shared/ui/PaperInputDialog.vue";
 import PaperOptionSheet, { type PaperOptionSheetOption } from "@/shared/ui/PaperOptionSheet.vue";
@@ -413,14 +417,14 @@ function closeSheet(): void {
 function openInputDialog(
   kind: InputDialogKind,
   title: string,
-  copy: string,
+  copyText: string,
   placeholder: string,
   value: string,
   maxlength: number,
 ): void {
   inputDialogKind.value = kind;
   inputDialogTitle.value = title;
-  inputDialogCopy.value = copy;
+  inputDialogCopy.value = copyText;
   inputDialogPlaceholder.value = placeholder;
   inputDialogValue.value = value;
   inputDialogMaxlength.value = maxlength;
@@ -635,7 +639,7 @@ async function handleSheetSelect(key: string): Promise<void> {
             setTimeout(() => {
               restartAppAfterRestore();
             }, 300);
-          } catch (error) {
+          } catch {
             openInfoDialog(copy.value.profile.restoreFailed, copy.value.profile.restoreFailed);
           }
         },
@@ -745,31 +749,32 @@ onUnmounted(() => {
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
-.profile-page__scroll-fill {
-  gap: 0;
-}
-
 .profile-page__content {
-  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+  padding: 16rpx var(--noche-page-padding-x) var(--noche-page-bottom-padding);
   display: flex;
   flex-direction: column;
   gap: 24rpx;
 }
 
 .profile-page__banner {
-  padding: 16rpx 18rpx;
-  border-radius: 18rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 22rpx;
   background: var(--noche-danger-soft);
 }
 
 .profile-page__banner-text {
   font-size: 22rpx;
-  line-height: 1.7;
+  line-height: 1.72;
   color: var(--noche-danger);
 }
 
+.profile-page__menu {
+  display: flex;
+  flex-direction: column;
+}
+
 .profile-page__footer {
-  padding-top: 10rpx;
+  padding-top: 8rpx;
   display: flex;
   justify-content: center;
 }
@@ -778,7 +783,7 @@ onUnmounted(() => {
   font-size: 18rpx;
   line-height: 1.6;
   color: var(--noche-muted);
-  letter-spacing: 0.28em;
-  padding-left: 0.28em;
+  letter-spacing: 0.24em;
+  padding-left: 0.24em;
 }
 </style>

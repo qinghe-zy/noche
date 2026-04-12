@@ -9,12 +9,14 @@ function readProjectFile(relativePath: string): string {
 describe("page top inset layout", () => {
   it("publishes dynamic status-bar and fixed navbar css vars from the shared mobile layout system", () => {
     const layoutFile = readProjectFile("src/shared/layout/mobileLayout.ts");
+    const safeAreaComposable = readProjectFile("src/shared/layout/useSafeAreaLayout.ts");
     const globalStyle = readProjectFile("src/uni.scss");
 
     expect(layoutFile).toContain("--noche-status-bar-height");
     expect(layoutFile).toContain("--noche-nav-bar-height");
     expect(layoutFile).toContain("--noche-page-top-inset");
     expect(layoutFile).toContain("--noche-content-min-height");
+    expect(safeAreaComposable).toContain("useMobileLayout");
     expect(globalStyle).toContain("--noche-status-bar-height");
     expect(globalStyle).toContain("--noche-page-top-inset");
   });
@@ -28,15 +30,17 @@ describe("page top inset layout", () => {
       "src/features/editor/components/FutureLetterEditorShell.vue",
       "src/features/mailbox/pages/MailboxPage.vue",
       "src/features/calendar/pages/CalendarPage.vue",
-      "src/features/profile/components/ProfileHero.vue",
+      "src/features/profile/pages/ProfilePage.vue",
       "src/features/profile/pages/ProfileAlbumPage.vue",
-      "src/shared/ui/BasePageShell.vue",
+      "src/features/day-archive/pages/DayArchivePage.vue",
+      "src/shared/ui/PageScaffold.vue",
+      "src/shared/ui/SafeTopbar.vue",
     ];
 
     const joined = files.map((file) => readProjectFile(file)).join("\n");
 
-    expect(joined).toContain("var(--noche-status-bar-height)");
-    expect(joined).toContain("var(--noche-nav-bar-height)");
+    expect(joined).toContain("var(--noche-topbar-block-height)");
+    expect(joined).toContain("var(--noche-safe-bottom)");
     expect(joined).toContain("var(--noche-content-min-height)");
   });
 });

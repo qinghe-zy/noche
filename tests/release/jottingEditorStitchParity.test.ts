@@ -12,6 +12,6 @@ describe("jotting editor stitch parity", () => {
 
     expect(jottingShell).toContain("jotting-editor-shell");
     expect(jottingShell).toContain("AppIcon name=\"image\"");
-    expect(jottingShell).toContain("TopbarIconButton");
+    expect(jottingShell).toContain("SafeTopbar");
   });
 });

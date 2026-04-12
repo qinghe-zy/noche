@@ -3,15 +3,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, watch } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { applyThemeMode } from "@/shared/theme";
-import { syncMobileLayoutVars } from "@/shared/layout/mobileLayout";
+import { refreshMobileLayout } from "@/shared/layout/useMobileLayout";
 
 const settingsStore = useSettingsStore();
-let stableViewportHeight = 0;
 let stopThemeChangeListener: (() => void) | null = null;
+let stopWindowResizeListener: (() => void) | null = null;
 
 watch(
   () => settingsStore.theme,
@@ -24,11 +24,17 @@ watch(
 );
 
 function refreshMobileLayoutVars(): void {
-  stableViewportHeight = syncMobileLayoutVars(stableViewportHeight);
+  refreshMobileLayout();
 }
 
 onMounted(() => {
   refreshMobileLayoutVars();
+  nextTick(() => {
+    refreshMobileLayoutVars();
+  });
+  setTimeout(() => {
+    refreshMobileLayoutVars();
+  }, 48);
 
   if (typeof uni !== "undefined" && typeof uni.onThemeChange === "function") {
     const listener = () => {
@@ -44,15 +50,33 @@ onMounted(() => {
       }
     };
   }
+
+  if (typeof uni !== "undefined" && typeof uni.onWindowResize === "function") {
+    const listener = () => {
+      refreshMobileLayoutVars();
+    };
+
+    uni.onWindowResize(listener);
+    stopWindowResizeListener = () => {
+      if (typeof uni.offWindowResize === "function") {
+        uni.offWindowResize(listener);
+      }
+    };
+  }
 });
 
 onShow(() => {
   refreshMobileLayoutVars();
+  nextTick(() => {
+    refreshMobileLayoutVars();
+  });
 });
 
 onUnmounted(() => {
   stopThemeChangeListener?.();
   stopThemeChangeListener = null;
+  stopWindowResizeListener?.();
+  stopWindowResizeListener = null;
 });
 </script>
 

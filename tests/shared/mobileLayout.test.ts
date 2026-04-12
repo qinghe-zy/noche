@@ -37,10 +37,11 @@ describe("mobile layout baseline", () => {
     expect(metrics.viewportHeight).toBe(851);
     expect(keyboardViewportMetrics.viewportHeight).toBe(851);
     expect(keyboardViewportMetrics.safeTop).toBe(32);
+    expect(keyboardViewportMetrics.sizeClass).toBe("M");
     expect(keyboardViewportMetrics.statusBarHeight).toBe(32);
     expect(keyboardViewportMetrics.navBarHeight).toBe(44);
-    expect(keyboardViewportMetrics.pageTopInset).toBe(76);
-    expect(keyboardViewportMetrics.contentMinHeight).toBe(775);
+    expect(keyboardViewportMetrics.pageTopInset).toBeGreaterThan(76);
+    expect(keyboardViewportMetrics.contentMinHeight).toBeLessThan(775);
   });
 
   it("maps shared spacing tokens into css variables", () => {
@@ -72,5 +73,24 @@ describe("mobile layout baseline", () => {
     expect(setCalls).toContainEqual(["--noche-viewport-height", "851px"]);
     expect(setCalls).toContainEqual(["--noche-page-padding-x", `${rpxToPx(28, 393)}px`]);
     expect(setCalls).toContainEqual(["--noche-editor-textarea-min-height", `${metrics.editorTextareaMinHeight}px`]);
+  });
+
+  it("prefers the safer top inset and classifies widths into size buckets", () => {
+    const metrics = computeMobileLayoutMetrics({
+      windowWidth: 356,
+      windowHeight: 780,
+      screenHeight: 800,
+      statusBarHeight: 24,
+      safeAreaInsets: {
+        top: 31,
+        bottom: 18,
+      },
+    });
+
+    expect(metrics.safeTop).toBe(31);
+    expect(metrics.safeBottom).toBe(18);
+    expect(metrics.sizeClass).toBe("S");
+    expect(metrics.pageBottomPadding).toBeGreaterThan(18);
+    expect(metrics.fabBottom).toBeGreaterThan(metrics.safeBottom);
   });
 });

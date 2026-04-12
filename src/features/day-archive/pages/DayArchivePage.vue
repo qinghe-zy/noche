@@ -1,42 +1,52 @@
 <template>
-  <view class="day-archive-page">
-    <view class="day-archive-page__hero">
-      <text class="day-archive-page__eyebrow">{{ copy.dayArchive.eyebrow }}</text>
-      <text class="day-archive-page__title">{{ pageTitle }}</text>
-      <text class="day-archive-page__subtitle">{{ pageSubtitle }}</text>
-    </view>
+  <PageScaffold
+    class="day-archive-page"
+    :title="pageTitle"
+    :show-left="true"
+    :topbar-bordered="true"
+    :max-width="'720px'"
+    scrollable
+    @left-tap="handleGoBack"
+  >
+    <view class="day-archive-page__content">
+      <view class="day-archive-page__hero">
+        <text class="day-archive-page__eyebrow">{{ copy.dayArchive.eyebrow }}</text>
+        <text class="day-archive-page__title">{{ pageTitle }}</text>
+        <text class="day-archive-page__subtitle">{{ pageSubtitle }}</text>
+      </view>
 
-    <view v-if="calendarStore.error" class="day-archive-page__banner day-archive-page__banner--error">
-      <text>{{ calendarStore.error }}</text>
-    </view>
+      <view v-if="calendarStore.error" class="day-archive-page__banner day-archive-page__banner--error">
+        <text>{{ calendarStore.error }}</text>
+      </view>
 
-    <view v-if="calendarStore.isLoading" class="day-archive-page__state">
-      <text class="day-archive-page__state-text">{{ copy.dayArchive.loading }}</text>
-    </view>
+      <view v-if="calendarStore.isLoading" class="day-archive-page__state">
+        <text class="day-archive-page__state-text">{{ copy.dayArchive.loading }}</text>
+      </view>
 
-    <view v-else-if="entries.length === 0" class="day-archive-page__state">
-      <text class="day-archive-page__state-text">{{ emptyText }}</text>
-      <button class="day-archive-page__primary-button" @click="handleWriteDiary">
-        {{ copy.dayArchive.writeDiary }}
-      </button>
-    </view>
+      <view v-else-if="entries.length === 0" class="day-archive-page__state">
+        <text class="day-archive-page__state-text">{{ emptyText }}</text>
+        <button class="day-archive-page__primary-button" @click="handleWriteDiary">
+          {{ copy.dayArchive.writeDiary }}
+        </button>
+      </view>
 
-    <view v-else class="day-archive-page__list">
-      <view
-        v-for="entry in entries"
-        :key="entry.id"
-        class="day-archive-page__item"
-        @click="handleOpenEntry(entry.id)"
-      >
-        <view class="day-archive-page__item-head">
-          <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type, settingsStore.locale) }}</text>
-          <text class="day-archive-page__item-date">{{ resolveEntryDateLabel(entry) }}</text>
+      <view v-else class="day-archive-page__list">
+        <view
+          v-for="entry in entries"
+          :key="entry.id"
+          class="day-archive-page__item"
+          @click="handleOpenEntry(entry.id)"
+        >
+          <view class="day-archive-page__item-head">
+            <text class="day-archive-page__item-type">{{ formatEntryTypeLabel(entry.type, settingsStore.locale) }}</text>
+            <text class="day-archive-page__item-date">{{ resolveEntryDateLabel(entry) }}</text>
+          </view>
+          <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
+          <text class="day-archive-page__item-content">{{ entry.content }}</text>
         </view>
-        <text class="day-archive-page__item-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
-        <text class="day-archive-page__item-content">{{ entry.content }}</text>
       </view>
     </view>
-  </view>
+  </PageScaffold>
 </template>
 
 <script setup lang="ts">
@@ -47,6 +57,8 @@ import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { lockRecordDate } from "@/domain/time/rules";
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDate } from "@/shared/utils/date";
+import { navigateBackOrFallback } from "@/shared/utils/navigation";
+import PageScaffold from "@/shared/ui/PageScaffold.vue";
 import { t } from "@/shared/i18n";
 import {
   formatDayArchiveEmptyText,
@@ -88,14 +100,16 @@ function handleWriteDiary(): void {
   });
 }
 
+function handleGoBack(): void {
+  navigateBackOrFallback({
+    fallbackUrl: `/${ROUTES.calendar}`,
+  });
+}
+
 onLoad((query) => {
   recordDate.value = typeof query?.recordDate === "string" && query.recordDate.trim()
     ? query.recordDate
     : lockRecordDate();
-
-  uni.setNavigationBarTitle({
-    title: formatDayArchiveTitle(recordDate.value, settingsStore.locale),
-  });
 
   void calendarStore.fetchSelectedDateEntries(recordDate.value);
 });
@@ -103,60 +117,59 @@ onLoad((query) => {
 
 <style scoped>
 .day-archive-page {
-  min-height: 100vh;
-  padding: 56rpx 32rpx 72rpx;
   background: var(--noche-bg);
+  color: var(--noche-text);
 }
 
-.day-archive-page__hero,
-.day-archive-page__banner,
-.day-archive-page__list,
-.day-archive-page__state {
-  position: relative;
+.day-archive-page__content {
+  padding: 14rpx var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .day-archive-page__hero {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
-  margin-bottom: 28rpx;
+  gap: 14rpx;
 }
 
 .day-archive-page__eyebrow,
 .day-archive-page__item-type,
 .day-archive-page__item-date {
-  font-size: 22rpx;
-  letter-spacing: 4rpx;
+  font-family: "Inter", sans-serif;
+  font-size: 18rpx;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(34, 34, 34, 0.58);
+  color: var(--noche-ink-subtle);
+  padding-left: 0.22em;
 }
 
 .day-archive-page__title {
-  font-size: 58rpx;
-  line-height: 1.1;
+  font-size: 52rpx;
+  line-height: 1.08;
   font-weight: 600;
-  color: #1d1d1d;
+  color: var(--noche-text);
 }
 
 .day-archive-page__subtitle {
-  font-size: 28rpx;
-  line-height: 1.6;
-  color: rgba(34, 34, 34, 0.68);
+  font-size: 24rpx;
+  line-height: 1.72;
+  color: var(--noche-ink-soft);
 }
 
 .day-archive-page__banner {
-  margin-bottom: 24rpx;
   padding: 18rpx 22rpx;
   border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1rpx solid rgba(34, 34, 34, 0.06);
-  color: rgba(34, 34, 34, 0.76);
-  font-size: 24rpx;
+  background: color-mix(in srgb, var(--noche-surface) 96%, transparent);
+  border: 1px solid color-mix(in srgb, var(--noche-border) 72%, transparent);
+  color: var(--noche-ink-soft);
+  font-size: 22rpx;
 }
 
 .day-archive-page__banner--error {
-  background: rgba(136, 49, 49, 0.08);
-  color: #7d3535;
+  background: var(--noche-danger-soft);
+  color: var(--noche-danger);
 }
 
 .day-archive-page__state,
@@ -164,7 +177,7 @@ onLoad((query) => {
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
   background: var(--noche-surface);
-  border: 1rpx solid var(--noche-border);
+  border: 1px solid var(--noche-border);
 }
 
 .day-archive-page__state {
@@ -176,15 +189,15 @@ onLoad((query) => {
 }
 
 .day-archive-page__state-text {
-  font-size: 28rpx;
-  line-height: 1.6;
-  color: rgba(34, 34, 34, 0.68);
+  font-size: 24rpx;
+  line-height: 1.72;
+  color: var(--noche-ink-soft);
 }
 
 .day-archive-page__list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .day-archive-page__item-head {
@@ -197,18 +210,18 @@ onLoad((query) => {
 .day-archive-page__item-title {
   display: block;
   margin-top: 14rpx;
-  font-size: 34rpx;
-  line-height: 1.3;
+  font-size: 32rpx;
+  line-height: 1.36;
   font-weight: 600;
-  color: #1d1d1d;
+  color: var(--noche-text);
 }
 
 .day-archive-page__item-content {
   display: block;
   margin-top: 14rpx;
-  font-size: 28rpx;
-  line-height: 1.7;
-  color: rgba(34, 34, 34, 0.74);
+  font-size: 22rpx;
+  line-height: 1.76;
+  color: var(--noche-ink-soft);
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -217,12 +230,12 @@ onLoad((query) => {
 }
 
 .day-archive-page__primary-button {
-  min-width: 240rpx;
+  min-width: 260rpx;
   min-height: 88rpx;
   border: none;
   border-radius: 999rpx;
-  background: #1f1f1f;
-  color: #faf7f2;
-  font-size: 28rpx;
+  background: var(--noche-text);
+  color: var(--noche-bg);
+  font-size: 24rpx;
 }
 </style>

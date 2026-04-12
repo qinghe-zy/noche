@@ -20,7 +20,7 @@ describe("editor stitch parity", () => {
     const editorPage = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
 
     expect(editorPage).toContain("AppIcon");
-    expect(editorPage).toContain("TopbarIconButton");
+    expect(editorPage).toContain("SafeTopbar");
     expect(editorPage).not.toContain("fonts.googleapis.com");
   });
 
@@ -57,7 +57,7 @@ describe("editor stitch parity", () => {
     expect(futureShell).toContain(".editor-page__canvas { padding: 0;");
     expect(futureShell).toContain("max-width: none;");
     expect(futureShell).toContain("min-height: 0;");
-    expect(futureShell).toContain("var(--noche-page-bottom-padding)");
+    expect(futureShell).toContain("var(--noche-safe-bottom)");
     expect(futureShell).toContain("box-shadow: none;");
     expect(futureShell).toContain("border: none;");
   });
