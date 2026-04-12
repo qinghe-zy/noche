@@ -1,39 +1,41 @@
 <template>
-  <view class="profile-page">
-    <scroll-view scroll-y class="profile-page__scroll">
-      <ProfileHero
-        :title="copy.profile.title"
-        :display-name="identity.displayName"
-        :signature="identity.signature"
-        :avatar-uri="identity.avatarUri"
-        :cover-uri="identity.coverUri"
-        @go-back="handleGoBack"
-        @edit-avatar="activeSheet = 'avatar-actions'"
-        @edit-profile="activeSheet = 'profile-actions'"
-      />
-
-      <view class="profile-page__content">
-        <view v-if="pageError" class="profile-page__banner">
-          <text class="profile-page__banner-text">{{ pageError }}</text>
-        </view>
-
-        <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
-
-        <ProfileMemoryAlbum
-          :items="visibleItems"
-          :is-loading="albumLoading"
-          :has-any-record="stats.recordedDays > 0"
-          :show-all-entry="hasMore"
-          @open-item="openViewer"
-          @open-all="handleOpenAllAlbum"
+  <view class="profile-page noche-mobile-page">
+    <scroll-view scroll-y class="profile-page__scroll noche-mobile-scroll">
+      <view class="profile-page__scroll-fill noche-mobile-scroll-fill">
+        <ProfileHero
+          :title="copy.profile.title"
+          :display-name="identity.displayName"
+          :signature="identity.signature"
+          :avatar-uri="identity.avatarUri"
+          :cover-uri="identity.coverUri"
+          @go-back="handleGoBack"
+          @edit-avatar="activeSheet = 'avatar-actions'"
+          @edit-profile="activeSheet = 'profile-actions'"
         />
 
-        <view class="profile-page__menu">
-          <ProfileActionList :items="actionItems" @select="handleSelectAction" />
-        </view>
+        <view class="profile-page__content">
+          <view v-if="pageError" class="profile-page__banner">
+            <text class="profile-page__banner-text">{{ pageError }}</text>
+          </view>
 
-        <view class="profile-page__footer">
-          <text class="profile-page__footer-text">{{ footerText }}</text>
+          <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
+
+          <ProfileMemoryAlbum
+            :items="visibleItems"
+            :is-loading="albumLoading"
+            :has-any-record="stats.recordedDays > 0"
+            :show-all-entry="hasMore"
+            @open-item="openViewer"
+            @open-all="handleOpenAllAlbum"
+          />
+
+          <view class="profile-page__menu">
+            <ProfileActionList :items="actionItems" @select="handleSelectAction" />
+          </view>
+
+          <view class="profile-page__footer">
+            <text class="profile-page__footer-text">{{ footerText }}</text>
+          </view>
         </view>
       </view>
     </scroll-view>
@@ -215,7 +217,35 @@ function resolveBackupErrorMessage(error: unknown): string {
     return copy.value.profile.backupUnavailable;
   }
 
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
   return copy.value.profile.exportFailed;
+}
+
+function buildExportSuccessCopy(exportPath: string): string {
+  if (settingsStore.locale === "en-US") {
+    return `Saved to:\n${exportPath}\n\nNext time, open Local Backup -> Restore from backup, then choose this folder from the backup list.`;
+  }
+
+  return `已保存到：\n${exportPath}\n\n下次需要恢复时，进入「本地备份」->「从本地备份恢复」，再从列表里选择这一份备份。`;
+}
+
+function buildRestoreConfirmCopy(backupPath: string): string {
+  if (settingsStore.locale === "en-US") {
+    return `${copy.value.profile.restoreConfirmCopy}\n\nBackup location:\n${backupPath}\n\nPlease make sure this is the backup you want to restore.`;
+  }
+
+  return `${copy.value.profile.restoreConfirmCopy}\n\n备份位置：\n${backupPath}\n\n请确认这就是你要恢复的那一份。`;
+}
+
+function buildRestoreSuccessCopy(backupPath: string): string {
+  if (settingsStore.locale === "en-US") {
+    return `Restored from:\n${backupPath}\n\nThe app will restart now. Re-open it and check whether your pages, images, and settings are back.`;
+  }
+
+  return `已从以下备份恢复：\n${backupPath}\n\n应用即将自动重启。重启后请回到应用里检查记录、图片和设置是否都已恢复。`;
 }
 
 const actionItems = computed<ProfileActionItem[]>(() => [
@@ -553,7 +583,7 @@ async function handleSheetSelect(key: string): Promise<void> {
             value: result.createdAt,
           });
           await refreshIdentity();
-          openInfoDialog(copy.value.profile.exportSuccess, result.absolutePath);
+          openInfoDialog(copy.value.profile.exportSuccess, buildExportSuccessCopy(result.absolutePath));
         } catch (error) {
           openInfoDialog(copy.value.profile.exportFailed, resolveBackupErrorMessage(error));
         }
@@ -580,7 +610,7 @@ async function handleSheetSelect(key: string): Promise<void> {
       }
       openConfirmDialog(
         copy.value.profile.restoreConfirmTitle,
-        `${copy.value.profile.restoreConfirmCopy}\n\n${pendingRestoreBackup.value.absolutePath}`,
+        buildRestoreConfirmCopy(pendingRestoreBackup.value.absolutePath),
         [
           {
             key: "cancel",
@@ -601,7 +631,7 @@ async function handleSheetSelect(key: string): Promise<void> {
 
           try {
             await importLocalBackup(pendingRestoreBackup.value.backupId);
-            openInfoDialog(copy.value.profile.restoreSuccess, pendingRestoreBackup.value.absolutePath);
+            openInfoDialog(copy.value.profile.restoreSuccess, buildRestoreSuccessCopy(pendingRestoreBackup.value.absolutePath));
             setTimeout(() => {
               restartAppAfterRestore();
             }, 300);
@@ -710,37 +740,36 @@ onUnmounted(() => {
 
 <style scoped>
 .profile-page {
-  min-height: 100vh;
   background: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
-.profile-page__scroll {
-  min-height: 100vh;
+.profile-page__scroll-fill {
+  gap: 0;
 }
 
 .profile-page__content {
-  padding: 12rpx 24rpx 88rpx;
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
+  gap: 24rpx;
 }
 
 .profile-page__banner {
   padding: 16rpx 18rpx;
   border-radius: 18rpx;
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--noche-danger-soft);
 }
 
 .profile-page__banner-text {
   font-size: 22rpx;
   line-height: 1.7;
-  color: #8a3d3a;
+  color: var(--noche-danger);
 }
 
 .profile-page__footer {
-  padding-top: 16rpx;
+  padding-top: 10rpx;
   display: flex;
   justify-content: center;
 }

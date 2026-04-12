@@ -84,20 +84,20 @@ const showEmptyHint = computed(() =>
   top: 14rpx;
   width: 1rpx;
   height: 42rpx;
-  background: rgba(177, 179, 171, 0.18);
+  background: var(--noche-paper-line);
 }
 
 .profile-stats__value {
   font-size: 48rpx;
   line-height: 1.1;
   font-weight: 400;
-  color: #31332e;
+  color: var(--noche-ink-strong);
 }
 
 .profile-stats__label {
   font-size: 17rpx;
   line-height: 1.45;
-  color: rgba(99, 95, 85, 0.54);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.06em;
 }
 
@@ -107,6 +107,6 @@ const showEmptyHint = computed(() =>
   font-size: 20rpx;
   line-height: 1.7;
   text-align: left;
-  color: rgba(99, 95, 85, 0.66);
+  color: var(--noche-ink-soft);
 }
 </style>

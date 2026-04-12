@@ -1,13 +1,13 @@
 <template>
-  <view class="profile-album-page">
+  <view class="profile-album-page noche-mobile-page">
     <view class="profile-album-page__topbar">
       <TopbarIconButton @tap="handleGoBack" />
       <text class="profile-album-page__title">{{ copy.profile.albumTitle }}</text>
       <view class="profile-album-page__spacer"></view>
     </view>
 
-    <scroll-view scroll-y class="profile-album-page__scroll">
-      <view class="profile-album-page__content">
+    <scroll-view scroll-y class="profile-album-page__scroll noche-mobile-scroll">
+      <view class="profile-album-page__content noche-mobile-scroll-fill">
         <ProfileMemoryAlbum
           :title="copy.profile.albumAll"
           :subtitle="copy.profile.albumSubtitle"
@@ -79,7 +79,6 @@ onShow(() => {
 
 <style scoped>
 .profile-album-page {
-  min-height: 100vh;
   background: var(--noche-bg);
   color: var(--noche-text);
 }
@@ -88,8 +87,10 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: var(--noche-nav-bar-height);
   gap: 16rpx;
-  padding: 40rpx 32rpx 18rpx;
+  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
+  flex-shrink: 0;
 }
 
 .profile-album-page__title {
@@ -105,13 +106,10 @@ onShow(() => {
   height: 72rpx;
 }
 
-.profile-album-page__scroll {
-  min-height: calc(100vh - 118rpx);
-}
-
 .profile-album-page__content {
   max-width: 720rpx;
+  min-height: var(--noche-content-min-height);
   margin: 0 auto;
-  padding: 12rpx 30rpx 88rpx;
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
 }
 </style>

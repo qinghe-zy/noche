@@ -28,7 +28,7 @@
       >
         <image
           class="profile-album__image"
-          :src="item.localUri"
+          :src="normalizeLocalImageSrc(item.localUri)"
           mode="aspectFill"
           lazy-load
         />
@@ -56,6 +56,7 @@ import { computed } from "vue";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { t } from "@/shared/i18n";
 import { formatProfileRecordDate, type ProfileAlbumItem } from "@/features/profile/profileData";
+import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 const settingsStore = useSettingsStore();
 const copy = computed(() => t(settingsStore.locale));
@@ -104,7 +105,7 @@ defineEmits<{
 .profile-album__title {
   font-size: 29rpx;
   line-height: 1.3;
-  color: #31332e;
+  color: var(--noche-ink-strong);
   letter-spacing: 0.08em;
   padding-left: 0.08em;
 }
@@ -114,7 +115,7 @@ defineEmits<{
 .profile-album__date {
   font-size: 17rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.56);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.04em;
 }
 
@@ -138,7 +139,7 @@ defineEmits<{
   width: 100%;
   aspect-ratio: 1;
   border-radius: 20rpx;
-  background: rgba(235, 231, 224, 0.88);
+  background: var(--noche-card-muted);
 }
 
 .profile-album__state {
@@ -155,17 +156,17 @@ defineEmits<{
 .profile-album__state-title {
   font-size: 23rpx;
   line-height: 1.4;
-  color: #4d4943;
+  color: var(--noche-ink-strong);
 }
 
 .profile-album__state-text {
   font-size: 19rpx;
   line-height: 1.72;
-  color: rgba(99, 95, 85, 0.6);
+  color: var(--noche-ink-faint);
 }
 
 .profile-album__state--empty {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.12);
-  border-bottom: 1rpx solid rgba(177, 179, 171, 0.08);
+  border-top: 1rpx solid color-mix(in srgb, var(--noche-border) 48%, transparent);
+  border-bottom: 1rpx solid color-mix(in srgb, var(--noche-border) 36%, transparent);
 }
 </style>

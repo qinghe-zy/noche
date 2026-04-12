@@ -34,7 +34,7 @@ defineEmits<{
 
 <style scoped>
 .profile-action-list {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.14);
+  border-top: 1rpx solid color-mix(in srgb, var(--noche-border) 58%, transparent);
 }
 
 .profile-action-list__item {
@@ -46,7 +46,7 @@ defineEmits<{
 }
 
 .profile-action-list__item + .profile-action-list__item {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.09);
+  border-top: 1rpx solid color-mix(in srgb, var(--noche-border) 42%, transparent);
 }
 
 .profile-action-list__copy {
@@ -60,7 +60,7 @@ defineEmits<{
 .profile-action-list__title {
   font-size: 25rpx;
   line-height: 1.35;
-  color: #31332e;
+  color: var(--noche-ink-strong);
   letter-spacing: 0.02em;
 }
 
@@ -68,7 +68,7 @@ defineEmits<{
 .profile-action-list__value {
   font-size: 17rpx;
   line-height: 1.58;
-  color: rgba(99, 95, 85, 0.58);
+  color: var(--noche-ink-faint);
 }
 
 .profile-action-list__meta {
@@ -86,6 +86,6 @@ defineEmits<{
 .profile-action-list__icon {
   width: 24rpx;
   height: 24rpx;
-  color: rgba(138, 129, 120, 0.46);
+  color: var(--noche-ink-faint);
 }
 </style>

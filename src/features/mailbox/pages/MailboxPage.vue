@@ -1,5 +1,5 @@
 <template>
-  <view class="mailbox-page">
+  <view class="mailbox-page noche-mobile-page">
     <view class="mailbox-page__topbar">
       <view class="mailbox-page__topbar-inner">
         <TopbarIconButton @tap="handleGoHome" />
@@ -8,7 +8,7 @@
       </view>
     </view>
 
-    <view class="mailbox-page__main">
+    <view class="mailbox-page__main noche-mobile-main">
       <view class="mailbox-page__switcher">
         <view class="mailbox-page__tab-group mailbox-page__tab-group--primary">
           <button
@@ -42,108 +42,110 @@
         </view>
       </view>
 
-      <scroll-view scroll-y class="mailbox-page__content">
-        <view v-if="mailboxStore.isLoading" class="mailbox-page__state">
-          <text class="mailbox-page__state-text">{{ copy.mailbox.loading }}</text>
-        </view>
+      <scroll-view scroll-y class="mailbox-page__content noche-mobile-scroll">
+        <view class="mailbox-page__content-fill noche-mobile-scroll-fill">
+          <view v-if="mailboxStore.isLoading" class="mailbox-page__state">
+            <text class="mailbox-page__state-text">{{ copy.mailbox.loading }}</text>
+          </view>
 
-        <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
-          <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
-          <button class="mailbox-page__retry" @click="refresh">{{ copy.mailbox.reload }}</button>
-        </view>
+          <view v-else-if="mailboxStore.error" class="mailbox-page__state mailbox-page__state--error">
+            <text class="mailbox-page__state-text">{{ mailboxStore.error }}</text>
+            <button class="mailbox-page__retry" @click="refresh">{{ copy.mailbox.reload }}</button>
+          </view>
 
-        <view v-else-if="activeSection.entries.length === 0" class="mailbox-page__state">
-          <text class="mailbox-page__state-text">
-            {{ activeSection.emptyText }}
-          </text>
-        </view>
+          <view v-else-if="activeSection.entries.length === 0" class="mailbox-page__state">
+            <text class="mailbox-page__state-text">
+              {{ activeSection.emptyText }}
+            </text>
+          </view>
 
-        <view v-else class="mailbox-page__module-list">
-          <view class="mailbox-page__module">
-            <view class="mailbox-page__module-head">
-              <view class="mailbox-page__module-tab">
-                <text class="mailbox-page__module-tab-text">{{ activeSection.title }}</text>
-                <view class="mailbox-page__module-tab-underline"></view>
+          <view v-else class="mailbox-page__module-list">
+            <view class="mailbox-page__module">
+              <view class="mailbox-page__module-head">
+                <view class="mailbox-page__module-tab">
+                  <text class="mailbox-page__module-tab-text">{{ activeSection.title }}</text>
+                  <view class="mailbox-page__module-tab-underline"></view>
+                </view>
+                <text class="mailbox-page__module-count">{{ activeSection.entries.length }}</text>
               </view>
-              <text class="mailbox-page__module-count">{{ activeSection.entries.length }}</text>
-            </view>
 
-            <view class="mailbox-page__list">
-              <view
-                v-for="entry in activeSection.entries"
-                :key="entry.id"
-                class="mailbox-page__entry-shell"
-                :class="activeSection.stackClass"
-                @click="handleEntryClick(entry)"
-              >
+              <view class="mailbox-page__list">
                 <view
-                  class="mailbox-page__entry-card"
-                  :class="activeSection.cardClass"
+                  v-for="entry in activeSection.entries"
+                  :key="entry.id"
+                  class="mailbox-page__entry-shell"
+                  :class="activeSection.stackClass"
+                  @click="handleEntryClick(entry)"
                 >
-                  <view class="mailbox-page__entry-head">
-                    <view class="mailbox-page__entry-badge">
-                      <view class="mailbox-page__entry-dot"></view>
-                      <text class="mailbox-page__entry-type">{{ formatTypeLabel(entry.type) }}</text>
-                    </view>
-                    <view class="mailbox-page__entry-meta-cluster">
-                      <text class="mailbox-page__entry-date">{{ formatDateLabel(entry, activeSection.dateTab) }}</text>
-                      <view
-                        v-if="hasDiaryPreludeGlyphs(entry)"
-                        class="mailbox-page__entry-prelude"
-                      >
-                        <DiaryPreludeGlyph
-                          v-if="entry.diaryPrelude?.weatherCode"
-                          class="mailbox-page__entry-prelude-glyph"
-                          kind="weather"
-                          :code="entry.diaryPrelude.weatherCode"
-                        />
-                        <DiaryPreludeGlyph
-                          v-if="entry.diaryPrelude?.moodCode"
-                          class="mailbox-page__entry-prelude-glyph"
-                          kind="mood"
-                          :code="entry.diaryPrelude.moodCode"
-                        />
+                  <view
+                    class="mailbox-page__entry-card"
+                    :class="activeSection.cardClass"
+                  >
+                    <view class="mailbox-page__entry-head">
+                      <view class="mailbox-page__entry-badge">
+                        <view class="mailbox-page__entry-dot"></view>
+                        <text class="mailbox-page__entry-type">{{ formatTypeLabel(entry.type) }}</text>
+                      </view>
+                      <view class="mailbox-page__entry-meta-cluster">
+                        <text class="mailbox-page__entry-date">{{ formatDateLabel(entry, activeSection.dateTab) }}</text>
+                        <view
+                          v-if="hasDiaryPreludeGlyphs(entry)"
+                          class="mailbox-page__entry-prelude"
+                        >
+                          <DiaryPreludeGlyph
+                            v-if="entry.diaryPrelude?.weatherCode"
+                            class="mailbox-page__entry-prelude-glyph"
+                            kind="weather"
+                            :code="entry.diaryPrelude.weatherCode"
+                          />
+                          <DiaryPreludeGlyph
+                            v-if="entry.diaryPrelude?.moodCode"
+                            class="mailbox-page__entry-prelude-glyph"
+                            kind="mood"
+                            :code="entry.diaryPrelude.moodCode"
+                          />
+                        </view>
                       </view>
                     </view>
+
+                    <template v-if="activeSection.renderMode === 'paper'">
+                      <text class="mailbox-page__entry-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
+                      <text class="mailbox-page__entry-excerpt">{{ formatExcerpt(entry) }}</text>
+                      <view class="mailbox-page__entry-foot">
+                        <text class="mailbox-page__entry-meta">{{ activeSection.metaLabel }}</text>
+                        <AppIcon :name="resolveMailboxMetaIcon(activeSection.metaIcon)" class="mailbox-page__entry-icon" />
+                      </view>
+                    </template>
+
+                    <template v-else>
+                      <view class="mailbox-page__sealed-center">
+                        <view class="mailbox-page__sealed-lock">
+                          <AppIcon name="lock" class="mailbox-page__sealed-lock-icon" />
+                          <text class="mailbox-page__sealed-lock-label">{{ settingsStore.locale === "en-US" ? "Reserved" : "保留中" }}</text>
+                        </view>
+
+                        <view class="mailbox-page__sealed-icon-wrap">
+                          <AppIcon name="mail" class="mailbox-page__sealed-icon" />
+                        </view>
+
+                        <text class="mailbox-page__sealed-title">{{ formatMailboxLockedTitle(entry, settingsStore.locale) }}</text>
+                      </view>
+
+                      <view class="mailbox-page__sealed-bottom">
+                        <text class="mailbox-page__sealed-copy">{{ formatExcerpt(entry) }}</text>
+                        <view class="mailbox-page__sealed-wax">
+                          <view class="mailbox-page__sealed-wax-core"></view>
+                        </view>
+                      </view>
+                    </template>
                   </view>
-
-                  <template v-if="activeSection.renderMode === 'paper'">
-                    <text class="mailbox-page__entry-title">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
-                    <text class="mailbox-page__entry-excerpt">{{ formatExcerpt(entry) }}</text>
-                    <view class="mailbox-page__entry-foot">
-                      <text class="mailbox-page__entry-meta">{{ activeSection.metaLabel }}</text>
-                      <AppIcon :name="resolveMailboxMetaIcon(activeSection.metaIcon)" class="mailbox-page__entry-icon" />
-                    </view>
-                  </template>
-
-                  <template v-else>
-                    <view class="mailbox-page__sealed-center">
-                      <view class="mailbox-page__sealed-lock">
-                        <AppIcon name="lock" class="mailbox-page__sealed-lock-icon" />
-                        <text class="mailbox-page__sealed-lock-label">{{ settingsStore.locale === "en-US" ? "Reserved" : "保留中" }}</text>
-                      </view>
-
-                      <view class="mailbox-page__sealed-icon-wrap">
-                        <AppIcon name="mail" class="mailbox-page__sealed-icon" />
-                      </view>
-
-                      <text class="mailbox-page__sealed-title">{{ formatMailboxLockedTitle(entry, settingsStore.locale) }}</text>
-                    </view>
-
-                    <view class="mailbox-page__sealed-bottom">
-                      <text class="mailbox-page__sealed-copy">{{ formatExcerpt(entry) }}</text>
-                      <view class="mailbox-page__sealed-wax">
-                        <view class="mailbox-page__sealed-wax-core"></view>
-                      </view>
-                    </view>
-                  </template>
                 </view>
               </view>
             </view>
           </view>
-        </view>
 
-        <view class="mailbox-page__footer"></view>
+          <view class="mailbox-page__footer"></view>
+        </view>
       </scroll-view>
     </view>
 
@@ -436,27 +438,25 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page {
-  min-height: 100vh;
   background-color: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   position: relative;
-  overflow-x: hidden;
 }
 
 .mailbox-page__topbar {
-  position: sticky;
-  top: 0;
   width: 100%;
   background: var(--noche-surface);
   z-index: 20;
+  flex-shrink: 0;
 }
 
 .mailbox-page__topbar-inner {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 40rpx 32rpx 24rpx;
+  min-height: var(--noche-nav-bar-height);
+  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -473,18 +473,19 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__main {
   width: 100%;
   max-width: 640px;
+  min-height: var(--noche-content-min-height);
   margin: 0 auto;
-  padding: 4px 24px 88px;
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) 0;
 }
 
 .mailbox-page__switcher {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .mailbox-page__switcher--secondary {
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 
 .mailbox-page__tab-group {
@@ -498,18 +499,22 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-group--primary {
-  width: 312px;
-  min-height: 46px;
+  width: min(100%, 296px);
+  min-height: 44px;
 }
 
 .mailbox-page__tab-group--secondary {
-  width: 232px;
-  min-height: 38px;
+  width: min(100%, 216px);
+  min-height: 36px;
   border-radius: 9999px;
 }
 
 .mailbox-page__content {
-  min-height: calc(100vh - 180px);
+  padding-bottom: var(--noche-page-bottom-padding);
+}
+
+.mailbox-page__content-fill {
+  gap: 0;
 }
 
 .mailbox-page__tab-pill {
@@ -562,22 +567,24 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__state {
-  padding: 120px 12px;
+  min-height: var(--noche-empty-state-min-height);
+  padding: 52px 12px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 16px;
 }
 
 .mailbox-page__state-text {
   font-size: 15px;
   line-height: 1.8;
   text-align: center;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-ink-soft);
 }
 
 .mailbox-page__state--error .mailbox-page__state-text {
-  color: #9f403d;
+  color: var(--noche-danger);
 }
 
 .mailbox-page__retry {
@@ -592,14 +599,14 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__module-list {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 22px;
 }
 
 .mailbox-page__module {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-top: 4px;
+  gap: 12px;
+  padding-top: 2px;
 }
 
 .mailbox-page__module-head {
@@ -616,7 +623,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.18em;
-  color: rgba(121, 124, 117, 0.74);
+  color: var(--noche-ink-subtle);
   padding-left: 0.18em;
 }
 
@@ -651,13 +658,13 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__module-empty-text {
   font-size: 13px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--noche-ink-faint);
 }
 
 .mailbox-page__list {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .mailbox-page__entry-shell {
@@ -674,7 +681,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-card {
   background: var(--noche-surface);
   border: 1px solid var(--noche-border);
-  padding: 24px 22px;
+  padding: 20px 18px;
   border-radius: 18px;
 }
 
@@ -688,7 +695,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .mailbox-page__entry-meta-cluster {
@@ -706,7 +713,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-dot {
   width: 4px;
   height: 4px;
-  background: rgba(177, 179, 171, 0.7);
+  background: var(--noche-ink-subtle);
 }
 
 .mailbox-page__entry-type,
@@ -718,7 +725,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(121, 124, 117, 0.72);
+  color: var(--noche-ink-subtle);
 }
 
 .mailbox-page__entry-type,
@@ -731,7 +738,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--noche-ink-subtle);
 }
 
 .mailbox-page__entry-prelude-glyph {
@@ -741,23 +748,23 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page__entry-title {
   display: block;
-  font-size: 22px;
-  line-height: 1.5;
+  font-size: 19px;
+  line-height: 1.4;
   color: var(--noche-text);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .mailbox-page__entry-excerpt {
   display: block;
-  font-size: 13px;
-  line-height: 1.9;
-  color: rgba(99, 95, 85, 0.82);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--noche-ink-soft);
 }
 
 .mailbox-page__entry-foot {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(221, 212, 200, 0.8);
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--noche-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -766,14 +773,14 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-icon {
   width: 16px;
   height: 16px;
-  color: rgba(177, 179, 171, 0.62);
+  color: var(--noche-ink-ghost);
 }
 
 .mailbox-page__sealed-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2px 0 14px;
+  padding: 0 0 10px;
 }
 
 .mailbox-page__sealed-lock {
@@ -782,7 +789,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   align-items: center;
   gap: 6px;
   opacity: 0.6;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .mailbox-page__sealed-lock-icon {
@@ -791,7 +798,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-icon-wrap {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   opacity: 0.24;
 }
 
@@ -804,7 +811,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.12em;
-  color: rgba(87, 83, 73, 0.92);
+  color: var(--noche-ink-strong);
   padding-left: 0.12em;
   text-align: center;
 }
@@ -813,22 +820,22 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .mailbox-page__sealed-copy {
   font-size: 12px;
   line-height: 1.6;
   text-align: center;
-  color: rgba(99, 95, 85, 0.68);
+  color: var(--noche-ink-faint);
 }
 
 .mailbox-page__sealed-wax {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.12);
-  border: 1px solid rgba(138, 129, 120, 0.2);
+  background: color-mix(in srgb, var(--noche-accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--noche-accent) 28%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -838,24 +845,24 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 5px;
   height: 5px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.28);
+  background: color-mix(in srgb, var(--noche-accent) 36%, transparent);
 }
 
 .mailbox-page__footer {
-  height: 20px;
+  height: 8px;
 }
 
 .mailbox-page__fab {
   position: fixed;
-  right: 24px;
-  bottom: 28px;
+  right: calc(var(--noche-page-padding-x) + 4px);
+  bottom: var(--noche-fab-bottom);
   width: 56px;
   height: 56px;
   border: none;
   border-radius: 18px;
   background: var(--noche-text);
   color: var(--noche-bg);
-  box-shadow: 0 8px 18px rgba(49, 51, 46, 0.1);
+  box-shadow: 0 8px 18px rgba(var(--noche-paper-shadow-rgb), 0.2);
   display: flex;
   align-items: center;
   justify-content: center;

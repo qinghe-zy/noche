@@ -30,6 +30,46 @@ export function collectManagedLocalResourcePaths(
     .filter(isManagedLocalFile);
 }
 
+function normalizeFileProtocol(localUri: string): string {
+  if (/^file:\/\//iu.test(localUri)) {
+    return localUri;
+  }
+
+  if (/^(\/storage\/|\/var\/mobile\/|\/data\/user\/|\/data\/data\/)/iu.test(localUri)) {
+    return `file://${localUri}`;
+  }
+
+  return localUri;
+}
+
+export function normalizeLocalImageSrc(localUri: string | null | undefined): string {
+  const trimmed = localUri?.trim() ?? "";
+
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/^(data:|https?:|blob:)/iu.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (
+    typeof plus !== "undefined"
+    && plus.io
+    && typeof plus.io.convertLocalFileSystemURL === "function"
+    && /^(_doc\/|_documents\/)/iu.test(trimmed)
+  ) {
+    try {
+      const converted = plus.io.convertLocalFileSystemURL(trimmed);
+      return normalizeFileProtocol(converted || trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
+
+  return normalizeFileProtocol(trimmed);
+}
+
 export async function removeManagedLocalFiles(paths: string[]): Promise<void> {
   if (!paths.length || typeof uni === "undefined" || typeof uni.removeSavedFile !== "function") {
     return;

@@ -85,6 +85,17 @@ export function createSQLiteClient(
   let transactionDepth = 0;
 
   async function ensureOpen(): Promise<void> {
+    if (openPromise && typeof plus !== "undefined" && plus.sqlite) {
+      const stillOpen = plus.sqlite.isOpenDatabase({
+        name: config.name,
+        path: config.path,
+      });
+
+      if (!stillOpen) {
+        openPromise = null;
+      }
+    }
+
     if (openPromise) {
       await openPromise;
       return;

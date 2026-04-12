@@ -329,6 +329,64 @@ describe("draft store", () => {
     });
   });
 
+  it("does not delete managed attachment files when formalizing a draft into an entry", async () => {
+    const removeSavedFile = vi.fn(({ success }: { success?: () => void }) => {
+      success?.();
+    });
+    vi.stubGlobal("uni", {
+      removeSavedFile,
+    });
+    const draftStore = useDraftStore();
+
+    await draftStore.openDraft({
+      type: "jotting",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "",
+      attachments: [
+        createImageAttachment({
+          draftKey: "draft_jotting",
+          localUri: "_doc/noche/formalized-image-1.png",
+        }),
+      ],
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+
+    expect(entry?.attachments?.[0]?.localUri).toBe("_doc/noche/formalized-image-1.png");
+    expect(removeSavedFile).not.toHaveBeenCalled();
+  });
+
+  it("can reopen a formalized image entry with attachments still present for read mode", async () => {
+    const draftStore = useDraftStore();
+    const entryStore = useEntryStore();
+
+    await draftStore.openDraft({
+      type: "diary",
+      recordDate: "2026-04-10",
+    });
+    await draftStore.saveActiveDraft({
+      title: "",
+      content: "配图日记",
+      attachments: [
+        createImageAttachment({
+          draftKey: "draft_diary_2026-04-10",
+          localUri: "_doc/noche/reopen-image-1.png",
+        }),
+      ],
+    });
+
+    const entry = await draftStore.saveActiveDraftAsEntry();
+    const reopened = entry ? await entryStore.fetchEntryById(entry.id) : null;
+
+    expect(reopened?.attachments).toEqual([
+      expect.objectContaining({
+        localUri: "_doc/noche/reopen-image-1.png",
+      }),
+    ]);
+  });
+
   it("formalizes diary prelude into an entry and restores it on resume", async () => {
     const draftStore = useDraftStore();
     const entryStore = useEntryStore();

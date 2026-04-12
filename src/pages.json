@@ -9,7 +9,10 @@
     {
       "path": "features/editor/pages/EditorPage",
       "style": {
-        "navigationStyle": "custom"
+        "navigationStyle": "custom",
+        "app-plus": {
+          "softinputMode": "adjustResize"
+        }
       }
     },
     {

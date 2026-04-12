@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
 import { normalizeAttachments } from "@/domain/entry/rules";
+import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 export function useEditorImageAttachments() {
   const attachments = ref<Attachment[]>([]);
@@ -44,10 +45,16 @@ export function useEditorImageAttachments() {
       return;
     }
 
-    const urls = attachments.value.map((attachment) => attachment.localUri);
+    const urls = attachments.value
+      .map((attachment) => normalizeLocalImageSrc(attachment.localUri))
+      .filter(Boolean);
     const startIndex = startAttachmentId
       ? attachments.value.findIndex((attachment) => attachment.id === startAttachmentId)
       : 0;
+
+    if (!urls.length) {
+      return;
+    }
 
     uni.previewImage({
       urls,

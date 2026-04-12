@@ -22,7 +22,6 @@
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
     :continue-write-label="copy.editor.continueWrite"
-    :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
     :focused-attachment-id="focusedAttachmentId"
@@ -50,7 +49,6 @@
     :can-continue-write="canContinueWrite"
     :continue-write-label="copy.editor.continueWrite"
     :signature-line="copy.editor.jottingSignature"
-    :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
     :focused-attachment-id="focusedAttachmentId"
@@ -92,7 +90,6 @@
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
-    :cursor-spacing="cursorSpacing"
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
     :focused-attachment-id="focusedAttachmentId"
@@ -119,6 +116,16 @@
     @close="resolveDestroyDraftDialog(false)"
     @action="handleDestroyDraftDialogAction"
   />
+
+  <PaperOptionSheet
+    :open="isImageInsertSheetOpen"
+    :title="copy.editor.imageInsertSheetTitle"
+    :copy="copy.editor.imageInsertSheetCopy"
+    :options="imageInsertSheetOptions"
+    :cancel-text="copy.home.cancel"
+    @close="closeImageInsertSheet"
+    @select="handleImageInsertSheetSelect"
+  />
 </template>
 
 <script setup lang="ts">
@@ -139,7 +146,6 @@ import { resolveDraftSaveAction } from "@/domain/services/entryService";
 import { resolveDiaryEntryOpenTarget } from "@/domain/services/editorService";
 import { useEditorAutosave } from "@/features/editor/composables/useEditorAutosave";
 import { useEditorFeedbackState } from "@/features/editor/composables/useEditorFeedbackState";
-import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { shouldResetFutureUnlockDate } from "@/features/editor/editorFutureDraft";
 import { useEditorImageAttachments } from "@/features/editor/composables/useEditorImageAttachments";
 import { useEditorImagePicker } from "@/features/editor/composables/useEditorImagePicker";
@@ -150,6 +156,7 @@ import DiaryPreludePicker from "@/features/editor/components/DiaryPreludePicker.
 import JottingEditorShell from "@/features/editor/components/JottingEditorShell.vue";
 import FutureLetterEditorShell from "@/features/editor/components/FutureLetterEditorShell.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
+import PaperOptionSheet, { type PaperOptionSheetOption } from "@/shared/ui/PaperOptionSheet.vue";
 import { t } from "@/shared/i18n";
 
 type EditorMode = "edit" | "read";
@@ -198,13 +205,13 @@ const isFutureDateSheetOpen = ref(false);
 const isDiaryPreludePickerOpen = ref(false);
 const diaryPreludePickerOrigin = ref<"auto" | "manual">("auto");
 const isDestroyDraftDialogOpen = ref(false);
+const isImageInsertSheetOpen = ref(false);
 const futureHint = ref("");
 let destroyDraftDialogResolver: ((confirmed: boolean) => void) | null = null;
 
 const { showSavedHint, stampOpacity, markDirty, markSaved, reset: resetFeedback } = useEditorFeedbackState();
-const { cursorSpacing } = useEditorKeyboardViewport();
 const autosave = useEditorAutosave({
-  delayMs: 2200,
+  delayMs: 1800,
   onSave: async () => {
     if (mode.value !== "edit" || isHydrating.value || !draftStore.activeDraft) {
       return;
@@ -341,6 +348,18 @@ const destroyDraftDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
   },
 ]));
 const jottingHeadlineDate = computed(() => formatDate(recordDate.value, settingsStore.locale === "en-US" ? "MMM DD" : "M月D日"));
+const imageInsertSheetOptions = computed<PaperOptionSheetOption[]>(() => ([
+  {
+    key: "album",
+    title: copy.value.editor.imageInsertFromAlbum,
+    copy: copy.value.editor.imageInsertFromAlbumCopy,
+  },
+  {
+    key: "camera",
+    title: copy.value.editor.imageInsertFromCamera,
+    copy: copy.value.editor.imageInsertFromCameraCopy,
+  },
+]));
 
 function toChineseYear(dateString: string): string {
   return dateString
@@ -775,10 +794,27 @@ async function handlePickImages(): Promise<void> {
     return;
   }
 
+  isImageInsertSheetOpen.value = true;
+}
+
+function closeImageInsertSheet(): void {
+  isImageInsertSheetOpen.value = false;
+}
+
+async function handleImageInsertSheetSelect(optionKey: string): Promise<void> {
+  if (mode.value !== "edit" || !draftStore.activeDraft) {
+    closeImageInsertSheet();
+    return;
+  }
+
+  const sourceType: Array<"album" | "camera"> = optionKey === "camera" ? ["camera"] : ["album"];
+  closeImageInsertSheet();
+
   try {
     const pickedAttachments = await imagePicker.pickImages({
       draftKey: draftStore.activeDraft.slotKey,
       startSortOrder: attachments.value.length,
+      sourceType,
     });
 
     if (!pickedAttachments.length) {
@@ -955,11 +991,13 @@ onLoad((query) => {
 });
 
 onHide(() => {
+  closeImageInsertSheet();
   writeDraftShadowSnapshot();
   void autosave.flush();
 });
 
 onUnload(() => {
+  closeImageInsertSheet();
   writeDraftShadowSnapshot();
   void autosave.flush();
 });

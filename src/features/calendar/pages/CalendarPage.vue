@@ -1,5 +1,5 @@
 <template>
-  <view class="calendar-page">
+  <view class="calendar-page noche-mobile-page">
     <view class="calendar-page__topbar">
       <view class="calendar-page__topbar-inner">
         <TopbarIconButton @tap="handleBackToMailbox" />
@@ -8,7 +8,8 @@
       </view>
     </view>
 
-    <view class="calendar-page__main">
+    <scroll-view class="calendar-page__scroll noche-mobile-scroll" scroll-y>
+      <view class="calendar-page__main noche-mobile-scroll-fill">
       <view class="calendar-page__hero">
         <text class="calendar-page__hero-title">{{ copy.calendar.title }}</text>
         <text class="calendar-page__hero-subtitle">
@@ -112,16 +113,17 @@
           </view>
         </view>
 
-    <view class="calendar-page__footer">
-      <view v-if="calendarStore.isLoading" class="calendar-page__status">
-        <text class="calendar-page__status-text">{{ copy.calendar.refresh }}</text>
-      </view>
-        <view v-else class="calendar-page__legend">
-          <view class="calendar-page__legend-dot"></view>
-          <text class="calendar-page__legend-text">{{ copy.calendar.recordMarker }}</text>
+        <view class="calendar-page__footer">
+          <view v-if="calendarStore.isLoading" class="calendar-page__status">
+            <text class="calendar-page__status-text">{{ copy.calendar.refresh }}</text>
+          </view>
+          <view v-else class="calendar-page__legend">
+            <view class="calendar-page__legend-dot"></view>
+            <text class="calendar-page__legend-text">{{ copy.calendar.recordMarker }}</text>
+          </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
 
     <PaperConfirmDialog
       :open="isLockedFutureDialogOpen"
@@ -378,7 +380,6 @@ onShow(() => {
 }
 
 .calendar-page {
-  min-height: 100vh;
   background-color: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
@@ -387,13 +388,15 @@ onShow(() => {
 .calendar-page__topbar {
   width: 100%;
   background: var(--noche-surface);
+  flex-shrink: 0;
 }
 
 .calendar-page__topbar-inner {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: 40rpx 32rpx 24rpx;
+  min-height: var(--noche-nav-bar-height);
+  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -428,18 +431,19 @@ onShow(() => {
 .calendar-page__main {
   width: 100%;
   max-width: 640px;
+  min-height: var(--noche-content-min-height);
   margin: 0 auto;
-  padding: 8px 24px 60px;
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
 }
 
 .calendar-page__hero {
-  margin-bottom: 34px;
+  margin-bottom: 24px;
   text-align: center;
 }
 
 .calendar-page__hero-title {
   display: block;
-  font-size: 36px;
+  font-size: 30px;
   line-height: 1.2;
   color: var(--noche-text);
 }
@@ -456,7 +460,7 @@ onShow(() => {
 }
 
 .calendar-page__banner {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   padding: 14px 16px;
   border-radius: 14px;
   background: var(--noche-panel);
@@ -467,14 +471,14 @@ onShow(() => {
 }
 
 .calendar-page__banner--error {
-  color: #8a3d3a;
+  color: var(--noche-danger);
 }
 
 .calendar-page__paper-panel {
   background: var(--noche-panel);
   border: 1px solid var(--noche-border);
   border-radius: 18px;
-  padding: 24px 18px 22px;
+  padding: 20px 16px 18px;
 }
 
 .calendar-page__panel-head {
@@ -528,7 +532,7 @@ onShow(() => {
 .calendar-page__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: 26px;
+  row-gap: 20px;
 }
 
 .calendar-page__day {
@@ -564,7 +568,7 @@ onShow(() => {
 }
 
 .calendar-page__day--selected .calendar-page__day-number {
-  color: #1d1d1d;
+  color: var(--noche-ink-strong);
 }
 
 .calendar-page__day--selected .calendar-page__day-inner::before {
@@ -575,7 +579,7 @@ onShow(() => {
   width: 28px;
   height: 28px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(246, 240, 232, 0.96) 0%, rgba(246, 240, 232, 0.52) 48%, rgba(246, 240, 232, 0) 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--noche-surface-soft) 96%, transparent) 0%, color-mix(in srgb, var(--noche-surface-soft) 52%, transparent) 48%, rgba(246, 240, 232, 0) 72%);
   transform: translate(-50%, -58%);
   z-index: -1;
 }
@@ -585,12 +589,12 @@ onShow(() => {
   width: 4px;
   height: 4px;
   border-radius: 9999px;
-  background: #5f5e5e;
+  background: var(--noche-accent);
 }
 
 .calendar-page__day-mailbox {
-  margin-top: 30px;
-  padding-top: 24px;
+  margin-top: 24px;
+  padding-top: 18px;
   border-top: 1px solid var(--noche-border);
 }
 
@@ -606,7 +610,7 @@ onShow(() => {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.22em;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--noche-ink-soft);
   padding-left: 0.22em;
   text-transform: uppercase;
 }
@@ -617,7 +621,7 @@ onShow(() => {
 
 .calendar-page__day-mailbox-title {
   display: block;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.35;
   color: var(--noche-text);
   margin-bottom: 8px;
@@ -642,7 +646,7 @@ onShow(() => {
 .calendar-page__day-mailbox-empty-text {
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.74);
+  color: var(--noche-ink-faint);
 }
 
 .calendar-page__day-mailbox-action {
@@ -667,7 +671,7 @@ onShow(() => {
 .calendar-page__day-mailbox-item {
   padding: 18px 0 20px;
   background: transparent;
-  border: 1px solid rgba(221, 212, 200, 0.52);
+  border: 1px solid color-mix(in srgb, var(--noche-border) 72%, transparent);
   text-align: center;
   border-radius: 2px;
 }
@@ -691,7 +695,7 @@ onShow(() => {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--noche-ink-subtle);
   padding-left: 0.14em;
   text-transform: uppercase;
 }
@@ -700,7 +704,7 @@ onShow(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--noche-ink-subtle);
 }
 
 .calendar-page__day-mailbox-item-prelude-glyph {
@@ -712,7 +716,7 @@ onShow(() => {
   display: block;
   font-size: 18px;
   line-height: 1.45;
-  color: #31332e;
+  color: var(--noche-ink-strong);
   margin-bottom: 8px;
   text-align: center;
 }
@@ -721,7 +725,7 @@ onShow(() => {
   display: block;
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-ink-soft);
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -736,14 +740,14 @@ onShow(() => {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--noche-ink-subtle);
   padding-left: 0.14em;
   text-transform: uppercase;
   text-align: center;
 }
 
 .calendar-page__footer {
-  padding-top: 24px;
+  padding-top: 18px;
   display: flex;
   justify-content: center;
 }
@@ -753,7 +757,7 @@ onShow(() => {
   font-family: "Inter", sans-serif;
   font-size: 10px;
   letter-spacing: 0.22em;
-  color: rgba(121, 124, 117, 0.8);
+  color: var(--noche-ink-subtle);
   padding-left: 0.22em;
 }
 

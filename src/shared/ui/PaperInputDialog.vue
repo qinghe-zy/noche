@@ -111,7 +111,7 @@ function handleInput(event: Event): void {
   background: var(--noche-surface);
   border: 1px solid var(--noche-border);
   border-radius: 24px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
+  box-shadow: 0 18px 40px rgba(var(--noche-shadow-rgb), 0.18);
   overflow: hidden;
 }
 

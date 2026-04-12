@@ -29,7 +29,7 @@ export interface ProfileActionItem {
 }
 
 export const PROFILE_PREVIEW_LIMIT = 6;
-export const PROFILE_APP_VERSION = "1.0.1";
+export const PROFILE_APP_VERSION = "1.0.0";
 
 export const PROFILE_PREF_KEYS = {
   displayName: "profile.displayName",

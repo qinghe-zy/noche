@@ -21,6 +21,9 @@ describe("calendar stitch parity", () => {
 
     expect(calendarPage).toContain("TopbarIconButton");
     expect(calendarPage).toContain("AppIcon");
-    expect(calendarPage).toContain("padding: 28rpx 32rpx 24rpx;");
+    expect(calendarPage).toContain("noche-mobile-page");
+    expect(calendarPage).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(calendarPage).toContain("padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;");
+    expect(calendarPage).toContain("min-height: var(--noche-content-min-height);");
   });
 });

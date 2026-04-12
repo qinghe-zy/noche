@@ -9,10 +9,83 @@ page {
   --noche-space-4: 16rpx;
   --noche-space-6: 24rpx;
   --noche-space-8: 32rpx;
+  --noche-safe-top: 0px;
+  --noche-safe-bottom: 0px;
+  --noche-viewport-height: 100vh;
+  --noche-status-bar-height: 0px;
+  --noche-nav-bar-height: 44px;
+  --noche-page-top-inset: 44px;
+  --noche-content-min-height: calc(100vh - var(--noche-page-top-inset) - var(--noche-safe-bottom));
+  --noche-topbar-padding-top: 0px;
+  --noche-topbar-padding-bottom: 0px;
+  --noche-topbar-padding-x: 16px;
+  --noche-topbar-row-height: 44px;
+  --noche-topbar-block-height: 44px;
+  --noche-page-padding-x: 14px;
+  --noche-page-section-gap: 12px;
+  --noche-page-section-gap-tight: 8px;
+  --noche-page-bottom-padding: 22px;
+  --noche-fab-bottom: 24px;
+  --noche-empty-state-min-height: 240px;
+  --noche-editor-textarea-min-height: 300px;
 }
 
 page {
   font-family: var(--noche-font-family-base);
   background: var(--noche-color-bg);
   color: var(--noche-color-text);
+}
+
+page,
+body,
+.uni-app,
+.uni-page-body,
+.uni-page-wrapper {
+  min-height: 100%;
+}
+
+.noche-mobile-page {
+  min-height: var(--noche-viewport-height);
+  height: var(--noche-viewport-height);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.noche-mobile-main {
+  flex: 1;
+  min-height: var(--noche-content-min-height);
+  display: flex;
+  flex-direction: column;
+}
+
+.noche-mobile-scroll {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+}
+
+.noche-mobile-scroll-fill {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.noche-writing-surface {
+  --noche-writing-line-pitch: 44px;
+  --noche-writing-line-height: 44px;
+  --noche-writing-baseline-offset: 7px;
+  --noche-writing-first-line-offset: 11px;
+  box-sizing: border-box;
+  line-height: var(--noche-writing-line-height);
+  padding-top: var(--noche-writing-first-line-offset);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent calc(var(--noche-writing-line-pitch) - var(--noche-writing-baseline-offset) - 1px),
+    var(--noche-paper-line) calc(var(--noche-writing-line-pitch) - var(--noche-writing-baseline-offset) - 1px),
+    var(--noche-paper-line) calc(var(--noche-writing-line-pitch) - var(--noche-writing-baseline-offset))
+  );
+  background-position: 0 var(--noche-writing-first-line-offset);
+  background-size: 100% var(--noche-writing-line-pitch);
 }

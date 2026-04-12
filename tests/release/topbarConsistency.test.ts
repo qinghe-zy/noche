@@ -23,9 +23,12 @@ describe("topbar consistency", () => {
     expect(mailboxPage).toContain("TopbarIconButton");
     expect(calendarPage).toContain("TopbarIconButton");
     expect(profileHero).toContain("TopbarIconButton");
-    expect(mailboxPage).toContain("padding: 40rpx 32rpx 24rpx;");
-    expect(calendarPage).toContain("padding: 40rpx 32rpx 24rpx;");
-    expect(profileHero).toContain("padding: 40rpx 24rpx 0;");
+    expect(mailboxPage).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(mailboxPage).toContain("padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;");
+    expect(calendarPage).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(calendarPage).toContain("padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;");
+    expect(profileHero).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(profileHero).toContain("padding: var(--noche-status-bar-height) var(--noche-page-padding-x) 0;");
   });
 
   it("keeps the home profile entry borderless and not implemented as the old framed button avatar", () => {

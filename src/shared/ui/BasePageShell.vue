@@ -15,11 +15,11 @@ defineProps<{
 
 <style scoped>
 .base-page-shell {
-  min-height: 100vh;
-  padding: var(--noche-space-8);
+  min-height: var(--noche-content-min-height);
+  padding: calc(var(--noche-page-top-inset) + var(--noche-page-section-gap-tight)) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
   display: flex;
   flex-direction: column;
-  gap: var(--noche-space-4);
+  gap: var(--noche-page-section-gap);
   background: var(--noche-color-bg);
 }
 

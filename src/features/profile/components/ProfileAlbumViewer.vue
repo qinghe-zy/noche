@@ -9,7 +9,7 @@
       </view>
 
       <view class="profile-album-viewer__image-wrap">
-        <image class="profile-album-viewer__image" :src="item.localUri" mode="widthFix" />
+        <image class="profile-album-viewer__image" :src="normalizeLocalImageSrc(item.localUri)" mode="widthFix" />
       </view>
 
       <view class="profile-album-viewer__meta">
@@ -52,6 +52,7 @@ import {
   formatProfileTypeLabel,
   type ProfileAlbumItem,
 } from "@/features/profile/profileData";
+import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 const settingsStore = useSettingsStore();
 const copy = computed(() => t(settingsStore.locale));
@@ -83,7 +84,7 @@ defineEmits<{
   align-items: flex-end;
   justify-content: center;
   padding: 32rpx 24rpx 36rpx;
-  background: rgba(34, 32, 28, 0.42);
+  background: var(--noche-overlay-strong);
   backdrop-filter: blur(14rpx);
 }
 
@@ -92,7 +93,7 @@ defineEmits<{
   max-height: 88vh;
   border-radius: 32rpx;
   overflow: hidden;
-  background: rgba(250, 247, 242, 0.98);
+  background: var(--noche-surface-elevated);
   display: flex;
   flex-direction: column;
 }
@@ -109,7 +110,7 @@ defineEmits<{
 .profile-album-viewer__type {
   font-size: 19rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.14em;
 }
 
@@ -121,7 +122,7 @@ defineEmits<{
 .profile-album-viewer__image {
   width: 100%;
   border-radius: 24rpx;
-  background: rgba(239, 234, 226, 0.86);
+  background: var(--noche-card-muted);
 }
 
 .profile-album-viewer__meta {
@@ -141,7 +142,7 @@ defineEmits<{
 .profile-album-viewer__date {
   font-size: 28rpx;
   line-height: 1.4;
-  color: #31332e;
+  color: var(--noche-ink-strong);
 }
 
 .profile-album-viewer__actions {
@@ -154,11 +155,11 @@ defineEmits<{
   width: 72rpx;
   height: 72rpx;
   border-radius: 999rpx;
-  background: rgba(238, 232, 223, 0.92);
+  background: var(--noche-chip);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c655c;
+  color: var(--noche-accent);
 }
 
 .profile-album-viewer__pager--disabled {
@@ -174,7 +175,7 @@ defineEmits<{
   flex: 1;
   min-height: 72rpx;
   border-radius: 999rpx;
-  background: #6a635a;
+  background: var(--noche-accent-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +184,7 @@ defineEmits<{
 .profile-album-viewer__jump-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: #fbf9f5;
+  color: var(--noche-accent-contrast);
   letter-spacing: 0.08em;
 }
 </style>

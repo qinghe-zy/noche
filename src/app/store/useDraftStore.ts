@@ -212,14 +212,28 @@ export const useDraftStore = defineStore("draft", {
       }
     },
     async removeDraft(slotKey: string): Promise<void> {
+      return this.removeDraftInternal(slotKey, {
+        preserveManagedFiles: false,
+      });
+    },
+    async removeDraftInternal(
+      slotKey: string,
+      options: {
+        preserveManagedFiles: boolean;
+      },
+    ): Promise<void> {
       this.isLoading = true;
       this.error = null;
 
       try {
         const targetDraft = this.drafts[slotKey] ?? await draftRepository.getBySlotKey(slotKey);
-        const managedPaths = collectManagedLocalAttachmentPaths(targetDraft?.attachments);
+        const managedPaths = options.preserveManagedFiles
+          ? []
+          : collectManagedLocalAttachmentPaths(targetDraft?.attachments);
 
-        await removeManagedLocalFiles(managedPaths);
+        if (managedPaths.length) {
+          await removeManagedLocalFiles(managedPaths);
+        }
         await draftRepository.deleteBySlotKey(slotKey);
         clearDraftShadow(slotKey);
         delete this.drafts[slotKey];
@@ -252,7 +266,9 @@ export const useDraftStore = defineStore("draft", {
         await entryRepository.save(entry);
 
         try {
-          await this.removeDraft(draft.slotKey);
+          await this.removeDraftInternal(draft.slotKey, {
+            preserveManagedFiles: true,
+          });
         } catch (cleanupError) {
           if (previousLinkedEntry) {
             await entryRepository.save(previousLinkedEntry);

@@ -52,6 +52,27 @@ function toAbsoluteBackupPath(relativePath: string): string {
   return `${BACKUP_ROOT}/${relativePath}`.replace(/\/+/gu, "/");
 }
 
+function buildBackupFilePath(backupId: string, relativePath: string): string {
+  return toAbsoluteBackupPath(`${backupId}/${relativePath}`);
+}
+
+function toDisplayPath(path: string): string {
+  if (
+    typeof plus !== "undefined"
+    && plus.io
+    && typeof plus.io.convertLocalFileSystemURL === "function"
+    && /^(_doc\/|_documents\/)/iu.test(path)
+  ) {
+    try {
+      return plus.io.convertLocalFileSystemURL(path) || path;
+    } catch {
+      return path;
+    }
+  }
+
+  return path;
+}
+
 function toBackupRelativePath(originalUri: string): string {
   const normalized = originalUri.replace(/^file:\/\//iu, "");
   const cleaned = normalized.replace(/^\/+/u, "");
@@ -84,6 +105,13 @@ function collectManagedBackupAssets(
 async function resolveEntry(url: string): Promise<any> {
   return new Promise((resolve, reject) => {
     plus.io.resolveLocalFileSystemURL(url, resolve, reject);
+  }).catch((error) => {
+    const message = error instanceof Error
+      ? error.message
+      : typeof (error as { message?: unknown } | undefined)?.message === "string"
+        ? (error as { message: string }).message
+        : String(error ?? "Unknown filesystem error");
+    throw new Error(`resolveLocalFileSystemURL failed for ${url}: ${message}`);
   });
 }
 
@@ -128,9 +156,9 @@ async function removeEntryIfExists(url: string): Promise<void> {
   }
 }
 
-async function writeTextFile(relativePath: string, content: string): Promise<void> {
-  const parent = await ensureParentDirectory(relativePath);
-  const fileName = relativePath.split("/").pop() ?? "file.txt";
+async function writeTextFile(absolutePath: string, content: string): Promise<void> {
+  const parent = await ensureParentDirectory(absolutePath);
+  const fileName = absolutePath.split("/").pop() ?? "file.txt";
   const fileEntry = await new Promise<any>((resolve, reject) => {
     parent.getFile(fileName, { create: true }, resolve, reject);
   });
@@ -142,23 +170,29 @@ async function writeTextFile(relativePath: string, content: string): Promise<voi
     writer.onwrite = () => resolve();
     writer.onerror = reject;
     writer.write(content);
+  }).catch((error) => {
+    const message = error instanceof Error ? error.message : String(error ?? "Unknown write error");
+    throw new Error(`Failed to write backup file ${absolutePath}: ${message}`);
   });
 }
 
-async function copyFile(sourceUri: string, targetRelativePath: string): Promise<void> {
+async function copyFile(sourceUri: string, targetAbsolutePath: string): Promise<void> {
   const sourceEntry = await resolveEntry(sourceUri);
-  const parentDir = await ensureParentDirectory(targetRelativePath);
-  const targetName = targetRelativePath.split("/").pop() ?? "file";
+  const parentDir = await ensureParentDirectory(targetAbsolutePath);
+  const targetName = targetAbsolutePath.split("/").pop() ?? "file";
 
-  await removeEntryIfExists(toAbsoluteBackupPath(targetRelativePath));
+  await removeEntryIfExists(targetAbsolutePath);
 
   await new Promise<void>((resolve, reject) => {
     sourceEntry.copyTo(parentDir, targetName, () => resolve(), reject);
+  }).catch((error) => {
+    const message = error instanceof Error ? error.message : String(error ?? "Unknown copy error");
+    throw new Error(`Failed to copy ${sourceUri} -> ${targetAbsolutePath}: ${message}`);
   });
 }
 
 async function copyBackupFileToOriginal(sourceRelativePath: string, originalUri: string): Promise<void> {
-  const sourceEntry = await resolveEntry(toAbsoluteBackupPath(sourceRelativePath));
+  const sourceEntry = await resolveEntry(sourceRelativePath);
   const parentDir = await ensureParentDirectory(originalUri);
   const fileName = originalUri.split("/").pop() ?? "file";
 
@@ -166,11 +200,14 @@ async function copyBackupFileToOriginal(sourceRelativePath: string, originalUri:
 
   await new Promise<void>((resolve, reject) => {
     sourceEntry.copyTo(parentDir, fileName, () => resolve(), reject);
+  }).catch((error) => {
+    const message = error instanceof Error ? error.message : String(error ?? "Unknown restore copy error");
+    throw new Error(`Failed to restore ${sourceRelativePath} -> ${originalUri}: ${message}`);
   });
 }
 
-async function readTextFile(relativePath: string): Promise<string> {
-  const entry = await resolveEntry(toAbsoluteBackupPath(relativePath));
+async function readTextFile(absolutePath: string): Promise<string> {
+  const entry = await resolveEntry(absolutePath);
   const file = await new Promise<any>((resolve, reject) => entry.file(resolve, reject));
   const reader = new FileReader();
 
@@ -182,7 +219,7 @@ async function readTextFile(relativePath: string): Promise<string> {
 }
 
 async function readBackupManifest(backupId: string): Promise<BackupManifest> {
-  const raw = await readTextFile(`${backupId}/${MANIFEST_NAME}`);
+  const raw = await readTextFile(buildBackupFilePath(backupId, MANIFEST_NAME));
   return JSON.parse(raw) as BackupManifest;
 }
 
@@ -207,6 +244,32 @@ function closeSQLiteIfOpen(): void {
   }
 }
 
+function reopenSQLiteIfNeeded(): void {
+  if (typeof plus === "undefined" || !plus.sqlite) {
+    return;
+  }
+
+  try {
+    const isOpen = plus.sqlite.isOpenDatabase({
+      name: SQLITE_DB_NAME,
+      path: SQLITE_DB_PATH,
+    });
+
+    if (isOpen) {
+      return;
+    }
+
+    plus.sqlite.openDatabase({
+      name: SQLITE_DB_NAME,
+      path: SQLITE_DB_PATH,
+      success: () => undefined,
+      fail: () => undefined,
+    });
+  } catch {
+    // noop
+  }
+}
+
 export async function listLocalBackups(): Promise<LocalBackupSummary[]> {
   if (!isAppPlusRuntime()) {
     return [];
@@ -218,18 +281,24 @@ export async function listLocalBackups(): Promise<LocalBackupSummary[]> {
       rootEntry.createReader().readEntries(resolve, reject);
     });
 
-    const summaries = await Promise.all(
-      entries
-        .filter((entry) => entry.isDirectory)
-        .map(async (entry) => {
-          const manifest = await readBackupManifest(entry.name);
-          return {
-            backupId: manifest.backupId,
-            createdAt: manifest.createdAt,
-            absolutePath: `${BACKUP_ROOT}/${entry.name}`,
-          };
-        }),
-    );
+    const summaries = (
+      await Promise.all(
+        entries
+          .filter((entry) => entry.isDirectory)
+          .map(async (entry) => {
+            try {
+              const manifest = await readBackupManifest(entry.name);
+              return {
+                backupId: manifest.backupId,
+                createdAt: manifest.createdAt,
+                absolutePath: toDisplayPath(`${BACKUP_ROOT}/${entry.name}`),
+              } satisfies LocalBackupSummary;
+            } catch {
+              return null;
+            }
+          }),
+      )
+    ).filter((item): item is LocalBackupSummary => Boolean(item));
 
     return summaries.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
   } catch {
@@ -263,22 +332,27 @@ export async function exportLocalBackup(): Promise<LocalBackupSummary> {
   };
 
   await ensureDirectory(backupDir);
-  closeSQLiteIfOpen();
-  await copyFile(SQLITE_DB_PATH, `${backupId}/${SQLITE_BACKUP_FILE}`);
-  await writeTextFile(`${backupId}/${PREFS_BACKUP_FILE}`, storageMap.preferences);
-  await writeTextFile(`${backupId}/${DRAFT_SHADOW_BACKUP_FILE}`, storageMap.draftShadow);
 
-  for (const asset of manifest.assets) {
-    await copyFile(asset.originalUri, `${backupId}/${asset.backupRelativePath}`);
+  try {
+    closeSQLiteIfOpen();
+    await copyFile(SQLITE_DB_PATH, buildBackupFilePath(backupId, SQLITE_BACKUP_FILE));
+    await writeTextFile(buildBackupFilePath(backupId, PREFS_BACKUP_FILE), storageMap.preferences);
+    await writeTextFile(buildBackupFilePath(backupId, DRAFT_SHADOW_BACKUP_FILE), storageMap.draftShadow);
+
+    for (const asset of manifest.assets) {
+      await copyFile(asset.originalUri, buildBackupFilePath(backupId, asset.backupRelativePath));
+    }
+
+    await writeTextFile(buildBackupFilePath(backupId, MANIFEST_NAME), JSON.stringify(manifest, null, 2));
+
+    return {
+      backupId,
+      createdAt,
+      absolutePath: toDisplayPath(backupDir),
+    };
+  } finally {
+    reopenSQLiteIfNeeded();
   }
-
-  await writeTextFile(`${backupId}/${MANIFEST_NAME}`, JSON.stringify(manifest, null, 2));
-
-  return {
-    backupId,
-    createdAt,
-    absolutePath: backupDir,
-  };
 }
 
 export async function importLocalBackup(backupId: string): Promise<void> {
@@ -289,15 +363,19 @@ export async function importLocalBackup(backupId: string): Promise<void> {
   const manifest = await readBackupManifest(backupId);
   const storage = createUniJsonStorage();
 
-  closeSQLiteIfOpen();
-  await copyBackupFileToOriginal(`${backupId}/${manifest.dbRelativePath}`, SQLITE_DB_PATH);
+  try {
+    closeSQLiteIfOpen();
+    await copyBackupFileToOriginal(buildBackupFilePath(backupId, manifest.dbRelativePath), SQLITE_DB_PATH);
 
-  for (const asset of manifest.assets) {
-    await copyBackupFileToOriginal(`${backupId}/${asset.backupRelativePath}`, asset.originalUri);
+    for (const asset of manifest.assets) {
+      await copyBackupFileToOriginal(buildBackupFilePath(backupId, asset.backupRelativePath), asset.originalUri);
+    }
+
+    storage.setString("noche.preferences.v1", await readTextFile(buildBackupFilePath(backupId, manifest.prefsRelativePath)));
+    storage.setString("noche.editor-draft-shadow.v1", await readTextFile(buildBackupFilePath(backupId, manifest.draftShadowRelativePath)));
+  } finally {
+    reopenSQLiteIfNeeded();
   }
-
-  storage.setString("noche.preferences.v1", await readTextFile(`${backupId}/${manifest.prefsRelativePath}`));
-  storage.setString("noche.editor-draft-shadow.v1", await readTextFile(`${backupId}/${manifest.draftShadowRelativePath}`));
 }
 
 export function restartAppAfterRestore(): void {

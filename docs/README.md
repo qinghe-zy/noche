@@ -22,7 +22,7 @@
 - [release/](./release/)：发布与版本更新文档。
   - [android_release_playbook.md](./release/android_release_playbook.md)：Android 发版执行手册。
   - [version_update_checklist.md](./release/version_update_checklist.md)：版本更新固定检查单。
-  - [releases/v1.0.1.md](./release/releases/v1.0.1.md)：当前版本 release note。
+  - [releases/v1.0.0.md](./release/releases/v1.0.0.md)：当前版本 release note。
 - [tasks/](./tasks/)：任务拆解与进度追踪。
   - 命名格式：`T-###_topic.md`
 - [handoffs/](./handoffs/)：阶段检查点与交接记录。

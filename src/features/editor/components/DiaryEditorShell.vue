@@ -1,5 +1,5 @@
 <template>
-  <view class="diary-editor-shell">
+  <view class="diary-editor-shell noche-mobile-page">
     <view class="diary-editor-shell__grain"></view>
 
     <view class="diary-editor-shell__topbar">
@@ -25,7 +25,7 @@
       <view v-else class="diary-editor-shell__spacer"></view>
     </view>
 
-    <view class="diary-editor-shell__canvas">
+    <view class="diary-editor-shell__canvas noche-mobile-main">
       <view class="diary-editor-shell__header">
         <text class="diary-editor-shell__date">{{ headlineDate }}</text>
         <DiaryPreludeHeaderMeta
@@ -42,43 +42,61 @@
         <text>{{ errorMessage }}</text>
       </view>
 
-      <scroll-view class="diary-editor-shell__body" scroll-y>
-        <view v-if="attachments.length" class="diary-editor-shell__attachments">
-          <view
-            v-for="attachment in attachments"
-            :key="attachment.id"
-            class="diary-editor-shell__attachment-card"
-            :class="{ 'diary-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
-            :id="`entry-attachment-${attachment.id}`"
-            @click="$emit('preview-attachment', attachment.id)"
-          >
-            <image class="diary-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
+      <scroll-view
+        :id="writingSurfaceIds.body"
+        class="diary-editor-shell__body noche-mobile-scroll"
+        :scroll-y="writingScrollEnabled"
+        :scroll-top="writingScrollTop"
+        :style="writingBodyStyle"
+        @scroll="writingSurface.handleScroll"
+      >
+        <view :id="writingSurfaceIds.content" class="diary-editor-shell__body-fill noche-mobile-scroll-fill">
+          <view v-if="attachments.length" class="diary-editor-shell__attachments">
             <view
-              v-if="mode === 'edit'"
-              class="diary-editor-shell__attachment-remove"
-              @tap.stop="$emit('remove-attachment', attachment.id)"
+              v-for="attachment in attachments"
+              :key="attachment.id"
+              class="diary-editor-shell__attachment-card"
+              :class="{ 'diary-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
+              :id="`entry-attachment-${attachment.id}`"
+              @click="$emit('preview-attachment', attachment.id)"
             >
-              <AppIcon name="close" class="diary-editor-shell__attachment-remove-svg" />
+              <image class="diary-editor-shell__attachment-image" :src="normalizeLocalImageSrc(attachment.localUri)" mode="aspectFill" />
+              <view
+                v-if="mode === 'edit'"
+                class="diary-editor-shell__attachment-remove"
+                @tap.stop="$emit('remove-attachment', attachment.id)"
+              >
+                <AppIcon name="close" class="diary-editor-shell__attachment-remove-svg" />
+              </view>
             </view>
           </view>
-        </view>
 
-        <textarea
-          v-if="mode === 'edit'"
-          class="diary-editor-shell__textarea literary-text"
-          :value="content"
-          auto-height
-          adjust-position="false"
-          maxlength="-1"
-          :cursor-spacing="cursorSpacing"
-          :show-confirm-bar="false"
-          :placeholder="bodyPlaceholder"
-          placeholder-class="diary-editor-shell__placeholder"
-          @input="$emit('content-input', $event)"
-        />
+          <textarea
+            v-if="mode === 'edit'"
+            :id="writingSurfaceIds.surface"
+            class="diary-editor-shell__textarea noche-writing-surface literary-text"
+            :style="writingSurfaceStyle"
+            :value="content"
+            auto-height
+            adjust-position="false"
+            maxlength="-1"
+            :show-confirm-bar="false"
+            :placeholder="bodyPlaceholder"
+            placeholder-class="diary-editor-shell__placeholder"
+            @blur="writingSurface.handleBlur"
+            @focus="writingSurface.handleFocus"
+            @input="handleWritingInput"
+            @keyboardheightchange="writingSurface.handleKeyboardHeightChange"
+            @linechange="writingSurface.handleLineChange"
+          />
 
-        <view v-else class="diary-editor-shell__read">
-          <text class="diary-editor-shell__read-content literary-text">{{ content }}</text>
+          <view v-else class="diary-editor-shell__read">
+            <text
+              :id="writingSurfaceIds.surface"
+              class="diary-editor-shell__read-content noche-writing-surface literary-text"
+              :style="writingSurfaceStyle"
+            >{{ content }}</text>
+          </view>
         </view>
       </scroll-view>
 
@@ -98,17 +116,20 @@
 </template>
 
 <script setup lang="ts">
+import { computed, toRefs } from "vue";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import type { Attachment } from "@/shared/types/attachment";
+import { useWritingSurfaceController } from "@/features/editor/composables/useWritingSurfaceController";
 import DiaryPreludeHeaderMeta from "@/features/editor/components/DiaryPreludeHeaderMeta.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 type EditorMode = "edit" | "read";
 
 let lastPickImagesTriggerAt = 0;
 
-defineProps<{
+const props = defineProps<{
   mode: EditorMode;
   atmosphereLine: string;
   headlineDate: string;
@@ -121,7 +142,6 @@ defineProps<{
   showSavedHint: boolean;
   canContinueWrite: boolean;
   continueWriteLabel: string;
-  cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
   focusedAttachmentId?: string;
@@ -139,6 +159,47 @@ const emit = defineEmits<{
   (event: "preview-attachment", attachmentId: string): void;
   (event: "edit-diary-prelude"): void;
 }>();
+const {
+  attachments,
+  atmosphereLine,
+  bodyPlaceholder,
+  canContinueWrite,
+  content,
+  continueWriteLabel,
+  diaryPrelude,
+  diaryPreludeStatus,
+  errorMessage,
+  focusedAttachmentId,
+  headerSubtitle,
+  headerTimeLabel,
+  headlineDate,
+  mode,
+  savedHintLabel,
+  showSavedHint,
+  stampOpacity,
+} = toRefs(props);
+const surfaceLayoutSignature = computed(() => [
+  props.mode,
+  props.attachments.length,
+  props.focusedAttachmentId ?? "none",
+  props.errorMessage ?? "clean",
+].join(":"));
+const writingSurface = useWritingSurfaceController({
+  variant: "diary",
+  mode,
+  content,
+  layoutSignature: surfaceLayoutSignature,
+});
+const writingSurfaceIds = writingSurface.ids;
+const writingBodyStyle = writingSurface.bodyStyle;
+const writingScrollEnabled = writingSurface.scrollEnabled;
+const writingScrollTop = writingSurface.scrollTop;
+const writingSurfaceStyle = computed(() => writingSurface.surfaceStyle.value);
+
+function handleWritingInput(event: Event | { detail?: { value?: string; cursor?: number } }): void {
+  writingSurface.handleInput(event);
+  emit("content-input", event);
+}
 
 function handlePickImagesTrigger(): void {
   const now = Date.now();
@@ -159,7 +220,6 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell {
-  min-height: 100vh;
   background: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
@@ -172,8 +232,8 @@ function handlePickImagesTrigger(): void {
   pointer-events: none;
   opacity: 0.03;
   background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.72)),
-    radial-gradient(circle at center, rgba(49, 51, 46, 0.06), transparent 60%);
+    linear-gradient(to bottom, rgba(var(--noche-shadow-rgb), 0.02), rgba(var(--noche-shadow-rgb), 0.01)),
+    radial-gradient(circle at center, rgba(var(--noche-paper-shadow-rgb), 0.06), transparent 60%);
 }
 
 .literary-text {
@@ -183,16 +243,16 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__topbar {
-  position: sticky;
-  top: 0;
   z-index: 10;
   display: grid;
   grid-template-columns: 72rpx 1fr 72rpx;
   align-items: center;
+  min-height: var(--noche-nav-bar-height);
   gap: 16rpx;
-  padding: 28rpx 36rpx 24rpx;
+  padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;
   background: var(--noche-surface);
   backdrop-filter: blur(12rpx);
+  flex-shrink: 0;
 }
 
 .diary-editor-shell__icon-button {
@@ -242,14 +302,14 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__canvas {
-  min-height: calc(100vh - 124rpx);
-  padding: 36rpx 48rpx 40rpx;
+  min-height: var(--noche-content-min-height);
+  padding: var(--noche-page-section-gap) calc(var(--noche-page-padding-x) + 8px) var(--noche-page-bottom-padding);
   display: flex;
   flex-direction: column;
 }
 
 .diary-editor-shell__header {
-  margin-bottom: 26rpx;
+  margin-bottom: 20rpx;
 }
 
 .diary-editor-shell__date {
@@ -261,9 +321,9 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__notice {
-  margin-bottom: 18rpx;
+  margin-bottom: 14rpx;
   font-size: 22rpx;
-  color: #8a3d3a;
+  color: var(--noche-danger);
 }
 
 .diary-editor-shell__body {
@@ -271,11 +331,15 @@ function handlePickImagesTrigger(): void {
   min-height: 0;
 }
 
+.diary-editor-shell__body-fill {
+  gap: 0;
+}
+
 .diary-editor-shell__attachments {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20rpx;
-  margin-bottom: 28rpx;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
 }
 
 .diary-editor-shell__attachment-card {
@@ -289,7 +353,7 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__attachment-card--focused {
-  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
+  box-shadow: 0 0 0 2rpx rgba(var(--noche-paper-shadow-rgb), 0.38);
 }
 
 .diary-editor-shell__attachment-image {
@@ -319,13 +383,13 @@ function handlePickImagesTrigger(): void {
 .diary-editor-shell__textarea,
 .diary-editor-shell__read-content {
   width: 100%;
-  min-height: 560rpx;
   border: none;
   background: transparent;
-  padding: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
   color: var(--noche-text);
   font-size: 18px;
-  line-height: 2.2;
 }
 
 .diary-editor-shell__placeholder {
@@ -342,8 +406,8 @@ function handlePickImagesTrigger(): void {
 }
 
 .diary-editor-shell__footer {
-  margin-top: 36rpx;
-  padding-top: 28rpx;
+  margin-top: 24rpx;
+  padding-top: 18rpx;
   border-top: 1rpx solid var(--noche-border);
   display: flex;
   align-items: center;

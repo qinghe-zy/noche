@@ -44,25 +44,35 @@ describe("diary prelude stitch parity", () => {
   it("keeps the picker compact enough to fit the main content on one screen", () => {
     const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
 
-    expect(picker).toContain("padding: 24rpx 24rpx 10rpx;");
-    expect(picker).toContain("padding: 12rpx 24rpx 12rpx;");
-    expect(picker).toContain("min-height: 104rpx;");
-    expect(picker).toContain("margin-top: 18rpx;");
+    expect(picker).toContain("noche-mobile-page");
+    expect(picker).toContain("noche-mobile-scroll");
+    expect(picker).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(picker).toContain("padding: var(--noche-status-bar-height) var(--noche-page-padding-x) 0;");
+    expect(picker).toContain("min-height: var(--noche-content-min-height);");
+    expect(picker).toContain("padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);");
+    expect(picker).toContain("min-height: 94rpx;");
+    expect(picker).toContain("margin-top: 16rpx;");
   });
 
   it("keeps the overall picker height closer to the home-page cadence to avoid first-screen scrolling", () => {
     const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
 
-    expect(picker).toContain("padding: 24rpx 22rpx 18rpx;");
-    expect(picker).toContain("min-height: 68rpx;");
-    expect(picker).toContain("font-size: 36rpx;");
-    expect(picker).toContain("min-height: 68rpx;");
+    expect(picker).toContain("padding: 22rpx 18rpx 16rpx;");
+    expect(picker).toContain("min-height: 64rpx;");
+    expect(picker).toContain("font-size: 32rpx;");
+    expect(picker).toContain("margin-top: auto;");
   });
 
   it("keeps the anxious sweat drop lightweight and hand-drawn after shrinking", () => {
     const glyph = readProjectFile("src/features/editor/components/DiaryPreludeGlyph.vue");
+    const glyphSource = readProjectFile("src/features/editor/preludeGlyphSource.ts");
+    const anxiousGlyph = readProjectFile("static/prelude-glyphs/mood-anxious.svg");
 
-    expect(glyph).toContain("diary-prelude-glyph__sweat-drop");
-    expect(glyph).toContain("rgba(177, 179, 171");
+    expect(glyph).toContain("handleImageError");
+    expect(glyphSource).not.toContain("/static/prelude-glyphs");
+    expect(glyphSource).toContain("const MOOD_FALLBACK_SVGS = {");
+    expect(glyphSource).toContain("data:image/svg+xml;utf8,");
+    expect(anxiousGlyph).toContain("rgba(177,179,171,0.22)");
+    expect(anxiousGlyph).toContain("17.5 7.4");
   });
 });

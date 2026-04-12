@@ -17,16 +17,30 @@ interface ChooseImageResult {
 interface PickImagesOptions {
   draftKey: string;
   startSortOrder?: number;
+  sourceType?: Array<"album" | "camera">;
 }
 
-function chooseImages(): Promise<ChooseImageResult> {
+function chooseImages(sourceType?: Array<"album" | "camera">): Promise<ChooseImageResult | null> {
   return new Promise((resolve, reject) => {
     uni.chooseImage({
       count: 9,
       sizeType: ["compressed", "original"],
-      sourceType: ["album", "camera"],
+      sourceType: sourceType?.length ? sourceType : ["album", "camera"],
       success: (result) => resolve(result as ChooseImageResult),
-      fail: reject,
+      fail: (error) => {
+        const message = error instanceof Error
+          ? error.message
+          : typeof (error as { errMsg?: unknown })?.errMsg === "string"
+            ? String((error as { errMsg?: string }).errMsg)
+            : "";
+
+        if (/cancel/iu.test(message)) {
+          resolve(null);
+          return;
+        }
+
+        reject(error);
+      },
     });
   });
 }
@@ -100,7 +114,11 @@ async function persistLocalUri(
 export function useEditorImagePicker() {
   return {
     async pickImages(options: PickImagesOptions): Promise<Attachment[]> {
-      const result = await chooseImages();
+      const result = await chooseImages(options.sourceType);
+      if (!result) {
+        return [];
+      }
+
       const tempFilePaths = result.tempFilePaths ?? [];
       const tempFiles = result.tempFiles ?? [];
 

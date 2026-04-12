@@ -53,9 +53,11 @@ describe("editor stitch parity", () => {
   it("keeps the future letter shell full-screen and immersive instead of a centered white card", () => {
     const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
 
+    expect(futureShell).toContain("noche-mobile-page");
     expect(futureShell).toContain(".editor-page__canvas { padding: 0;");
     expect(futureShell).toContain("max-width: none;");
-    expect(futureShell).toContain("min-height: 100vh;");
+    expect(futureShell).toContain("min-height: 0;");
+    expect(futureShell).toContain("var(--noche-page-bottom-padding)");
     expect(futureShell).toContain("box-shadow: none;");
     expect(futureShell).toContain("border: none;");
   });

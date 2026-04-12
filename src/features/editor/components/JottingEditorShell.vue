@@ -1,6 +1,6 @@
 <template>
-  <view class="jotting-editor-shell">
-    <view class="jotting-editor-shell__surface">
+  <view class="jotting-editor-shell noche-mobile-page">
+    <view class="jotting-editor-shell__surface noche-mobile-main">
       <view class="jotting-editor-shell__top-icons">
         <TopbarIconButton @tap="$emit('go-back')" />
 
@@ -21,72 +21,94 @@
         <view v-else class="jotting-editor-shell__spacer"></view>
       </view>
 
-      <view class="jotting-editor-shell__card">
-        <view class="jotting-editor-shell__meta">
-          <text class="jotting-editor-shell__eyebrow">{{ eyebrowLabel }}</text>
-          <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
-        </view>
+      <scroll-view
+        :id="writingSurfaceIds.body"
+        class="jotting-editor-shell__body noche-mobile-scroll"
+        :scroll-y="writingScrollEnabled"
+        :scroll-top="writingScrollTop"
+        :style="writingBodyStyle"
+        @scroll="writingSurface.handleScroll"
+      >
+        <view :id="writingSurfaceIds.content" class="jotting-editor-shell__body-fill noche-mobile-scroll-fill">
+          <view class="jotting-editor-shell__card">
+            <view class="jotting-editor-shell__meta">
+              <text class="jotting-editor-shell__eyebrow">{{ eyebrowLabel }}</text>
+              <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
+            </view>
 
-        <view v-if="attachments.length" class="jotting-editor-shell__attachments">
-          <view
-            v-for="attachment in attachments"
-            :key="attachment.id"
-            class="jotting-editor-shell__attachment-card"
-            :class="{ 'jotting-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
-            :id="`entry-attachment-${attachment.id}`"
-            @click="$emit('preview-attachment', attachment.id)"
-          >
-            <image class="jotting-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
-            <view
+            <view v-if="attachments.length" class="jotting-editor-shell__attachments">
+              <view
+                v-for="attachment in attachments"
+                :key="attachment.id"
+                class="jotting-editor-shell__attachment-card"
+                :class="{ 'jotting-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
+                :id="`entry-attachment-${attachment.id}`"
+                @click="$emit('preview-attachment', attachment.id)"
+              >
+                <image class="jotting-editor-shell__attachment-image" :src="normalizeLocalImageSrc(attachment.localUri)" mode="aspectFill" />
+                <view
+                  v-if="mode === 'edit'"
+                  class="jotting-editor-shell__attachment-remove"
+                  @tap.stop="$emit('remove-attachment', attachment.id)"
+                >
+                  <AppIcon name="close" class="jotting-editor-shell__attachment-remove-svg" />
+                </view>
+              </view>
+            </view>
+
+            <textarea
               v-if="mode === 'edit'"
-              class="jotting-editor-shell__attachment-remove"
-              @tap.stop="$emit('remove-attachment', attachment.id)"
-            >
-              <AppIcon name="close" class="jotting-editor-shell__attachment-remove-svg" />
+              :id="writingSurfaceIds.surface"
+              class="jotting-editor-shell__textarea noche-writing-surface literary-text"
+              :style="writingSurfaceStyle"
+              :value="content"
+              auto-height
+              adjust-position="false"
+              maxlength="-1"
+              :show-confirm-bar="false"
+              :placeholder="bodyPlaceholder"
+              placeholder-class="jotting-editor-shell__placeholder"
+              @blur="writingSurface.handleBlur"
+              @focus="writingSurface.handleFocus"
+              @input="handleWritingInput"
+              @keyboardheightchange="writingSurface.handleKeyboardHeightChange"
+              @linechange="writingSurface.handleLineChange"
+            />
+
+            <view v-else class="jotting-editor-shell__read">
+              <text class="jotting-editor-shell__read-title">{{ readTitle }}</text>
+              <text class="jotting-editor-shell__read-meta">{{ readMeta }}</text>
+              <text
+                :id="writingSurfaceIds.surface"
+                class="jotting-editor-shell__read-content noche-writing-surface literary-text"
+                :style="writingSurfaceStyle"
+              >{{ content }}</text>
+            </view>
+
+            <view class="jotting-editor-shell__image-trigger">
+              <view class="jotting-editor-shell__image-button" @tap="$emit('pick-images')">
+                <AppIcon name="image" class="jotting-editor-shell__image-svg" />
+              </view>
             </view>
           </view>
+          <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
         </view>
-
-        <textarea
-          v-if="mode === 'edit'"
-          class="jotting-editor-shell__textarea literary-text"
-          :value="content"
-          auto-height
-          adjust-position="false"
-          maxlength="-1"
-          :cursor-spacing="cursorSpacing"
-          :show-confirm-bar="false"
-          :placeholder="bodyPlaceholder"
-          placeholder-class="jotting-editor-shell__placeholder"
-          @input="$emit('content-input', $event)"
-        />
-
-        <view v-else class="jotting-editor-shell__read">
-          <text class="jotting-editor-shell__read-title">{{ readTitle }}</text>
-          <text class="jotting-editor-shell__read-meta">{{ readMeta }}</text>
-          <text class="jotting-editor-shell__read-content literary-text">{{ content }}</text>
-        </view>
-
-        <view class="jotting-editor-shell__image-trigger">
-          <view class="jotting-editor-shell__image-button" @tap="$emit('pick-images')">
-            <AppIcon name="image" class="jotting-editor-shell__image-svg" />
-          </view>
-        </view>
-      </view>
-
-      <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
+      </scroll-view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
+import { computed, toRefs } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
+import { useWritingSurfaceController } from "@/features/editor/composables/useWritingSurfaceController";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+import { normalizeLocalImageSrc } from "@/shared/utils/localFiles";
 
 type EditorMode = "edit" | "read";
 
-defineProps<{
+const props = defineProps<{
   mode: EditorMode;
   eyebrowLabel: string;
   headlineDate: string;
@@ -97,13 +119,12 @@ defineProps<{
   canContinueWrite: boolean;
   continueWriteLabel: string;
   signatureLine: string;
-  cursorSpacing: number;
   stampOpacity: number;
   attachments: Attachment[];
   focusedAttachmentId?: string;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (event: "go-back"): void;
   (event: "formal-save"): void;
   (event: "continue-write"): void;
@@ -112,6 +133,42 @@ defineEmits<{
   (event: "remove-attachment", attachmentId: string): void;
   (event: "preview-attachment", attachmentId: string): void;
 }>();
+const {
+  attachments,
+  bodyPlaceholder,
+  canContinueWrite,
+  content,
+  continueWriteLabel,
+  eyebrowLabel,
+  focusedAttachmentId,
+  headlineDate,
+  mode,
+  readMeta,
+  readTitle,
+  signatureLine,
+  stampOpacity,
+} = toRefs(props);
+const surfaceLayoutSignature = computed(() => [
+  props.mode,
+  props.attachments.length,
+  props.focusedAttachmentId ?? "none",
+].join(":"));
+const writingSurface = useWritingSurfaceController({
+  variant: "jotting",
+  mode,
+  content,
+  layoutSignature: surfaceLayoutSignature,
+});
+const writingSurfaceIds = writingSurface.ids;
+const writingBodyStyle = writingSurface.bodyStyle;
+const writingScrollEnabled = writingSurface.scrollEnabled;
+const writingScrollTop = writingSurface.scrollTop;
+const writingSurfaceStyle = computed(() => writingSurface.surfaceStyle.value);
+
+function handleWritingInput(event: Event | { detail?: { value?: string; cursor?: number } }): void {
+  writingSurface.handleInput(event);
+  emit("content-input", event);
+}
 </script>
 
 <style scoped>
@@ -121,15 +178,13 @@ defineEmits<{
 }
 
 .jotting-editor-shell {
-  min-height: 100vh;
   background: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
 }
 
 .jotting-editor-shell__surface {
-  min-height: 100vh;
-  padding: 28rpx 32rpx 40rpx;
+  padding: 0 var(--noche-page-padding-x) var(--noche-page-bottom-padding);
   display: flex;
   flex-direction: column;
 }
@@ -144,8 +199,18 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 72rpx;
-  margin-bottom: 28rpx;
+  min-height: var(--noche-nav-bar-height);
+  padding-top: var(--noche-status-bar-height);
+  margin-bottom: var(--noche-page-section-gap);
+  flex-shrink: 0;
+}
+
+.jotting-editor-shell__body {
+  min-height: var(--noche-content-min-height);
+}
+
+.jotting-editor-shell__body-fill {
+  gap: 0;
 }
 
 .jotting-editor-shell__icon-button {
@@ -174,13 +239,12 @@ defineEmits<{
 }
 
 .jotting-editor-shell__card {
-  flex: 1;
-  margin-top: 128rpx;
-  margin-bottom: 80rpx;
-  padding: 92rpx 44rpx 40rpx;
+  margin-top: 48rpx;
+  margin-bottom: 32rpx;
+  padding: 72rpx 32rpx 32rpx;
   border-radius: 28rpx;
   background: var(--noche-surface);
-  box-shadow: 0 8rpx 48rpx rgba(49, 51, 46, 0.06);
+  box-shadow: 0 8rpx 48rpx rgba(var(--noche-paper-shadow-rgb), 0.16);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -202,7 +266,7 @@ defineEmits<{
 
 .jotting-editor-shell__date {
   display: block;
-  font-size: 60rpx;
+  font-size: 54rpx;
   line-height: 1.14;
   letter-spacing: 0.04em;
 }
@@ -225,7 +289,7 @@ defineEmits<{
 }
 
 .jotting-editor-shell__attachment-card--focused {
-  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
+  box-shadow: 0 0 0 2rpx rgba(var(--noche-paper-shadow-rgb), 0.38);
 }
 
 .jotting-editor-shell__attachment-image {
@@ -256,13 +320,13 @@ defineEmits<{
 .jotting-editor-shell__read-content {
   width: 100%;
   flex: 1;
-  min-height: 520rpx;
   border: none;
   background: transparent;
-  padding: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
   color: var(--noche-text);
   font-size: 18px;
-  line-height: 2;
 }
 
 .jotting-editor-shell__placeholder {
@@ -310,6 +374,7 @@ defineEmits<{
 }
 
 .jotting-editor-shell__signature {
+  margin-top: 4rpx;
   text-align: center;
   font-size: 20rpx;
   color: var(--noche-muted);

@@ -1,12 +1,10 @@
 <template>
-  <view class="home-page">
+  <view class="home-page noche-mobile-page">
     <view class="home-page__topnav">
       <view class="home-page__topnav-inner">
         <view class="home-page__topnav-spacer"></view>
         <view class="home-page__topnav-profile-entry" @tap="handleNavigate('profile')">
-          <view class="home-page__topnav-profile-mark">
-            <HomeProfileMark />
-          </view>
+          <text class="home-page__topnav-profile-text">{{ settingsStore.locale === "en-US" ? "Profile" : "个人主页" }}</text>
         </view>
       </view>
     </view>
@@ -121,7 +119,6 @@ import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 import AppIcon from "@/shared/ui/AppIcon.vue";
-import HomeProfileMark from "@/features/home/components/HomeProfileMark.vue";
 import { t } from "@/shared/i18n";
 
 const draftStore = useDraftStore();
@@ -212,11 +209,7 @@ onShow(() => {
 }
 
 .home-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
   background-color: var(--noche-bg);
   color: var(--noche-text);
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
@@ -232,7 +225,8 @@ onShow(() => {
   width: 100%;
   max-width: 768px;
   margin: 0 auto;
-  padding: 40px 22px 0;
+  min-height: var(--noche-nav-bar-height);
+  padding: var(--noche-status-bar-height) var(--noche-page-padding-x) 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -243,8 +237,8 @@ onShow(() => {
 }
 
 .home-page__topnav-profile-entry {
-  width: 72rpx;
-  height: 72rpx;
+  min-width: 152rpx;
+  min-height: 72rpx;
   border: none;
   background: transparent;
   display: flex;
@@ -258,11 +252,12 @@ onShow(() => {
   transition: color 160ms ease, opacity 160ms ease;
 }
 
-.home-page__topnav-profile-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.92;
+.home-page__topnav-profile-text {
+  font-family: "Inter", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  color: var(--noche-text);
 }
 
 .home-page__topnav-profile-entry:active,
@@ -272,20 +267,20 @@ onShow(() => {
 
 .home-page__main {
   flex: 1;
+  min-height: var(--noche-content-min-height);
   width: 100%;
   max-width: 768px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 24px 24px;
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
   position: relative;
-  margin-top: 12px;
   z-index: 1;
 }
 
 .home-page__hero {
-  margin-bottom: 56px;
+  margin-bottom: 40px;
   text-align: center;
 }
 
@@ -310,14 +305,14 @@ onShow(() => {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 56px;
+  margin-bottom: 36px;
 }
 
 .home-page__paper-premium {
   position: relative;
-  width: min(100%, 340px);
-  aspect-ratio: 1 / 1.4;
-  padding: 48px;
+  width: min(100%, 316px);
+  aspect-ratio: 1 / 1.3;
+  padding: 40px;
   background-color: var(--noche-panel);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.03),
@@ -373,7 +368,7 @@ onShow(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 26px;
   z-index: 1;
 }
 
@@ -399,7 +394,7 @@ onShow(() => {
 }
 
 .home-page__paper-heading {
-  font-size: 30px;
+  font-size: 27px;
   line-height: 1.3;
   font-weight: 300;
   color: var(--noche-text);
@@ -432,11 +427,11 @@ onShow(() => {
 
 .home-page__secondary-nav {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 28px;
+  gap: 20px;
 }
 
 .home-page__nav-entry {
@@ -481,7 +476,7 @@ onShow(() => {
 
 .home-page__footer {
   margin-top: auto;
-  padding: 24px 0 48px;
+  padding: 18px 0 calc(var(--noche-safe-bottom) + 18px);
   z-index: 1;
 }
 
@@ -508,10 +503,10 @@ onShow(() => {
 
 .home-page__jotting-modal {
   width: min(100%, 420px);
-  background: rgba(252, 248, 241, 0.98);
+  background: var(--noche-surface-elevated);
   border: 1px solid var(--noche-border);
   border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
+  box-shadow: 0 18px 40px rgba(var(--noche-shadow-rgb), 0.14);
   overflow: hidden;
 }
 

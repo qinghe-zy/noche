@@ -6,6 +6,14 @@ export function resolveThemeMode(theme: AppThemeMode): ResolvedTheme {
     return theme;
   }
 
+  if (typeof uni !== "undefined" && typeof uni.getSystemInfoSync === "function") {
+    const systemTheme = (uni.getSystemInfoSync() as { theme?: string }).theme;
+
+    if (systemTheme === "light" || systemTheme === "dark") {
+      return systemTheme;
+    }
+  }
+
   if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }

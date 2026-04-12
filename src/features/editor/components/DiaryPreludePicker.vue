@@ -1,5 +1,5 @@
 <template>
-  <view class="diary-prelude-picker">
+  <view class="diary-prelude-picker noche-mobile-page">
     <view class="diary-prelude-picker__grain"></view>
 
     <view class="diary-prelude-picker__topbar">
@@ -9,8 +9,13 @@
       <view v-else class="diary-prelude-picker__skip-spacer"></view>
     </view>
 
-    <scroll-view class="diary-prelude-picker__body" scroll-y>
-      <view class="diary-prelude-picker__preview-card">
+    <scroll-view
+      :id="viewportIds.body"
+      class="diary-prelude-picker__body noche-mobile-scroll"
+      :scroll-y="viewportScrollEnabled"
+    >
+      <view :id="viewportIds.content" class="diary-prelude-picker__body-fill noche-mobile-scroll-fill">
+        <view class="diary-prelude-picker__preview-card">
         <view class="diary-prelude-picker__preview-glyph-wrap">
           <DiaryPreludeGlyph
             class="diary-prelude-picker__preview-glyph"
@@ -25,61 +30,62 @@
         <text class="diary-prelude-picker__preview-note">{{ previewNote }}</text>
       </view>
 
-      <view class="diary-prelude-picker__section">
-        <view class="diary-prelude-picker__section-head">
-          <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeWeather }}</text>
-          <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "WEATHER" : "Weather" }}</text>
-        </view>
-        <view class="diary-prelude-picker__grid">
-          <view
-            v-for="option in DIARY_WEATHER_OPTIONS"
-            :key="option.code"
-            class="diary-prelude-picker__option"
-            :class="{ 'diary-prelude-picker__option--active': weatherCode === option.code }"
-            @tap="toggleWeather(option.code)"
-          >
-            <view class="diary-prelude-picker__option-glyph-wrap">
-              <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="weather" :code="option.code" />
+        <view class="diary-prelude-picker__section">
+          <view class="diary-prelude-picker__section-head">
+            <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeWeather }}</text>
+            <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "WEATHER" : "Weather" }}</text>
+          </view>
+          <view class="diary-prelude-picker__grid">
+            <view
+              v-for="option in DIARY_WEATHER_OPTIONS"
+              :key="option.code"
+              class="diary-prelude-picker__option"
+              :class="{ 'diary-prelude-picker__option--active': weatherCode === option.code }"
+              @tap="toggleWeather(option.code)"
+            >
+              <view class="diary-prelude-picker__option-glyph-wrap">
+                <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="weather" :code="option.code" />
+              </view>
+              <view v-if="weatherCode === option.code" class="diary-prelude-picker__option-mark"></view>
+              <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
+              <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
             </view>
-            <view v-if="weatherCode === option.code" class="diary-prelude-picker__option-mark"></view>
-            <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
-            <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
           </view>
         </view>
-      </view>
 
-      <view class="diary-prelude-picker__section">
-        <view class="diary-prelude-picker__section-head">
-          <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeMood }}</text>
-          <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "MOOD" : "Mood" }}</text>
-        </view>
-        <view class="diary-prelude-picker__grid diary-prelude-picker__grid--mood">
-          <view
-            v-for="option in DIARY_MOOD_OPTIONS"
-            :key="option.code"
-            class="diary-prelude-picker__option"
-            :class="{ 'diary-prelude-picker__option--active': moodCode === option.code }"
-            @tap="toggleMood(option.code)"
-          >
-            <view class="diary-prelude-picker__option-glyph-wrap">
-              <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="mood" :code="option.code" />
+        <view class="diary-prelude-picker__section">
+          <view class="diary-prelude-picker__section-head">
+            <text class="diary-prelude-picker__section-title">{{ copy.editor.diaryPreludeMood }}</text>
+            <text class="diary-prelude-picker__section-subtitle">{{ settingsStore.locale === "en-US" ? "MOOD" : "Mood" }}</text>
+          </view>
+          <view class="diary-prelude-picker__grid diary-prelude-picker__grid--mood">
+            <view
+              v-for="option in DIARY_MOOD_OPTIONS"
+              :key="option.code"
+              class="diary-prelude-picker__option"
+              :class="{ 'diary-prelude-picker__option--active': moodCode === option.code }"
+              @tap="toggleMood(option.code)"
+            >
+              <view class="diary-prelude-picker__option-glyph-wrap">
+                <DiaryPreludeGlyph class="diary-prelude-picker__option-glyph" kind="mood" :code="option.code" />
+              </view>
+              <view v-if="moodCode === option.code" class="diary-prelude-picker__option-mark"></view>
+              <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
+              <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
             </view>
-            <view v-if="moodCode === option.code" class="diary-prelude-picker__option-mark"></view>
-            <text class="diary-prelude-picker__option-zh">{{ settingsStore.locale === "en-US" ? option.labelEn : option.labelZh }}</text>
-            <text class="diary-prelude-picker__option-en">{{ settingsStore.locale === "en-US" ? option.labelZh : option.labelEn.toUpperCase() }}</text>
           </view>
         </view>
-      </view>
 
-      <view class="diary-prelude-picker__footer">
-        <view
-          class="diary-prelude-picker__confirm"
-          :class="{ 'diary-prelude-picker__confirm--disabled': !previewPrelude }"
-          @tap="handleConfirm"
-        >
-          <text class="diary-prelude-picker__confirm-label">{{ copy.editor.diaryPreludeConfirm }}</text>
+        <view class="diary-prelude-picker__footer">
+          <view
+            class="diary-prelude-picker__confirm"
+            :class="{ 'diary-prelude-picker__confirm--disabled': !previewPrelude }"
+            @tap="handleConfirm"
+          >
+            <text class="diary-prelude-picker__confirm-label">{{ copy.editor.diaryPreludeConfirm }}</text>
+          </view>
+          <text v-if="pickerHint" class="diary-prelude-picker__hint">{{ pickerHint }}</text>
         </view>
-        <text v-if="pickerHint" class="diary-prelude-picker__hint">{{ pickerHint }}</text>
       </view>
     </scroll-view>
   </view>
@@ -94,6 +100,7 @@ import {
   DIARY_WEATHER_OPTIONS,
 } from "@/domain/diaryPrelude/catalog";
 import type { DiaryPreludeMeta } from "@/domain/diaryPrelude/types";
+import { useViewportContentFit } from "@/features/editor/composables/useViewportContentFit";
 import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import { t } from "@/shared/i18n";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
@@ -163,6 +170,18 @@ const previewNote = computed(() => {
   return copy.value.editor.diaryPreludeNoteFallback;
 });
 const pickerHint = computed(() => (props.canSkip ? copy.value.editor.diaryPreludeHint : ""));
+const viewportLayoutSignature = computed(() => [
+  settingsStore.locale,
+  props.canSkip ? "skip" : "locked",
+  weatherCode.value ?? "none",
+  moodCode.value ?? "none",
+  previewNote.value,
+].join(":"));
+const viewportFit = useViewportContentFit({
+  layoutSignature: viewportLayoutSignature,
+});
+const viewportIds = viewportFit.ids;
+const viewportScrollEnabled = viewportFit.scrollEnabled;
 
 function toggleWeather(code: string): void {
   weatherCode.value = weatherCode.value === code ? null : code;
@@ -196,9 +215,8 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker {
-  min-height: 100vh;
-  background: #fbf9f5;
-  color: #31332e;
+  background: var(--noche-bg);
+  color: var(--noche-text);
   position: relative;
 }
 
@@ -208,28 +226,28 @@ function handleSkip(): void {
   pointer-events: none;
   opacity: 0.03;
   background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.74)),
-    radial-gradient(circle at center, rgba(49, 51, 46, 0.05), transparent 60%);
+    linear-gradient(to bottom, rgba(var(--noche-shadow-rgb), 0.02), rgba(var(--noche-shadow-rgb), 0.01)),
+    radial-gradient(circle at center, rgba(var(--noche-paper-shadow-rgb), 0.05), transparent 60%);
 }
 
 .diary-prelude-picker__topbar {
-  position: sticky;
-  top: 0;
   z-index: 10;
   display: grid;
   grid-template-columns: 72rpx 1fr auto;
   align-items: center;
+  min-height: var(--noche-nav-bar-height);
   gap: 20rpx;
-  padding: 24rpx 24rpx 10rpx;
-  background: rgba(251, 249, 245, 0.96);
+  padding: var(--noche-status-bar-height) var(--noche-page-padding-x) 0;
+  background: var(--noche-surface);
   backdrop-filter: blur(12rpx);
+  flex-shrink: 0;
 }
 
 .diary-prelude-picker__title {
   text-align: center;
   font-size: 24rpx;
   line-height: 1.5;
-  color: rgba(99, 95, 85, 0.74);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.1em;
 }
 
@@ -238,7 +256,7 @@ function handleSkip(): void {
   text-align: right;
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 22rpx;
-  color: rgba(138, 129, 120, 0.78);
+  color: var(--noche-ink-faint);
   transition: opacity 160ms ease, transform 180ms ease;
 }
 
@@ -253,14 +271,18 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__body {
-  min-height: calc(100vh - 124rpx);
-  padding: 12rpx 24rpx 12rpx;
+  min-height: var(--noche-content-min-height);
+  padding: var(--noche-page-section-gap-tight) var(--noche-page-padding-x) var(--noche-page-bottom-padding);
+}
+
+.diary-prelude-picker__body-fill {
+  gap: 0;
 }
 
 .diary-prelude-picker__preview-card {
-  padding: 24rpx 22rpx 18rpx;
-  border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.88);
+  padding: 22rpx 18rpx 16rpx;
+  border-radius: 24rpx;
+  background: var(--noche-surface-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -268,15 +290,15 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__preview-glyph-wrap {
-  width: 76rpx;
-  height: 76rpx;
+  width: 68rpx;
+  height: 68rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.78);
+  background: var(--noche-card-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(49, 51, 46, 0.88);
-  margin-bottom: 12rpx;
+  color: var(--noche-ink-strong);
+  margin-bottom: 10rpx;
 }
 
 .diary-prelude-picker__preview-glyph {
@@ -285,7 +307,7 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__preview-headline {
-  font-size: 36rpx;
+  font-size: 32rpx;
   line-height: 1.16;
   letter-spacing: 0.18em;
   margin-bottom: 8rpx;
@@ -294,25 +316,25 @@ function handleSkip(): void {
 .diary-prelude-picker__preview-subline {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 15rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.28em;
 }
 
 .diary-prelude-picker__preview-line {
   width: 72rpx;
   height: 1rpx;
-  background: rgba(177, 179, 171, 0.28);
+  background: var(--noche-paper-line);
   margin: 14rpx 0 10rpx;
 }
 
 .diary-prelude-picker__preview-note {
-  font-size: 18rpx;
+  font-size: 17rpx;
   line-height: 1.45;
-  color: rgba(99, 95, 85, 0.76);
+  color: var(--noche-ink-faint);
 }
 
 .diary-prelude-picker__section {
-  margin-top: 18rpx;
+  margin-top: 16rpx;
 }
 
 .diary-prelude-picker__section-head {
@@ -330,7 +352,7 @@ function handleSkip(): void {
 .diary-prelude-picker__section-subtitle {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 13rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.24em;
 }
 
@@ -346,20 +368,20 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option {
   position: relative;
-  min-height: 104rpx;
+  min-height: 94rpx;
   padding: 12rpx 12rpx;
   border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1rpx solid rgba(177, 179, 171, 0.16);
+  background: var(--noche-surface-faint);
+  border: 1rpx solid color-mix(in srgb, var(--noche-border) 55%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4rpx;
   text-align: center;
-  color: rgba(49, 51, 46, 0.86);
+  color: var(--noche-ink-strong);
   transform: translateY(0) scale(1);
-  box-shadow: 0 0 0 rgba(49, 51, 46, 0);
+  box-shadow: 0 0 0 rgba(var(--noche-paper-shadow-rgb), 0);
   transition:
     transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -370,28 +392,28 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option:active {
   transform: translateY(1rpx) scale(0.985);
-  box-shadow: 0 8rpx 18rpx rgba(49, 51, 46, 0.06);
+  box-shadow: 0 8rpx 18rpx rgba(var(--noche-paper-shadow-rgb), 0.12);
 }
 
 .diary-prelude-picker__option--active {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(138, 129, 120, 0.48);
-  color: rgba(49, 51, 46, 0.96);
+  background: var(--noche-surface-strong);
+  border-color: color-mix(in srgb, var(--noche-accent) 42%, var(--noche-border));
+  color: var(--noche-ink-strong);
   transform: translateY(-4rpx);
   box-shadow:
-    0 14rpx 28rpx rgba(49, 51, 46, 0.08),
-    0 2rpx 0 rgba(255, 255, 255, 0.85) inset;
+    0 14rpx 28rpx rgba(var(--noche-paper-shadow-rgb), 0.16),
+    0 2rpx 0 rgba(var(--noche-shadow-rgb), 0.08) inset;
 }
 
 .diary-prelude-picker__option-glyph-wrap {
   width: 42rpx;
   height: 42rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.92);
+  background: var(--noche-card-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--noche-ink-soft);
   transition:
     background-color 220ms ease,
     color 180ms ease,
@@ -399,8 +421,8 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-glyph-wrap {
-  background: rgba(234, 229, 218, 0.82);
-  color: rgba(49, 51, 46, 0.94);
+  background: var(--noche-card-mark);
+  color: var(--noche-ink-strong);
   transform: scale(1.05);
 }
 
@@ -411,8 +433,8 @@ function handleSkip(): void {
   width: 10rpx;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(138, 129, 120, 0.82);
-  box-shadow: 0 0 0 4rpx rgba(234, 229, 218, 0.55);
+  background: var(--noche-accent);
+  box-shadow: 0 0 0 4rpx rgba(var(--noche-shadow-rgb), 0.14);
 }
 
 .diary-prelude-picker__option-glyph {
@@ -427,40 +449,40 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-zh {
-  color: rgba(49, 51, 46, 0.98);
+  color: var(--noche-ink-strong);
   transform: translateY(-1rpx);
 }
 
 .diary-prelude-picker__option-en {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 11rpx;
-  color: rgba(138, 129, 120, 0.68);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.22em;
   transition: color 180ms ease, letter-spacing 220ms ease;
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-en {
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--noche-ink-faint);
   letter-spacing: 0.24em;
 }
 
 .diary-prelude-picker__footer {
-  margin-top: 18rpx;
-  padding-bottom: 2rpx;
+  margin-top: auto;
+  padding-top: var(--noche-page-section-gap);
   display: flex;
   flex-direction: column;
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .diary-prelude-picker__confirm {
-  min-height: 68rpx;
+  min-height: 64rpx;
   border-radius: 999rpx;
-  background: rgba(95, 94, 94, 0.92);
+  background: var(--noche-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   transform: scale(1);
-  box-shadow: 0 10rpx 18rpx rgba(49, 51, 46, 0.1);
+  box-shadow: 0 10rpx 18rpx rgba(var(--noche-paper-shadow-rgb), 0.18);
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms ease,
@@ -469,16 +491,16 @@ function handleSkip(): void {
 
 .diary-prelude-picker__confirm:active {
   transform: scale(0.992);
-  box-shadow: 0 6rpx 12rpx rgba(49, 51, 46, 0.08);
+  box-shadow: 0 6rpx 12rpx rgba(var(--noche-paper-shadow-rgb), 0.14);
 }
 
 .diary-prelude-picker__confirm--disabled {
-  background: rgba(177, 179, 171, 0.56);
+  background: var(--noche-ink-ghost);
   box-shadow: none;
 }
 
 .diary-prelude-picker__confirm-label {
-  color: #faf7f6;
+  color: var(--noche-accent-contrast);
   font-size: 20rpx;
   letter-spacing: 0.16em;
 }
@@ -487,7 +509,7 @@ function handleSkip(): void {
   text-align: center;
   font-size: 16rpx;
   line-height: 1.35;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--noche-ink-faint);
 }
 
 @media (prefers-reduced-motion: reduce) {

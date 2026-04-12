@@ -20,7 +20,10 @@ describe("mailbox stitch parity", () => {
     const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
 
     expect(mailboxPage).toContain("TopbarIconButton");
-    expect(mailboxPage).toContain("padding: 28rpx 32rpx 24rpx;");
+    expect(mailboxPage).toContain("noche-mobile-page");
+    expect(mailboxPage).toContain("min-height: var(--noche-nav-bar-height);");
+    expect(mailboxPage).toContain("padding: var(--noche-status-bar-height) var(--noche-topbar-padding-x) 0;");
+    expect(mailboxPage).toContain("min-height: var(--noche-content-min-height);");
     expect(mailboxPage).not.toContain(">edit_square<");
     expect(mailboxPage).not.toContain(">auto_stories<");
   });
