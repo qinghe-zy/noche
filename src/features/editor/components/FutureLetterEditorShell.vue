@@ -1,0 +1,773 @@
+<template>
+  <view class="editor-page" :class="[themeClass, `editor-page--${entryType}`]">
+    <view class="editor-page__paper-noise"></view>
+
+    <view class="editor-page__canvas">
+      <view class="editor-page__paper-surface">
+        <view class="editor-page__fixed-layer">
+          <view class="editor-page__topbar">
+            <view class="editor-page__topbar-inner" :style="topbarInnerStyle">
+              <TopbarIconButton @tap="$emit('go-back')" />
+
+              <view
+                v-if="mode === 'edit'"
+                class="editor-page__topbar-button editor-page__topbar-button--action"
+                @tap="$emit('formal-save')"
+              >
+                <text v-if="showSavedHint" class="editor-page__saved-hint">{{ savedHintLabel }}</text>
+                <AppIcon name="mail" class="editor-page__topbar-svg" />
+              </view>
+              <view
+                v-else-if="canContinueWrite"
+                class="editor-page__topbar-button editor-page__topbar-button--continue"
+                @tap="$emit('continue-write')"
+              >
+                {{ continueWriteLabel }}
+              </view>
+              <view v-else class="editor-page__topbar-spacer"></view>
+            </view>
+          </view>
+
+          <view class="editor-page__meta">
+            <text class="editor-page__meta-date literary-text">{{ paperDateDisplay }}</text>
+            <text class="editor-page__meta-subtitle">{{ paperSubline }}</text>
+          </view>
+
+          <view v-if="errorMessage" class="editor-page__notice editor-page__notice--error">
+            <text>{{ errorMessage }}</text>
+          </view>
+
+          <view v-if="showFutureUnlockRibbon" class="editor-page__future-ribbon">
+            <text class="editor-page__future-ribbon-label">{{ futureUnlockLabel }}</text>
+            <view class="editor-page__future-ribbon-copy">
+              <view class="editor-page__future-ribbon-value" @tap="$emit('open-future-date-sheet')">
+                {{ futureDateLabel }}
+              </view>
+              <text v-if="futureHint" class="editor-page__future-ribbon-hint">{{ futureHint }}</text>
+            </view>
+          </view>
+
+          <view v-if="attachments.length" class="editor-page__attachments">
+            <view
+              v-for="attachment in attachments"
+              :key="attachment.id"
+              class="editor-page__attachment-card"
+              :class="{ 'editor-page__attachment-card--focused': focusedAttachmentId === attachment.id }"
+              :id="`entry-attachment-${attachment.id}`"
+              @click="$emit('preview-attachment', attachment.id)"
+            >
+              <image class="editor-page__attachment-image" :src="attachment.localUri" mode="aspectFill" />
+              <view
+                v-if="mode === 'edit'"
+                class="editor-page__attachment-remove"
+                @tap.stop="$emit('remove-attachment', attachment.id)"
+              >
+                <AppIcon name="close" class="editor-page__attachment-remove-svg" />
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="editor-page__interactive-layer" :style="interactiveLayerStyle">
+          <scroll-view
+            v-if="mode === 'edit'"
+            class="editor-page__writing-scroll"
+            scroll-y
+            :scroll-top="writingScrollTop"
+            :scroll-with-animation="scrollWithAnimation"
+          >
+            <view class="editor-page__writing-stage editor-page__writing-lines" :style="writingStageStyle">
+              <textarea
+                class="editor-page__textarea literary-text"
+                :value="content"
+                :focus="textareaFocused"
+                :cursor="localCursorPosition"
+                adjust-position="false"
+                disable-default-padding
+                maxlength="-1"
+              :cursor-spacing="cursorSpacing"
+              :show-confirm-bar="false"
+              :placeholder="bodyPlaceholder"
+              placeholder-class="editor-page__placeholder"
+              :style="textareaStyle"
+              @input="handleInput"
+                @focus="handleFocus"
+                @blur="handleBlur"
+                @linechange="handleLineChange"
+              />
+              <view class="editor-page__blank-spacer" :style="blankSpacerStyle" @tap="handleBlankAreaFocus"></view>
+            </view>
+          </scroll-view>
+
+          <view v-else class="editor-page__writing-area editor-page__writing-area--read">
+            <view class="editor-page__read-header">
+              <text class="editor-page__read-headline">{{ readTitle }}</text>
+              <text class="editor-page__read-meta">{{ readMeta }}</text>
+            </view>
+            <text class="editor-page__read-content editor-page__writing-lines literary-text" :style="writingTextStyle">{{ content }}</text>
+          </view>
+        </view>
+
+        <view v-if="mode === 'edit'" class="editor-page__floating-attachment" :style="floatingAttachmentStyle">
+          <view class="editor-page__attachment-trigger" @tap="$emit('pick-images')">
+            <AppIcon name="image" class="editor-page__attachment-trigger-svg" />
+          </view>
+        </view>
+
+        <view v-if="mode === 'read'" class="editor-page__watermark" :style="{ opacity: stampOpacity }">N.</view>
+        <view v-else class="editor-page__seal" :style="{ opacity: stampOpacity }">
+          <svg class="editor-page__signature-svg" viewBox="0 0 120 120" aria-hidden="true">
+            <rect x="0" y="0" width="120" height="120" fill="currentColor" opacity="0.12" />
+            <path
+              d="M18 86 C26 62, 33 40, 40 28 C42 25, 45 25, 47 28 C48 30, 48 34, 48 44 L48 84 C48 87, 50 88, 52 84 C58 72, 64 58, 73 40 C75 36, 78 35, 80 38 C82 41, 82 47, 82 58 L82 84 M24 68 C31 72, 39 78, 48 84 M58 74 C66 79, 74 83, 82 84 M92 84 L104 84"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="4.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </view>
+      </view>
+    </view>
+
+    <view
+      v-if="isFutureDateSheetOpen"
+      class="editor-page__sheet-mask"
+      @click="$emit('close-future-date-sheet')"
+    >
+      <view class="editor-page__date-sheet" @click.stop>
+        <text class="editor-page__sheet-title">{{ futureSheetTitle }}</text>
+        <text class="editor-page__sheet-copy">{{ futureSheetCopy }}</text>
+        <view class="editor-page__sheet-calendar-head">
+          <view class="editor-page__sheet-calendar-nav" @tap="$emit('prev-future-picker-month')">
+            <AppIcon name="chevron-left" class="editor-page__sheet-calendar-nav-icon" />
+          </view>
+          <text class="editor-page__sheet-calendar-month">{{ futurePickerMonthLabel }}</text>
+          <view class="editor-page__sheet-calendar-nav" @tap="$emit('next-future-picker-month')">
+            <AppIcon name="chevron-right" class="editor-page__sheet-calendar-nav-icon" />
+          </view>
+        </view>
+        <view class="editor-page__date-chip-row">
+          <view
+            v-for="option in futureQuickDateOptions"
+            :key="option.value"
+            class="editor-page__date-chip"
+            :class="{ 'editor-page__date-chip--active': option.value === pendingUnlockDate }"
+            @tap="$emit('pick-future-date', option.value)"
+          >
+            {{ option.label }}
+          </view>
+        </view>
+        <view class="editor-page__date-weekdays">
+          <text v-for="weekday in futurePickerWeekLabels" :key="weekday" class="editor-page__date-weekday">{{ weekday }}</text>
+        </view>
+        <view class="editor-page__date-grid">
+          <view
+            v-for="day in futurePickerDays"
+            :key="day.key"
+            class="editor-page__date-cell"
+            :class="{
+              'editor-page__date-cell--empty': !day.date,
+              'editor-page__date-cell--disabled': day.date && !day.selectable,
+              'editor-page__date-cell--selected': day.date && day.fullDate === pendingUnlockDate,
+            }"
+            @tap="day.date && day.selectable && $emit('pick-future-date', day.fullDate)"
+          >
+            <text v-if="day.date" class="editor-page__date-cell-text">{{ day.date }}</text>
+          </view>
+        </view>
+        <view class="editor-page__sheet-actions">
+          <view class="editor-page__sheet-button editor-page__sheet-button--secondary" @tap="$emit('close-future-date-sheet')">{{ futureSheetSkipLabel }}</view>
+          <view class="editor-page__sheet-button editor-page__sheet-button--primary" @tap="$emit('confirm-future-date')">{{ futureSheetConfirmLabel }}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from "vue";
+import type { Attachment } from "@/shared/types/attachment";
+import type { EntryType } from "@/domain/entry/types";
+import {
+  DEFAULT_EDITOR_LINE_HEIGHT_PX,
+  rpxToPx,
+  shouldRefreshForNextLine,
+} from "@/features/editor/composables/useEditorKeyboardViewport";
+import {
+  reconcileFutureMeasuredHeight,
+  type FutureContentChangeDirection,
+} from "@/features/editor/futureEditorLayout";
+import { useThemeClass } from "@/shared/theme";
+import AppIcon from "@/shared/ui/AppIcon.vue";
+import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
+
+type EditorMode = "edit" | "read";
+type TextareaInputPayload = { value?: string; cursor?: number };
+type TextareaFocusPayload = { cursor?: number };
+type TextareaLineChangePayload = { height?: number };
+type QueryRect = {
+  height?: number | null;
+  width?: number | null;
+};
+
+const PAPER_SURFACE_HORIZONTAL_PADDING_RPX = 32;
+const WRITING_STAGE_HORIZONTAL_PADDING_PX = 8;
+const MIN_RENDERED_WRITING_LINES = 2;
+
+const props = defineProps<{
+  entryType: EntryType;
+  mode: EditorMode;
+  paperDateDisplay: string;
+  paperSubline: string;
+  futureUnlockLabel: string;
+  futureDateLabel: string;
+  futureHint: string;
+  showFutureUnlockRibbon: boolean;
+  pendingUnlockDate: string;
+  isFutureDateSheetOpen: boolean;
+  futurePickerMonthLabel: string;
+  futurePickerWeekLabels: string[];
+  futurePickerDays: Array<{
+    key: string;
+    date: number | null;
+    fullDate: string;
+    selectable: boolean;
+  }>;
+  futureQuickDateOptions: Array<{ label: string; value: string }>;
+  content: string;
+  bodyPlaceholder: string;
+  readTitle: string;
+  readMeta: string;
+  continueWriteLabel: string;
+  futureSheetTitle: string;
+  futureSheetCopy: string;
+  futureSheetSkipLabel: string;
+  futureSheetConfirmLabel: string;
+  savedHintLabel: string;
+  errorMessage: string | null;
+  showSavedHint: boolean;
+  canContinueWrite: boolean;
+  cursorSpacing: number;
+  writingFontSizePx: number;
+  writingLineHeightPx: number;
+  showPaperLines: boolean;
+  statusBarHeight: number;
+  safeAreaBottom: number;
+  keyboardHeight: number;
+  keyboardVisible: boolean;
+  windowHeight: number;
+  topbarTop: number;
+  attachmentDockBottom: number;
+  minLineGapToKeyboard: number;
+  restoreAfterKeyboardHide: number;
+  cursorPosition: number;
+  focusEndRequestKey: number;
+  stampOpacity: number;
+  attachments: Attachment[];
+  focusedAttachmentId?: string;
+}>();
+
+const emit = defineEmits<{
+  (event: "go-back"): void;
+  (event: "formal-save"): void;
+  (event: "continue-write"): void;
+  (event: "content-input", payload: { detail?: TextareaInputPayload }): void;
+  (event: "pick-images"): void;
+  (event: "remove-attachment", attachmentId: string): void;
+  (event: "preview-attachment", attachmentId: string): void;
+  (event: "open-future-date-sheet"): void;
+  (event: "close-future-date-sheet"): void;
+  (event: "pick-future-date", value: string): void;
+  (event: "prev-future-picker-month"): void;
+  (event: "next-future-picker-month"): void;
+  (event: "confirm-future-date"): void;
+  (event: "focus-end-request"): void;
+  (event: "content-selection-change", cursor: number): void;
+  (event: "editor-focus", cursor: number): void;
+  (event: "editor-blur"): void;
+}>();
+
+function resolveScreenWidth(): number {
+  if (typeof uni === "undefined" || typeof uni.getSystemInfoSync !== "function") {
+    return 375;
+  }
+
+  return Math.max(uni.getSystemInfoSync().screenWidth || 375, 320);
+}
+
+function normalizeContentHeight(height: number, lineHeightPx: number): number {
+  const normalizedLineCount = Math.max(Math.ceil(height / lineHeightPx), 1);
+  return normalizedLineCount * lineHeightPx;
+}
+
+function isWideCharacter(character: string): boolean {
+  return /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE10-\uFE19\uFE30-\uFE6F\uFF01-\uFF60\uFFE0-\uFFE6]/u.test(character);
+}
+
+function measureCharacterWidth(character: string, fontSizePx: number): number {
+  if (character === "\t") {
+    return fontSizePx * 2;
+  }
+
+  if (character === " ") {
+    return fontSizePx * 0.35;
+  }
+
+  if (isWideCharacter(character)) {
+    return fontSizePx;
+  }
+
+  if (/[A-Z]/.test(character)) {
+    return fontSizePx * 0.68;
+  }
+
+  if (/[0-9]/.test(character)) {
+    return fontSizePx * 0.62;
+  }
+
+  if (/[a-z]/.test(character)) {
+    return fontSizePx * 0.56;
+  }
+
+  if (/[.,;:'"`~!?()[\]{}<>\\/_\-+=|]/.test(character)) {
+    return fontSizePx * 0.42;
+  }
+
+  return fontSizePx * 0.58;
+}
+
+function estimateSegmentVisualLines(segment: string, availableWidth: number, fontSizePx: number): number {
+  if (!segment) {
+    return 1;
+  }
+
+  let visualLineCount = 1;
+  let currentLineWidth = 0;
+  const letterSpacingPx = fontSizePx * 0.05;
+
+  for (const character of Array.from(segment)) {
+    const nextCharacterWidth = measureCharacterWidth(character, fontSizePx) + letterSpacingPx;
+
+    if (currentLineWidth > 0 && currentLineWidth + nextCharacterWidth > availableWidth) {
+      visualLineCount += 1;
+      currentLineWidth = 0;
+    }
+
+    currentLineWidth += nextCharacterWidth;
+  }
+
+  return visualLineCount;
+}
+
+const instance = getCurrentInstance();
+const themeClass = useThemeClass();
+const fixedLayerHeight = ref(0);
+const writingStageWidth = ref(0);
+const writingScrollTop = ref(0);
+const textareaFocused = ref(false);
+const localCursorPosition = ref(props.cursorPosition);
+const scrollWithAnimation = ref(false);
+const resolvedScreenWidth = ref(resolveScreenWidth());
+const latestEstimatedContentHeight = ref(props.writingLineHeightPx);
+const measuredContentHeight = ref(props.writingLineHeightPx);
+const lastContentChangeDirection = ref<FutureContentChangeDirection>("same");
+
+const topbarInnerStyle = computed(() => ({
+  paddingTop: `${props.topbarTop}px`,
+}));
+
+const interactiveLayerHeight = computed(() =>
+  Math.max(props.windowHeight - fixedLayerHeight.value - (props.keyboardVisible ? props.keyboardHeight : 0), 220),
+);
+
+const paperInnerWidth = computed(() =>
+  Math.max(
+    resolvedScreenWidth.value - rpxToPx(PAPER_SURFACE_HORIZONTAL_PADDING_RPX, resolvedScreenWidth.value) * 2,
+    props.writingFontSizePx * 6,
+  ),
+);
+
+const estimatedContentWidth = computed(() => {
+  if (writingStageWidth.value > 0) {
+    return Math.max(writingStageWidth.value - WRITING_STAGE_HORIZONTAL_PADDING_PX * 2, props.writingFontSizePx * 6);
+  }
+
+  return Math.max(paperInnerWidth.value - WRITING_STAGE_HORIZONTAL_PADDING_PX * 2, props.writingFontSizePx * 6);
+});
+
+const renderWritingHeight = computed(() =>
+  Math.max(
+    measuredContentHeight.value + props.writingLineHeightPx,
+    props.writingLineHeightPx * MIN_RENDERED_WRITING_LINES,
+  ),
+);
+
+const interactiveLayerStyle = computed(() => ({
+  height: `${interactiveLayerHeight.value}px`,
+}));
+
+const writingStageStyle = computed(() => ({
+  minHeight: `${interactiveLayerHeight.value}px`,
+  paddingBottom: `${props.minLineGapToKeyboard + props.safeAreaBottom}px`,
+  "--editor-paper-line-height": `${props.writingLineHeightPx}px`,
+  backgroundImage: props.showPaperLines
+    ? `repeating-linear-gradient(to bottom, transparent, transparent ${props.writingLineHeightPx - 6}px, rgba(177, 179, 171, 0.18) ${props.writingLineHeightPx - 6}px, rgba(177, 179, 171, 0.18) ${props.writingLineHeightPx - 4}px, transparent ${props.writingLineHeightPx - 4}px, transparent ${props.writingLineHeightPx}px)`
+    : "none",
+}));
+
+const blankSpacerStyle = computed(() => ({
+  minHeight: `${Math.max(Math.round(interactiveLayerHeight.value - renderWritingHeight.value), 0)}px`,
+}));
+
+const textareaStyle = computed(() => ({
+  height: `${renderWritingHeight.value}px`,
+  fontSize: `${props.writingFontSizePx}px`,
+  lineHeight: `${props.writingLineHeightPx}px`,
+  "--editor-writing-font-size": `${props.writingFontSizePx}px`,
+  "--editor-writing-line-height": `${props.writingLineHeightPx}px`,
+  "--editor-paper-line-height": `${props.writingLineHeightPx}px`,
+}));
+const writingTextStyle = computed(() => ({
+  fontSize: `${props.writingFontSizePx}px`,
+  lineHeight: `${props.writingLineHeightPx}px`,
+  "--editor-writing-font-size": `${props.writingFontSizePx}px`,
+  "--editor-writing-line-height": `${props.writingLineHeightPx}px`,
+  "--editor-paper-line-height": `${props.writingLineHeightPx}px`,
+  backgroundImage: props.showPaperLines
+    ? `repeating-linear-gradient(to bottom, transparent, transparent ${props.writingLineHeightPx - 6}px, rgba(177, 179, 171, 0.18) ${props.writingLineHeightPx - 6}px, rgba(177, 179, 171, 0.18) ${props.writingLineHeightPx - 4}px, transparent ${props.writingLineHeightPx - 4}px, transparent ${props.writingLineHeightPx}px)`
+    : "none",
+}));
+
+const floatingAttachmentStyle = computed(() => ({
+  bottom: `${props.attachmentDockBottom}px`,
+}));
+
+function estimateContentHeight(content: string): number {
+  const visualLineCount = content
+    .split(/\r?\n/u)
+    .reduce((totalLineCount, segment) => totalLineCount + estimateSegmentVisualLines(segment, estimatedContentWidth.value, props.writingFontSizePx), 0);
+
+  return normalizeContentHeight(visualLineCount * props.writingLineHeightPx, props.writingLineHeightPx);
+}
+
+function applyVisualEstimate(nextContent: string, previousContent = nextContent): void {
+  const estimatedHeight = estimateContentHeight(nextContent);
+
+  lastContentChangeDirection.value = nextContent.length > previousContent.length
+    ? "grow"
+    : nextContent.length < previousContent.length
+      ? "shrink"
+      : "same";
+
+  latestEstimatedContentHeight.value = estimatedHeight;
+  measuredContentHeight.value = estimatedHeight;
+  scrollWithAnimation.value = false;
+}
+
+function measureLayout(): void {
+  nextTick(() => {
+    const publicInstance = instance?.proxy;
+    if (!publicInstance || typeof uni === "undefined" || typeof uni.createSelectorQuery !== "function") {
+      return;
+    }
+
+    uni
+      .createSelectorQuery()
+      .in(publicInstance)
+      .select(".editor-page__fixed-layer")
+      .boundingClientRect()
+      .select(".editor-page__writing-stage")
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const [fixedLayerRect, writingStageRect] = results ?? [];
+        const nextFixedLayerHeight = Math.max(fixedLayerRect?.height ?? 0, 0);
+        const nextWritingStageWidth = Math.max(writingStageRect?.width ?? 0, 0);
+        const shouldReestimateHeight = nextWritingStageWidth > 0 && nextWritingStageWidth !== writingStageWidth.value;
+
+        fixedLayerHeight.value = nextFixedLayerHeight;
+
+        if (nextWritingStageWidth > 0) {
+          writingStageWidth.value = nextWritingStageWidth;
+        }
+
+        if (shouldReestimateHeight) {
+          applyVisualEstimate(props.content);
+        }
+      });
+  });
+}
+
+function setWritingScrollTop(nextScrollTop: number): void {
+  if (nextScrollTop === writingScrollTop.value) {
+    return;
+  }
+
+  writingScrollTop.value = nextScrollTop;
+}
+
+function syncWritingScroll(
+  nextContentHeight = measuredContentHeight.value,
+  options: {
+    force?: boolean;
+    allowRestore?: boolean;
+    animate?: boolean;
+  } = {},
+): void {
+  const {
+    force = false,
+    allowRestore = false,
+    animate = false,
+  } = options;
+  const targetScrollTop = Math.max(
+    nextContentHeight - interactiveLayerHeight.value + props.minLineGapToKeyboard,
+    0,
+  );
+  const shouldAdvance = force || shouldRefreshForNextLine({
+    contentHeight: measuredContentHeight.value,
+    nextContentHeight,
+    scrollTop: writingScrollTop.value,
+    viewportHeight: interactiveLayerHeight.value,
+    minLineGapToKeyboard: props.minLineGapToKeyboard,
+  });
+
+  if (shouldAdvance || writingScrollTop.value > targetScrollTop) {
+    scrollWithAnimation.value = animate;
+    setWritingScrollTop(targetScrollTop);
+    return;
+  }
+
+  if (allowRestore && !props.keyboardVisible) {
+    scrollWithAnimation.value = animate;
+    setWritingScrollTop(Math.max(
+      nextContentHeight - interactiveLayerHeight.value + props.restoreAfterKeyboardHide,
+      0,
+    ));
+  }
+}
+
+function readEventDetail<T>(event: Event): T | undefined {
+  return (event as Event & { detail?: T }).detail;
+}
+
+function handleInput(event: Event): void {
+  const detail = readEventDetail<TextareaInputPayload>(event);
+  const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.content.length;
+  localCursorPosition.value = cursor;
+  emit("content-selection-change", cursor);
+  emit("content-input", { detail });
+}
+
+function handleFocus(event: Event): void {
+  const detail = readEventDetail<TextareaFocusPayload>(event);
+  const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.cursorPosition;
+  textareaFocused.value = true;
+  localCursorPosition.value = cursor;
+  emit("editor-focus", cursor);
+}
+
+function handleBlur(): void {
+  textareaFocused.value = false;
+  emit("editor-blur");
+}
+
+function handleLineChange(event: Event): void {
+  const detail = readEventDetail<TextareaLineChangePayload>(event);
+  if (typeof detail?.height !== "number") {
+    return;
+  }
+
+  const normalizedRealHeight = normalizeContentHeight(detail.height, props.writingLineHeightPx);
+  const currentMeasuredHeight = measuredContentHeight.value;
+  const correctedHeight = reconcileFutureMeasuredHeight({
+    estimatedHeight: latestEstimatedContentHeight.value,
+    actualHeight: normalizedRealHeight,
+    currentMeasuredHeight,
+    lastContentChangeDirection: lastContentChangeDirection.value,
+    lineHeightPx: props.writingLineHeightPx,
+  });
+
+  if (correctedHeight === currentMeasuredHeight) {
+    return;
+  }
+
+  measuredContentHeight.value = correctedHeight;
+  scrollWithAnimation.value = false;
+
+  if (props.keyboardVisible) {
+    syncWritingScroll(correctedHeight, {
+      force: correctedHeight > currentMeasuredHeight,
+      animate: false,
+    });
+  }
+}
+
+function handleBlankAreaFocus(): void {
+  emit("focus-end-request");
+}
+
+applyVisualEstimate(props.content);
+
+onMounted(() => {
+  resolvedScreenWidth.value = resolveScreenWidth();
+  applyVisualEstimate(props.content);
+  measureLayout();
+});
+
+watch(
+  () => [props.attachments.length, props.errorMessage, props.showFutureUnlockRibbon, props.mode],
+  () => {
+    measureLayout();
+  },
+);
+
+watch(
+  () => props.content,
+  (nextContent, previousContent) => {
+    applyVisualEstimate(nextContent, previousContent ?? nextContent);
+  },
+);
+
+watch(
+  () => props.focusEndRequestKey,
+  () => {
+    textareaFocused.value = true;
+    localCursorPosition.value = props.content.length;
+    nextTick(() => {
+      scrollWithAnimation.value = false;
+      syncWritingScroll(measuredContentHeight.value, {
+        force: true,
+      });
+    });
+  },
+);
+
+watch(
+  () => props.cursorPosition,
+  (nextCursor) => {
+    localCursorPosition.value = nextCursor;
+  },
+);
+
+watch(
+  () => props.keyboardVisible,
+  (visible, previousVisible) => {
+    if (visible === previousVisible) {
+      return;
+    }
+
+    nextTick(() => {
+      scrollWithAnimation.value = false;
+      syncWritingScroll(measuredContentHeight.value, {
+        force: visible,
+        allowRestore: !visible,
+      });
+    });
+  },
+);
+</script>
+
+<style scoped>
+.editor-page,
+.editor-page * {
+  box-sizing: border-box;
+}
+
+.editor-page {
+  height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(240, 222, 197, 0.36), transparent 24%),
+    radial-gradient(circle at top right, rgba(222, 214, 233, 0.15), transparent 24%),
+    var(--noche-bg);
+  position: relative;
+  overflow: hidden;
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  color: var(--noche-text);
+}
+
+.editor-page__paper-noise { position: fixed; inset: 0; pointer-events: none; opacity: 0.03; background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.01) 100%); }
+.literary-text { letter-spacing: 0.05em; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+.editor-page__canvas { padding: 0; display: flex; justify-content: stretch; width: 100%; height: 100%; }
+.editor-page__paper-surface { width: 100%; max-width: none; height: 100vh; padding: 0 32rpx; background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 243, 235, 0.98)); border: none; box-shadow: none; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.editor-page__fixed-layer { position: relative; z-index: 2; flex: 0 0 auto; }
+.editor-page__interactive-layer { position: relative; z-index: 1; min-height: 0; transition: height 220ms ease-out; }
+.editor-page__topbar { width: 100%; margin-bottom: 10px; }
+.editor-page__topbar-inner { width: 100%; padding: 0 0 24rpx; display: flex; align-items: center; justify-content: space-between; }
+.editor-page__topbar-button { width: 88rpx; height: 88rpx; padding: 0; display: flex; align-items: center; justify-content: center; position: relative; color: rgba(138, 129, 120, 0.82); border: none; background: transparent; }
+.editor-page__topbar-svg { width: 44rpx; height: 44rpx; color: currentColor; }
+.editor-page__saved-hint { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-family: "Inter", "PingFang SC", sans-serif; font-size: 10px; letter-spacing: 2rpx; color: rgba(177, 179, 171, 0.82); }
+.editor-page__topbar-spacer { width: 88rpx; height: 88rpx; }
+.editor-page__meta { margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; padding: 0 8px; }
+.editor-page__meta-date { font-size: 14px; letter-spacing: 0.25em; color: rgba(49, 51, 46, 0.84); }
+.editor-page__meta-subtitle { font-family: "Inter", "PingFang SC", sans-serif; font-size: 12px; letter-spacing: 0.32em; color: rgba(177, 179, 171, 0.52); text-transform: uppercase; }
+.editor-page__notice { margin-bottom: 20rpx; font-size: 22rpx; line-height: 1.6; }
+.editor-page__notice--error { color: #8a3d3a; }
+.editor-page__future-ribbon { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1rpx solid rgba(177, 179, 171, 0.24); }
+.editor-page__future-ribbon-label,.editor-page__read-meta { font-size: 13px; letter-spacing: 0.12em; color: rgba(72, 69, 61, 0.56); }
+.editor-page__future-ribbon-value { color: #5f5b51; font-size: 14px; letter-spacing: 0.08em; }
+.editor-page__future-ribbon-copy { display: flex; flex-direction: column; align-items: flex-end; gap: 8rpx; }
+.editor-page__future-ribbon-hint { font-size: 12px; color: rgba(138, 129, 120, 0.86); }
+.editor-page__attachments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16rpx; margin-bottom: 20rpx; padding: 0 8px; }
+.editor-page__attachment-card { position: relative; width: 100%; aspect-ratio: 4 / 3; padding: 0; border-radius: 20rpx; overflow: hidden; background: rgba(248, 246, 242, 0.72); }
+.editor-page__attachment-card--focused { box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38); }
+.editor-page__attachment-image { width: 100%; height: 100%; }
+.editor-page__attachment-remove { position: absolute; top: 10rpx; right: 10rpx; width: 44rpx; height: 44rpx; border-radius: 999rpx; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.72); }
+.editor-page__attachment-remove-svg { width: 28rpx; height: 28rpx; color: rgba(49, 51, 46, 0.72); }
+.editor-page__writing-scroll { height: 100%; }
+.editor-page__writing-stage { min-height: 100%; padding: 0 8px; }
+.editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), rgba(177, 179, 171, 0.18) calc(var(--editor-paper-line-height, 44px) - 6px), rgba(177, 179, 171, 0.18) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); background-size: 100% var(--editor-paper-line-height, 44px); }
+.editor-page__textarea,.editor-page__read-content { width: 100%; border: none; background: transparent; color: rgba(49, 51, 46, 0.92); font-size: var(--editor-writing-font-size, 18px); line-height: var(--editor-writing-line-height, 44px); padding: 0; overflow-wrap: anywhere; }
+.editor-page__textarea { transition: height 220ms ease-out; }
+.editor-page__placeholder { color: rgba(177, 179, 171, 0.56); }
+.editor-page__blank-spacer { width: 100%; }
+.editor-page__writing-area { height: 100%; padding: 0 8px 120rpx; }
+.editor-page__writing-area--read { overflow: hidden; }
+.editor-page__read-header { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+.editor-page__read-headline { font-size: 24px; line-height: 1.4; color: #31332e; }
+.editor-page__read-content { white-space: pre-wrap; display: block; height: 100%; }
+.editor-page__floating-attachment { position: absolute; left: 40rpx; z-index: 3; transition: bottom 220ms ease-out; }
+.editor-page__attachment-trigger { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; padding: 0; }
+.editor-page__attachment-trigger-svg { width: 32rpx; height: 32rpx; color: rgba(177, 179, 171, 0.88); }
+.editor-page__sheet-mask { position: fixed; inset: 0; z-index: 20; background: rgba(49, 51, 46, 0.24); display: flex; align-items: flex-end; }
+.editor-page__date-sheet { width: 100%; padding: 34rpx 28rpx 40rpx; background: #fbf9f5; display: flex; flex-direction: column; gap: 18rpx; }
+.editor-page__sheet-title { font-size: 34rpx; color: #31332e; }
+.editor-page__sheet-copy { font-size: 24rpx; line-height: 1.7; color: rgba(93, 96, 90, 0.9); }
+.editor-page__sheet-calendar-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.editor-page__sheet-calendar-nav { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; color: rgba(138, 129, 120, 0.82); }
+.editor-page__sheet-calendar-nav-icon { width: 28rpx; height: 28rpx; color: currentColor; }
+.editor-page__sheet-calendar-month { font-size: 24rpx; letter-spacing: 0.16em; color: #5f5b51; }
+.editor-page__date-chip-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.editor-page__date-chip { min-height: 52rpx; padding: 0 18rpx; display: flex; align-items: center; justify-content: center; border-radius: 9999rpx; background: rgba(255,255,255,0.72); border: 1rpx solid rgba(221,212,200,0.76); color: rgba(99,95,85,0.82); font-size: 22rpx; }
+.editor-page__date-chip--active { background: #5f5e5e; color: #faf7f6; border-color: #5f5e5e; }
+.editor-page__date-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8rpx; }
+.editor-page__date-weekday { text-align: center; font-family: "Inter", "PingFang SC", sans-serif; font-size: 18rpx; letter-spacing: 0.14em; color: rgba(121,124,117,0.76); }
+.editor-page__date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10rpx; }
+.editor-page__date-cell { min-height: 60rpx; display: flex; align-items: center; justify-content: center; border-radius: 18rpx; color: rgba(99,95,85,0.82); }
+.editor-page__date-cell--selected { background: rgba(95,94,94,0.92); color: #faf7f6; }
+.editor-page__date-cell--disabled { opacity: 0.34; }
+.editor-page__date-cell-text { font-size: 24rpx; }
+.editor-page__sheet-actions { display: flex; justify-content: space-between; gap: 16rpx; padding-top: 12rpx; }
+.editor-page__sheet-button { flex: 1; min-height: 84rpx; font-size: 26rpx; display: flex; align-items: center; justify-content: center; }
+.editor-page__sheet-button--primary { background: #5f5e5e; color: #faf7f6; }
+.editor-page__sheet-button--secondary { color: #5f5b51; border: 1rpx solid rgba(177, 179, 171, 0.4); }
+.editor-page__watermark { position: absolute; bottom: 20rpx; right: 40rpx; font-size: 180rpx; color: rgba(217, 219, 210, 0.2); pointer-events: none; }
+.editor-page__seal { position: absolute; right: 28rpx; bottom: 20rpx; pointer-events: none; }
+.editor-page__signature-svg { width: 84rpx; height: 84rpx; color: rgba(95, 94, 94, 0.72); }
+.theme-dark.editor-page { background: radial-gradient(circle at top left, rgba(129, 112, 92, 0.18), transparent 24%), radial-gradient(circle at top right, rgba(88, 92, 112, 0.14), transparent 24%), var(--noche-bg); }
+.theme-dark .editor-page__paper-surface { background: linear-gradient(180deg, rgba(31, 30, 28, 0.98), rgba(24, 24, 23, 0.98)); }
+.theme-dark .editor-page__topbar-button,.theme-dark .editor-page__meta-date,.theme-dark .editor-page__read-headline,.theme-dark .editor-page__future-ribbon-value,.theme-dark .editor-page__sheet-title,.theme-dark .editor-page__sheet-calendar-month,.theme-dark .editor-page__sheet-button--secondary,.theme-dark .editor-page__textarea,.theme-dark .editor-page__read-content { color: var(--noche-text); }
+.theme-dark .editor-page__meta-subtitle,.theme-dark .editor-page__future-ribbon-label,.theme-dark .editor-page__read-meta,.theme-dark .editor-page__future-ribbon-hint,.theme-dark .editor-page__saved-hint,.theme-dark .editor-page__date-weekday,.theme-dark .editor-page__placeholder { color: var(--noche-muted); }
+.theme-dark .editor-page__future-ribbon { border-bottom-color: rgba(117, 110, 101, 0.36); }
+.theme-dark .editor-page__attachment-card { background: rgba(42, 41, 38, 0.74); }
+.theme-dark .editor-page__attachment-remove { background: rgba(36, 35, 32, 0.88); }
+.theme-dark .editor-page__attachment-remove-svg,.theme-dark .editor-page__topbar-svg,.theme-dark .editor-page__attachment-trigger-svg,.theme-dark .editor-page__sheet-calendar-nav-icon { color: var(--noche-text); }
+.theme-dark .editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); }
+.theme-dark .editor-page__date-chip,.theme-dark .editor-page__date-cell,.theme-dark .editor-page__date-sheet { background: rgba(34, 33, 31, 0.98); color: var(--noche-text); }
+.theme-dark .editor-page__sheet-copy { color: var(--noche-muted); }
+.theme-dark .editor-page__sheet-button--primary,.theme-dark .editor-page__date-chip--active,.theme-dark .editor-page__date-cell--selected { background: rgba(232, 225, 214, 0.18); color: var(--noche-text); border-color: rgba(232, 225, 214, 0.18); }
+.theme-dark .editor-page__sheet-button--secondary { border-color: rgba(117, 110, 101, 0.48); }
+.theme-dark .editor-page__sheet-mask { background: rgba(6, 6, 6, 0.56); }
+.theme-dark .editor-page__watermark { color: rgba(241, 237, 230, 0.08); }
+.theme-dark .editor-page__signature-svg { color: rgba(241, 237, 230, 0.52); }
+</style>

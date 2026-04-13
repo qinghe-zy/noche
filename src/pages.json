@@ -1,0 +1,53 @@
+{
+  "pages": [
+    {
+      "path": "features/home/pages/HomePage",
+      "style": {
+        "navigationStyle": "custom",
+        "disableScroll": true
+      }
+    },
+    {
+      "path": "features/editor/pages/EditorPage",
+      "style": {
+        "navigationStyle": "custom",
+        "disableScroll": true
+      }
+    },
+    {
+      "path": "features/mailbox/pages/MailboxPage",
+      "style": {
+        "navigationStyle": "custom",
+        "disableScroll": true
+      }
+    },
+    {
+      "path": "features/calendar/pages/CalendarPage",
+      "style": {
+        "navigationStyle": "custom",
+        "disableScroll": true
+      }
+    },
+    {
+      "path": "features/day-archive/pages/DayArchivePage",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "features/profile/pages/ProfilePage",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "features/profile/pages/ProfileAlbumPage",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "globalStyle": {
+    "backgroundColor": "#F8F8F8"
+  }
+}
