@@ -31,6 +31,22 @@ export function rpxToPx(value: number, screenWidth = 375): number {
   return Math.round((value * screenWidth) / 750);
 }
 
+export function resolveVisibleWindowHeight(
+  windowHeight: number,
+  keyboardVisible: boolean,
+  keyboardHeight: number,
+): number {
+  return Math.max(windowHeight - (keyboardVisible ? keyboardHeight : 0), 0);
+}
+
+export function resolveInteractiveLayerHeight(
+  visibleWindowHeight: number,
+  fixedLayerHeight: number,
+  minimumHeight: number,
+): number {
+  return Math.max(visibleWindowHeight - fixedLayerHeight, minimumHeight);
+}
+
 export function createEditorViewportSnapshot({
   safeArea,
   screenHeight = 800,
@@ -41,6 +57,7 @@ export function createEditorViewportSnapshot({
   keyboardVisible = keyboardHeight > 0,
 }: EditorSystemSnapshot) {
   const safeAreaBottom = Math.max(screenHeight - (safeArea?.bottom ?? windowHeight), 0);
+  const visibleWindowHeight = resolveVisibleWindowHeight(windowHeight, keyboardVisible, keyboardHeight);
   const topbarHorizontalPadding = rpxToPx(TOPBAR_HORIZONTAL_PADDING_RPX, screenWidth);
   const topbarBottomSpacing = rpxToPx(TOPBAR_BOTTOM_SPACING_RPX, screenWidth);
   const topbarTop = statusBarHeight + topbarHorizontalPadding;
@@ -52,6 +69,7 @@ export function createEditorViewportSnapshot({
     screenHeight,
     screenWidth,
     windowHeight,
+    visibleWindowHeight,
     statusBarHeight,
     safeAreaBottom,
     keyboardHeight,
@@ -104,13 +122,30 @@ function resolveSystemSnapshot(): EditorSystemSnapshot {
 }
 
 export function useEditorKeyboardViewport() {
-  const systemSnapshot = ref(createEditorViewportSnapshot(resolveSystemSnapshot()));
   const keyboardHeight = ref(0);
   const keyboardVisible = ref(false);
 
+  // Capture the initial system snapshot and remember its windowHeight as the
+  // stable baseline. On Android the OS shrinks windowHeight when the keyboard
+  // opens, so we must NOT re-read it while the keyboard is visible or we end up
+  // double-subtracting keyboardHeight in every consumer's layout calculation.
+  const initialSystemSnapshot = resolveSystemSnapshot();
+  let stableWindowHeight: number | undefined = initialSystemSnapshot.windowHeight;
+
+  const systemSnapshot = ref(createEditorViewportSnapshot(initialSystemSnapshot));
+
   const syncSnapshot = () => {
+    const sys = resolveSystemSnapshot();
+
+    // Refresh the stable baseline only while the keyboard is hidden. This
+    // handles orientation changes without ever capturing a shrunk value.
+    if (!keyboardVisible.value) {
+      stableWindowHeight = sys.windowHeight ?? stableWindowHeight;
+    }
+
     systemSnapshot.value = createEditorViewportSnapshot({
-      ...resolveSystemSnapshot(),
+      ...sys,
+      windowHeight: stableWindowHeight ?? sys.windowHeight,
       keyboardHeight: keyboardHeight.value,
       keyboardVisible: keyboardVisible.value,
     });
@@ -150,6 +185,7 @@ export function useEditorKeyboardViewport() {
   const cursorSpacing = computed(() => systemSnapshot.value.cursorSpacing);
   const restoreAfterKeyboardHide = computed(() => systemSnapshot.value.restoreAfterKeyboardHide);
   const windowHeight = computed(() => systemSnapshot.value.windowHeight);
+  const visibleWindowHeight = computed(() => systemSnapshot.value.visibleWindowHeight);
   const screenWidth = computed(() => systemSnapshot.value.screenWidth);
   const keyboardCompensation = computed(() => (keyboardVisible.value ? keyboardHeight.value : 0));
 
@@ -169,6 +205,7 @@ export function useEditorKeyboardViewport() {
     restoreAfterKeyboardHide,
     keyboardCompensation,
     windowHeight,
+    visibleWindowHeight,
     screenWidth,
     rpxToPx: (value: number) => rpxToPx(value, screenWidth.value),
     refreshSnapshot: syncSnapshot,

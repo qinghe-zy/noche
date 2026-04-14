@@ -29,7 +29,16 @@
           </view>
 
           <view class="editor-page__meta">
-            <text class="editor-page__meta-date literary-text">{{ paperDateDisplay }}</text>
+            <view class="editor-page__meta-row">
+              <text class="editor-page__meta-date literary-text">{{ paperDateDisplay }}</text>
+              <view
+                v-if="showImageAction"
+                class="editor-page__meta-image-button"
+                @tap="$emit('pick-images')"
+              >
+                <AppIcon name="image" class="editor-page__meta-image-icon" />
+              </view>
+            </view>
             <text class="editor-page__meta-subtitle">{{ paperSubline }}</text>
           </view>
 
@@ -84,15 +93,16 @@
                 :cursor="localCursorPosition"
                 adjust-position="false"
                 disable-default-padding
-                maxlength="-1"
+              maxlength="-1"
               :cursor-spacing="cursorSpacing"
               :show-confirm-bar="false"
               :placeholder="bodyPlaceholder"
               placeholder-class="editor-page__placeholder"
               :style="textareaStyle"
+              @tap.stop="handleTextareaTap"
               @input="handleInput"
-                @focus="handleFocus"
-                @blur="handleBlur"
+              @focus="handleFocus"
+              @blur="handleBlur"
                 @linechange="handleLineChange"
               />
               <view class="editor-page__blank-spacer" :style="blankSpacerStyle" @tap="handleBlankAreaFocus"></view>
@@ -105,12 +115,6 @@
               <text class="editor-page__read-meta">{{ readMeta }}</text>
             </view>
             <text class="editor-page__read-content editor-page__writing-lines literary-text" :style="writingTextStyle">{{ content }}</text>
-          </view>
-        </view>
-
-        <view v-if="mode === 'edit'" class="editor-page__floating-attachment" :style="floatingAttachmentStyle">
-          <view class="editor-page__attachment-trigger" @tap="$emit('pick-images')">
-            <AppIcon name="image" class="editor-page__attachment-trigger-svg" />
           </view>
         </view>
 
@@ -192,9 +196,15 @@ import type { Attachment } from "@/shared/types/attachment";
 import type { EntryType } from "@/domain/entry/types";
 import {
   DEFAULT_EDITOR_LINE_HEIGHT_PX,
+  resolveInteractiveLayerHeight,
   rpxToPx,
-  shouldRefreshForNextLine,
 } from "@/features/editor/composables/useEditorKeyboardViewport";
+import {
+  estimateEditorCaretLineBottom,
+  estimateEditorContentHeight,
+  resolveCaretAwareScrollTop,
+  resolveTapCaretLineBottom,
+} from "@/features/editor/editorCaretLayout";
 import {
   reconcileFutureMeasuredHeight,
   type FutureContentChangeDirection,
@@ -210,6 +220,7 @@ type TextareaLineChangePayload = { height?: number };
 type QueryRect = {
   height?: number | null;
   width?: number | null;
+  top?: number | null;
 };
 
 const PAPER_SURFACE_HORIZONTAL_PADDING_RPX = 32;
@@ -249,17 +260,16 @@ const props = defineProps<{
   errorMessage: string | null;
   showSavedHint: boolean;
   canContinueWrite: boolean;
+  showImageAction: boolean;
   cursorSpacing: number;
   writingFontSizePx: number;
   writingLineHeightPx: number;
   showPaperLines: boolean;
   statusBarHeight: number;
   safeAreaBottom: number;
-  keyboardHeight: number;
   keyboardVisible: boolean;
-  windowHeight: number;
+  visibleWindowHeight: number;
   topbarTop: number;
-  attachmentDockBottom: number;
   minLineGapToKeyboard: number;
   restoreAfterKeyboardHide: number;
   cursorPosition: number;
@@ -274,9 +284,9 @@ const emit = defineEmits<{
   (event: "formal-save"): void;
   (event: "continue-write"): void;
   (event: "content-input", payload: { detail?: TextareaInputPayload }): void;
-  (event: "pick-images"): void;
   (event: "remove-attachment", attachmentId: string): void;
   (event: "preview-attachment", attachmentId: string): void;
+  (event: "pick-images"): void;
   (event: "open-future-date-sheet"): void;
   (event: "close-future-date-sheet"): void;
   (event: "pick-future-date", value: string): void;
@@ -302,68 +312,9 @@ function normalizeContentHeight(height: number, lineHeightPx: number): number {
   return normalizedLineCount * lineHeightPx;
 }
 
-function isWideCharacter(character: string): boolean {
-  return /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE10-\uFE19\uFE30-\uFE6F\uFF01-\uFF60\uFFE0-\uFFE6]/u.test(character);
-}
-
-function measureCharacterWidth(character: string, fontSizePx: number): number {
-  if (character === "\t") {
-    return fontSizePx * 2;
-  }
-
-  if (character === " ") {
-    return fontSizePx * 0.35;
-  }
-
-  if (isWideCharacter(character)) {
-    return fontSizePx;
-  }
-
-  if (/[A-Z]/.test(character)) {
-    return fontSizePx * 0.68;
-  }
-
-  if (/[0-9]/.test(character)) {
-    return fontSizePx * 0.62;
-  }
-
-  if (/[a-z]/.test(character)) {
-    return fontSizePx * 0.56;
-  }
-
-  if (/[.,;:'"`~!?()[\]{}<>\\/_\-+=|]/.test(character)) {
-    return fontSizePx * 0.42;
-  }
-
-  return fontSizePx * 0.58;
-}
-
-function estimateSegmentVisualLines(segment: string, availableWidth: number, fontSizePx: number): number {
-  if (!segment) {
-    return 1;
-  }
-
-  let visualLineCount = 1;
-  let currentLineWidth = 0;
-  const letterSpacingPx = fontSizePx * 0.05;
-
-  for (const character of Array.from(segment)) {
-    const nextCharacterWidth = measureCharacterWidth(character, fontSizePx) + letterSpacingPx;
-
-    if (currentLineWidth > 0 && currentLineWidth + nextCharacterWidth > availableWidth) {
-      visualLineCount += 1;
-      currentLineWidth = 0;
-    }
-
-    currentLineWidth += nextCharacterWidth;
-  }
-
-  return visualLineCount;
-}
-
 const instance = getCurrentInstance();
 const themeClass = useThemeClass();
-const fixedLayerHeight = ref(0);
+const fixedLayerHeight = ref(Math.max(props.topbarTop + rpxToPx(112, resolveScreenWidth()), 140));
 const writingStageWidth = ref(0);
 const writingScrollTop = ref(0);
 const textareaFocused = ref(false);
@@ -373,13 +324,15 @@ const resolvedScreenWidth = ref(resolveScreenWidth());
 const latestEstimatedContentHeight = ref(props.writingLineHeightPx);
 const measuredContentHeight = ref(props.writingLineHeightPx);
 const lastContentChangeDirection = ref<FutureContentChangeDirection>("same");
+const bodyViewportTop = ref(0);
+const pendingTapCaretLineBottom = ref<number | null>(null);
 
 const topbarInnerStyle = computed(() => ({
   paddingTop: `${props.topbarTop}px`,
 }));
 
 const interactiveLayerHeight = computed(() =>
-  Math.max(props.windowHeight - fixedLayerHeight.value - (props.keyboardVisible ? props.keyboardHeight : 0), 220),
+  resolveInteractiveLayerHeight(props.visibleWindowHeight, fixedLayerHeight.value, 220),
 );
 
 const paperInnerWidth = computed(() =>
@@ -396,6 +349,16 @@ const estimatedContentWidth = computed(() => {
 
   return Math.max(paperInnerWidth.value - WRITING_STAGE_HORIZONTAL_PADDING_PX * 2, props.writingFontSizePx * 6);
 });
+
+const caretLineBottom = computed(() =>
+  estimateEditorCaretLineBottom({
+    content: props.content,
+    cursor: localCursorPosition.value,
+    availableWidth: estimatedContentWidth.value,
+    fontSizePx: props.writingFontSizePx,
+    lineHeightPx: props.writingLineHeightPx,
+  }),
+);
 
 const renderWritingHeight = computed(() =>
   Math.max(
@@ -440,16 +403,13 @@ const writingTextStyle = computed(() => ({
     : "none",
 }));
 
-const floatingAttachmentStyle = computed(() => ({
-  bottom: `${props.attachmentDockBottom}px`,
-}));
-
 function estimateContentHeight(content: string): number {
-  const visualLineCount = content
-    .split(/\r?\n/u)
-    .reduce((totalLineCount, segment) => totalLineCount + estimateSegmentVisualLines(segment, estimatedContentWidth.value, props.writingFontSizePx), 0);
-
-  return normalizeContentHeight(visualLineCount * props.writingLineHeightPx, props.writingLineHeightPx);
+  return estimateEditorContentHeight({
+    content,
+    availableWidth: estimatedContentWidth.value,
+    fontSizePx: props.writingFontSizePx,
+    lineHeightPx: props.writingLineHeightPx,
+  });
 }
 
 function applyVisualEstimate(nextContent: string, previousContent = nextContent): void {
@@ -478,15 +438,21 @@ function measureLayout(): void {
       .in(publicInstance)
       .select(".editor-page__fixed-layer")
       .boundingClientRect()
+      .select(".editor-page__writing-scroll")
+      .boundingClientRect()
       .select(".editor-page__writing-stage")
       .boundingClientRect()
       .exec((results: Array<QueryRect | null | undefined>) => {
-        const [fixedLayerRect, writingStageRect] = results ?? [];
+        const [fixedLayerRect, writingScrollRect, writingStageRect] = results ?? [];
         const nextFixedLayerHeight = Math.max(fixedLayerRect?.height ?? 0, 0);
         const nextWritingStageWidth = Math.max(writingStageRect?.width ?? 0, 0);
         const shouldReestimateHeight = nextWritingStageWidth > 0 && nextWritingStageWidth !== writingStageWidth.value;
 
         fixedLayerHeight.value = nextFixedLayerHeight;
+
+        if (typeof writingScrollRect?.top === "number") {
+          bodyViewportTop.value = writingScrollRect.top;
+        }
 
         if (nextWritingStageWidth > 0) {
           writingStageWidth.value = nextWritingStageWidth;
@@ -520,19 +486,14 @@ function syncWritingScroll(
     allowRestore = false,
     animate = false,
   } = options;
-  const targetScrollTop = Math.max(
-    nextContentHeight - interactiveLayerHeight.value + props.minLineGapToKeyboard,
-    0,
-  );
-  const shouldAdvance = force || shouldRefreshForNextLine({
-    contentHeight: measuredContentHeight.value,
-    nextContentHeight,
-    scrollTop: writingScrollTop.value,
+  const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
+  const targetScrollTop = resolveCaretAwareScrollTop({
+    caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
     viewportHeight: interactiveLayerHeight.value,
     minLineGapToKeyboard: props.minLineGapToKeyboard,
   });
 
-  if (shouldAdvance || writingScrollTop.value > targetScrollTop) {
+  if (force || Math.abs(writingScrollTop.value - targetScrollTop) > 1) {
     scrollWithAnimation.value = animate;
     setWritingScrollTop(targetScrollTop);
     return;
@@ -545,6 +506,18 @@ function syncWritingScroll(
       0,
     ));
   }
+
+  pendingTapCaretLineBottom.value = null;
+}
+
+function handleTextareaTap(event: Event): void {
+  const detail = readEventDetail<{ y?: number }>(event);
+  pendingTapCaretLineBottom.value = resolveTapCaretLineBottom({
+    tapClientY: detail?.y,
+    viewportTop: bodyViewportTop.value,
+    currentScrollTop: writingScrollTop.value,
+    lineHeightPx: props.writingLineHeightPx,
+  });
 }
 
 function readEventDetail<T>(event: Event): T | undefined {
@@ -565,10 +538,17 @@ function handleFocus(event: Event): void {
   textareaFocused.value = true;
   localCursorPosition.value = cursor;
   emit("editor-focus", cursor);
+
+  if (props.keyboardVisible) {
+    nextTick(() => {
+      syncWritingScroll();
+    });
+  }
 }
 
 function handleBlur(): void {
   textareaFocused.value = false;
+  pendingTapCaretLineBottom.value = null;
   emit("editor-blur");
 }
 
@@ -647,6 +627,12 @@ watch(
   () => props.cursorPosition,
   (nextCursor) => {
     localCursorPosition.value = nextCursor;
+
+    if (props.keyboardVisible && textareaFocused.value) {
+      nextTick(() => {
+        syncWritingScroll();
+      });
+    }
   },
 );
 
@@ -699,8 +685,11 @@ watch(
 .editor-page__saved-hint { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-family: "Inter", "PingFang SC", sans-serif; font-size: 10px; letter-spacing: 2rpx; color: rgba(177, 179, 171, 0.82); }
 .editor-page__topbar-spacer { width: 88rpx; height: 88rpx; }
 .editor-page__meta { margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; padding: 0 8px; }
+.editor-page__meta-row { display: flex; align-items: center; justify-content: space-between; gap: 24rpx; }
 .editor-page__meta-date { font-size: 14px; letter-spacing: 0.25em; color: rgba(49, 51, 46, 0.84); }
 .editor-page__meta-subtitle { font-family: "Inter", "PingFang SC", sans-serif; font-size: 12px; letter-spacing: 0.32em; color: rgba(177, 179, 171, 0.52); text-transform: uppercase; }
+.editor-page__meta-image-button { width: 48rpx; height: 48rpx; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: rgba(138, 129, 120, 0.82); }
+.editor-page__meta-image-icon { width: 28rpx; height: 28rpx; color: currentColor; }
 .editor-page__notice { margin-bottom: 20rpx; font-size: 22rpx; line-height: 1.6; }
 .editor-page__notice--error { color: #8a3d3a; }
 .editor-page__future-ribbon { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1rpx solid rgba(177, 179, 171, 0.24); }
@@ -726,9 +715,6 @@ watch(
 .editor-page__read-header { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
 .editor-page__read-headline { font-size: 24px; line-height: 1.4; color: #31332e; }
 .editor-page__read-content { white-space: pre-wrap; display: block; height: 100%; }
-.editor-page__floating-attachment { position: absolute; left: 40rpx; z-index: 3; transition: bottom 220ms ease-out; }
-.editor-page__attachment-trigger { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; padding: 0; }
-.editor-page__attachment-trigger-svg { width: 32rpx; height: 32rpx; color: rgba(177, 179, 171, 0.88); }
 .editor-page__sheet-mask { position: fixed; inset: 0; z-index: 20; background: rgba(49, 51, 46, 0.24); display: flex; align-items: flex-end; }
 .editor-page__date-sheet { width: 100%; padding: 34rpx 28rpx 40rpx; background: #fbf9f5; display: flex; flex-direction: column; gap: 18rpx; }
 .editor-page__sheet-title { font-size: 34rpx; color: #31332e; }
@@ -758,10 +744,11 @@ watch(
 .theme-dark .editor-page__paper-surface { background: linear-gradient(180deg, rgba(31, 30, 28, 0.98), rgba(24, 24, 23, 0.98)); }
 .theme-dark .editor-page__topbar-button,.theme-dark .editor-page__meta-date,.theme-dark .editor-page__read-headline,.theme-dark .editor-page__future-ribbon-value,.theme-dark .editor-page__sheet-title,.theme-dark .editor-page__sheet-calendar-month,.theme-dark .editor-page__sheet-button--secondary,.theme-dark .editor-page__textarea,.theme-dark .editor-page__read-content { color: var(--noche-text); }
 .theme-dark .editor-page__meta-subtitle,.theme-dark .editor-page__future-ribbon-label,.theme-dark .editor-page__read-meta,.theme-dark .editor-page__future-ribbon-hint,.theme-dark .editor-page__saved-hint,.theme-dark .editor-page__date-weekday,.theme-dark .editor-page__placeholder { color: var(--noche-muted); }
+.theme-dark .editor-page__meta-image-button { color: var(--noche-muted); }
 .theme-dark .editor-page__future-ribbon { border-bottom-color: rgba(117, 110, 101, 0.36); }
 .theme-dark .editor-page__attachment-card { background: rgba(42, 41, 38, 0.74); }
 .theme-dark .editor-page__attachment-remove { background: rgba(36, 35, 32, 0.88); }
-.theme-dark .editor-page__attachment-remove-svg,.theme-dark .editor-page__topbar-svg,.theme-dark .editor-page__attachment-trigger-svg,.theme-dark .editor-page__sheet-calendar-nav-icon { color: var(--noche-text); }
+.theme-dark .editor-page__attachment-remove-svg,.theme-dark .editor-page__topbar-svg,.theme-dark .editor-page__sheet-calendar-nav-icon { color: var(--noche-text); }
 .theme-dark .editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); }
 .theme-dark .editor-page__date-chip,.theme-dark .editor-page__date-cell,.theme-dark .editor-page__date-sheet { background: rgba(34, 33, 31, 0.98); color: var(--noche-text); }
 .theme-dark .editor-page__sheet-copy { color: var(--noche-muted); }

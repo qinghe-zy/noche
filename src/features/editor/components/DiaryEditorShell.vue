@@ -43,7 +43,9 @@
           :time-label="headerTimeLabel"
           :status="diaryPreludeStatus"
           :prelude="diaryPrelude"
+          :show-image-action="showImageAction"
           @edit="$emit('edit-diary-prelude')"
+          @pick-image="$emit('pick-images')"
         />
       </view>
 
@@ -53,7 +55,7 @@
     </view>
 
     <view class="diary-editor-shell__interactive-layer" :style="interactiveLayerStyle">
-      <scroll-view class="diary-editor-shell__body" scroll-y :style="bodyStyle">
+      <scroll-view class="diary-editor-shell__body" scroll-y :scroll-top="writingScrollTop" :scroll-with-animation="scrollWithAnimation" :style="bodyStyle">
         <view class="diary-editor-shell__body-stage" :style="bodyStageStyle" @tap="handleEditorAreaFocus">
           <view v-if="attachments.length" class="diary-editor-shell__attachments">
             <view
@@ -91,11 +93,12 @@
               :show-confirm-bar="false"
               :placeholder="showInlinePlaceholder ? '' : bodyPlaceholder"
               placeholder-class="diary-editor-shell__placeholder"
-              :style="writingTextStyle"
-              @tap.stop
+              :style="textareaStyle"
+              @tap.stop="handleTextareaTap"
               @input="handleInput"
               @focus="handleTextareaFocus"
               @blur="handleTextareaBlur"
+              @linechange="handleLineChange"
             />
           </view>
           <view
@@ -112,25 +115,22 @@
       </scroll-view>
     </view>
 
-    <view v-if="mode === 'edit'" class="diary-editor-shell__floating-attachment" :style="floatingAttachmentStyle">
-      <view class="diary-editor-shell__footer-tools">
-        <view
-          class="diary-editor-shell__tool-button"
-          @tap="handlePickImagesTrigger"
-          @click="handlePickImagesTrigger"
-        >
-          <AppIcon name="image" class="diary-editor-shell__image-svg" />
-        </view>
-      </view>
-    </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from "vue";
+import { computed, getCurrentInstance, nextTick, onMounted, ref, toRefs, watch } from "vue";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import type { Attachment } from "@/shared/types/attachment";
-import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
+import {
+  estimateEditorCaretLineBottom,
+  resolveCaretAwareScrollTop,
+  resolveTapCaretLineBottom,
+} from "@/features/editor/editorCaretLayout";
+import {
+  resolveInteractiveLayerHeight,
+  rpxToPx as rpxToPxFn,
+} from "@/features/editor/composables/useEditorKeyboardViewport";
 import { isEditorContentVisuallyEmpty } from "@/features/editor/editorInputRules";
 import { useThemeClass } from "@/shared/theme";
 import DiaryPreludeHeaderMeta from "@/features/editor/components/DiaryPreludeHeaderMeta.vue";
@@ -138,71 +138,22 @@ import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 type EditorMode = "edit" | "read";
-type QueryRect = { height?: number | null };
+type QueryRect = { height?: number | null; top?: number | null };
 type TextareaInputPayload = { value?: string; cursor?: number };
 type TextareaFocusPayload = { cursor?: number };
 
-let lastPickImagesTriggerAt = 0;
 const instance = getCurrentInstance();
 const themeClass = useThemeClass();
-const fixedLayerHeight = ref(0);
+const fixedLayerHeight = ref(140);
 const textareaFocused = ref(false);
 const localCursorPosition = ref<number | undefined>(undefined);
 const shouldLockCursorToEnd = ref(false);
 const hasBodyInteracted = ref(false);
-const {
-  statusBarHeight,
-  keyboardHeight,
-  keyboardVisible,
-  attachmentDockBottom,
-  minLineGapToKeyboard,
-  restoreAfterKeyboardHide,
-  windowHeight,
-  rpxToPx,
-} = useEditorKeyboardViewport();
-
-const topbarStyle = computed(() => ({
-  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
-}));
-
-const interactiveLayerHeight = computed(() =>
-  Math.max(windowHeight.value - fixedLayerHeight.value - (keyboardVisible.value ? keyboardHeight.value : 0), 220),
-);
-
-const interactiveLayerStyle = computed(() => ({
-  height: `${interactiveLayerHeight.value}px`,
-}));
-
-const bodyBottomPadding = computed(() =>
-  rpxToPx(96) + (keyboardVisible.value ? minLineGapToKeyboard.value : restoreAfterKeyboardHide.value),
-);
-
-const bodyStyle = computed(() => ({
-  height: `${interactiveLayerHeight.value}px`,
-}));
-
-const bodyStageStyle = computed(() => ({
-  minHeight: `${interactiveLayerHeight.value}px`,
-  paddingBottom: `${bodyBottomPadding.value}px`,
-}));
-const showInlinePlaceholder = computed(() =>
-  props.mode === "edit"
-  && isEditorContentVisuallyEmpty("diary", props.content)
-  && !hasBodyInteracted.value,
-);
-const blankSpacerStyle = computed(() => ({
-  minHeight: `${Math.max(rpxToPx(80), minLineGapToKeyboard.value)}px`,
-}));
-
-const floatingAttachmentStyle = computed(() => ({
-  bottom: `${attachmentDockBottom.value}px`,
-}));
-const writingTextStyle = computed(() => ({
-  fontSize: `${props.writingFontSizePx}px`,
-  lineHeight: `${props.writingLineHeightPx}px`,
-  "--diary-writing-font-size": `${props.writingFontSizePx}px`,
-  "--diary-writing-line-height": `${props.writingLineHeightPx}px`,
-}));
+const measuredContentHeight = ref(0);
+const writingScrollTop = ref(0);
+const scrollWithAnimation = ref(false);
+const bodyViewportTop = ref(0);
+const pendingTapCaretLineBottom = ref<number | null>(null);
 
 const props = defineProps<{
   mode: EditorMode;
@@ -227,9 +178,31 @@ const props = defineProps<{
   stampOpacity: number;
   attachments: Attachment[];
   focusedAttachmentId?: string;
+  showImageAction: boolean;
   diaryPreludeStatus: DiaryPreludeStatus;
   diaryPrelude: DiaryPreludeMeta | null;
+  // Viewport values passed from EditorPage — avoids a second keyboard listener
+  // instance and fixes the double-subtraction bug on Android.
+  statusBarHeight: number;
+  keyboardVisible: boolean;
+  visibleWindowHeight: number;
+  minLineGapToKeyboard: number;
+  restoreAfterKeyboardHide: number;
+  screenWidth: number;
 }>();
+
+// Destructure viewport props into reactive refs so all computed properties and
+// watchers below work without any other changes.
+const {
+  statusBarHeight,
+  keyboardVisible,
+  visibleWindowHeight,
+  minLineGapToKeyboard,
+  restoreAfterKeyboardHide,
+  screenWidth,
+} = toRefs(props);
+
+const rpxToPx = (value: number) => rpxToPxFn(value, screenWidth.value);
 
 const emit = defineEmits<{
   (event: "go-back"): void;
@@ -237,15 +210,80 @@ const emit = defineEmits<{
   (event: "continue-write"): void;
   (event: "title-input", payload: Event | { detail?: { value?: string } }): void;
   (event: "content-input", payload: Event | { detail?: { value?: string } }): void;
-  (event: "pick-images"): void;
   (event: "remove-attachment", attachmentId: string): void;
   (event: "preview-attachment", attachmentId: string): void;
   (event: "edit-diary-prelude"): void;
+  (event: "pick-images"): void;
   (event: "focus-end-request"): void;
   (event: "content-selection-change", cursor: number): void;
   (event: "editor-focus", cursor: number): void;
   (event: "editor-blur"): void;
 }>();
+
+const topbarStyle = computed(() => ({
+  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
+}));
+
+const interactiveLayerHeight = computed(() =>
+  resolveInteractiveLayerHeight(visibleWindowHeight.value, fixedLayerHeight.value, 220),
+);
+
+const interactiveLayerStyle = computed(() => ({
+  height: `${interactiveLayerHeight.value}px`,
+}));
+
+const editorAvailableWidth = computed(() =>
+  Math.max(screenWidth.value - rpxToPx(96), props.writingFontSizePx * 6),
+);
+
+const bodyBottomPadding = computed(() =>
+  rpxToPx(96) + (keyboardVisible.value ? minLineGapToKeyboard.value : restoreAfterKeyboardHide.value),
+);
+
+const bodyStyle = computed(() => ({
+  height: `${interactiveLayerHeight.value}px`,
+}));
+
+const bodyStageStyle = computed(() => ({
+  minHeight: `${interactiveLayerHeight.value}px`,
+  paddingBottom: `${bodyBottomPadding.value}px`,
+}));
+const showInlinePlaceholder = computed(() =>
+  props.mode === "edit"
+  && isEditorContentVisuallyEmpty("diary", props.content)
+  && !hasBodyInteracted.value,
+);
+const blankSpacerStyle = computed(() => ({
+  minHeight: `${Math.max(rpxToPx(80), minLineGapToKeyboard.value)}px`,
+}));
+
+const renderWritingHeight = computed(() =>
+  Math.max(
+    measuredContentHeight.value + props.writingLineHeightPx,
+    props.writingLineHeightPx * 2,
+  ),
+);
+
+const writingTextStyle = computed(() => ({
+  fontSize: `${props.writingFontSizePx}px`,
+  lineHeight: `${props.writingLineHeightPx}px`,
+  "--diary-writing-font-size": `${props.writingFontSizePx}px`,
+  "--diary-writing-line-height": `${props.writingLineHeightPx}px`,
+}));
+const textareaStyle = computed(() => ({
+  ...writingTextStyle.value,
+  height: `${renderWritingHeight.value}px`,
+}));
+
+const caretLineBottom = computed(() =>
+  estimateEditorCaretLineBottom({
+    content: props.content,
+    cursor: localCursorPosition.value ?? props.cursorPosition,
+    availableWidth: editorAvailableWidth.value,
+    fontSizePx: props.writingFontSizePx,
+    lineHeightPx: props.writingLineHeightPx,
+  }),
+);
 
 function measureFixedLayer(): void {
   nextTick(() => {
@@ -258,23 +296,18 @@ function measureFixedLayer(): void {
       .createSelectorQuery()
       .in(publicInstance)
       .select(".diary-editor-shell__fixed-layer")
-      .boundingClientRect((result: QueryRect | QueryRect[]) => {
-        const rect = Array.isArray(result) ? result[0] : result;
-        fixedLayerHeight.value = Math.max(rect?.height ?? 0, 0);
-      })
-      .exec();
+      .boundingClientRect()
+      .select(".diary-editor-shell__body")
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const [fixedLayerRect, bodyRect] = results ?? [];
+        fixedLayerHeight.value = Math.max(fixedLayerRect?.height ?? 0, 0);
+
+        if (typeof bodyRect?.top === "number") {
+          bodyViewportTop.value = bodyRect.top;
+        }
+      });
   });
-}
-
-function handlePickImagesTrigger(): void {
-  const now = Date.now();
-
-  if (now - lastPickImagesTriggerAt < 240) {
-    return;
-  }
-
-  lastPickImagesTriggerAt = now;
-  emit("pick-images");
 }
 
 function readEventDetail<T>(event: Event): T | undefined {
@@ -290,6 +323,53 @@ function handleInput(event: Event): void {
   emit("content-input", event);
 }
 
+function handleLineChange(event: Event): void {
+  const detail = readEventDetail<{ height?: number }>(event);
+  if (typeof detail?.height !== "number") {
+    return;
+  }
+
+  const lineHeight = props.writingLineHeightPx;
+  const normalized = Math.max(Math.ceil(detail.height / lineHeight), 1) * lineHeight;
+
+  if (normalized === measuredContentHeight.value) {
+    return;
+  }
+
+  const prevHeight = measuredContentHeight.value;
+  measuredContentHeight.value = normalized;
+
+  if (keyboardVisible.value && normalized > prevHeight) {
+    syncWritingScroll(normalized);
+  }
+}
+
+function syncWritingScroll(nextContentHeight = measuredContentHeight.value): void {
+  const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
+  const targetScrollTop = resolveCaretAwareScrollTop({
+    caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
+    viewportHeight: interactiveLayerHeight.value,
+    minLineGapToKeyboard: minLineGapToKeyboard.value,
+  });
+
+  if (Math.abs(targetScrollTop - writingScrollTop.value) > 1 || !keyboardVisible.value) {
+    scrollWithAnimation.value = false;
+    writingScrollTop.value = targetScrollTop;
+  }
+
+  pendingTapCaretLineBottom.value = null;
+}
+
+function handleTextareaTap(event: Event): void {
+  const detail = readEventDetail<{ y?: number }>(event);
+  pendingTapCaretLineBottom.value = resolveTapCaretLineBottom({
+    tapClientY: detail?.y,
+    viewportTop: bodyViewportTop.value,
+    currentScrollTop: writingScrollTop.value,
+    lineHeightPx: props.writingLineHeightPx,
+  });
+}
+
 function handleEditorAreaFocus(): void {
   emit("focus-end-request");
 }
@@ -300,6 +380,12 @@ function handleTextareaFocus(event: Event): void {
   const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.cursorPosition;
   localCursorPosition.value = cursor;
   emit("editor-focus", cursor);
+
+  if (keyboardVisible.value) {
+    nextTick(() => {
+      syncWritingScroll();
+    });
+  }
 
   if (!shouldLockCursorToEnd.value) {
     return;
@@ -315,6 +401,7 @@ function handleTextareaFocus(event: Event): void {
 
 function handleTextareaBlur(): void {
   textareaFocused.value = false;
+  pendingTapCaretLineBottom.value = null;
   releaseCursorLock();
   emit("editor-blur");
 }
@@ -322,6 +409,10 @@ function handleTextareaBlur(): void {
 onMounted(() => {
   localCursorPosition.value = props.cursorPosition;
   measureFixedLayer();
+  if (props.content.length > 0) {
+    const lineCount = Math.max(props.content.split("\n").length, 1);
+    measuredContentHeight.value = Math.max(lineCount * props.writingLineHeightPx, props.writingLineHeightPx);
+  }
 });
 
 watch(
@@ -336,9 +427,18 @@ watch(
 );
 
 watch(
-  () => [keyboardVisible.value, keyboardHeight.value, windowHeight.value, props.errorMessage],
+  () => [keyboardVisible.value, visibleWindowHeight.value, props.errorMessage],
   () => {
     measureFixedLayer();
+  },
+);
+
+watch(
+  () => [keyboardVisible.value, visibleWindowHeight.value],
+  () => {
+    nextTick(() => {
+      syncWritingScroll();
+    });
   },
 );
 
@@ -350,6 +450,12 @@ watch(
     }
 
     localCursorPosition.value = nextCursor;
+
+    if (keyboardVisible.value && textareaFocused.value) {
+      nextTick(() => {
+        syncWritingScroll();
+      });
+    }
   },
 );
 
@@ -357,6 +463,12 @@ watch(
   () => props.focusEndRequestKey,
   () => {
     focusEditorToEnd();
+
+    if (keyboardVisible.value) {
+      nextTick(() => {
+        syncWritingScroll();
+      });
+    }
   },
 );
 
@@ -581,7 +693,20 @@ function focusEditorToEnd(): void {
   color: var(--noche-text);
 }
 
-.diary-editor-shell__textarea,
+.diary-editor-shell__textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--noche-text);
+  font-size: 18px;
+  line-height: 2.2;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+  transition: height 220ms ease-out;
+}
+
 .diary-editor-shell__read-content {
   width: 100%;
   min-height: 100%;
@@ -594,20 +719,14 @@ function focusEditorToEnd(): void {
 }
 
 .diary-editor-shell__editor-field {
-  flex: 1 0 auto;
-  min-height: 100%;
+  flex: 0 0 auto;
   display: flex;
   position: relative;
 }
 
-.diary-editor-shell__textarea {
-  flex: 1 1 auto;
-  position: relative;
-  z-index: 1;
-}
-
 .diary-editor-shell__blank-spacer {
   width: 100%;
+  flex: 1 0 auto;
 }
 
 .diary-editor-shell__inline-placeholder {
@@ -633,32 +752,5 @@ function focusEditorToEnd(): void {
 
 .diary-editor-shell__read-content {
   white-space: pre-wrap;
-}
-
-.diary-editor-shell__floating-attachment {
-  position: absolute;
-  left: 48rpx;
-  z-index: 3;
-  transition: bottom 220ms ease-out;
-}
-
-.diary-editor-shell__footer-tools {
-  display: flex;
-  align-items: center;
-  gap: 28rpx;
-}
-
-.diary-editor-shell__tool-button {
-  min-width: 44rpx;
-  min-height: 44rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.diary-editor-shell__image-svg {
-  width: 40rpx;
-  height: 40rpx;
-  color: var(--noche-muted);
 }
 </style>

@@ -62,10 +62,9 @@ describe("diary prelude state", () => {
       moodCode: "calm",
     });
 
-    expect(shouldRenderDiaryPreludeHeaderMeta("edit", "selected", prelude)).toBe(true);
-    expect(shouldRenderDiaryPreludeHeaderMeta("read", "selected", prelude)).toBe(true);
-    expect(shouldRenderDiaryPreludeHeaderMeta("edit", "skipped", null)).toBe(false);
-    expect(shouldRenderDiaryPreludeHeaderMeta("edit", "unseen", null)).toBe(false);
+    expect(shouldRenderDiaryPreludeHeaderMeta("selected", prelude)).toBe(true);
+    expect(shouldRenderDiaryPreludeHeaderMeta("skipped", null)).toBe(false);
+    expect(shouldRenderDiaryPreludeHeaderMeta("unseen", null)).toBe(false);
   });
 
   it("only allows editing selected diary prelude in edit mode", () => {

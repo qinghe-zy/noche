@@ -42,6 +42,7 @@ describe("editor stitch parity", () => {
   });
 
   it("prevents keyboard focus from pushing the whole writing page upward", () => {
+    const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
     const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
     const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
     const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
@@ -51,7 +52,9 @@ describe("editor stitch parity", () => {
     expect(futureShell).toContain("adjust-position=\"false\"");
     expect(futureShell).toContain("editor-page__fixed-layer");
     expect(futureShell).toContain("editor-page__interactive-layer");
-    expect(futureShell).toContain("editor-page__floating-attachment");
+    expect(editorPage).toContain(":visible-window-height=\"visibleWindowHeight\"");
+    expect(editorPage).toContain("@pick-images=\"handlePickImages\"");
+    expect(futureShell).toContain("editor-page__meta-image-button");
     expect(futureShell).not.toContain("auto-height");
   });
 

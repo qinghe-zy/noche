@@ -12,11 +12,13 @@ describe("jotting editor stitch parity", () => {
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
     expect(jottingShell).toContain("jotting-editor-shell");
-    expect(jottingShell).toContain("AppIcon name=\"image\"");
     expect(jottingShell).toContain("TopbarIconButton");
     expect(jottingShell).toContain("jotting-editor-shell__title-input");
     expect(jottingShell).toContain("@input=\"$emit('title-input', $event)\"");
     expect(editorPage).toContain(":title=\"title\"");
     expect(editorPage).toContain("@title-input=\"handleTitleInput\"");
+    expect(jottingShell).toContain("jotting-editor-shell__meta-image-button");
+    expect(editorPage).toContain(":show-image-action=\"showImageAction\"");
+    expect(editorPage).toContain("@pick-images=\"handlePickImages\"");
   });
 });

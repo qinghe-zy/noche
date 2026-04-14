@@ -37,6 +37,7 @@
     "build:quickapp-webview-huawei": "uni build -p quickapp-webview-huawei",
     "build:quickapp-webview-union": "uni build -p quickapp-webview-union",
     "doctor:uni-runtime": "node scripts/uni-runtime-doctor.mjs",
+    "doctor:apk-signing": "node scripts/check-android-apk-signing.mjs",
     "type-check": "vue-tsc --noEmit",
     "test:unit": "vitest run --config vitest.config.mts"
   },

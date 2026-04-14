@@ -18,8 +18,11 @@ export function shouldOpenDiaryPreludePicker(input: {
     }) === "unseen";
 }
 
+// The prelude header meta (weather/mood chips) is a display element that is
+// meaningful in both edit and read modes, so mode is intentionally not gated
+// here. Edit access to the prelude is controlled separately by
+// shouldAllowDiaryPreludeEdit.
 export function shouldRenderDiaryPreludeHeaderMeta(
-  mode: EditorMode,
   diaryPreludeStatus: DiaryPreludeStatus | null | undefined,
   diaryPrelude: DiaryPreludeMeta | null | undefined,
 ): boolean {

@@ -13,8 +13,10 @@ describe("editor keyboard viewport shells", () => {
 
     expect(diaryShell).toContain("diary-editor-shell__fixed-layer");
     expect(diaryShell).toContain("diary-editor-shell__interactive-layer");
-    expect(diaryShell).toContain("keyboardHeight");
-    expect(diaryShell).toContain("windowHeight");
+    expect(diaryShell).toContain("visibleWindowHeight");
+    expect(diaryShell).toContain("resolveInteractiveLayerHeight");
+    expect(diaryShell).not.toContain("windowHeight.value - fixedLayerHeight.value - (keyboardVisible.value ? keyboardHeight.value : 0)");
+    expect(diaryShell).not.toContain("useEditorKeyboardViewport(");
     expect(diaryShell).toContain(":focus=\"textareaFocused\"");
     expect(diaryShell).toContain(":cursor=\"localCursorPosition\"");
     expect(diaryShell).toContain("focus-end-request");
@@ -33,6 +35,7 @@ describe("editor keyboard viewport shells", () => {
     expect(diaryShell).not.toContain("handleEditorAreaFocus(): void {\n  hasBodyInteracted.value = true;");
     expect(diaryShell).not.toContain("handleTextareaFocus(event: Event): void {\n  textareaFocused.value = true;\n  hasBodyInteracted.value = true;");
     expect(diaryShell).toContain(":focus=\"textareaFocused\"");
+    expect(editorPage).toContain(":visible-window-height=\"visibleWindowHeight\"");
     expect(editorPage).toContain(":cursor-position=\"cursorPosition\"");
     expect(editorPage).toContain(":focus-end-request-key=\"focusEndRequestKey\"");
     expect(editorPage).toContain("requestBodyFocusIfNeeded");
@@ -44,8 +47,10 @@ describe("editor keyboard viewport shells", () => {
 
     expect(jottingShell).toContain("jotting-editor-shell__fixed-layer");
     expect(jottingShell).toContain("jotting-editor-shell__interactive-layer");
-    expect(jottingShell).toContain("keyboardHeight");
-    expect(jottingShell).toContain("windowHeight");
+    expect(jottingShell).toContain("visibleWindowHeight");
+    expect(jottingShell).toContain("resolveInteractiveLayerHeight");
+    expect(jottingShell).not.toContain("windowHeight.value - shellFixedHeight.value - (keyboardVisible.value ? keyboardHeight.value : 0)");
+    expect(jottingShell).not.toContain("useEditorKeyboardViewport(");
     expect(jottingShell).toContain("content-selection-change");
     expect(jottingShell).toContain("focus-end-request");
     expect(jottingShell).toContain("@tap=\"handleEditorAreaFocus\"");
@@ -58,6 +63,7 @@ describe("editor keyboard viewport shells", () => {
     expect(jottingShell).toContain("!hasBodyInteracted.value");
     expect(jottingShell).not.toContain("handleEditorAreaFocus(): void {\n  if (props.mode !== \"edit\") {\n    return;\n  }\n\n  hasBodyInteracted.value = true;");
     expect(jottingShell).not.toContain("handleTextareaFocus(event: Event): void {\n  textareaFocused.value = true;\n  hasBodyInteracted.value = true;");
+    expect(editorPage).toContain(":visible-window-height=\"visibleWindowHeight\"");
     expect(editorPage).toContain("@focus-end-request=\"handleFocusEndRequest\"");
     expect(editorPage).toContain("@content-selection-change=\"handleContentSelectionChange\"");
   });

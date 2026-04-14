@@ -23,11 +23,20 @@
     </view>
 
     <view class="jotting-editor-shell__interactive-layer" :style="interactiveLayerShellStyle">
-      <view class="jotting-editor-shell__card" :style="cardStyle">
+      <view class="jotting-editor-shell__card">
         <view class="jotting-editor-shell__card-fixed-layer">
           <view class="jotting-editor-shell__meta">
             <text class="jotting-editor-shell__eyebrow">{{ eyebrowLabel }}</text>
-            <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
+            <view class="jotting-editor-shell__meta-date-row">
+              <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
+              <view
+                v-if="showImageAction"
+                class="jotting-editor-shell__meta-image-button"
+                @tap="$emit('pick-images')"
+              >
+                <AppIcon name="image" class="jotting-editor-shell__meta-image-icon" />
+              </view>
+            </view>
             <input
               v-if="mode === 'edit'"
               class="jotting-editor-shell__title-input"
@@ -60,8 +69,13 @@
           </view>
         </view>
 
-        <view class="jotting-editor-shell__card-interactive-layer" :style="cardInteractiveLayerStyle">
-          <scroll-view class="jotting-editor-shell__body" scroll-y :style="bodyStyle">
+        <view class="jotting-editor-shell__card-interactive-layer">
+          <scroll-view
+            class="jotting-editor-shell__body"
+            scroll-y
+            :scroll-top="writingScrollTop"
+            :scroll-with-animation="scrollWithAnimation"
+          >
             <view class="jotting-editor-shell__body-stage" :style="bodyStageStyle" @tap="handleEditorAreaFocus">
               <view v-if="mode === 'edit'" class="jotting-editor-shell__editor-field">
                 <view v-if="showInlinePlaceholder" class="jotting-editor-shell__inline-placeholder">
@@ -79,13 +93,20 @@
                   :show-confirm-bar="false"
                   :placeholder="showInlinePlaceholder ? '' : bodyPlaceholder"
                   placeholder-class="jotting-editor-shell__placeholder"
-                  :style="writingTextStyle"
-                  @tap.stop
+                  :style="textareaStyle"
+                  @tap.stop="handleTextareaTap"
                   @input="handleTextareaInput"
                   @focus="handleTextareaFocus"
                   @blur="handleTextareaBlur"
+                  @linechange="handleLineChange"
                 />
               </view>
+              <view
+                v-if="mode === 'edit'"
+                class="jotting-editor-shell__blank-spacer"
+                :style="blankSpacerStyle"
+                @tap="handleEditorAreaFocus"
+              ></view>
 
               <view v-else class="jotting-editor-shell__read">
                 <text v-if="readTitle" class="jotting-editor-shell__read-title">{{ readTitle }}</text>
@@ -98,111 +119,44 @@
       </view>
     </view>
 
-    <view v-if="mode === 'edit'" class="jotting-editor-shell__floating-attachment" :style="floatingAttachmentStyle">
-      <view class="jotting-editor-shell__image-button" @tap="$emit('pick-images')">
-        <AppIcon name="image" class="jotting-editor-shell__image-svg" />
-      </view>
-    </view>
-
     <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from "vue";
+import { computed, getCurrentInstance, nextTick, onMounted, ref, toRefs, watch } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
-import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
+import {
+  estimateEditorCaretLineBottom,
+  resolveCaretAwareScrollTop,
+  resolveTapCaretLineBottom,
+} from "@/features/editor/editorCaretLayout";
+import {
+  resolveInteractiveLayerHeight,
+  rpxToPx as rpxToPxFn,
+} from "@/features/editor/composables/useEditorKeyboardViewport";
 import { isEditorContentVisuallyEmpty } from "@/features/editor/editorInputRules";
 import { useThemeClass } from "@/shared/theme";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 type EditorMode = "edit" | "read";
-type QueryRect = { height?: number | null };
+type QueryRect = { height?: number | null; top?: number | null };
 type TextareaInputPayload = { value?: string; cursor?: number };
 type TextareaFocusPayload = { cursor?: number };
 
 const instance = getCurrentInstance();
 const themeClass = useThemeClass();
 const shellFixedHeight = ref(0);
-const cardFixedHeight = ref(0);
 const textareaFocused = ref(false);
 const localCursorPosition = ref<number | undefined>(undefined);
 const shouldLockCursorToEnd = ref(false);
 const hasBodyInteracted = ref(false);
-const {
-  statusBarHeight,
-  keyboardHeight,
-  keyboardVisible,
-  attachmentDockBottom,
-  minLineGapToKeyboard,
-  restoreAfterKeyboardHide,
-  windowHeight,
-  rpxToPx,
-} = useEditorKeyboardViewport();
-
-const topbarStyle = computed(() => ({
-  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
-}));
-
-const interactiveLayerHeight = computed(() =>
-  Math.max(windowHeight.value - shellFixedHeight.value - (keyboardVisible.value ? keyboardHeight.value : 0), 260),
-);
-
-const interactiveLayerShellStyle = computed(() => ({
-  height: `${interactiveLayerHeight.value}px`,
-}));
-
-const cardTopGap = computed(() => rpxToPx(keyboardVisible.value ? 40 : 96));
-
-const cardBottomGap = computed(() => rpxToPx(keyboardVisible.value ? 112 : 220));
-
-const cardVisualHeight = computed(() =>
-  Math.max(
-    interactiveLayerHeight.value - cardTopGap.value - cardBottomGap.value,
-    Math.min(interactiveLayerHeight.value - rpxToPx(104), 260),
-  ),
-);
-
-const cardStyle = computed(() => ({
-  height: `${cardVisualHeight.value}px`,
-}));
-
-const cardInteractiveLayerHeight = computed(() =>
-  Math.max(cardVisualHeight.value - cardFixedHeight.value - rpxToPx(72), 180),
-);
-
-const cardInteractiveLayerStyle = computed(() => ({
-  height: `${cardInteractiveLayerHeight.value}px`,
-}));
-
-const bodyBottomPadding = computed(() =>
-  rpxToPx(88) + (keyboardVisible.value ? minLineGapToKeyboard.value : restoreAfterKeyboardHide.value),
-);
-
-const bodyStyle = computed(() => ({
-  height: `${cardInteractiveLayerHeight.value}px`,
-}));
-
-const bodyStageStyle = computed(() => ({
-  minHeight: `${cardInteractiveLayerHeight.value}px`,
-  paddingBottom: `${bodyBottomPadding.value}px`,
-}));
-const showInlinePlaceholder = computed(() =>
-  props.mode === "edit"
-  && isEditorContentVisuallyEmpty("jotting", props.content)
-  && !hasBodyInteracted.value,
-);
-
-const floatingAttachmentStyle = computed(() => ({
-  bottom: `${attachmentDockBottom.value}px`,
-}));
-const writingTextStyle = computed(() => ({
-  fontSize: `${props.writingFontSizePx}px`,
-  lineHeight: `${props.writingLineHeightPx}px`,
-  "--jotting-writing-font-size": `${props.writingFontSizePx}px`,
-  "--jotting-writing-line-height": `${props.writingLineHeightPx}px`,
-}));
+const measuredContentHeight = ref(0);
+const writingScrollTop = ref(0);
+const scrollWithAnimation = ref(false);
+const bodyViewportTop = ref(0);
+const pendingTapCaretLineBottom = ref<number | null>(null);
 
 const props = defineProps<{
   mode: EditorMode;
@@ -225,7 +179,29 @@ const props = defineProps<{
   stampOpacity: number;
   attachments: Attachment[];
   focusedAttachmentId?: string;
+  showImageAction: boolean;
+  // Viewport values passed from EditorPage — avoids a second keyboard listener
+  // instance and fixes the double-subtraction bug on Android.
+  statusBarHeight: number;
+  keyboardVisible: boolean;
+  visibleWindowHeight: number;
+  minLineGapToKeyboard: number;
+  restoreAfterKeyboardHide: number;
+  screenWidth: number;
 }>();
+
+// Destructure viewport props into reactive refs so all computed properties and
+// watchers below work without any other changes.
+const {
+  statusBarHeight,
+  keyboardVisible,
+  visibleWindowHeight,
+  minLineGapToKeyboard,
+  restoreAfterKeyboardHide,
+  screenWidth,
+} = toRefs(props);
+
+const rpxToPx = (value: number) => rpxToPxFn(value, screenWidth.value);
 
 const emit = defineEmits<{
   (event: "go-back"): void;
@@ -233,14 +209,77 @@ const emit = defineEmits<{
   (event: "continue-write"): void;
   (event: "title-input", payload: Event | { detail?: { value?: string } }): void;
   (event: "content-input", payload: Event | { detail?: { value?: string } }): void;
-  (event: "pick-images"): void;
   (event: "remove-attachment", attachmentId: string): void;
   (event: "preview-attachment", attachmentId: string): void;
+  (event: "pick-images"): void;
   (event: "focus-end-request"): void;
   (event: "content-selection-change", cursor: number): void;
   (event: "editor-focus", cursor: number): void;
   (event: "editor-blur"): void;
 }>();
+
+const topbarStyle = computed(() => ({
+  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
+}));
+
+const interactiveLayerHeight = computed(() =>
+  resolveInteractiveLayerHeight(visibleWindowHeight.value, shellFixedHeight.value, 260),
+);
+
+const interactiveLayerShellStyle = computed(() => ({
+  height: `${interactiveLayerHeight.value}px`,
+}));
+
+const editorAvailableWidth = computed(() =>
+  Math.max(screenWidth.value - rpxToPx(152), props.writingFontSizePx * 6),
+);
+
+const bodyBottomPadding = computed(() =>
+  rpxToPx(88) + (keyboardVisible.value ? minLineGapToKeyboard.value : restoreAfterKeyboardHide.value),
+);
+
+const bodyStageStyle = computed(() => ({
+  minHeight: `${interactiveLayerHeight.value}px`,
+  paddingBottom: `${bodyBottomPadding.value}px`,
+}));
+const showInlinePlaceholder = computed(() =>
+  props.mode === "edit"
+  && isEditorContentVisuallyEmpty("jotting", props.content)
+  && !hasBodyInteracted.value,
+);
+
+const renderWritingHeight = computed(() =>
+  Math.max(
+    measuredContentHeight.value + props.writingLineHeightPx,
+    props.writingLineHeightPx * 2,
+  ),
+);
+
+const writingTextStyle = computed(() => ({
+  fontSize: `${props.writingFontSizePx}px`,
+  lineHeight: `${props.writingLineHeightPx}px`,
+  "--jotting-writing-font-size": `${props.writingFontSizePx}px`,
+  "--jotting-writing-line-height": `${props.writingLineHeightPx}px`,
+}));
+
+const textareaStyle = computed(() => ({
+  ...writingTextStyle.value,
+  height: `${renderWritingHeight.value}px`,
+}));
+
+const blankSpacerStyle = computed(() => ({
+  minHeight: `${Math.max(rpxToPx(80), minLineGapToKeyboard.value)}px`,
+}));
+
+const caretLineBottom = computed(() =>
+  estimateEditorCaretLineBottom({
+    content: props.content,
+    cursor: localCursorPosition.value ?? props.cursorPosition,
+    availableWidth: editorAvailableWidth.value,
+    fontSizePx: props.writingFontSizePx,
+    lineHeightPx: props.writingLineHeightPx,
+  }),
+);
 
 function measureHeights(): void {
   nextTick(() => {
@@ -253,24 +292,28 @@ function measureHeights(): void {
 
     query
       .select(".jotting-editor-shell__fixed-layer")
-      .boundingClientRect((result: QueryRect | QueryRect[]) => {
-        const rect = Array.isArray(result) ? result[0] : result;
-        shellFixedHeight.value = Math.max(rect?.height ?? 0, 0);
-      });
+      .boundingClientRect()
+      .select(".jotting-editor-shell__body")
+      .boundingClientRect();
 
-    query
-      .select(".jotting-editor-shell__card-fixed-layer")
-      .boundingClientRect((result: QueryRect | QueryRect[]) => {
-        const rect = Array.isArray(result) ? result[0] : result;
-        cardFixedHeight.value = Math.max(rect?.height ?? 0, 0);
-      })
-      .exec();
+    query.exec((results: Array<QueryRect | null | undefined>) => {
+      const [fixedLayerRect, bodyRect] = results ?? [];
+      shellFixedHeight.value = Math.max(fixedLayerRect?.height ?? 0, 0);
+
+      if (typeof bodyRect?.top === "number") {
+        bodyViewportTop.value = bodyRect.top;
+      }
+    });
   });
 }
 
 onMounted(() => {
   localCursorPosition.value = props.cursorPosition;
   measureHeights();
+  if (props.content.length > 0) {
+    const lineCount = Math.max(props.content.split("\n").length, 1);
+    measuredContentHeight.value = Math.max(lineCount * props.writingLineHeightPx, props.writingLineHeightPx);
+  }
 });
 
 watch(
@@ -292,6 +335,12 @@ watch(
     }
 
     localCursorPosition.value = nextCursor;
+
+    if (keyboardVisible.value && textareaFocused.value) {
+      nextTick(() => {
+        syncWritingScroll();
+      });
+    }
   },
 );
 
@@ -303,9 +352,24 @@ watch(
 );
 
 watch(
+  () => [keyboardVisible.value, visibleWindowHeight.value],
+  () => {
+    nextTick(() => {
+      syncWritingScroll();
+    });
+  },
+);
+
+watch(
   () => props.focusEndRequestKey,
   () => {
     focusEditorToEnd();
+
+    if (keyboardVisible.value) {
+      nextTick(() => {
+        syncWritingScroll();
+      });
+    }
   },
 );
 
@@ -349,12 +413,65 @@ function handleTextareaInput(event: Event): void {
   emit("content-input", event);
 }
 
+function handleLineChange(event: Event): void {
+  const detail = readEventDetail<{ height?: number }>(event);
+  if (typeof detail?.height !== "number") {
+    return;
+  }
+
+  const lineHeight = props.writingLineHeightPx;
+  const normalized = Math.max(Math.ceil(detail.height / lineHeight), 1) * lineHeight;
+
+  if (normalized === measuredContentHeight.value) {
+    return;
+  }
+
+  const previousHeight = measuredContentHeight.value;
+  measuredContentHeight.value = normalized;
+
+  if (keyboardVisible.value && normalized > previousHeight) {
+    syncWritingScroll(normalized);
+  }
+}
+
+function syncWritingScroll(nextContentHeight = measuredContentHeight.value): void {
+  const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
+  const targetScrollTop = resolveCaretAwareScrollTop({
+    caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
+    viewportHeight: interactiveLayerHeight.value,
+    minLineGapToKeyboard: minLineGapToKeyboard.value,
+  });
+
+  if (Math.abs(targetScrollTop - writingScrollTop.value) > 1 || !keyboardVisible.value) {
+    scrollWithAnimation.value = false;
+    writingScrollTop.value = targetScrollTop;
+  }
+
+  pendingTapCaretLineBottom.value = null;
+}
+
+function handleTextareaTap(event: Event): void {
+  const detail = readEventDetail<{ y?: number }>(event);
+  pendingTapCaretLineBottom.value = resolveTapCaretLineBottom({
+    tapClientY: detail?.y,
+    viewportTop: bodyViewportTop.value,
+    currentScrollTop: writingScrollTop.value,
+    lineHeightPx: props.writingLineHeightPx,
+  });
+}
+
 function handleTextareaFocus(event: Event): void {
   textareaFocused.value = true;
   const detail = readEventDetail<TextareaFocusPayload>(event);
   const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.cursorPosition;
   localCursorPosition.value = cursor;
   emit("editor-focus", cursor);
+
+  if (keyboardVisible.value) {
+    nextTick(() => {
+      syncWritingScroll();
+    });
+  }
 
   if (!shouldLockCursorToEnd.value) {
     return;
@@ -370,6 +487,7 @@ function handleTextareaFocus(event: Event): void {
 
 function handleTextareaBlur(): void {
   textareaFocused.value = false;
+  pendingTapCaretLineBottom.value = null;
   releaseCursorLock();
   emit("editor-blur");
 }
@@ -439,12 +557,13 @@ function handleTextareaBlur(): void {
   min-height: 0;
   padding: 32rpx 32rpx 72rpx;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   overflow: hidden;
 }
 
 .jotting-editor-shell__card {
   width: 100%;
+  height: 100%;
   padding: 92rpx 44rpx 40rpx;
   border-radius: 28rpx;
   background: var(--noche-surface);
@@ -463,6 +582,13 @@ function handleTextareaBlur(): void {
   margin-bottom: 28rpx;
 }
 
+.jotting-editor-shell__meta-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
 .jotting-editor-shell__eyebrow {
   display: block;
   margin-bottom: 12rpx;
@@ -478,6 +604,22 @@ function handleTextareaBlur(): void {
   font-size: 60rpx;
   line-height: 1.14;
   letter-spacing: 0.04em;
+}
+
+.jotting-editor-shell__meta-image-button {
+  width: 48rpx;
+  height: 48rpx;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--noche-muted);
+}
+
+.jotting-editor-shell__meta-image-icon {
+  width: 28rpx;
+  height: 28rpx;
+  color: currentColor;
 }
 
 .jotting-editor-shell__title-input {
@@ -543,12 +685,15 @@ function handleTextareaBlur(): void {
 }
 
 .jotting-editor-shell__card-interactive-layer {
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  display: flex;
 }
 
 .jotting-editor-shell__body {
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .jotting-editor-shell__body-stage {
@@ -577,9 +722,14 @@ function handleTextareaBlur(): void {
 }
 
 .jotting-editor-shell__textarea {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   position: relative;
   z-index: 1;
+}
+
+.jotting-editor-shell__blank-spacer {
+  width: 100%;
+  flex: 1 0 auto;
 }
 
 .jotting-editor-shell__placeholder {
@@ -614,26 +764,6 @@ function handleTextareaBlur(): void {
 
 .jotting-editor-shell__read-content {
   white-space: pre-wrap;
-}
-
-.jotting-editor-shell__floating-attachment {
-  position: absolute;
-  left: 64rpx;
-  z-index: 3;
-}
-
-.jotting-editor-shell__image-button {
-  width: 48rpx;
-  height: 48rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.jotting-editor-shell__image-svg {
-  width: 32rpx;
-  height: 32rpx;
-  color: var(--noche-muted);
 }
 
 .jotting-editor-shell__signature {

@@ -12,15 +12,14 @@ describe("diary editor stitch parity", () => {
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
     expect(diaryShell).toContain("diary-editor-shell");
-    expect(diaryShell).toContain("AppIcon name=\"image\"");
     expect(diaryShell).toContain("DiaryPreludeHeaderMeta");
     expect(diaryShell).toContain("TopbarIconButton");
     expect(diaryShell).not.toContain("diary-editor-shell__inkwell");
     expect(diaryShell).not.toContain("AppIcon name=\"palette\"");
-    expect(diaryShell).toContain("handlePickImagesTrigger");
-    expect(diaryShell).toContain("@click=\"handlePickImagesTrigger\"");
     expect(diaryShell).not.toContain("DiaryPreludeInlineCard");
     expect(editorPage).toContain("DiaryPreludePicker");
+    expect(editorPage).toContain(":show-image-action=\"showImageAction\"");
+    expect(editorPage).toContain("@pick-images=\"handlePickImages\"");
   });
 
   it("uses the in-app paper confirm dialog instead of the system modal for destructive diary actions", () => {

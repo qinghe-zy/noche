@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_EDITOR_LINE_HEIGHT_PX,
   createEditorViewportSnapshot,
+  resolveInteractiveLayerHeight,
+  resolveVisibleWindowHeight,
   shouldRefreshForNextLine,
 } from "@/features/editor/composables/useEditorKeyboardViewport";
 
@@ -26,11 +28,20 @@ describe("editor keyboard viewport", () => {
 
     expect(snapshot.statusBarHeight).toBe(28);
     expect(snapshot.safeAreaBottom).toBe(34);
+    expect(snapshot.visibleWindowHeight).toBe(492);
     expect(snapshot.topbarTop).toBe(44);
     expect(snapshot.topbarHorizontalPadding).toBe(16);
     expect(snapshot.topbarBottomSpacing).toBe(12);
     expect(snapshot.attachmentDockBottom).toBe(332);
     expect(snapshot.cursorSpacing).toBe(DEFAULT_EDITOR_LINE_HEIGHT_PX);
+  });
+
+  it("centralizes keyboard compensation before shells measure their fixed layers", () => {
+    const visibleWindowHeight = resolveVisibleWindowHeight(812, true, 320);
+
+    expect(visibleWindowHeight).toBe(492);
+    expect(resolveInteractiveLayerHeight(visibleWindowHeight, 180, 220)).toBe(312);
+    expect(resolveInteractiveLayerHeight(visibleWindowHeight, 420, 220)).toBe(220);
   });
 
   it("requests a one-line refresh when the next line would press into the keyboard buffer", () => {

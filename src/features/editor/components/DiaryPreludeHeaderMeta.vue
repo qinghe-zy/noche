@@ -18,6 +18,13 @@
           :code="icon.code"
         />
       </view>
+      <view
+        v-if="showImageAction"
+        class="diary-prelude-header-meta__action-button"
+        @tap.stop="emit('pick-image')"
+      >
+        <AppIcon name="image" class="diary-prelude-header-meta__action-icon" />
+      </view>
     </view>
     <text v-if="quoteLine" class="diary-prelude-header-meta__quote literary-text">{{ quoteLine }}</text>
   </view>
@@ -27,6 +34,7 @@
 import { computed } from "vue";
 import type { DiaryPreludeMeta, DiaryPreludeStatus } from "@/domain/diaryPrelude/types";
 import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
+import AppIcon from "@/shared/ui/AppIcon.vue";
 import {
   shouldAllowDiaryPreludeEdit,
   shouldRenderDiaryPreludeHeaderMeta,
@@ -38,16 +46,19 @@ const props = defineProps<{
   timeLabel: string;
   status: DiaryPreludeStatus;
   prelude: DiaryPreludeMeta | null;
+  showImageAction?: boolean;
 }>();
 
 const emit = defineEmits<{
   (event: "edit"): void;
+  (event: "pick-image"): void;
 }>();
 
 const showPreludeDetails = computed(() =>
-  shouldRenderDiaryPreludeHeaderMeta(props.mode, props.status, props.prelude),
+  shouldRenderDiaryPreludeHeaderMeta(props.status, props.prelude),
 );
 const isEditable = computed(() => shouldAllowDiaryPreludeEdit(props.mode, props.status));
+const showImageAction = computed(() => props.showImageAction === true && props.mode === "edit");
 const iconItems = computed(() =>
   [
     {
@@ -117,9 +128,25 @@ function handleEdit(): void {
   color: rgba(99, 95, 85, 0.78);
 }
 
+.diary-prelude-header-meta__action-button {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  color: rgba(99, 95, 85, 0.78);
+}
+
 .diary-prelude-header-meta__icon-glyph {
   width: 24rpx;
   height: 24rpx;
+}
+
+.diary-prelude-header-meta__action-icon {
+  width: 24rpx;
+  height: 24rpx;
+  color: currentColor;
 }
 
 .literary-text {

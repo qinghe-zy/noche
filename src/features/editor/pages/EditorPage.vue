@@ -32,17 +32,24 @@
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
     :focused-attachment-id="focusedAttachmentId"
+    :show-image-action="showImageAction"
     :diary-prelude-status="diaryPreludeStatus"
     :diary-prelude="diaryPrelude"
+    :status-bar-height="statusBarHeight"
+    :keyboard-visible="keyboardVisible"
+    :visible-window-height="visibleWindowHeight"
+    :min-line-gap-to-keyboard="minLineGapToKeyboard"
+    :restore-after-keyboard-hide="restoreAfterKeyboardHide"
+    :screen-width="screenWidth"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
     @title-input="handleTitleInput"
     @content-input="handleContentInput"
-    @pick-images="handlePickImages"
     @remove-attachment="handleRemoveAttachment"
     @preview-attachment="handlePreviewAttachment"
     @edit-diary-prelude="openDiaryPreludePicker"
+    @pick-images="handlePickImages"
     @focus-end-request="handleFocusEndRequest"
     @content-selection-change="handleContentSelectionChange"
     @editor-focus="handleEditorFocus"
@@ -71,14 +78,21 @@
     :stamp-opacity="stampOpacity"
     :attachments="attachments"
     :focused-attachment-id="focusedAttachmentId"
+    :show-image-action="showImageAction"
+    :status-bar-height="statusBarHeight"
+    :keyboard-visible="keyboardVisible"
+    :visible-window-height="visibleWindowHeight"
+    :min-line-gap-to-keyboard="minLineGapToKeyboard"
+    :restore-after-keyboard-hide="restoreAfterKeyboardHide"
+    :screen-width="screenWidth"
     @go-back="handleGoBack"
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
     @title-input="handleTitleInput"
     @content-input="handleContentInput"
-    @pick-images="handlePickImages"
     @remove-attachment="handleRemoveAttachment"
     @preview-attachment="handlePreviewAttachment"
+    @pick-images="handlePickImages"
     @focus-end-request="handleFocusEndRequest"
     @content-selection-change="handleContentSelectionChange"
     @editor-focus="handleEditorFocus"
@@ -114,17 +128,16 @@
     :error-message="errorMessage"
     :show-saved-hint="showSavedHint"
     :can-continue-write="canContinueWrite"
+    :show-image-action="showImageAction"
     :cursor-spacing="cursorSpacing"
     :writing-font-size-px="writingAppearance.fontSizePx"
     :writing-line-height-px="writingAppearance.lineHeightPx"
     :show-paper-lines="settingsStore.futureLetterPaperLinesEnabled"
     :status-bar-height="statusBarHeight"
     :safe-area-bottom="safeAreaBottom"
-    :keyboard-height="keyboardHeight"
     :keyboard-visible="keyboardVisible"
-    :window-height="windowHeight"
+    :visible-window-height="visibleWindowHeight"
     :topbar-top="topbarTop"
-    :attachment-dock-bottom="attachmentDockBottom"
     :min-line-gap-to-keyboard="futureMinLineGapToKeyboard"
     :restore-after-keyboard-hide="restoreAfterKeyboardHide"
     :cursor-position="cursorPosition"
@@ -136,9 +149,9 @@
     @formal-save="handleFormalSave"
     @continue-write="handleContinueWrite"
     @content-input="handleContentInput"
-    @pick-images="handlePickImages"
     @remove-attachment="handleRemoveAttachment"
     @preview-attachment="handlePreviewAttachment"
+    @pick-images="handlePickImages"
     @open-future-date-sheet="openFutureDateSheet"
     @close-future-date-sheet="closeFutureDateSheet"
     @pick-future-date="handlePickFutureDate"
@@ -264,14 +277,13 @@ const { showSavedHint, stampOpacity, markDirty, markSaved, reset: resetFeedback 
 const {
   statusBarHeight,
   safeAreaBottom,
-  keyboardHeight,
   keyboardVisible,
   cursorSpacing,
   topbarTop,
-  attachmentDockBottom,
   minLineGapToKeyboard,
   restoreAfterKeyboardHide,
-  windowHeight,
+  visibleWindowHeight,
+  screenWidth,
 } = useEditorKeyboardViewport();
 const autosave = useEditorAutosave({
   delayMs: 2200,
@@ -426,6 +438,9 @@ const imageSourceSheetOptions = computed<PaperOptionSheetOption[]>(() => ([
 ]));
 const jottingHeadlineDate = computed(() => formatDate(recordDate.value, settingsStore.locale === "en-US" ? "MMM DD" : "M月D日"));
 const writingAppearance = computed(() => resolveEditorWritingAppearance(entryType.value, settingsStore.writingPreset));
+const showImageAction = computed(() =>
+  mode.value === "edit" && !isDiaryPreludePickerOpen.value && Boolean(draftStore.activeDraft),
+);
 const futureCursorSpacing = computed(() =>
   resolveEditorLiveSpacing(
     Math.max(cursorSpacing.value, writingAppearance.value.lineHeightPx),
