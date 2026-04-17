@@ -21,6 +21,7 @@ _documents
 *.aab
 *.jks
 *.keystore
+.worktrees/
 findings.md
 progress.md
 task_plan.md
