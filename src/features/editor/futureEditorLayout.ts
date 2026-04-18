@@ -4,6 +4,39 @@ export function resolveEditorLiveSpacing(baseSpacingPx: number, writingLineHeigh
   return Math.max(baseSpacingPx, writingLineHeightPx);
 }
 
+export function resolveFutureScrollViewportHeight(
+  bodyViewportHeight: number,
+  fallbackViewportHeight: number,
+): number {
+  if (bodyViewportHeight > 0) {
+    return bodyViewportHeight;
+  }
+
+  return Math.max(fallbackViewportHeight, 0);
+}
+
+export function shouldPreserveFutureCaretAnchor({
+  keyboardVisible,
+  textareaFocused,
+  pendingKeyboardViewportSync,
+}: {
+  keyboardVisible: boolean;
+  textareaFocused: boolean;
+  pendingKeyboardViewportSync: boolean;
+}): boolean {
+  return keyboardVisible && textareaFocused && pendingKeyboardViewportSync;
+}
+
+export function shouldApplyFuturePropCursorSync({
+  keyboardVisible,
+  textareaFocused,
+}: {
+  keyboardVisible: boolean;
+  textareaFocused: boolean;
+}): boolean {
+  return !(keyboardVisible && textareaFocused);
+}
+
 export function reconcileFutureMeasuredHeight({
   estimatedHeight,
   actualHeight,

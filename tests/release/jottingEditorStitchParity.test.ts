@@ -33,6 +33,7 @@ describe("jotting editor stitch parity", () => {
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
     expect(editorPage).toContain('if (entryType.value === "jotting") {');
+    expect(editorPage).toContain('if (entryType.value === "diary") {');
     expect(editorPage).toContain("function requestBodyFocusIfNeeded(): void");
   });
 });

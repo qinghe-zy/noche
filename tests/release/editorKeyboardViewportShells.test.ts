@@ -11,6 +11,7 @@ describe("editor keyboard viewport shells", () => {
     const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
+    expect(diaryShell).toContain("useDeferredKeyboardViewportSync");
     expect(diaryShell).toContain("diary-shell-read__scroll");
     expect(diaryShell).toContain("diary-shell-read__overlay");
     expect(diaryShell).toContain("@scroll=\"onReadScroll\"");
@@ -31,8 +32,10 @@ describe("editor keyboard viewport shells", () => {
     expect(diaryShell).toContain(":cursor=\"localCursorPosition\"");
     expect(diaryShell).toContain("focus-end-request");
     expect(diaryShell).toContain("content-selection-change");
-    expect(diaryShell).toContain("@tap=\"handleEditorAreaFocus\"");
     expect(diaryShell).toContain("@tap.stop");
+    expect(diaryShell).toContain("diary-shell-edit__blank-spacer");
+    expect(diaryShell).toContain("@tap=\"handleBlankAreaFocus\"");
+    expect(diaryShell).not.toContain("diary-shell-edit__body\" :style=\"editBodyStyle\" @tap=\"handleEditorAreaFocus\"");
     expect(diaryShell).toContain("diary-editor-shell__inline-placeholder");
     expect(diaryShell).toContain(":placeholder=\"showInlinePlaceholder ? '' : bodyPlaceholder\"");
     expect(diaryShell).toContain("left: 0;");
@@ -40,11 +43,15 @@ describe("editor keyboard viewport shells", () => {
     expect(diaryShell).toContain("const hasBodyInteracted = ref(false);");
     expect(diaryShell).toContain("const shouldLockCursorToEnd = ref(false);");
     expect(diaryShell).toContain("function focusEditorToEnd(): void");
+    expect(diaryShell).toContain("function handleBlankAreaFocus(): void");
+    expect(diaryShell).not.toContain("function handleEditorAreaFocus(): void");
     expect(diaryShell).toContain("requestAnimationFrame(releaseCursorLock)");
     expect(diaryShell).toContain("!hasBodyInteracted.value");
     expect(diaryShell).not.toContain("diary-editor-shell__topbar-center literary-text");
     expect(diaryShell).not.toContain("handleEditorAreaFocus(): void {\n  hasBodyInteracted.value = true;");
     expect(diaryShell).not.toContain("handleTextareaFocus(event: Event): void {\n  textareaFocused.value = true;\n  hasBodyInteracted.value = true;");
+    expect(diaryShell).toContain("requestKeyboardViewportSync");
+    expect(diaryShell).toContain("flushPendingKeyboardViewportSync");
     expect(diaryShell).toContain(":focus=\"textareaFocused\"");
     expect(editorPage).toContain(":visible-window-height=\"visibleWindowHeight\"");
     expect(editorPage).toContain(":cursor-position=\"cursorPosition\"");
@@ -56,6 +63,7 @@ describe("editor keyboard viewport shells", () => {
     const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
+    expect(jottingShell).toContain("useDeferredKeyboardViewportSync");
     expect(jottingShell).toContain("jotting-shell-edit__scroll");
     expect(jottingShell).toContain("jotting-shell-edit__paper");
     expect(jottingShell).toContain("jotting-shell-edit__overlay");
@@ -65,8 +73,10 @@ describe("editor keyboard viewport shells", () => {
     expect(jottingShell).not.toContain("useEditorKeyboardViewport(");
     expect(jottingShell).toContain("content-selection-change");
     expect(jottingShell).toContain("focus-end-request");
-    expect(jottingShell).toContain("@tap=\"handleEditorAreaFocus\"");
     expect(jottingShell).toContain("@tap.stop");
+    expect(jottingShell).toContain("jotting-shell-edit__blank-spacer");
+    expect(jottingShell).toContain("@tap=\"handleBlankAreaFocus\"");
+    expect(jottingShell).not.toContain("jotting-shell-edit__body\" :style=\"editBodyStyle\" @tap=\"handleEditorAreaFocus\"");
     expect(jottingShell).toContain("jotting-editor-shell__inline-placeholder");
     expect(jottingShell).toContain(":placeholder=\"showInlinePlaceholder ? '' : bodyPlaceholder\"");
     expect(jottingShell).toContain("left: 0;");
@@ -79,9 +89,14 @@ describe("editor keyboard viewport shells", () => {
     expect(jottingShell).toContain("measureEditBodyViewport");
     expect(jottingShell).toContain("const editScrollTopBinding = computed(() =>");
     expect(jottingShell).toContain("jotting-shell-edit__body");
+    expect(jottingShell).toContain(":scroll-y=\"!isEditShellScrollLocked && editCanShellScroll\"");
     expect(jottingShell).not.toContain("jotting-shell-edit__body-scroll");
     expect(jottingShell).not.toContain("handleEditorAreaFocus(): void {\n  if (props.mode !== \"edit\") {\n    return;\n  }\n\n  hasBodyInteracted.value = true;");
     expect(jottingShell).not.toContain("handleTextareaFocus(event: Event): void {\n  textareaFocused.value = true;\n  hasBodyInteracted.value = true;");
+    expect(jottingShell).toContain("function handleBlankAreaFocus(): void");
+    expect(jottingShell).not.toContain("function handleEditorAreaFocus(): void");
+    expect(jottingShell).toContain("requestKeyboardViewportSync");
+    expect(jottingShell).toContain("flushPendingKeyboardViewportSync");
     expect(editorPage).toContain(":visible-window-height=\"visibleWindowHeight\"");
     expect(editorPage).toContain("@focus-end-request=\"handleFocusEndRequest\"");
     expect(editorPage).toContain("@content-selection-change=\"handleContentSelectionChange\"");

@@ -77,13 +77,14 @@
           </view>
         </view>
 
-        <view class="editor-page__interactive-layer" :style="interactiveLayerStyle">
+        <view class="editor-page__interactive-layer">
           <scroll-view
             v-if="mode === 'edit'"
             class="editor-page__writing-scroll"
             scroll-y
-            :scroll-top="writingScrollTop"
+            :scroll-top="writingScrollTopBinding"
             :scroll-with-animation="scrollWithAnimation"
+            @scroll="handleWritingScroll"
           >
             <view class="editor-page__writing-stage editor-page__writing-lines" :style="writingStageStyle">
               <textarea
@@ -191,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from "vue";
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
 import type { EntryType } from "@/domain/entry/types";
 import {
@@ -199,6 +200,7 @@ import {
   resolveInteractiveLayerHeight,
   rpxToPx,
 } from "@/features/editor/composables/useEditorKeyboardViewport";
+import { useDeferredKeyboardViewportSync } from "@/features/editor/composables/useDeferredKeyboardViewportSync";
 import {
   estimateEditorCaretLineBottom,
   estimateEditorContentHeight,
@@ -207,6 +209,9 @@ import {
 } from "@/features/editor/editorCaretLayout";
 import {
   reconcileFutureMeasuredHeight,
+  resolveFutureScrollViewportHeight,
+  shouldApplyFuturePropCursorSync,
+  shouldPreserveFutureCaretAnchor,
   type FutureContentChangeDirection,
 } from "@/features/editor/futureEditorLayout";
 import { useThemeClass } from "@/shared/theme";
@@ -217,6 +222,12 @@ type EditorMode = "edit" | "read";
 type TextareaInputPayload = { value?: string; cursor?: number };
 type TextareaFocusPayload = { cursor?: number };
 type TextareaLineChangePayload = { height?: number };
+type ScrollEventPayload = { scrollTop?: number };
+type DeferredKeyboardViewportPayload = {
+  nextContentHeight: number;
+  force: boolean;
+  animate: boolean;
+};
 type QueryRect = {
   height?: number | null;
   width?: number | null;
@@ -317,15 +328,21 @@ const themeClass = useThemeClass();
 const fixedLayerHeight = ref(Math.max(props.topbarTop + rpxToPx(112, resolveScreenWidth()), 140));
 const writingStageWidth = ref(0);
 const writingScrollTop = ref(0);
+const isProgrammaticWritingScroll = ref(false);
+const programmaticWritingScrollTop = ref<number | null>(null);
 const textareaFocused = ref(false);
 const localCursorPosition = ref(props.cursorPosition);
+const caretAnchorCursorPosition = ref(props.cursorPosition);
 const scrollWithAnimation = ref(false);
 const resolvedScreenWidth = ref(resolveScreenWidth());
 const latestEstimatedContentHeight = ref(props.writingLineHeightPx);
 const measuredContentHeight = ref(props.writingLineHeightPx);
 const lastContentChangeDirection = ref<FutureContentChangeDirection>("same");
+const bodyViewportHeight = ref(0);
 const bodyViewportTop = ref(0);
 const pendingTapCaretLineBottom = ref<number | null>(null);
+
+let writingScrollTimer: ReturnType<typeof setTimeout> | null = null;
 
 const topbarInnerStyle = computed(() => ({
   paddingTop: `${props.topbarTop}px`,
@@ -353,7 +370,7 @@ const estimatedContentWidth = computed(() => {
 const caretLineBottom = computed(() =>
   estimateEditorCaretLineBottom({
     content: props.content,
-    cursor: localCursorPosition.value,
+    cursor: caretAnchorCursorPosition.value,
     availableWidth: estimatedContentWidth.value,
     fontSizePx: props.writingFontSizePx,
     lineHeightPx: props.writingLineHeightPx,
@@ -367,9 +384,7 @@ const renderWritingHeight = computed(() =>
   ),
 );
 
-const interactiveLayerStyle = computed(() => ({
-  height: `${interactiveLayerHeight.value}px`,
-}));
+const writingScrollTopBinding = computed(() => programmaticWritingScrollTop.value);
 
 const writingStageStyle = computed(() => ({
   minHeight: `${interactiveLayerHeight.value}px`,
@@ -403,6 +418,22 @@ const writingTextStyle = computed(() => ({
     : "none",
 }));
 
+const {
+  pendingKeyboardViewportSync,
+  deferKeyboardViewportSync,
+  requestKeyboardViewportSync: queueKeyboardViewportSync,
+  flushPendingKeyboardViewportSync: takePendingKeyboardViewportSync,
+  resetKeyboardViewportSync,
+} = useDeferredKeyboardViewportSync<DeferredKeyboardViewportPayload>({
+  keyboardVisible: computed(() => props.keyboardVisible),
+  bodyViewportHeight,
+  scheduleMeasurement: (flush) => {
+    measureLayout(() => {
+      flush();
+    });
+  },
+});
+
 function estimateContentHeight(content: string): number {
   return estimateEditorContentHeight({
     content,
@@ -426,10 +457,11 @@ function applyVisualEstimate(nextContent: string, previousContent = nextContent)
   scrollWithAnimation.value = false;
 }
 
-function measureLayout(): void {
+function measureLayout(onComplete?: () => void): void {
   nextTick(() => {
     const publicInstance = instance?.proxy;
     if (!publicInstance || typeof uni === "undefined" || typeof uni.createSelectorQuery !== "function") {
+      onComplete?.();
       return;
     }
 
@@ -450,6 +482,10 @@ function measureLayout(): void {
 
         fixedLayerHeight.value = nextFixedLayerHeight;
 
+        if (typeof writingScrollRect?.height === "number") {
+          bodyViewportHeight.value = Math.max(writingScrollRect.height, 0);
+        }
+
         if (typeof writingScrollRect?.top === "number") {
           bodyViewportTop.value = writingScrollRect.top;
         }
@@ -461,6 +497,8 @@ function measureLayout(): void {
         if (shouldReestimateHeight) {
           applyVisualEstimate(props.content);
         }
+
+        onComplete?.();
       });
   });
 }
@@ -473,41 +511,89 @@ function setWritingScrollTop(nextScrollTop: number): void {
   writingScrollTop.value = nextScrollTop;
 }
 
+function clearWritingScrollTimer(): void {
+  if (writingScrollTimer !== null) {
+    clearTimeout(writingScrollTimer);
+    writingScrollTimer = null;
+  }
+}
+
+function setProgrammaticWritingScrollTop(nextScrollTop: number): void {
+  clearWritingScrollTimer();
+  isProgrammaticWritingScroll.value = true;
+  programmaticWritingScrollTop.value = nextScrollTop;
+  setWritingScrollTop(nextScrollTop);
+  writingScrollTimer = setTimeout(() => {
+    writingScrollTimer = null;
+    isProgrammaticWritingScroll.value = false;
+    programmaticWritingScrollTop.value = null;
+  }, 120);
+}
+
 function syncWritingScroll(
   nextContentHeight = measuredContentHeight.value,
   options: {
     force?: boolean;
-    allowRestore?: boolean;
     animate?: boolean;
   } = {},
 ): void {
   const {
     force = false,
-    allowRestore = false,
     animate = false,
   } = options;
+
+  if (deferKeyboardViewportSync({
+    nextContentHeight,
+    force,
+    animate,
+  })) {
+    return;
+  }
+
   const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
   const targetScrollTop = resolveCaretAwareScrollTop({
     caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
-    viewportHeight: interactiveLayerHeight.value,
+    viewportHeight: resolveFutureScrollViewportHeight(bodyViewportHeight.value, interactiveLayerHeight.value),
     minLineGapToKeyboard: props.minLineGapToKeyboard,
   });
 
   if (force || Math.abs(writingScrollTop.value - targetScrollTop) > 1) {
     scrollWithAnimation.value = animate;
-    setWritingScrollTop(targetScrollTop);
+    setProgrammaticWritingScrollTop(targetScrollTop);
     return;
   }
 
-  if (allowRestore && !props.keyboardVisible) {
-    scrollWithAnimation.value = animate;
-    setWritingScrollTop(Math.max(
-      nextContentHeight - interactiveLayerHeight.value + props.restoreAfterKeyboardHide,
-      0,
-    ));
+  pendingTapCaretLineBottom.value = null;
+}
+
+function requestKeyboardViewportSync(
+  nextContentHeight = measuredContentHeight.value,
+  options: {
+    force?: boolean;
+    animate?: boolean;
+  } = {},
+): void {
+  queueKeyboardViewportSync({
+    nextContentHeight,
+    force: options.force ?? false,
+    animate: options.animate ?? false,
+  }, {
+    prepare: () => {
+      bodyViewportHeight.value = 0;
+    },
+  });
+}
+
+function flushPendingKeyboardViewportSync(): void {
+  const payload = takePendingKeyboardViewportSync();
+  if (!payload) {
+    return;
   }
 
-  pendingTapCaretLineBottom.value = null;
+  syncWritingScroll(payload.nextContentHeight, {
+    force: payload.force,
+    animate: payload.animate,
+  });
 }
 
 function handleTextareaTap(event: Event): void {
@@ -524,31 +610,49 @@ function readEventDetail<T>(event: Event): T | undefined {
   return (event as Event & { detail?: T }).detail;
 }
 
+function handleWritingScroll(event: Event): void {
+  const detail = readEventDetail<ScrollEventPayload>(event);
+  writingScrollTop.value = Math.max(detail?.scrollTop ?? 0, 0);
+
+  if (!isProgrammaticWritingScroll.value) {
+    programmaticWritingScrollTop.value = null;
+  }
+}
+
 function handleInput(event: Event): void {
   const detail = readEventDetail<TextareaInputPayload>(event);
-  const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.content.length;
+  const cursor = typeof detail?.cursor === "number" ? detail.cursor : localCursorPosition.value;
   localCursorPosition.value = cursor;
+
+  if (typeof detail?.cursor === "number") {
+    caretAnchorCursorPosition.value = cursor;
+  }
+
   emit("content-selection-change", cursor);
   emit("content-input", { detail });
 }
 
 function handleFocus(event: Event): void {
   const detail = readEventDetail<TextareaFocusPayload>(event);
-  const cursor = typeof detail?.cursor === "number" ? detail.cursor : props.cursorPosition;
+  const cursor = typeof detail?.cursor === "number" ? detail.cursor : localCursorPosition.value;
   textareaFocused.value = true;
   localCursorPosition.value = cursor;
+
+  if (typeof detail?.cursor === "number") {
+    caretAnchorCursorPosition.value = cursor;
+  }
+
   emit("editor-focus", cursor);
 
   if (props.keyboardVisible) {
-    nextTick(() => {
-      syncWritingScroll();
-    });
+    requestKeyboardViewportSync();
   }
 }
 
 function handleBlur(): void {
   textareaFocused.value = false;
   pendingTapCaretLineBottom.value = null;
+  resetKeyboardViewportSync();
   emit("editor-blur");
 }
 
@@ -595,6 +699,10 @@ onMounted(() => {
   measureLayout();
 });
 
+onBeforeUnmount(() => {
+  clearWritingScrollTimer();
+});
+
 watch(
   () => [props.attachments.length, props.errorMessage, props.showFutureUnlockRibbon, props.mode],
   () => {
@@ -614,44 +722,70 @@ watch(
   () => {
     textareaFocused.value = true;
     localCursorPosition.value = props.content.length;
-    nextTick(() => {
-      scrollWithAnimation.value = false;
-      syncWritingScroll(measuredContentHeight.value, {
-        force: true,
-      });
-    });
+    caretAnchorCursorPosition.value = props.content.length;
+
+    if (props.keyboardVisible) {
+      requestKeyboardViewportSync();
+    }
   },
 );
 
 watch(
   () => props.cursorPosition,
   (nextCursor) => {
+    if (!shouldApplyFuturePropCursorSync({
+      keyboardVisible: props.keyboardVisible,
+      textareaFocused: textareaFocused.value,
+    })) {
+      return;
+    }
+
     localCursorPosition.value = nextCursor;
 
-    if (props.keyboardVisible && textareaFocused.value) {
-      nextTick(() => {
-        syncWritingScroll();
-      });
+    if (!shouldPreserveFutureCaretAnchor({
+      keyboardVisible: props.keyboardVisible,
+      textareaFocused: textareaFocused.value,
+      pendingKeyboardViewportSync: pendingKeyboardViewportSync.value,
+    })) {
+      caretAnchorCursorPosition.value = nextCursor;
     }
   },
 );
 
 watch(
-  () => props.keyboardVisible,
-  (visible, previousVisible) => {
-    if (visible === previousVisible) {
+  () => [props.keyboardVisible, props.visibleWindowHeight],
+  ([nextKeyboardVisible, nextVisibleWindowHeight], [previousKeyboardVisible, previousVisibleWindowHeight]) => {
+    const keyboardVisibleChanged = nextKeyboardVisible !== previousKeyboardVisible;
+    const visibleWindowHeightChanged = nextVisibleWindowHeight !== previousVisibleWindowHeight;
+
+    if (!keyboardVisibleChanged && !visibleWindowHeightChanged) {
       return;
     }
 
     nextTick(() => {
       scrollWithAnimation.value = false;
-      syncWritingScroll(measuredContentHeight.value, {
-        force: visible,
-        allowRestore: !visible,
-      });
+
+      if (nextKeyboardVisible) {
+        requestKeyboardViewportSync();
+        return;
+      }
+
+      clearWritingScrollTimer();
+      isProgrammaticWritingScroll.value = false;
+      programmaticWritingScrollTop.value = null;
+      resetKeyboardViewportSync();
+      measureLayout();
     });
   },
 );
+
+watch(bodyViewportHeight, (nextHeight) => {
+  if (nextHeight <= 0) {
+    return;
+  }
+
+  flushPendingKeyboardViewportSync();
+});
 </script>
 
 <style scoped>
@@ -677,7 +811,7 @@ watch(
 .editor-page__canvas { padding: 0; display: flex; justify-content: stretch; width: 100%; height: 100%; }
 .editor-page__paper-surface { width: 100%; max-width: none; height: 100vh; padding: 0 32rpx; background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 243, 235, 0.98)); border: none; box-shadow: none; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 .editor-page__fixed-layer { position: relative; z-index: 2; flex: 0 0 auto; }
-.editor-page__interactive-layer { position: relative; z-index: 1; min-height: 0; transition: height 220ms ease-out; }
+.editor-page__interactive-layer { position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; }
 .editor-page__topbar { width: 100%; margin-bottom: 10px; }
 .editor-page__topbar-inner { width: 100%; padding: 0 0 24rpx; display: flex; align-items: center; justify-content: space-between; }
 .editor-page__topbar-button { width: 88rpx; height: 88rpx; padding: 0; display: flex; align-items: center; justify-content: center; position: relative; color: rgba(138, 129, 120, 0.82); border: none; background: transparent; }

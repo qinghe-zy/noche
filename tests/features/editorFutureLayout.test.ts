@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   reconcileFutureMeasuredHeight,
   resolveEditorLiveSpacing,
+  resolveFutureScrollViewportHeight,
+  shouldApplyFuturePropCursorSync,
+  shouldPreserveFutureCaretAnchor,
 } from "@/features/editor/futureEditorLayout";
 
 describe("future editor layout helpers", () => {
@@ -28,5 +31,41 @@ describe("future editor layout helpers", () => {
       lastContentChangeDirection: "shrink",
       lineHeightPx: 44,
     })).toBe(396);
+  });
+
+  it("prefers the measured writing viewport height when keyboard scroll sync has a real body viewport", () => {
+    expect(resolveFutureScrollViewportHeight(236, 312)).toBe(236);
+    expect(resolveFutureScrollViewportHeight(0, 312)).toBe(312);
+  });
+
+  it("preserves the current caret anchor only during a pending keyboard viewport sync", () => {
+    expect(shouldPreserveFutureCaretAnchor({
+      keyboardVisible: true,
+      textareaFocused: true,
+      pendingKeyboardViewportSync: true,
+    })).toBe(true);
+
+    expect(shouldPreserveFutureCaretAnchor({
+      keyboardVisible: true,
+      textareaFocused: true,
+      pendingKeyboardViewportSync: false,
+    })).toBe(false);
+  });
+
+  it("ignores parent cursor echo while the future editor is already focused with the keyboard open", () => {
+    expect(shouldApplyFuturePropCursorSync({
+      keyboardVisible: true,
+      textareaFocused: true,
+    })).toBe(false);
+
+    expect(shouldApplyFuturePropCursorSync({
+      keyboardVisible: false,
+      textareaFocused: true,
+    })).toBe(true);
+
+    expect(shouldApplyFuturePropCursorSync({
+      keyboardVisible: true,
+      textareaFocused: false,
+    })).toBe(true);
   });
 });

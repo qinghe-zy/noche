@@ -135,7 +135,7 @@
               </view>
             </view>
 
-            <view class="diary-shell-edit__body" :style="editBodyStyle" @tap="handleEditorAreaFocus">
+            <view class="diary-shell-edit__body" :style="editBodyStyle">
               <view class="diary-shell-edit__editor-field">
                 <view v-if="showInlinePlaceholder" class="diary-editor-shell__inline-placeholder">
                   {{ bodyPlaceholder }}
@@ -160,7 +160,11 @@
                   @linechange="handleLineChange"
                 />
               </view>
-              <view class="diary-shell-edit__blank-spacer" :style="editStaticBlankSpacerStyle"></view>
+              <view
+                class="diary-shell-edit__blank-spacer"
+                :style="editStaticBlankSpacerStyle"
+                @tap="handleBlankAreaFocus"
+              ></view>
             </view>
           </view>
 
@@ -248,6 +252,7 @@ import {
   resolveInteractiveLayerHeight,
   rpxToPx as rpxToPxFn,
 } from "@/features/editor/composables/useEditorKeyboardViewport";
+import { useDeferredKeyboardViewportSync } from "@/features/editor/composables/useDeferredKeyboardViewportSync";
 import { isEditorContentVisuallyEmpty } from "@/features/editor/editorInputRules";
 import { shouldRenderDiaryPreludeHeaderMeta } from "@/features/editor/diaryPreludeState";
 import { useThemeClass } from "@/shared/theme";
@@ -440,6 +445,23 @@ const showCompactPreludeIcons = computed(() =>
 const showCollapsedTitleRow = computed(() =>
   Boolean(props.title) || showCompactPreludeIcons.value,
 );
+
+const {
+  pendingKeyboardViewportSync,
+  deferKeyboardViewportSync,
+  requestKeyboardViewportSync: queueKeyboardViewportSync,
+  flushPendingKeyboardViewportSync: takePendingKeyboardViewportSync,
+  resetKeyboardViewportSync,
+} = useDeferredKeyboardViewportSync<number>({
+  keyboardVisible,
+  bodyViewportHeight,
+  scheduleMeasurement: (flush) => {
+    nextTick(() => {
+      measureEditBodyViewport();
+      flush();
+    });
+  },
+});
 
 const readCanScroll = computed(() =>
   measuredReadPaperHeight.value > Math.max(visibleWindowHeight.value - spacerHeight.value, 0),
@@ -782,6 +804,7 @@ function resetEditState(): void {
   measuredEditPaperHeight.value = 0;
   isProgrammaticEditBodyScroll.value = false;
   editProgrammaticScrollTop.value = undefined;
+  resetKeyboardViewportSync();
   scrollWithAnimation.value = false;
   bodyViewportHeight.value = 0;
   bodyViewportTop.value = 0;
@@ -851,6 +874,10 @@ function handleLineChange(event: Event): void {
 }
 
 function syncWritingScroll(nextContentHeight = measuredContentHeight.value): void {
+  if (deferKeyboardViewportSync(nextContentHeight)) {
+    return;
+  }
+
   const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
   const targetScrollTop = resolveCaretAwareScrollTop({
     caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
@@ -884,7 +911,15 @@ function handleTextareaTap(event: Event): void {
   });
 }
 
-function handleEditorAreaFocus(): void {
+function requestKeyboardViewportSync(nextContentHeight = measuredContentHeight.value): void {
+  queueKeyboardViewportSync(nextContentHeight);
+}
+
+function flushPendingKeyboardViewportSync(): number | null {
+  return takePendingKeyboardViewportSync();
+}
+
+function handleBlankAreaFocus(): void {
   if (props.mode !== "edit") {
     return;
   }
@@ -900,10 +935,7 @@ function handleTextareaFocus(event: Event): void {
   emit("editor-focus", cursor);
 
   if (keyboardVisible.value) {
-    nextTick(() => {
-      measureEditBodyViewport();
-      syncWritingScroll();
-    });
+    requestKeyboardViewportSync();
   }
 
   if (!shouldLockCursorToEnd.value) {
@@ -921,6 +953,7 @@ function handleTextareaFocus(event: Event): void {
 function handleTextareaBlur(): void {
   textareaFocused.value = false;
   pendingTapCaretLineBottom.value = null;
+  resetKeyboardViewportSync();
   releaseCursorLock();
   emit("editor-blur");
 }
@@ -991,10 +1024,7 @@ watch(
     localCursorPosition.value = nextCursor;
 
     if (keyboardVisible.value && textareaFocused.value) {
-      nextTick(() => {
-        measureEditBodyViewport();
-        syncWritingScroll();
-      });
+      requestKeyboardViewportSync();
     }
   },
 );
@@ -1022,12 +1052,13 @@ watch(
       scheduleEditMeasurements();
 
       if (keyboardVisible.value) {
-        syncWritingScroll();
+        requestKeyboardViewportSync();
         return;
       }
 
       clearEditBodyScrollTimer();
       isProgrammaticEditBodyScroll.value = false;
+      resetKeyboardViewportSync();
       scrollWithAnimation.value = false;
       editProgrammaticScrollTop.value = undefined;
     });
@@ -1082,13 +1113,19 @@ watch(
     focusEditorToEnd();
 
     if (keyboardVisible.value) {
-      nextTick(() => {
-        measureEditBodyViewport();
-        syncWritingScroll();
-      });
+      requestKeyboardViewportSync();
     }
   },
 );
+
+watch(bodyViewportHeight, () => {
+  const nextContentHeight = flushPendingKeyboardViewportSync();
+  if (nextContentHeight === null) {
+    return;
+  }
+
+  syncWritingScroll(nextContentHeight);
+});
 </script>
 
 <style scoped>

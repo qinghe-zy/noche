@@ -22,7 +22,7 @@ describe("jotting editor layout parity", () => {
   it("freezes collapse progress during keyboard use while keeping a single manual shell scroll container", () => {
     const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
 
-    expect(jottingShell).toContain(':scroll-y="editCanShellScroll"');
+    expect(jottingShell).toContain(':scroll-y="!isEditShellScrollLocked && editCanShellScroll"');
     expect(jottingShell).toContain("const editCanShellScroll = computed(() =>");
     expect(jottingShell).toContain("const isEditShellScrollLocked = computed(() => keyboardVisible.value);");
     expect(jottingShell).toContain("const editUserScrollTop = ref(0);");
