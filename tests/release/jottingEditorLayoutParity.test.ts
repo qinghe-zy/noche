@@ -7,37 +7,65 @@ function readProjectFile(relativePath: string): string {
 }
 
 describe("jotting editor layout parity", () => {
-  it("lets the card body consume remaining space with flex instead of measured inner heights", () => {
+  it("moves edit mode onto a full-page shell with a fixed overlay instead of the old card container", () => {
     const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
 
-    expect(jottingShell).not.toContain("const cardFixedHeight = ref(");
-    expect(jottingShell).not.toContain("const cardInteractiveLayerHeight = computed(");
-    expect(jottingShell).not.toContain(".select(\".jotting-editor-shell__card-fixed-layer\")");
-    expect(jottingShell).not.toContain("const cardTopGap = computed(");
-    expect(jottingShell).not.toContain("const cardBottomGap = computed(");
-    expect(jottingShell).not.toContain("const cardVisualHeight = computed(");
-    expect(jottingShell).not.toContain(":style=\"cardStyle\"");
-    expect(jottingShell).toContain(".jotting-editor-shell__card-interactive-layer {");
-    expect(jottingShell).toContain("flex: 1 1 auto;");
-    expect(jottingShell).toContain(".jotting-editor-shell__body {");
-    expect(jottingShell).toContain(".jotting-editor-shell__card {");
-    expect(jottingShell).toContain("width: 100%;");
-    expect(jottingShell).toContain("height: 100%;");
-    expect(jottingShell).toContain("const bodyStageStyle = computed(() => ({");
-    expect(jottingShell).toContain("minHeight: `${interactiveLayerHeight.value}px`");
-    expect(jottingShell).toContain("paddingBottom: `${bodyBottomPadding.value}px`");
+    expect(jottingShell).toContain('v-else-if="mode === \'edit\'"');
+    expect(jottingShell).toContain("jotting-shell-edit__scroll");
+    expect(jottingShell).toContain("jotting-shell-edit__paper");
+    expect(jottingShell).toContain("jotting-shell-edit__overlay");
+    expect(jottingShell).toContain("jotting-shell-edit__title-display");
+    expect(jottingShell).not.toContain("jotting-editor-shell__interactive-layer");
+    expect(jottingShell).not.toContain("jotting-editor-shell__card");
   });
 
-  it("only enables body scrolling when the writing area actually overflows or the keyboard needs room", () => {
+  it("freezes collapse progress during keyboard use while keeping a single manual shell scroll container", () => {
     const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
 
-    expect(jottingShell).toContain(':scroll-y="shouldEnableBodyScroll"');
-    expect(jottingShell).not.toContain("\n            scroll-y\n");
-    expect(jottingShell).toContain("const bodyViewportHeight = ref(0);");
-    expect(jottingShell).toContain("const shouldEnableBodyScroll = computed(() =>");
-    expect(jottingShell).toContain("const effectiveScrollableHeight = renderWritingHeight.value");
-    expect(jottingShell).toContain('props.mode === "edit" && keyboardVisible.value ? minLineGapToKeyboard.value : 0');
-    expect(jottingShell).toContain("bodyViewportHeight.value");
-    expect(jottingShell).toContain("writingScrollTop.value = 0;");
+    expect(jottingShell).toContain(':scroll-y="editCanShellScroll"');
+    expect(jottingShell).toContain("const editCanShellScroll = computed(() =>");
+    expect(jottingShell).toContain("const isEditShellScrollLocked = computed(() => keyboardVisible.value);");
+    expect(jottingShell).toContain("const editUserScrollTop = ref(0);");
+    expect(jottingShell).toContain("const editCollapseProgress = ref(0);");
+    expect(jottingShell).toContain("onEditShellScroll");
+    expect(jottingShell).toContain("const isProgrammaticEditBodyScroll = ref(false);");
+    expect(jottingShell).toContain("const editScrollTopBinding = computed(() =>");
+    expect(jottingShell).toContain("jotting-shell-edit__body");
+    expect(jottingShell).not.toContain("jotting-shell-edit__body-scroll");
+    expect(jottingShell).not.toContain(':scroll-y="shouldEnableBodyScroll"');
+    expect(jottingShell).toContain("editUserScrollTop.value");
+  });
+
+  it("splits jotting read and edit mode into separate top-level branches", () => {
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+
+    expect(jottingShell).toContain('v-if="mode === \'read\'"');
+    expect(jottingShell).toContain("jotting-shell-read__scroll");
+    expect(jottingShell).toContain("jotting-shell-read__overlay");
+  });
+
+  it("keeps read titles only in the overlay and not in the paper body", () => {
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+
+    expect(jottingShell).toContain("jotting-shell-read__title");
+    expect(jottingShell).not.toContain("jotting-editor-shell__read-title");
+  });
+
+  it("keeps the expanded edit title visually larger than the body and swaps to a readonly collapsed title", () => {
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+
+    expect(jottingShell).toContain("jotting-shell-edit__title-input");
+    expect(jottingShell).toContain("jotting-shell-edit__title-display");
+    expect(jottingShell).toContain("const editTitleInputFontSize = computed(() => rpxToPx(48));");
+    expect(jottingShell).toContain("const editCollapsedTitleFontSize = computed(() => rpxToPx(26));");
+  });
+
+  it("centers the collapsed title row against the topbar line height instead of raw font size", () => {
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+
+    expect(jottingShell).toContain("const collapsedTopbarTextLineHeight = computed(() => dateCollapsedFontSize.value * 1.14);");
+    expect(jottingShell).toContain("const collapsedTopbarTextTop = computed(() => topbarTop.value + (topbarHeight.value - collapsedTopbarTextLineHeight.value) / 2);");
+    expect(jottingShell).toContain("const collapsedTopbarTargetTop = computed(() => collapsedTopbarTextTop.value + expandedEyebrowHeight.value);");
+    expect(jottingShell).toContain("to: collapsedTopbarTargetTop.value");
   });
 });

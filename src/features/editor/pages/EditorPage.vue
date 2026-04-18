@@ -919,6 +919,10 @@ function requestBodyFocusIfNeeded(): void {
     return;
   }
 
+  if (entryType.value === "jotting") {
+    return;
+  }
+
   if (entryType.value === "diary" && isDiaryPreludePickerOpen.value) {
     return;
   }

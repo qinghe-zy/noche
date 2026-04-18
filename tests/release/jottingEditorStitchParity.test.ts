@@ -28,4 +28,11 @@ describe("jotting editor stitch parity", () => {
     expect(editorPage).toContain("uni.hideKeyboard");
     expect(editorPage).toContain('mode.value = "read";');
   });
+
+  it("does not auto-focus jotting drafts when entering edit mode", () => {
+    const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
+
+    expect(editorPage).toContain('if (entryType.value === "jotting") {');
+    expect(editorPage).toContain("function requestBodyFocusIfNeeded(): void");
+  });
 });

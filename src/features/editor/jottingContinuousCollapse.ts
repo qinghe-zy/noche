@@ -33,6 +33,35 @@ function clampProgress(value: number): number {
   return Math.max(0, Math.min(coerceFiniteNumber(value, 0), 1));
 }
 
+export function estimateJottingTextWidth(text: string, fontSize: number): number {
+  if (!text || !Number.isFinite(fontSize) || fontSize <= 0) {
+    return 0;
+  }
+
+  let width = 0;
+
+  for (const char of text) {
+    if (/[\u4e00-\u9fff\u3040-\u30ff]/.test(char)) {
+      width += fontSize;
+      continue;
+    }
+
+    if (/[A-Z]/.test(char)) {
+      width += fontSize * 0.68;
+      continue;
+    }
+
+    if (/[a-z0-9]/.test(char)) {
+      width += fontSize * 0.56;
+      continue;
+    }
+
+    width += fontSize * 0.38;
+  }
+
+  return Math.max(width, 0);
+}
+
 export function interpolateJottingMetric({
   progress,
   from,

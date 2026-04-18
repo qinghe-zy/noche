@@ -49,4 +49,18 @@ describe("diary editor stitch parity", () => {
     expect(editorPage).toContain(":title=\"title\"");
     expect(editorPage).toContain("@title-input=\"handleTitleInput\"");
   });
+
+  it("collapses diary chrome into date plus title plus prelude icons instead of keeping subtitle and time in the topbar", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+    const headerMeta = readProjectFile("src/features/editor/components/DiaryPreludeHeaderMeta.vue");
+
+    expect(diaryShell).toContain("diary-shell-read__date");
+    expect(diaryShell).toContain("diary-shell-read__title");
+    expect(diaryShell).toContain("diary-shell-read__title-icons");
+    expect(diaryShell).toContain("diary-shell-edit__title-display");
+    expect(diaryShell).toContain("variant=\"compact-icons\"");
+    expect(diaryShell).not.toContain("diary-editor-shell__topbar-center literary-text");
+    expect(headerMeta).toContain("variant?: \"default\" | \"compact-icons\"");
+    expect(headerMeta).toContain("props.variant === \"compact-icons\"");
+  });
 });

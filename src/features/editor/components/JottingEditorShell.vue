@@ -1,83 +1,105 @@
 <template>
   <view class="jotting-editor-shell" :class="themeClass">
-    <view class="jotting-editor-shell__fixed-layer">
-      <view class="jotting-editor-shell__top-icons" :style="topbarStyle">
-        <TopbarIconButton @tap="$emit('go-back')" />
-
-        <view
-          v-if="mode === 'edit'"
-          class="jotting-editor-shell__icon-button"
-          @tap="$emit('formal-save')"
+    <template v-if="mode === 'read'">
+      <view class="jotting-shell-read">
+        <scroll-view
+          class="jotting-shell-read__scroll"
+          :scroll-y="readCanScroll && !isTransitioningToEdit"
+          :scroll-top="readAnimatedScrollTop"
+          :scroll-with-animation="readScrollWithAnimation"
+          @scroll="onReadScroll"
         >
-          <AppIcon name="check" class="jotting-editor-shell__icon-svg" />
-        </view>
-        <view
-          v-else-if="canContinueWrite"
-          class="jotting-editor-shell__continue-button"
-          @tap="$emit('continue-write')"
-        >
-          {{ continueWriteLabel }}
-        </view>
-        <view v-else class="jotting-editor-shell__spacer"></view>
-      </view>
-    </view>
+          <view class="jotting-shell-read__spacer" :style="readSpacerStyle"></view>
 
-    <view class="jotting-editor-shell__interactive-layer" :style="interactiveLayerShellStyle">
-      <view class="jotting-editor-shell__card">
-        <view class="jotting-editor-shell__card-fixed-layer">
-          <view class="jotting-editor-shell__meta">
-            <text class="jotting-editor-shell__eyebrow">{{ eyebrowLabel }}</text>
-            <view class="jotting-editor-shell__meta-date-row">
-              <text class="jotting-editor-shell__date">{{ headlineDate }}</text>
+          <view class="jotting-shell-read__paper" :style="readPaperStyle" @tap="handleContinueWriteTap">
+            <text v-if="readMeta" class="jotting-shell-read__meta">{{ readMeta }}</text>
+
+            <view v-if="attachments.length" class="jotting-shell-read__attachments">
               <view
-                v-if="showImageAction"
-                class="jotting-editor-shell__meta-image-button"
-                @tap="$emit('pick-images')"
+                v-for="attachment in attachments"
+                :key="attachment.id"
+                class="jotting-shell-read__attachment-card"
+                :class="{ 'jotting-shell-read__attachment-card--focused': focusedAttachmentId === attachment.id }"
+                :id="`entry-attachment-${attachment.id}`"
+                @tap.stop="$emit('preview-attachment', attachment.id)"
               >
-                <AppIcon name="image" class="jotting-editor-shell__meta-image-icon" />
+                <image class="jotting-shell-read__attachment-image" :src="attachment.localUri" mode="aspectFill" />
               </view>
             </view>
+
+            <text class="jotting-shell-read__content literary-text" :style="writingTextStyle">{{ content }}</text>
+          </view>
+
+          <text class="jotting-shell-read__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
+          <view class="jotting-shell-read__bottom-pad"></view>
+        </scroll-view>
+
+        <view class="jotting-shell-read__overlay">
+          <view class="jotting-shell-read__overlay-bg" :style="readOverlayBackgroundStyle"></view>
+
+          <view class="jotting-shell-read__topbar" :style="topbarStyle">
+            <TopbarIconButton @tap="$emit('go-back')" />
+
+            <view
+              v-if="canContinueWrite"
+              class="jotting-editor-shell__continue-button jotting-shell-read__continue-button"
+              @tap="handleContinueWriteTap"
+            >
+              {{ continueWriteLabel }}
+            </view>
+            <view v-else class="jotting-editor-shell__spacer"></view>
+          </view>
+
+          <text class="jotting-shell-read__eyebrow" :style="readEyebrowStyle">{{ eyebrowLabel }}</text>
+          <text class="jotting-shell-read__date" :style="readDateStyle">{{ headlineDate }}</text>
+          <text v-if="readTitle" class="jotting-shell-read__title" :style="readTitleStyle">{{ readTitle }}</text>
+        </view>
+      </view>
+    </template>
+
+    <template v-else-if="mode === 'edit'">
+      <view class="jotting-shell-edit">
+        <scroll-view
+          class="jotting-shell-edit__scroll"
+          :scroll-y="editCanShellScroll"
+          :scroll-top="editScrollTopBinding"
+          :scroll-with-animation="scrollWithAnimation"
+          @scroll="onEditShellScroll"
+        >
+          <view class="jotting-shell-edit__spacer" :style="editSpacerStyle"></view>
+
+          <view class="jotting-shell-edit__paper" :style="editPaperStyle">
             <input
-              v-if="mode === 'edit'"
-              class="jotting-editor-shell__title-input"
+              class="jotting-editor-shell__title-input jotting-shell-edit__title-input"
+              :style="editTitleInputStyle"
               :value="title"
               :placeholder="titlePlaceholder"
               placeholder-class="jotting-editor-shell__title-placeholder"
               maxlength="40"
               @input="$emit('title-input', $event)"
             />
-          </view>
 
-          <view v-if="attachments.length" class="jotting-editor-shell__attachments">
-            <view
-              v-for="attachment in attachments"
-              :key="attachment.id"
-              class="jotting-editor-shell__attachment-card"
-              :class="{ 'jotting-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
-              :id="`entry-attachment-${attachment.id}`"
-              @click="$emit('preview-attachment', attachment.id)"
-            >
-              <image class="jotting-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
+            <view v-if="attachments.length" class="jotting-editor-shell__attachments">
               <view
-                v-if="mode === 'edit'"
-                class="jotting-editor-shell__attachment-remove"
-                @tap.stop="$emit('remove-attachment', attachment.id)"
+                v-for="attachment in attachments"
+                :key="attachment.id"
+                class="jotting-editor-shell__attachment-card"
+                :class="{ 'jotting-editor-shell__attachment-card--focused': focusedAttachmentId === attachment.id }"
+                :id="`entry-attachment-${attachment.id}`"
+                @click="$emit('preview-attachment', attachment.id)"
               >
-                <AppIcon name="close" class="jotting-editor-shell__attachment-remove-svg" />
+                <image class="jotting-editor-shell__attachment-image" :src="attachment.localUri" mode="aspectFill" />
+                <view
+                  class="jotting-editor-shell__attachment-remove"
+                  @tap.stop="$emit('remove-attachment', attachment.id)"
+                >
+                  <AppIcon name="close" class="jotting-editor-shell__attachment-remove-svg" />
+                </view>
               </view>
             </view>
-          </view>
-        </view>
 
-        <view class="jotting-editor-shell__card-interactive-layer">
-          <scroll-view
-            class="jotting-editor-shell__body"
-            :scroll-y="shouldEnableBodyScroll"
-            :scroll-top="writingScrollTop"
-            :scroll-with-animation="scrollWithAnimation"
-          >
-            <view class="jotting-editor-shell__body-stage" :style="bodyStageStyle" @tap="handleEditorAreaFocus">
-              <view v-if="mode === 'edit'" class="jotting-editor-shell__editor-field">
+            <view class="jotting-shell-edit__body" :style="editBodyStyle" @tap="handleEditorAreaFocus">
+              <view class="jotting-shell-edit__editor-field">
                 <view v-if="showInlinePlaceholder" class="jotting-editor-shell__inline-placeholder">
                   {{ bodyPlaceholder }}
                 </view>
@@ -101,36 +123,65 @@
                   @linechange="handleLineChange"
                 />
               </view>
-              <view
-                v-if="mode === 'edit'"
-                class="jotting-editor-shell__blank-spacer"
-                :style="blankSpacerStyle"
-                @tap="handleEditorAreaFocus"
-              ></view>
+              <view class="jotting-shell-edit__blank-spacer" :style="editStaticBlankSpacerStyle"></view>
+            </view>
+          </view>
 
-              <view v-else class="jotting-editor-shell__read">
-                <text v-if="readTitle" class="jotting-editor-shell__read-title">{{ readTitle }}</text>
-                <text class="jotting-editor-shell__read-meta">{{ readMeta }}</text>
-                <text class="jotting-editor-shell__read-content literary-text" :style="writingTextStyle">{{ content }}</text>
+          <text class="jotting-shell-edit__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
+          <view class="jotting-shell-edit__bottom-pad"></view>
+        </scroll-view>
+
+        <view class="jotting-shell-edit__overlay">
+          <view class="jotting-shell-edit__overlay-bg" :style="editOverlayBackgroundStyle"></view>
+
+          <view class="jotting-shell-edit__topbar" :style="topbarStyle">
+            <TopbarIconButton @tap="$emit('go-back')" />
+
+            <view class="jotting-shell-edit__topbar-actions">
+              <view
+                v-if="showImageAction"
+                class="jotting-editor-shell__meta-image-button jotting-shell-edit__topbar-image-button"
+                @tap="$emit('pick-images')"
+              >
+                <AppIcon name="image" class="jotting-editor-shell__meta-image-icon" />
+              </view>
+
+              <view class="jotting-editor-shell__icon-button jotting-shell-edit__save-button" @tap="$emit('formal-save')">
+                <AppIcon name="check" class="jotting-editor-shell__icon-svg" />
               </view>
             </view>
-          </scroll-view>
+          </view>
+
+          <text class="jotting-shell-edit__eyebrow" :style="editEyebrowStyle">{{ eyebrowLabel }}</text>
+          <text class="jotting-shell-edit__date" :style="editDateStyle">{{ headlineDate }}</text>
+          <text
+            v-if="title"
+            class="jotting-shell-edit__title-display"
+            :style="editTitleDisplayStyle"
+          >
+            {{ title }}
+          </text>
         </view>
       </view>
-    </view>
-
-    <text class="jotting-editor-shell__signature" :style="{ opacity: stampOpacity }">{{ signatureLine }}</text>
+    </template>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onMounted, ref, toRefs, watch } from "vue";
+import { computed, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, toRefs, watch } from "vue";
 import type { Attachment } from "@/shared/types/attachment";
 import {
   estimateEditorCaretLineBottom,
+  estimateEditorContentHeight,
   resolveCaretAwareScrollTop,
   resolveTapCaretLineBottom,
 } from "@/features/editor/editorCaretLayout";
+import {
+  estimateJottingTextWidth,
+  interpolateJottingMetric,
+  resolveJottingCollapseProgress,
+  resolveJottingProgressWindow,
+} from "@/features/editor/jottingContinuousCollapse";
 import {
   resolveInteractiveLayerHeight,
   rpxToPx as rpxToPxFn,
@@ -141,9 +192,10 @@ import AppIcon from "@/shared/ui/AppIcon.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 type EditorMode = "edit" | "read";
-type QueryRect = { height?: number | null; top?: number | null };
+type QueryRect = { height?: number | null; top?: number | null; width?: number | null };
 type TextareaInputPayload = { value?: string; cursor?: number };
 type TextareaFocusPayload = { cursor?: number };
+type ScrollEventPayload = { scrollTop?: number };
 
 const instance = getCurrentInstance();
 const themeClass = useThemeClass();
@@ -158,6 +210,23 @@ const scrollWithAnimation = ref(false);
 const bodyViewportHeight = ref(0);
 const bodyViewportTop = ref(0);
 const pendingTapCaretLineBottom = ref<number | null>(null);
+
+const readScrollTop = ref(0);
+const readScrollWithAnimation = ref(false);
+const readAnimatedScrollTop = ref(0);
+const measuredPaperHeight = ref(0);
+const measuredDateWidth = ref(0);
+const isTransitioningToEdit = ref(false);
+
+const editShellScrollTop = ref(0);
+const editUserScrollTop = ref(0);
+const editCollapseProgress = ref(0);
+const measuredEditPaperHeight = ref(0);
+const isProgrammaticEditBodyScroll = ref(false);
+const editProgrammaticScrollTop = ref<number | undefined>(undefined);
+
+let continueWriteTimer: ReturnType<typeof setTimeout> | null = null;
+let editBodyScrollTimer: ReturnType<typeof setTimeout> | null = null;
 
 const props = defineProps<{
   mode: EditorMode;
@@ -181,8 +250,6 @@ const props = defineProps<{
   attachments: Attachment[];
   focusedAttachmentId?: string;
   showImageAction: boolean;
-  // Viewport values passed from EditorPage — avoids a second keyboard listener
-  // instance and fixes the double-subtraction bug on Android.
   statusBarHeight: number;
   keyboardVisible: boolean;
   visibleWindowHeight: number;
@@ -191,8 +258,6 @@ const props = defineProps<{
   screenWidth: number;
 }>();
 
-// Destructure viewport props into reactive refs so all computed properties and
-// watchers below work without any other changes.
 const {
   statusBarHeight,
   keyboardVisible,
@@ -219,17 +284,17 @@ const emit = defineEmits<{
   (event: "editor-blur"): void;
 }>();
 
+const topbarTop = computed(() => statusBarHeight.value + rpxToPx(32));
+const topbarHeight = computed(() => rpxToPx(88));
+const topbarBottom = computed(() => topbarTop.value + topbarHeight.value);
+
 const topbarStyle = computed(() => ({
-  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
+  paddingTop: `${topbarTop.value}px`,
 }));
 
 const interactiveLayerHeight = computed(() =>
   resolveInteractiveLayerHeight(visibleWindowHeight.value, shellFixedHeight.value, 260),
 );
-
-const interactiveLayerShellStyle = computed(() => ({
-  height: `${interactiveLayerHeight.value}px`,
-}));
 
 const editorAvailableWidth = computed(() =>
   Math.max(screenWidth.value - rpxToPx(152), props.writingFontSizePx * 6),
@@ -240,9 +305,10 @@ const bodyBottomPadding = computed(() =>
 );
 
 const bodyStageStyle = computed(() => ({
-  minHeight: `${interactiveLayerHeight.value}px`,
+  minHeight: `${Math.max(bodyViewportHeight.value, interactiveLayerHeight.value)}px`,
   paddingBottom: `${bodyBottomPadding.value}px`,
 }));
+
 const showInlinePlaceholder = computed(() =>
   props.mode === "edit"
   && isEditorContentVisuallyEmpty("jotting", props.content)
@@ -272,16 +338,9 @@ const blankSpacerStyle = computed(() => ({
   minHeight: `${Math.max(rpxToPx(80), minLineGapToKeyboard.value)}px`,
 }));
 
-const shouldEnableBodyScroll = computed(() => {
-  if (bodyViewportHeight.value <= 0) {
-    return false;
-  }
-
-  const effectiveScrollableHeight = renderWritingHeight.value
-    + (props.mode === "edit" && keyboardVisible.value ? minLineGapToKeyboard.value : 0);
-
-  return effectiveScrollableHeight > bodyViewportHeight.value || writingScrollTop.value > 0;
-});
+const editStaticBlankSpacerStyle = computed(() => ({
+  minHeight: `${Math.max(rpxToPx(120), restoreAfterKeyboardHide.value)}px`,
+}));
 
 const caretLineBottom = computed(() =>
   estimateEditorCaretLineBottom({
@@ -293,6 +352,440 @@ const caretLineBottom = computed(() =>
   }),
 );
 
+const expandedEyebrowTop = computed(() => topbarBottom.value + rpxToPx(48));
+const expandedEyebrowHeight = computed(() => rpxToPx(30));
+const dateExpandedLeft = computed(() => rpxToPx(76));
+const titleExpandedLeft = computed(() => rpxToPx(76));
+const dateExpandedFontSize = computed(() => rpxToPx(60));
+const dateCollapsedFontSize = computed(() => rpxToPx(26));
+const titleCollapsedFontSize = computed(() => rpxToPx(26));
+const editTitleInputFontSize = computed(() => rpxToPx(48));
+const editCollapsedTitleFontSize = computed(() => rpxToPx(26));
+const titleGapAfterDate = computed(() => rpxToPx(12));
+const dateExpandedTopBase = computed(() => expandedEyebrowTop.value + expandedEyebrowHeight.value);
+const dateExpandedLineHeight = computed(() => dateExpandedFontSize.value * 1.14);
+const titleExpandedTopBase = computed(() => dateExpandedTopBase.value + dateExpandedLineHeight.value + rpxToPx(20));
+const titleExpandedLineHeight = computed(() => editTitleInputFontSize.value * 1.25);
+const titleCollapsedLineHeight = computed(() => titleCollapsedFontSize.value * 1.24);
+const collapsedTopbarTextLineHeight = computed(() => dateCollapsedFontSize.value * 1.14);
+const collapsedTopbarTextTop = computed(() => topbarTop.value + (topbarHeight.value - collapsedTopbarTextLineHeight.value) / 2);
+const collapsedTopbarTargetTop = computed(() => collapsedTopbarTextTop.value + expandedEyebrowHeight.value);
+const dateCollapsedLeft = computed(() => rpxToPx(132));
+const expandedTitleMaxHeight = computed(() =>
+  Math.max(visibleWindowHeight.value, titleExpandedLineHeight.value * 2),
+);
+const expandedMetaHeight = computed(() => titleExpandedTopBase.value + titleExpandedLineHeight.value - topbarBottom.value);
+const editExpandedMetaHeight = computed(() => titleExpandedTopBase.value + titleExpandedLineHeight.value - topbarBottom.value);
+const spacerHeight = computed(() => topbarBottom.value + expandedMetaHeight.value);
+const editSpacerHeight = computed(() => topbarBottom.value + editExpandedMetaHeight.value);
+const collapseDistance = computed(() => Math.max(expandedMetaHeight.value, 1));
+const editCollapseDistance = computed(() => Math.max(editExpandedMetaHeight.value, 1));
+
+const collapseProgress = computed(() =>
+  resolveJottingCollapseProgress({
+    effectiveCollapseScroll: readScrollTop.value,
+    collapseStart: 0,
+    collapseDistance: collapseDistance.value,
+  }),
+);
+
+const readCanScroll = computed(() =>
+  measuredPaperHeight.value > Math.max(visibleWindowHeight.value - spacerHeight.value, 0),
+);
+
+const editCanShellScroll = computed(() =>
+  measuredEditPaperHeight.value > Math.max(visibleWindowHeight.value - editSpacerHeight.value, 0),
+);
+
+const isEditShellScrollLocked = computed(() => keyboardVisible.value);
+const editScrollTopBinding = computed(() => editProgrammaticScrollTop.value);
+
+const eyebrowFadeProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: collapseProgress.value,
+    start: 0,
+    end: 0.3,
+  }),
+);
+const editEyebrowFadeProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: editCollapseProgress.value,
+    start: 0,
+    end: 0.3,
+  }),
+);
+const eyebrowHeightProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: collapseProgress.value,
+    start: 0,
+    end: 0.2,
+  }),
+);
+const editEyebrowHeightProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: editCollapseProgress.value,
+    start: 0,
+    end: 0.2,
+  }),
+);
+const titleHeightProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: collapseProgress.value,
+    start: 0.5,
+    end: 0.8,
+  }),
+);
+const titleEllipsisProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: collapseProgress.value,
+    start: 0.8,
+    end: 1,
+  }),
+);
+const editTitleDisplayProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: editCollapseProgress.value,
+    start: 0.45,
+    end: 0.7,
+  }),
+);
+const paperFlattenProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: collapseProgress.value,
+    start: 0.65,
+    end: 1,
+  }),
+);
+const editPaperFlattenProgress = computed(() =>
+  resolveJottingProgressWindow({
+    progress: editCollapseProgress.value,
+    start: 0.65,
+    end: 1,
+  }),
+);
+
+const eyebrowReleasedHeight = computed(() =>
+  interpolateJottingMetric({
+    progress: eyebrowHeightProgress.value,
+    from: 0,
+    to: expandedEyebrowHeight.value,
+  }),
+);
+
+const editEyebrowReleasedHeight = computed(() =>
+  interpolateJottingMetric({
+    progress: editEyebrowHeightProgress.value,
+    from: 0,
+    to: expandedEyebrowHeight.value,
+  }),
+);
+
+const currentDateFontSize = computed(() =>
+  interpolateJottingMetric({
+    progress: collapseProgress.value,
+    from: dateExpandedFontSize.value,
+    to: dateCollapsedFontSize.value,
+  }),
+);
+
+const currentTitleFontSize = computed(() =>
+  interpolateJottingMetric({
+    progress: collapseProgress.value,
+    from: rpxToPx(40),
+    to: titleCollapsedFontSize.value,
+  }),
+);
+
+const currentEditDateFontSize = computed(() =>
+  interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: dateExpandedFontSize.value,
+    to: dateCollapsedFontSize.value,
+  }),
+);
+
+const collapsedTitleLeft = computed(() =>
+  dateCollapsedLeft.value + measuredDateWidth.value + titleGapAfterDate.value,
+);
+
+const collapsedTitleRightSafe = computed(() => (props.canContinueWrite ? rpxToPx(180) : rpxToPx(120)));
+const editCollapsedTitleRightSafe = computed(() => (props.showImageAction ? rpxToPx(220) : rpxToPx(148)));
+const expandedDateMaxWidth = computed(() => Math.max(screenWidth.value - rpxToPx(152), dateExpandedFontSize.value));
+const collapsedDateMaxWidth = computed(() => Math.max(measuredDateWidth.value + rpxToPx(8), dateCollapsedFontSize.value));
+const expandedTitleMaxWidth = computed(() => Math.max(screenWidth.value - rpxToPx(152), rpxToPx(40)));
+const collapsedTitleMaxWidth = computed(() =>
+  Math.max(screenWidth.value - collapsedTitleLeft.value - collapsedTitleRightSafe.value, titleCollapsedFontSize.value),
+);
+const editCollapsedTitleMaxWidth = computed(() =>
+  Math.max(screenWidth.value - collapsedTitleLeft.value - editCollapsedTitleRightSafe.value, editCollapsedTitleFontSize.value),
+);
+const editExpandedTitleMaxWidth = computed(() =>
+  Math.max(screenWidth.value - rpxToPx(152), editTitleInputFontSize.value),
+);
+const editBodyStaticStyle = computed(() => ({
+  minHeight: `${Math.max(visibleWindowHeight.value - editSpacerHeight.value - rpxToPx(64), renderWritingHeight.value)}px`,
+  paddingBottom: `${rpxToPx(88)}px`,
+}));
+
+const editBodyStyle = computed(() => ({
+  minHeight: `${Math.max(renderWritingHeight.value + bodyBottomPadding.value, visibleWindowHeight.value - editSpacerHeight.value - rpxToPx(64))}px`,
+  paddingBottom: `${bodyBottomPadding.value}px`,
+}));
+
+const readSpacerStyle = computed(() => ({
+  height: `${spacerHeight.value}px`,
+}));
+
+const editSpacerStyle = computed(() => ({
+  height: `${keyboardVisible.value
+    ? Math.max(topbarBottom.value + editExpandedMetaHeight.value * (1 - editCollapseProgress.value), topbarBottom.value)
+    : editSpacerHeight.value}px`,
+}));
+
+const readOverlayBackgroundStyle = computed(() => ({
+  height: `${Math.max(topbarBottom.value + expandedMetaHeight.value * (1 - collapseProgress.value), topbarBottom.value)}px`,
+}));
+
+const editOverlayBackgroundStyle = computed(() => ({
+  height: `${Math.max(topbarBottom.value + editExpandedMetaHeight.value * (1 - editCollapseProgress.value), topbarBottom.value)}px`,
+}));
+
+const readEyebrowStyle = computed(() => ({
+  top: `${expandedEyebrowTop.value}px`,
+  left: `${dateExpandedLeft.value}px`,
+  fontSize: `${rpxToPx(18)}px`,
+  opacity: 1 - eyebrowFadeProgress.value,
+}));
+
+const editEyebrowStyle = computed(() => ({
+  top: `${expandedEyebrowTop.value}px`,
+  left: `${dateExpandedLeft.value}px`,
+  fontSize: `${rpxToPx(18)}px`,
+  opacity: 1 - editEyebrowFadeProgress.value,
+}));
+
+const readDateStyle = computed(() => ({
+  top: `${interpolateJottingMetric({
+    progress: collapseProgress.value,
+    from: dateExpandedTopBase.value,
+    to: collapsedTopbarTargetTop.value,
+  }) - eyebrowReleasedHeight.value}px`,
+  left: `${interpolateJottingMetric({
+    progress: collapseProgress.value,
+    from: dateExpandedLeft.value,
+    to: dateCollapsedLeft.value,
+  })}px`,
+  fontSize: `${currentDateFontSize.value}px`,
+  lineHeight: `${currentDateFontSize.value * 1.14}px`,
+  maxWidth: `${interpolateJottingMetric({
+    progress: collapseProgress.value,
+    from: expandedDateMaxWidth.value,
+    to: collapsedDateMaxWidth.value,
+  })}px`,
+}));
+
+const editDateStyle = computed(() => ({
+  top: `${interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: dateExpandedTopBase.value,
+    to: collapsedTopbarTargetTop.value,
+  }) - editEyebrowReleasedHeight.value}px`,
+  left: `${interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: dateExpandedLeft.value,
+    to: dateCollapsedLeft.value,
+  })}px`,
+  fontSize: `${currentEditDateFontSize.value}px`,
+  lineHeight: `${currentEditDateFontSize.value * 1.14}px`,
+  maxWidth: `${expandedDateMaxWidth.value}px`,
+}));
+
+const readTitleStyle = computed(() => {
+  const singleLine = titleEllipsisProgress.value > 0;
+
+  return {
+    top: `${interpolateJottingMetric({
+      progress: collapseProgress.value,
+      from: titleExpandedTopBase.value,
+      to: collapsedTopbarTargetTop.value,
+    }) - eyebrowReleasedHeight.value}px`,
+    left: `${interpolateJottingMetric({
+      progress: collapseProgress.value,
+      from: titleExpandedLeft.value,
+      to: collapsedTitleLeft.value,
+    })}px`,
+    fontSize: `${currentTitleFontSize.value}px`,
+    lineHeight: `${interpolateJottingMetric({
+      progress: collapseProgress.value,
+      from: titleExpandedLineHeight.value,
+      to: titleCollapsedLineHeight.value,
+    })}px`,
+    maxWidth: `${interpolateJottingMetric({
+      progress: collapseProgress.value,
+      from: expandedTitleMaxWidth.value,
+      to: collapsedTitleMaxWidth.value,
+    })}px`,
+    maxHeight: `${interpolateJottingMetric({
+      progress: titleHeightProgress.value,
+      from: expandedTitleMaxHeight.value,
+      to: titleCollapsedLineHeight.value,
+    })}px`,
+    whiteSpace: singleLine ? "nowrap" : "normal",
+    textOverflow: singleLine ? "ellipsis" : "clip",
+  };
+});
+
+const editTitleInputStyle = computed(() => ({
+  fontSize: `${editTitleInputFontSize.value}px`,
+  lineHeight: `${titleExpandedLineHeight.value}px`,
+  opacity: `${1 - editTitleDisplayProgress.value}`,
+}));
+
+const editTitleDisplayStyle = computed(() => ({
+    top: `${interpolateJottingMetric({
+      progress: editCollapseProgress.value,
+      from: titleExpandedTopBase.value,
+      to: collapsedTopbarTargetTop.value,
+    }) - editEyebrowReleasedHeight.value}px`,
+  left: `${interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: titleExpandedLeft.value,
+    to: collapsedTitleLeft.value,
+  })}px`,
+  fontSize: `${interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: editTitleInputFontSize.value,
+    to: editCollapsedTitleFontSize.value,
+  })}px`,
+  lineHeight: `${interpolateJottingMetric({
+    progress: editCollapseProgress.value,
+    from: titleExpandedLineHeight.value,
+    to: titleCollapsedLineHeight.value,
+  })}px`,
+    maxWidth: `${interpolateJottingMetric({
+      progress: editCollapseProgress.value,
+      from: editExpandedTitleMaxWidth.value,
+      to: editCollapsedTitleMaxWidth.value,
+    })}px`,
+  opacity: `${editTitleDisplayProgress.value}`,
+  whiteSpace: editCollapseProgress.value >= 0.8 ? "nowrap" : "normal",
+  textOverflow: editCollapseProgress.value >= 0.8 ? "ellipsis" : "clip",
+}));
+
+function resolvePaperStyle(progress: number): Record<string, string> {
+  const topRadius = interpolateJottingMetric({
+    progress,
+    from: rpxToPx(28),
+    to: 0,
+  });
+  const shadowOpacity = interpolateJottingMetric({
+    progress,
+    from: 0.06,
+    to: 0,
+  });
+
+  return {
+    borderTopLeftRadius: `${topRadius}px`,
+    borderTopRightRadius: `${topRadius}px`,
+    borderBottomLeftRadius: `${rpxToPx(28)}px`,
+    borderBottomRightRadius: `${rpxToPx(28)}px`,
+    boxShadow: `0 ${rpxToPx(8)}px ${rpxToPx(48)}px rgba(49, 51, 46, ${shadowOpacity})`,
+  };
+}
+
+const readPaperStyle = computed(() => resolvePaperStyle(paperFlattenProgress.value));
+const editPaperStyle = computed(() => resolvePaperStyle(editPaperFlattenProgress.value));
+
+function readEventDetail<T>(event: Event): T | undefined {
+  return (event as Event & { detail?: T }).detail;
+}
+
+function estimateVisibleContentHeight(): number {
+  return estimateEditorContentHeight({
+    content: props.content,
+    availableWidth: editorAvailableWidth.value,
+    fontSizePx: props.writingFontSizePx,
+    lineHeightPx: props.writingLineHeightPx,
+  });
+}
+
+function measurePaperHeight(): void {
+  nextTick(() => {
+    const publicInstance = instance?.proxy;
+    if (
+      props.mode !== "read"
+      || !publicInstance
+      || typeof uni === "undefined"
+      || typeof uni.createSelectorQuery !== "function"
+    ) {
+      return;
+    }
+
+    uni.createSelectorQuery()
+      .in(publicInstance)
+      .select(".jotting-shell-read__paper")
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const rect = results?.[0];
+        measuredPaperHeight.value = typeof rect?.height === "number" ? Math.max(rect.height, 0) : 0;
+      });
+  });
+}
+
+function measureEditPaperHeight(): void {
+  nextTick(() => {
+    const publicInstance = instance?.proxy;
+    if (
+      props.mode !== "edit"
+      || !publicInstance
+      || typeof uni === "undefined"
+      || typeof uni.createSelectorQuery !== "function"
+    ) {
+      return;
+    }
+
+    uni.createSelectorQuery()
+      .in(publicInstance)
+      .select(".jotting-shell-edit__paper")
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const rect = results?.[0];
+        measuredEditPaperHeight.value = typeof rect?.height === "number" ? Math.max(rect.height, 0) : 0;
+      });
+  });
+}
+
+function measureCollapsedDateWidth(): void {
+  nextTick(() => {
+    const publicInstance = instance?.proxy;
+    if (!publicInstance || typeof uni === "undefined" || typeof uni.createSelectorQuery !== "function") {
+      return;
+    }
+
+    const selector = props.mode === "edit"
+      ? ".jotting-shell-edit__date"
+      : ".jotting-shell-read__date";
+
+    uni.createSelectorQuery()
+      .in(publicInstance)
+      .select(selector)
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const rect = results?.[0];
+        const activeFontSize = props.mode === "edit" ? currentEditDateFontSize.value : currentDateFontSize.value;
+
+        if (typeof rect?.width !== "number" || rect.width <= 0 || activeFontSize <= 0) {
+          return;
+        }
+
+        measuredDateWidth.value = Math.max(
+          rect.width * (dateCollapsedFontSize.value / activeFontSize),
+          0,
+        );
+      });
+  });
+}
+
 function measureHeights(): void {
   nextTick(() => {
     const publicInstance = instance?.proxy;
@@ -300,132 +793,165 @@ function measureHeights(): void {
       return;
     }
 
-    const query = uni.createSelectorQuery().in(publicInstance);
-
-    query
+    uni.createSelectorQuery()
+      .in(publicInstance)
       .select(".jotting-editor-shell__fixed-layer")
       .boundingClientRect()
       .select(".jotting-editor-shell__body")
-      .boundingClientRect();
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const [fixedLayerRect, bodyRect] = results ?? [];
+        shellFixedHeight.value = Math.max(fixedLayerRect?.height ?? 0, 0);
 
-    query.exec((results: Array<QueryRect | null | undefined>) => {
-      const [fixedLayerRect, bodyRect] = results ?? [];
-      shellFixedHeight.value = Math.max(fixedLayerRect?.height ?? 0, 0);
+        if (typeof bodyRect?.height === "number") {
+          bodyViewportHeight.value = Math.max(bodyRect.height, 0);
+        }
 
-      if (typeof bodyRect?.height === "number") {
-        bodyViewportHeight.value = Math.max(bodyRect.height, 0);
-      }
-
-      if (typeof bodyRect?.top === "number") {
-        bodyViewportTop.value = bodyRect.top;
-      }
-    });
+        if (typeof bodyRect?.top === "number") {
+          bodyViewportTop.value = bodyRect.top;
+        }
+      });
   });
 }
 
-onMounted(() => {
-  localCursorPosition.value = props.cursorPosition;
-  measureHeights();
-  if (props.content.length > 0) {
-    const lineCount = Math.max(props.content.split("\n").length, 1);
-    measuredContentHeight.value = Math.max(lineCount * props.writingLineHeightPx, props.writingLineHeightPx);
-  }
-});
-
-watch(
-  () => props.content,
-  (nextContent) => {
-    if (!shouldLockCursorToEnd.value) {
+function measureEditBodyViewport(): void {
+  nextTick(() => {
+    const publicInstance = instance?.proxy;
+    if (
+      props.mode !== "edit"
+      || !keyboardVisible.value
+      || !publicInstance
+      || typeof uni === "undefined"
+      || typeof uni.createSelectorQuery !== "function"
+    ) {
       return;
     }
 
-    localCursorPosition.value = nextContent.length;
-  },
-);
+    uni.createSelectorQuery()
+      .in(publicInstance)
+      .select(".jotting-shell-edit__scroll")
+      .boundingClientRect()
+      .exec((results: Array<QueryRect | null | undefined>) => {
+        const rect = results?.[0];
 
-watch(
-  () => props.cursorPosition,
-  (nextCursor) => {
-    if (shouldLockCursorToEnd.value) {
-      return;
-    }
+        if (typeof rect?.height === "number") {
+          bodyViewportHeight.value = Math.max(rect.height, 0);
+        }
 
-    localCursorPosition.value = nextCursor;
-
-    if (keyboardVisible.value && textareaFocused.value) {
-      nextTick(() => {
-        syncWritingScroll();
+        if (typeof rect?.top === "number") {
+          bodyViewportTop.value = rect.top;
+        }
       });
-    }
-  },
-);
-
-watch(
-  () => [props.attachments.length, props.mode],
-  () => {
-    measureHeights();
-  },
-);
-
-watch(
-  () => [keyboardVisible.value, visibleWindowHeight.value],
-  () => {
-    nextTick(() => {
-      measureHeights();
-      syncWritingScroll();
-    });
-  },
-);
-
-watch(shouldEnableBodyScroll, (enabled) => {
-  if (!enabled) {
-    scrollWithAnimation.value = false;
-    writingScrollTop.value = 0;
-  }
-});
-
-watch(
-  () => props.focusEndRequestKey,
-  () => {
-    focusEditorToEnd();
-
-    if (keyboardVisible.value) {
-      nextTick(() => {
-        syncWritingScroll();
-      });
-    }
-  },
-);
-
-function releaseCursorLock(): void {
-  shouldLockCursorToEnd.value = false;
-  localCursorPosition.value = undefined;
+  });
 }
 
-function focusEditorToEnd(): void {
-  shouldLockCursorToEnd.value = true;
-  localCursorPosition.value = props.content.length;
+function resetReadState(): void {
+  readScrollTop.value = 0;
+  readScrollWithAnimation.value = false;
+  readAnimatedScrollTop.value = 0;
+  measuredPaperHeight.value = 0;
+  measuredDateWidth.value = estimateJottingTextWidth(props.headlineDate, dateCollapsedFontSize.value);
+  isTransitioningToEdit.value = false;
+}
 
-  if (!textareaFocused.value) {
-    textareaFocused.value = true;
+function resetEditState(): void {
+  editShellScrollTop.value = 0;
+  editUserScrollTop.value = 0;
+  editCollapseProgress.value = 0;
+  measuredEditPaperHeight.value = 0;
+  isProgrammaticEditBodyScroll.value = false;
+  editProgrammaticScrollTop.value = undefined;
+  scrollWithAnimation.value = false;
+  bodyViewportHeight.value = 0;
+  bodyViewportTop.value = 0;
+  measuredDateWidth.value = estimateJottingTextWidth(props.headlineDate, dateCollapsedFontSize.value);
+}
+
+function scheduleReadMeasurements(): void {
+  if (props.mode !== "read") {
     return;
   }
 
-  nextTick(() => {
-    releaseCursorLock();
-  });
+  measurePaperHeight();
+  measureCollapsedDateWidth();
 }
 
-function handleEditorAreaFocus(): void {
+function scheduleEditMeasurements(): void {
   if (props.mode !== "edit") {
     return;
   }
 
-  emit("focus-end-request");
+  shellFixedHeight.value = editSpacerHeight.value;
+  measureEditPaperHeight();
+  if (keyboardVisible.value) {
+    measureEditBodyViewport();
+  }
+  measureCollapsedDateWidth();
 }
 
-function readEventDetail<T>(event: Event): T | undefined {
-  return (event as Event & { detail?: T }).detail;
+function clearContinueWriteTimer(): void {
+  if (continueWriteTimer !== null) {
+    clearTimeout(continueWriteTimer);
+    continueWriteTimer = null;
+  }
+}
+
+function clearEditBodyScrollTimer(): void {
+  if (editBodyScrollTimer !== null) {
+    clearTimeout(editBodyScrollTimer);
+    editBodyScrollTimer = null;
+  }
+}
+
+function onReadScroll(event: Event): void {
+  const detail = readEventDetail<ScrollEventPayload>(event);
+  readScrollTop.value = Math.max(detail?.scrollTop ?? 0, 0);
+}
+
+function onEditShellScroll(event: Event): void {
+  const detail = readEventDetail<ScrollEventPayload>(event);
+  editShellScrollTop.value = Math.max(detail?.scrollTop ?? 0, 0);
+
+  if (!isProgrammaticEditBodyScroll.value) {
+    editProgrammaticScrollTop.value = undefined;
+  }
+
+  if (!isEditShellScrollLocked.value) {
+    editUserScrollTop.value = editShellScrollTop.value;
+    editCollapseProgress.value = resolveJottingCollapseProgress({
+      effectiveCollapseScroll: editUserScrollTop.value,
+      collapseStart: 0,
+      collapseDistance: editCollapseDistance.value,
+    });
+  }
+}
+
+function handleContinueWriteTap(): void {
+  if (props.mode !== "read" || !props.canContinueWrite || isTransitioningToEdit.value) {
+    return;
+  }
+
+  if (collapseProgress.value <= 0.05) {
+    emit("continue-write");
+    return;
+  }
+
+  clearContinueWriteTimer();
+  isTransitioningToEdit.value = true;
+  readScrollWithAnimation.value = true;
+  readAnimatedScrollTop.value = Math.max(readScrollTop.value, 1);
+
+  nextTick(() => {
+    readAnimatedScrollTop.value = 0;
+  });
+
+  continueWriteTimer = setTimeout(() => {
+    continueWriteTimer = null;
+    isTransitioningToEdit.value = false;
+    readScrollWithAnimation.value = false;
+    readScrollTop.value = 0;
+    emit("continue-write");
+  }, 250);
 }
 
 function handleTextareaInput(event: Event): void {
@@ -456,19 +982,34 @@ function handleLineChange(event: Event): void {
   if (keyboardVisible.value && normalized > previousHeight) {
     syncWritingScroll(normalized);
   }
+
+  if (props.mode === "read") {
+    measurePaperHeight();
+    return;
+  }
+
+  scheduleEditMeasurements();
 }
 
 function syncWritingScroll(nextContentHeight = measuredContentHeight.value): void {
   const preferredCaretLineBottom = pendingTapCaretLineBottom.value ?? caretLineBottom.value;
   const targetScrollTop = resolveCaretAwareScrollTop({
     caretLineBottom: Math.min(Math.max(preferredCaretLineBottom, props.writingLineHeightPx), nextContentHeight),
-    viewportHeight: interactiveLayerHeight.value,
+    viewportHeight: Math.max(bodyViewportHeight.value, props.writingLineHeightPx * 4),
     minLineGapToKeyboard: minLineGapToKeyboard.value,
   });
 
-  if (Math.abs(targetScrollTop - writingScrollTop.value) > 1 || !keyboardVisible.value) {
+  if (Math.abs(targetScrollTop - editShellScrollTop.value) > 1 || !keyboardVisible.value) {
+    clearEditBodyScrollTimer();
+    isProgrammaticEditBodyScroll.value = true;
     scrollWithAnimation.value = false;
-    writingScrollTop.value = targetScrollTop;
+    editProgrammaticScrollTop.value = targetScrollTop;
+    editShellScrollTop.value = targetScrollTop;
+    editBodyScrollTimer = setTimeout(() => {
+      editBodyScrollTimer = null;
+      isProgrammaticEditBodyScroll.value = false;
+      editProgrammaticScrollTop.value = undefined;
+    }, 120);
   }
 
   pendingTapCaretLineBottom.value = null;
@@ -479,7 +1020,7 @@ function handleTextareaTap(event: Event): void {
   pendingTapCaretLineBottom.value = resolveTapCaretLineBottom({
     tapClientY: detail?.y,
     viewportTop: bodyViewportTop.value,
-    currentScrollTop: writingScrollTop.value,
+    currentScrollTop: editShellScrollTop.value,
     lineHeightPx: props.writingLineHeightPx,
   });
 }
@@ -493,6 +1034,7 @@ function handleTextareaFocus(event: Event): void {
 
   if (keyboardVisible.value) {
     nextTick(() => {
+      measureEditBodyViewport();
       syncWritingScroll();
     });
   }
@@ -515,6 +1057,181 @@ function handleTextareaBlur(): void {
   releaseCursorLock();
   emit("editor-blur");
 }
+
+function handleEditorAreaFocus(): void {
+  if (props.mode !== "edit") {
+    return;
+  }
+
+  emit("focus-end-request");
+}
+
+function releaseCursorLock(): void {
+  shouldLockCursorToEnd.value = false;
+  localCursorPosition.value = undefined;
+}
+
+function focusEditorToEnd(): void {
+  shouldLockCursorToEnd.value = true;
+  localCursorPosition.value = props.content.length;
+
+  if (!textareaFocused.value) {
+    textareaFocused.value = true;
+    return;
+  }
+
+  nextTick(() => {
+    releaseCursorLock();
+  });
+}
+
+onMounted(() => {
+  localCursorPosition.value = props.cursorPosition;
+  measuredContentHeight.value = Math.max(estimateVisibleContentHeight(), props.writingLineHeightPx);
+
+  if (props.mode === "edit") {
+    resetEditState();
+    scheduleEditMeasurements();
+    return;
+  }
+
+  resetReadState();
+  scheduleReadMeasurements();
+});
+
+onBeforeUnmount(() => {
+  clearContinueWriteTimer();
+  clearEditBodyScrollTimer();
+});
+
+watch(
+  () => props.content,
+  (nextContent) => {
+    measuredContentHeight.value = Math.max(estimateVisibleContentHeight(), props.writingLineHeightPx);
+
+    if (props.mode !== "edit") {
+      measurePaperHeight();
+      return;
+    }
+
+    if (shouldLockCursorToEnd.value) {
+      localCursorPosition.value = nextContent.length;
+    }
+
+    scheduleEditMeasurements();
+  },
+);
+
+watch(
+  () => props.cursorPosition,
+  (nextCursor) => {
+    if (props.mode !== "edit" || shouldLockCursorToEnd.value) {
+      return;
+    }
+
+    localCursorPosition.value = nextCursor;
+
+    if (keyboardVisible.value && textareaFocused.value) {
+      nextTick(() => {
+        measureEditBodyViewport();
+        syncWritingScroll();
+      });
+    }
+  },
+);
+
+watch(
+  () => [props.attachments.length, props.mode],
+  () => {
+    if (props.mode === "edit") {
+      scheduleEditMeasurements();
+      return;
+    }
+
+    scheduleReadMeasurements();
+  },
+);
+
+watch(
+  () => [keyboardVisible.value, visibleWindowHeight.value],
+  () => {
+    if (props.mode !== "edit") {
+      return;
+    }
+
+    nextTick(() => {
+      scheduleEditMeasurements();
+      if (keyboardVisible.value) {
+        syncWritingScroll();
+        return;
+      }
+
+      clearEditBodyScrollTimer();
+      isProgrammaticEditBodyScroll.value = false;
+      scrollWithAnimation.value = false;
+      editProgrammaticScrollTop.value = undefined;
+    });
+  },
+);
+
+watch(
+  () => [screenWidth.value, props.headlineDate, props.mode],
+  () => {
+    measuredDateWidth.value = estimateJottingTextWidth(props.headlineDate, dateCollapsedFontSize.value);
+
+    if (props.mode === "edit") {
+      scheduleEditMeasurements();
+      return;
+    }
+
+    scheduleReadMeasurements();
+  },
+);
+
+watch(
+  () => props.mode,
+  (nextMode) => {
+    clearContinueWriteTimer();
+    clearEditBodyScrollTimer();
+
+    if (nextMode === "read") {
+      resetReadState();
+      scheduleReadMeasurements();
+      return;
+    }
+
+    resetEditState();
+    scheduleEditMeasurements();
+  },
+);
+
+watch(readCanScroll, (enabled) => {
+  if (enabled || props.mode !== "read") {
+    return;
+  }
+
+  readScrollTop.value = 0;
+  readScrollWithAnimation.value = false;
+  readAnimatedScrollTop.value = 0;
+});
+
+watch(
+  () => props.focusEndRequestKey,
+  () => {
+    if (props.mode !== "edit") {
+      return;
+    }
+
+    focusEditorToEnd();
+
+    if (keyboardVisible.value) {
+      nextTick(() => {
+        measureEditBodyViewport();
+        syncWritingScroll();
+      });
+    }
+  },
+);
 </script>
 
 <style scoped>
@@ -530,24 +1247,222 @@ function handleTextareaBlur(): void {
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   overflow: hidden;
   position: relative;
+}
+
+.jotting-shell-read,
+.jotting-shell-edit {
+  position: relative;
+  height: 100%;
+}
+
+.jotting-shell-read__scroll,
+.jotting-shell-edit__scroll {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+.jotting-shell-read__spacer,
+.jotting-shell-edit__spacer {
+  width: 100%;
+}
+
+.jotting-shell-read__paper,
+.jotting-shell-edit__paper {
+  margin: 0 32rpx;
+  padding: 40rpx 44rpx;
+  background: var(--noche-surface);
+}
+
+.jotting-shell-read__meta {
+  display: block;
+  margin-bottom: 24rpx;
+  font-family: "Inter", "PingFang SC", sans-serif;
+  font-size: 20rpx;
+  color: var(--noche-muted);
+}
+
+.jotting-shell-read__attachments,
+.jotting-editor-shell__attachments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.jotting-shell-read__attachment-card,
+.jotting-editor-shell__attachment-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 20rpx;
+  background: var(--noche-panel);
+}
+
+.jotting-shell-read__attachment-card--focused,
+.jotting-editor-shell__attachment-card--focused {
+  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
+}
+
+.jotting-shell-read__attachment-image,
+.jotting-editor-shell__attachment-image {
+  width: 100%;
+  height: 100%;
+}
+
+.jotting-shell-read__content {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  white-space: pre-wrap;
+}
+
+.jotting-shell-read__signature,
+.jotting-shell-edit__signature {
+  display: block;
+  margin: 24rpx 40rpx 0;
+  text-align: right;
+  font-size: 20rpx;
+  color: var(--noche-muted);
+  font-style: italic;
+}
+
+.jotting-shell-read__bottom-pad,
+.jotting-shell-edit__bottom-pad {
+  height: 96rpx;
+}
+
+.jotting-shell-read__overlay,
+.jotting-shell-edit__overlay {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.jotting-shell-read__overlay-bg,
+.jotting-shell-edit__overlay-bg {
+  position: absolute;
+  inset: 0 0 auto 0;
+  background: var(--noche-bg);
+}
+
+.jotting-shell-read__topbar,
+.jotting-shell-edit__topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 88rpx;
+  padding-left: 32rpx;
+  padding-right: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+}
+
+.jotting-shell-read__continue-button,
+.jotting-shell-edit__save-button {
+  pointer-events: auto;
+}
+
+.jotting-shell-edit__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  pointer-events: auto;
+}
+
+.jotting-shell-edit__topbar-image-button {
+  pointer-events: auto;
+}
+
+.jotting-shell-read__eyebrow,
+.jotting-shell-read__date,
+.jotting-shell-read__title,
+.jotting-shell-edit__eyebrow,
+.jotting-shell-edit__date,
+.jotting-shell-edit__title-display {
+  position: absolute;
+  overflow: hidden;
+}
+
+.jotting-shell-read__eyebrow,
+.jotting-shell-edit__eyebrow {
+  font-family: "Inter", "PingFang SC", sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--noche-muted);
+}
+
+.jotting-shell-read__date,
+.jotting-shell-edit__date {
+  letter-spacing: 0.04em;
+}
+
+.jotting-shell-read__title,
+.jotting-shell-edit__title-display {
+  word-break: break-word;
+}
+
+.jotting-shell-edit__title-input {
+  margin-bottom: 24rpx;
+}
+
+.jotting-shell-edit__body,
+.jotting-shell-edit__body-static {
   display: flex;
   flex-direction: column;
 }
 
-.jotting-editor-shell__fixed-layer {
+.jotting-shell-edit__editor-field {
   position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
 }
 
-.jotting-editor-shell__top-icons {
+.jotting-shell-edit__blank-spacer {
+  width: 100%;
+}
+
+.jotting-editor-shell__body {
+  min-height: 0;
+}
+
+.jotting-editor-shell__body-stage {
+  min-height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 88rpx;
-  padding-left: 32rpx;
-  padding-right: 32rpx;
-  margin-bottom: 28rpx;
+  flex-direction: column;
+}
+
+.jotting-editor-shell__editor-field {
+  flex: 1 0 auto;
+  min-height: 100%;
+  display: flex;
+  position: relative;
+}
+
+.jotting-editor-shell__textarea,
+.jotting-shell-read__content {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--noche-text);
+  font-size: 18px;
+  line-height: 2;
+}
+
+.jotting-editor-shell__textarea {
+  flex: 0 0 auto;
+  min-height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.jotting-editor-shell__blank-spacer {
+  width: 100%;
+  flex: 1 0 auto;
 }
 
 .jotting-editor-shell__icon-button {
@@ -575,65 +1490,9 @@ function handleTextareaBlur(): void {
   height: 88rpx;
 }
 
-.jotting-editor-shell__interactive-layer {
-  position: relative;
-  flex: 0 0 auto;
-  min-height: 0;
-  padding: 32rpx 32rpx 72rpx;
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
-}
-
-.jotting-editor-shell__card {
-  width: 100%;
-  height: 100%;
-  padding: 92rpx 44rpx 40rpx;
-  border-radius: 28rpx;
-  background: var(--noche-surface);
-  box-shadow: 0 8rpx 48rpx rgba(49, 51, 46, 0.06);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.jotting-editor-shell__card-fixed-layer {
-  flex: 0 0 auto;
-}
-
-.jotting-editor-shell__meta {
-  margin-bottom: 28rpx;
-}
-
-.jotting-editor-shell__meta-date-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24rpx;
-}
-
-.jotting-editor-shell__eyebrow {
-  display: block;
-  margin-bottom: 12rpx;
-  font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 18rpx;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--noche-muted);
-}
-
-.jotting-editor-shell__date {
-  display: block;
-  font-size: 60rpx;
-  line-height: 1.14;
-  letter-spacing: 0.04em;
-}
-
 .jotting-editor-shell__meta-image-button {
   width: 48rpx;
   height: 48rpx;
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -649,44 +1508,15 @@ function handleTextareaBlur(): void {
 .jotting-editor-shell__title-input {
   width: 100%;
   min-height: 56rpx;
-  margin-top: 14rpx;
   border: none;
   background: transparent;
   padding: 0;
   color: var(--noche-text);
-  font-size: 28rpx;
-  line-height: 1.4;
 }
 
 .jotting-editor-shell__title-placeholder {
   color: var(--noche-muted);
   font-weight: 300;
-}
-
-.jotting-editor-shell__attachments {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16rpx;
-  margin-bottom: 20rpx;
-}
-
-.jotting-editor-shell__attachment-card {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 20rpx;
-  background: var(--noche-panel);
-}
-
-.jotting-editor-shell__attachment-card--focused {
-  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
-}
-
-.jotting-editor-shell__attachment-image {
-  width: 100%;
-  height: 100%;
 }
 
 .jotting-editor-shell__attachment-remove {
@@ -708,54 +1538,6 @@ function handleTextareaBlur(): void {
   color: var(--noche-text);
 }
 
-.jotting-editor-shell__card-interactive-layer {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-}
-
-.jotting-editor-shell__body {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.jotting-editor-shell__body-stage {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.jotting-editor-shell__textarea,
-.jotting-editor-shell__read-content {
-  width: 100%;
-  min-height: 100%;
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: var(--noche-text);
-  font-size: 18px;
-  line-height: 2;
-}
-
-.jotting-editor-shell__editor-field {
-  flex: 1 0 auto;
-  min-height: 100%;
-  display: flex;
-  position: relative;
-}
-
-.jotting-editor-shell__textarea {
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.jotting-editor-shell__blank-spacer {
-  width: 100%;
-  flex: 1 0 auto;
-}
-
 .jotting-editor-shell__placeholder {
   color: var(--noche-muted);
   font-weight: 300;
@@ -768,35 +1550,6 @@ function handleTextareaBlur(): void {
   color: var(--noche-muted);
   font-size: var(--jotting-writing-font-size, 18px);
   line-height: var(--jotting-writing-line-height, 36px);
-  pointer-events: none;
-}
-
-.jotting-editor-shell__read-title {
-  display: block;
-  margin-bottom: 16rpx;
-  font-size: 40rpx;
-  line-height: 1.24;
-}
-
-.jotting-editor-shell__read-meta {
-  display: block;
-  margin-bottom: 24rpx;
-  font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 20rpx;
-  color: var(--noche-muted);
-}
-
-.jotting-editor-shell__read-content {
-  white-space: pre-wrap;
-}
-
-.jotting-editor-shell__signature {
-  position: absolute;
-  right: 40rpx;
-  bottom: 24rpx;
-  font-size: 20rpx;
-  color: var(--noche-muted);
-  font-style: italic;
   pointer-events: none;
 }
 </style>

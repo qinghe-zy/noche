@@ -20,9 +20,12 @@ describe("editor attachment dock parity", () => {
     expect(editorPage).not.toContain("attachmentDockStyle");
 
     expect(futureShell).toContain("editor-page__meta-image-button");
-    expect(diaryShell).toContain(":show-image-action=\"showImageAction\"");
-    expect(diaryShell).toContain("@pick-image=\"$emit('pick-images')\"");
-    expect(headerMeta).toContain("diary-prelude-header-meta__action-button");
+    expect(diaryShell).toContain("diary-shell-edit__topbar-actions");
+    expect(diaryShell).toContain("diary-shell-edit__topbar-image-button");
+    expect(diaryShell).not.toContain(":show-image-action=\"showImageAction\"");
+    expect(headerMeta).not.toContain("diary-prelude-header-meta__action-button");
     expect(jottingShell).toContain("jotting-editor-shell__meta-image-button");
+    expect(jottingShell).toContain("jotting-shell-edit__topbar-actions");
+    expect(jottingShell).toContain("jotting-shell-edit__topbar-image-button");
   });
 });

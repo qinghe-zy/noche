@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  estimateJottingTextWidth,
   interpolateJottingMetric,
   resolveJottingCollapseProgress,
   resolveJottingEffectiveCollapseScroll,
@@ -233,5 +234,21 @@ describe("jottingContinuousCollapse", () => {
       start: 0.8,
       end: 0.6,
     })).toBe(0);
+  });
+
+  it("estimates empty text as zero width", () => {
+    expect(estimateJottingTextWidth("", 26)).toBe(0);
+  });
+
+  it("scales width estimation with font size", () => {
+    expect(estimateJottingTextWidth("4月18日", 52)).toBeGreaterThan(
+      estimateJottingTextWidth("4月18日", 26),
+    );
+  });
+
+  it("gives Latin month abbreviations a stable finite width", () => {
+    const width = estimateJottingTextWidth("Apr 18", 26);
+    expect(width).toBeGreaterThan(0);
+    expect(Number.isFinite(width)).toBe(true);
   });
 });
