@@ -575,6 +575,12 @@ function returnToHome(): void {
   });
 }
 
+function hideEditorKeyboard(): void {
+  if (typeof uni !== "undefined" && typeof uni.hideKeyboard === "function") {
+    uni.hideKeyboard();
+  }
+}
+
 async function focusAttachmentInReadMode(): Promise<void> {
   if (mode.value !== "read" || !focusedAttachmentId.value) {
     return;
@@ -792,6 +798,7 @@ async function openEntryForRead(entryId: string): Promise<void> {
       throw new Error(entryStore.error ?? "Failed to load entry");
     }
 
+    hideEditorKeyboard();
     entryType.value = entry.type;
     savedEntry.value = entry;
     mode.value = "read";
@@ -1102,6 +1109,7 @@ async function handleFormalSave(): Promise<void> {
       throw new Error(draftStore.error ?? copy.value.editor.saveFailed);
     }
 
+    hideEditorKeyboard();
     savedEntry.value = entry;
     mode.value = "read";
     diaryPreludeStatus.value = entry.diaryPreludeStatus;

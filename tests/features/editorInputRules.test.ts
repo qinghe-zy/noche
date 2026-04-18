@@ -12,7 +12,7 @@ describe("editor input rules", () => {
     expect(resolveEditorInitialContent("future", "")).toBe("");
   });
 
-  it("adds the first-line full-width indent only after the user actually starts typing", () => {
+  it("keeps the first line flush-left when diary and jotting users start typing", () => {
     const result = normalizeEditorInput({
       entryType: "diary",
       previousValue: "",
@@ -20,8 +20,8 @@ describe("editor input rules", () => {
       cursor: 1,
     });
 
-    expect(result.value).toBe("　　今");
-    expect(result.cursor).toBe(3);
+    expect(result.value).toBe("今");
+    expect(result.cursor).toBe(1);
   });
 
   it("keeps the future letter first line flush-left but indents new lines", () => {

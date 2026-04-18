@@ -149,10 +149,10 @@ describe("home welcome card", () => {
     });
   });
 
-  it("always allows the welcome card to show while repeated acceptance is enabled", () => {
+  it("only auto-shows the welcome card once per day", () => {
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", null)).toBe(true);
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-15")).toBe(true);
-    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(true);
+    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(false);
   });
 
   it("persists the seen date with local-first storage", () => {

@@ -67,7 +67,7 @@ export function normalizeEditorInput({
 }: NormalizeEditorInputOptions): NormalizeEditorInputResult {
   let value = nextValue;
   let nextCursor = cursor;
-  const shouldIndentFirstLine = entryType !== "future";
+  void entryType;
 
   if (value.length > previousValue.length) {
     const prefixLength = getCommonPrefixLength(previousValue, value);
@@ -84,16 +84,6 @@ export function normalizeEditorInput({
         nextCursor += normalizedInsertedText.length - insertedText.length;
       }
     }
-  }
-
-  if (
-    shouldIndentFirstLine
-    && previousValue.length === 0
-    && value.length > 0
-    && !value.startsWith(FULL_WIDTH_INDENT)
-  ) {
-    value = `${FULL_WIDTH_INDENT}${value}`;
-    nextCursor += FULL_WIDTH_INDENT.length;
   }
 
   return {

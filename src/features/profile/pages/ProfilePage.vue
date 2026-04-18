@@ -8,6 +8,7 @@
         :avatar-uri="identity.avatarUri"
         :cover-uri="identity.coverUri"
         :display-name-fallback="copy.profile.displayNameUnset"
+        :nav-style="heroNavStyle"
         @go-back="handleGoBack"
         @preview-cover="openCoverViewer"
         @preview-avatar="openAvatarViewer"
@@ -147,12 +148,14 @@ import {
   restartAppAfterRestore,
   type LocalBackupSummary,
 } from "@/features/profile/localBackup";
+import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { t } from "@/shared/i18n";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 
 const settingsStore = useSettingsStore();
 const themeClass = useThemeClass();
 const typographyClass = useTypographyClass();
+const { statusBarHeight, topbarBottomSpacing, rpxToPx } = useEditorKeyboardViewport();
 const copy = computed(() => t(settingsStore.locale));
 const {
   identity,
@@ -322,6 +325,12 @@ const actionItems = computed<ProfileActionItem[]>(() => [
 const mediaViewerTitle = computed(() =>
   mediaViewerKind.value === "cover" ? copy.value.profile.coverSheetTitle : copy.value.profile.avatarSheetTitle,
 );
+const heroNavStyle = computed(() => ({
+  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
+  paddingLeft: `${rpxToPx(32)}px`,
+  paddingRight: `${rpxToPx(32)}px`,
+  paddingBottom: `${topbarBottomSpacing.value}px`,
+}));
 const mediaViewerImageUri = computed(() =>
   mediaViewerKind.value === "cover" ? identity.value.coverUri : identity.value.avatarUri,
 );

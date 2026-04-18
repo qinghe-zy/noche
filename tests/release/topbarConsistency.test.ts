@@ -33,6 +33,14 @@ describe("topbar consistency", () => {
     expect(profileHero).toContain("padding: 40rpx 24rpx 0;");
   });
 
+  it("uses the same topbar inset helper formula on the profile main page instead of a page-specific top gap", () => {
+    const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
+
+    expect(profilePage).toContain("useEditorKeyboardViewport");
+    expect(profilePage).toContain("topbarBottomSpacing");
+    expect(profilePage).toContain("statusBarHeight.value + rpxToPx(32)");
+  });
+
   it("pulls shared topbar spacing from the viewport helper instead of keeping legacy 40rpx padding blocks", () => {
     const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
     const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");

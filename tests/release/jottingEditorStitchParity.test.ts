@@ -21,4 +21,11 @@ describe("jotting editor stitch parity", () => {
     expect(editorPage).toContain(":show-image-action=\"showImageAction\"");
     expect(editorPage).toContain("@pick-images=\"handlePickImages\"");
   });
+
+  it("hides the keyboard before switching a saved jotting into read mode", () => {
+    const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
+
+    expect(editorPage).toContain("uni.hideKeyboard");
+    expect(editorPage).toContain('mode.value = "read";');
+  });
 });

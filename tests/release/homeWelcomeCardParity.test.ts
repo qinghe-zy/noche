@@ -47,6 +47,24 @@ describe("home welcome card parity", () => {
     expect(homePage).toContain("home-page__welcome-card-actions");
   });
 
+  it("keeps collected daily cards from reopening automatically", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+
+    expect(homePage).toContain('if (isHomeWelcomeCardCollected(dateKey, activeWelcomeCard.value.id)) {');
+    expect(homePage).toContain('welcomeCardStage.value = "hidden";');
+    expect(homePage).toContain("return;");
+    expect(homePage).toContain('welcomeCardStage.value = "entering";');
+  });
+
+  it("reads and records the last seen day so the card auto-shows only once per date", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+
+    expect(homePage).toContain("readHomeWelcomeCardSeenDate");
+    expect(homePage).toContain("markHomeWelcomeCardSeen");
+    expect(homePage).toContain("shouldAutoShowHomeWelcomeCard");
+    expect(homePage).toContain("const lastSeenDate");
+  });
+
   it("adds a top-left mini card-stack showcase entry that acts as the collect animation target", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
 
@@ -109,7 +127,7 @@ describe("home welcome card parity", () => {
     expect(homePage).toContain("justify-content: center;");
     expect(homePage).toContain("align-items: center;");
     expect(homePage).toContain("text-align: left;");
-    expect(homePage).toContain("font-size: 96px;");
+    expect(homePage).toContain("font-size: 48px;");
     expect(homePage).toContain("max-width: 220px;");
     expect(homePage).toContain("align-self: flex-start;");
   });
@@ -117,7 +135,7 @@ describe("home welcome card parity", () => {
   it("updates the effective type-scale overrides so the cover title actually changes on device", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
 
-    expect(homePage).toContain(".type-scale-small .home-page__welcome-card-title { font-size: 46px; }");
+    expect(homePage).toContain(".type-scale-small .home-page__welcome-card-title { font-size: 40px; }");
     expect(homePage).toContain(".type-scale-large .home-page__welcome-card-title { font-size: 56px; }");
     expect(homePage).toContain(".type-scale-small .home-page__welcome-card-content { font-size: 14px; }");
     expect(homePage).toContain(".type-scale-large .home-page__welcome-card-content { font-size: 16px; }");

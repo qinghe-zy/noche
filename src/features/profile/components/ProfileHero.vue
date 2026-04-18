@@ -10,7 +10,7 @@
       <view v-else class="profile-hero__cover-fallback"></view>
       <view class="profile-hero__mist"></view>
 
-      <view class="profile-hero__nav" @tap.stop>
+      <view class="profile-hero__nav" :style="navStyle" @tap.stop>
         <TopbarIconButton class="profile-hero__back" icon-name="back-ios" @tap="$emit('go-back')" />
         <text class="profile-hero__title">{{ title }}</text>
         <view class="profile-hero__nav-spacer"></view>
@@ -49,6 +49,7 @@ const props = withDefaults(defineProps<{
   avatarUri: string | null;
   coverUri: string | null;
   displayNameFallback?: string;
+  navStyle?: Record<string, string>;
 }>(), {
   title: "我的角落",
   displayNameFallback: "点击修改昵称",

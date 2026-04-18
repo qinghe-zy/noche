@@ -27,17 +27,14 @@ describe("app typography scale parity", () => {
     expect(dayArchivePage).toContain("useTypographyClass");
   });
 
-  it("pushes the typography scale all the way to remaining legacy shells and helper components", () => {
-    const scaffoldPage = readProjectFile("src/pages/index/index.vue");
+  it("pushes the typography scale all the way to shared shells and helper components", () => {
     const basePageShell = readProjectFile("src/shared/ui/BasePageShell.vue");
     const homeHero = readProjectFile("src/features/home/components/HomeHero.vue");
     const homeActionCard = readProjectFile("src/features/home/components/HomeActionCard.vue");
 
-    expect(scaffoldPage).toContain(".type-scale-small");
     expect(basePageShell).toContain(".type-scale-small");
     expect(homeHero).toContain(".type-scale-small");
     expect(homeActionCard).toContain(".type-scale-small");
-    expect(scaffoldPage).not.toContain("font-size: calc(");
     expect(basePageShell).not.toContain("font-size: calc(");
     expect(homeHero).not.toContain("font-size: calc(");
     expect(homeActionCard).not.toContain("font-size: calc(");

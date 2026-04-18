@@ -192,11 +192,14 @@ import {
   isHomeWelcomeCardCollected,
   markHomeWelcomeCardCollected,
   markHomeWelcomeCardResolved,
+  markHomeWelcomeCardSeen,
   readHomeWelcomeCardCollectionCount,
+  readHomeWelcomeCardSeenDate,
   resolveHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardGlyph,
   resolveHomeWelcomeCardTitle,
+  shouldAutoShowHomeWelcomeCard,
 } from "@/features/home/homeWelcomeCard";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
@@ -319,12 +322,19 @@ function resetWelcomeCard(): void {
 
 function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   clearWelcomeCardTimer();
+  const lastSeenDate = readHomeWelcomeCardSeenDate();
+
+  if (!shouldAutoShowHomeWelcomeCard(dateKey, lastSeenDate)) {
+    welcomeCardStage.value = "hidden";
+    return;
+  }
 
   if (isHomeWelcomeCardCollected(dateKey, activeWelcomeCard.value.id)) {
     welcomeCardStage.value = "hidden";
     return;
   }
 
+  markHomeWelcomeCardSeen(dateKey);
   markHomeWelcomeCardResolved(dateKey, activeWelcomeCard.value.id);
 
   welcomeCardStage.value = "entering";
@@ -1002,7 +1012,7 @@ onShow(() => {
 
 .home-page__welcome-card-title {
   font-family: "Inter", "PingFang SC", sans-serif;
-  font-size: 96px;
+  font-size: 48px;
   line-height: 0.96;
   font-weight: 800;
   letter-spacing: -0.06em;
@@ -1232,7 +1242,7 @@ onShow(() => {
 .type-scale-large .home-page__welcome-card-eyebrow,
 .type-scale-large .home-page__nav-entry-label,
 .type-scale-large .home-page__footer-text { font-size: 11px; }
-.type-scale-small .home-page__welcome-card-title { font-size: 46px; }
+.type-scale-small .home-page__welcome-card-title { font-size: 40px; }
 .type-scale-large .home-page__welcome-card-title { font-size: 56px; }
 .type-scale-small .home-page__welcome-card-content { font-size: 14px; }
 .type-scale-large .home-page__welcome-card-content { font-size: 16px; }

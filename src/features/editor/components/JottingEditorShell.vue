@@ -72,7 +72,7 @@
         <view class="jotting-editor-shell__card-interactive-layer">
           <scroll-view
             class="jotting-editor-shell__body"
-            scroll-y
+            :scroll-y="shouldEnableBodyScroll"
             :scroll-top="writingScrollTop"
             :scroll-with-animation="scrollWithAnimation"
           >
@@ -155,6 +155,7 @@ const hasBodyInteracted = ref(false);
 const measuredContentHeight = ref(0);
 const writingScrollTop = ref(0);
 const scrollWithAnimation = ref(false);
+const bodyViewportHeight = ref(0);
 const bodyViewportTop = ref(0);
 const pendingTapCaretLineBottom = ref<number | null>(null);
 
@@ -271,6 +272,17 @@ const blankSpacerStyle = computed(() => ({
   minHeight: `${Math.max(rpxToPx(80), minLineGapToKeyboard.value)}px`,
 }));
 
+const shouldEnableBodyScroll = computed(() => {
+  if (bodyViewportHeight.value <= 0) {
+    return false;
+  }
+
+  const effectiveScrollableHeight = renderWritingHeight.value
+    + (props.mode === "edit" && keyboardVisible.value ? minLineGapToKeyboard.value : 0);
+
+  return effectiveScrollableHeight > bodyViewportHeight.value || writingScrollTop.value > 0;
+});
+
 const caretLineBottom = computed(() =>
   estimateEditorCaretLineBottom({
     content: props.content,
@@ -299,6 +311,10 @@ function measureHeights(): void {
     query.exec((results: Array<QueryRect | null | undefined>) => {
       const [fixedLayerRect, bodyRect] = results ?? [];
       shellFixedHeight.value = Math.max(fixedLayerRect?.height ?? 0, 0);
+
+      if (typeof bodyRect?.height === "number") {
+        bodyViewportHeight.value = Math.max(bodyRect.height, 0);
+      }
 
       if (typeof bodyRect?.top === "number") {
         bodyViewportTop.value = bodyRect.top;
@@ -355,10 +371,18 @@ watch(
   () => [keyboardVisible.value, visibleWindowHeight.value],
   () => {
     nextTick(() => {
+      measureHeights();
       syncWritingScroll();
     });
   },
 );
+
+watch(shouldEnableBodyScroll, (enabled) => {
+  if (!enabled) {
+    scrollWithAnimation.value = false;
+    writingScrollTop.value = 0;
+  }
+});
 
 watch(
   () => props.focusEndRequestKey,

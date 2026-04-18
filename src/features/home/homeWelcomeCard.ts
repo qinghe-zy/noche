@@ -292,9 +292,7 @@ export function resolveHomeWelcomeCardSequence(card: HomeWelcomeCard): string {
 }
 
 export function shouldAutoShowHomeWelcomeCard(dateKey: string, lastSeenDate: string | null): boolean {
-  void dateKey;
-  void lastSeenDate;
-  return true;
+  return lastSeenDate !== dateKey;
 }
 
 export function readHomeWelcomeCardSeenDate(storage: JsonStorage = createUniJsonStorage()): string | null {
