@@ -18,6 +18,16 @@ describe("profile album display count parity", () => {
     expect(profileAlbumPage).toContain("profile-album-page__load-more");
   });
 
+  it("aligns the album page topbar height with the shared page topbar rhythm", () => {
+    const profileAlbumPage = readProjectFile("src/features/profile/pages/ProfileAlbumPage.vue");
+
+    expect(profileAlbumPage).toContain("useEditorKeyboardViewport");
+    expect(profileAlbumPage).toContain("topbarBottomSpacing");
+    expect(profileAlbumPage).toContain("paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`");
+    expect(profileAlbumPage).toContain("paddingBottom: `${topbarBottomSpacing.value}px`");
+    expect(profileAlbumPage).toContain("TopbarIconButton");
+  });
+
   it("surfaces a dedicated photo-wall display-count option in appearance settings", () => {
     const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
     const i18n = readProjectFile("src/shared/i18n.ts");

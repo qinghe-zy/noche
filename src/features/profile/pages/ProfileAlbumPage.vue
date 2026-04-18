@@ -1,9 +1,11 @@
 <template>
   <view class="profile-album-page" :class="[themeClass, typographyClass]">
     <view class="profile-album-page__topbar">
-      <TopbarIconButton @tap="handleGoBack" />
-      <text class="profile-album-page__title">{{ copy.profile.albumTitle }}</text>
-      <view class="profile-album-page__spacer"></view>
+      <view class="profile-album-page__topbar-inner" :style="topbarInnerStyle">
+        <TopbarIconButton @tap="handleGoBack" />
+        <text class="profile-album-page__title">{{ copy.profile.albumTitle }}</text>
+        <view class="profile-album-page__spacer"></view>
+      </view>
     </view>
 
     <scroll-view scroll-y class="profile-album-page__scroll">
@@ -52,6 +54,7 @@ import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import ProfileAlbumViewer from "@/features/profile/components/ProfileAlbumViewer.vue";
 import ProfileMemoryAlbum from "@/features/profile/components/ProfileMemoryAlbum.vue";
 import { useProfileAlbum } from "@/features/profile/composables/useProfileAlbum";
+import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { t } from "@/shared/i18n";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 
@@ -72,8 +75,15 @@ const {
 const settingsStore = useSettingsStore();
 const themeClass = useThemeClass();
 const typographyClass = useTypographyClass();
+const { statusBarHeight, topbarBottomSpacing, rpxToPx } = useEditorKeyboardViewport();
 const copy = computed(() => t(settingsStore.locale));
 const loadedCount = ref(0);
+const topbarInnerStyle = computed(() => ({
+  paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
+  paddingLeft: `${rpxToPx(32)}px`,
+  paddingRight: `${rpxToPx(32)}px`,
+  paddingBottom: `${topbarBottomSpacing.value}px`,
+}));
 
 const pageVisibleItems = computed(() => {
   if (settingsStore.albumDisplayCount === 0) {
@@ -131,11 +141,21 @@ onShow(() => {
 }
 
 .profile-album-page__topbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: var(--noche-bg);
+  z-index: 8;
+}
+
+.profile-album-page__topbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16rpx;
-  padding: 40rpx 32rpx 18rpx;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .profile-album-page__title {

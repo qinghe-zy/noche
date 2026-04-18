@@ -27,10 +27,9 @@ describe("home profile entry polish", () => {
 
   it("adds a quiet micro-subtitle beneath the home hero title", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
-    const i18n = readProjectFile("src/shared/i18n.ts");
 
     expect(homePage).toContain("home-page__hero-subtitle");
-    expect(homePage).toContain("copy.home.heroSubtitle");
-    expect(i18n).toContain("把外界的纷乱关在门外，很高兴遇见你。");
+    expect(homePage).toContain("activeWelcomeCard.content");
+    expect(homePage).not.toContain("copy.home.heroSubtitle");
   });
 });

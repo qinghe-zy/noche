@@ -2,8 +2,20 @@
   <view class="home-page" :class="[themeClass, typographyClass]">
     <view class="home-page__topnav">
       <view class="home-page__topnav-inner" :style="topnavInnerStyle">
+        <view
+          class="home-page__topnav-showcase-entry"
+          :class="{ 'home-page__topnav-showcase-entry--pulse': isShowcasePulsing }"
+          @tap="handleNavigate('homeCardShowcase')"
+          @click="handleNavigate('homeCardShowcase')"
+        >
+          <view class="home-page__showcase-stack">
+            <view class="home-page__showcase-stack-card home-page__showcase-stack-card--back"></view>
+            <view class="home-page__showcase-stack-card home-page__showcase-stack-card--mid"></view>
+            <view class="home-page__showcase-stack-card home-page__showcase-stack-card--front"></view>
+          </view>
+        </view>
         <view class="home-page__topnav-spacer"></view>
-        <view class="home-page__topnav-profile-entry" @tap="handleNavigate('profile')">
+        <view class="home-page__topnav-profile-entry" @tap="handleNavigate('profile')" @click="handleNavigate('profile')">
           <text class="home-page__topnav-profile-text" :class="{ 'home-page__topnav-profile-text--latin': settingsStore.locale === 'en-US' }">
             {{ copy.home.profileCenter }}
           </text>
@@ -14,8 +26,8 @@
     <view class="home-page__main" :style="mainStyle">
       <view class="home-page__hero">
         <text class="home-page__hero-title home-page__letter-spacing-widest">{{ homeHeroTitle }}</text>
-        <text v-if="copy.home.heroSubtitle" class="home-page__hero-subtitle">
-          {{ copy.home.heroSubtitle }}
+        <text v-if="activeWelcomeCard.content" class="home-page__hero-subtitle">
+          {{ activeWelcomeCard.content }}
         </text>
       </view>
 
@@ -81,10 +93,65 @@
     </view>
 
     <view
-      v-if="isJottingModalOpen"
-      class="home-page__jotting-modal-mask"
-      @click="handleCloseJottingModal"
+      v-if="shouldRenderWelcomeCard"
+      class="home-page__welcome-card-mask"
+      :class="`home-page__welcome-card-mask--${welcomeCardStage}`"
     >
+      <view class="home-page__welcome-card-mask-close" @tap="handleDismissWelcomeCard" @click="handleDismissWelcomeCard"></view>
+
+      <view
+        class="home-page__welcome-card"
+        :class="`home-page__welcome-card--${welcomeCardStage}`"
+        @tap="handleWelcomeCardTap"
+        @click="handleWelcomeCardTap"
+      >
+        <view class="home-page__welcome-card-stack">
+          <view class="home-page__welcome-card-face">
+            <view class="home-page__welcome-card-face-inner">
+              <view
+                class="home-page__welcome-card-header"
+                :class="isWelcomeCardReadingPhase ? 'home-page__welcome-card-header--reading' : 'home-page__welcome-card-header--title'"
+              >
+                <view class="home-page__welcome-card-glyph-chip">
+                  <text class="home-page__welcome-card-glyph">{{ welcomeCardGlyph }}</text>
+                </view>
+              </view>
+
+              <view
+                class="home-page__welcome-card-body"
+                :class="isWelcomeCardReadingPhase ? 'home-page__welcome-card-body--reading' : 'home-page__welcome-card-body--title'"
+              >
+                <text
+                  class="home-page__welcome-card-eyebrow"
+                  :class="isWelcomeCardReadingPhase ? 'home-page__welcome-card-eyebrow--reading' : 'home-page__welcome-card-eyebrow--title'"
+                >{{ welcomeCardEyebrow }}</text>
+                <text v-if="!isWelcomeCardReadingPhase" class="home-page__welcome-card-title home-page__welcome-card-title--cover">{{ welcomeCardTitle }}</text>
+                <text v-else class="home-page__welcome-card-content home-page__welcome-card-content--reading">{{ activeWelcomeCard.content }}</text>
+              </view>
+
+              <view class="home-page__welcome-card-footer">
+                <view class="home-page__welcome-card-divider"></view>
+
+                <view v-if="welcomeCardStage === 'expanded'" class="home-page__welcome-card-actions">
+                  <view class="home-page__welcome-card-pill home-page__welcome-card-pill--secondary" @tap.stop="handleDismissWelcomeCard" @click.stop="handleDismissWelcomeCard">
+                    <text class="home-page__welcome-card-pill-label home-page__welcome-card-pill-label--secondary">{{ welcomeCardDismissLabel }}</text>
+                  </view>
+                  <view class="home-page__welcome-card-pill" @tap.stop="handleCollectWelcomeCard" @click.stop="handleCollectWelcomeCard">
+                    <text class="home-page__welcome-card-pill-label">{{ welcomeCardCollectLabel }}</text>
+                  </view>
+                </view>
+
+                <view v-else class="home-page__welcome-card-pill home-page__welcome-card-pill--primary-action">
+                  <text class="home-page__welcome-card-pill-label">{{ welcomeCardActionLabel }}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view v-if="isJottingModalOpen" class="home-page__jotting-modal-mask" @click="handleCloseJottingModal">
       <view class="home-page__jotting-modal" @click.stop>
         <view class="home-page__jotting-modal-head">
           <text class="home-page__jotting-modal-title">{{ copy.home.jottingModalTitle }}</text>
@@ -96,12 +163,10 @@
             <text class="home-page__jotting-modal-action-title">{{ copy.home.continueLast }}</text>
             <text class="home-page__jotting-modal-action-copy">{{ copy.home.continueLastCopy }}</text>
           </view>
-
           <view class="home-page__jotting-modal-action" @click="handleCreateAnotherJottingDraft">
             <text class="home-page__jotting-modal-action-title">{{ copy.home.startAnother }}</text>
             <text class="home-page__jotting-modal-action-copy">{{ copy.home.startAnotherCopy }}</text>
           </view>
-
           <view class="home-page__jotting-modal-action home-page__jotting-modal-action--muted" @click="handleCloseJottingModal">
             <text class="home-page__jotting-modal-action-title">{{ copy.home.cancel }}</text>
           </view>
@@ -123,11 +188,23 @@ import { resolveDraftSaveAction } from "@/domain/services/entryService";
 import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
+import {
+  isHomeWelcomeCardCollected,
+  markHomeWelcomeCardCollected,
+  markHomeWelcomeCardResolved,
+  readHomeWelcomeCardCollectionCount,
+  resolveHomeWelcomeCard,
+  resolveHomeWelcomeCardEyebrow,
+  resolveHomeWelcomeCardGlyph,
+  resolveHomeWelcomeCardTitle,
+} from "@/features/home/homeWelcomeCard";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import { t } from "@/shared/i18n";
+
+type HomeWelcomeCardStage = "hidden" | "entering" | "stack" | "expanded" | "collecting" | "dismissing";
 
 const draftStore = useDraftStore();
 const settingsStore = useSettingsStore();
@@ -136,9 +213,12 @@ const typographyClass = useTypographyClass();
 const { homeTop, homeBottomPadding, statusBarHeight, rpxToPx } = useEditorKeyboardViewport();
 const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
+const welcomeCardStage = ref<HomeWelcomeCardStage>("hidden");
+const isShowcasePulsing = ref(false);
 const copy = computed(() => t(settingsStore.locale));
 const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const dailyPrompt = computed(() => resolveHomeDailyPrompt(todayDateKey.value));
+const activeWelcomeCard = computed(() => resolveHomeWelcomeCard(todayDateKey.value));
 const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   dateKey: todayDateKey.value,
   locale: settingsStore.locale,
@@ -146,6 +226,14 @@ const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   titleMode: settingsStore.homeTitleMode,
   customTitle: settingsStore.homeCustomTitle,
 }));
+const shouldRenderWelcomeCard = computed(() => welcomeCardStage.value !== "hidden");
+const welcomeCardGlyph = computed(() => resolveHomeWelcomeCardGlyph(activeWelcomeCard.value.type));
+const welcomeCardEyebrow = computed(() => resolveHomeWelcomeCardEyebrow(activeWelcomeCard.value.type, settingsStore.locale));
+const welcomeCardTitle = computed(() => resolveHomeWelcomeCardTitle(activeWelcomeCard.value.type, settingsStore.locale));
+const isWelcomeCardReadingPhase = computed(() => ["expanded", "collecting", "dismissing"].includes(welcomeCardStage.value));
+const welcomeCardActionLabel = computed(() => settingsStore.locale === "en-US" ? "Read note" : "查看正文");
+const welcomeCardCollectLabel = computed(() => settingsStore.locale === "en-US" ? "Keep this card" : "收下卡片");
+const welcomeCardDismissLabel = computed(() => settingsStore.locale === "en-US" ? "Return" : "回到主页");
 const topnavInnerStyle = computed(() => ({
   paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
   paddingLeft: `${rpxToPx(32)}px`,
@@ -155,12 +243,15 @@ const mainStyle = computed(() => ({
   paddingTop: `${homeTop.value + rpxToPx(36)}px`,
   paddingBottom: `${homeBottomPadding.value}px`,
 }));
-
 const footerMark = computed(() => `${dayjs(todayDateKey.value).format(settingsStore.locale === "en-US" ? "MMM YYYY" : "YYYY年MM月")} · ${copy.value.home.footerSuffix}`);
+let welcomeCardTimers: Array<ReturnType<typeof setTimeout>> = [];
+
 const dateChangeWatcher = createDateChangeWatcher({
   getDateKey: () => formatDate(new Date(), "YYYY-MM-DD"),
   onDateChange: (nextDateKey) => {
     todayDateKey.value = nextDateKey;
+    resetWelcomeCard();
+    syncWelcomeCardPresentation(nextDateKey);
   },
 });
 
@@ -202,6 +293,86 @@ function handleContinueJottingDraft() {
   handleNavigate("editor", { type: "jotting" });
 }
 
+function scheduleWelcomeCardStage(callback: () => void, delayMs: number): void {
+  const timer = setTimeout(() => {
+    welcomeCardTimers = welcomeCardTimers.filter((item) => item !== timer);
+    callback();
+  }, delayMs);
+
+  welcomeCardTimers.push(timer);
+}
+
+function clearWelcomeCardTimer(): void {
+  if (!welcomeCardTimers.length) {
+    return;
+  }
+
+  welcomeCardTimers.forEach((timer) => clearTimeout(timer));
+  welcomeCardTimers = [];
+}
+
+function resetWelcomeCard(): void {
+  clearWelcomeCardTimer();
+  welcomeCardStage.value = "hidden";
+  isShowcasePulsing.value = false;
+}
+
+function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
+  clearWelcomeCardTimer();
+
+  if (isHomeWelcomeCardCollected(dateKey, activeWelcomeCard.value.id)) {
+    welcomeCardStage.value = "hidden";
+    return;
+  }
+
+  markHomeWelcomeCardResolved(dateKey, activeWelcomeCard.value.id);
+
+  welcomeCardStage.value = "entering";
+  scheduleWelcomeCardStage(() => {
+    welcomeCardStage.value = "stack";
+  }, 260);
+}
+
+function handleDismissWelcomeCard(): void {
+  if (welcomeCardStage.value === "hidden" || welcomeCardStage.value === "dismissing") {
+    return;
+  }
+
+  clearWelcomeCardTimer();
+  welcomeCardStage.value = "dismissing";
+  scheduleWelcomeCardStage(() => {
+    welcomeCardStage.value = "hidden";
+  }, 340);
+}
+
+function handleWelcomeCardTap(): void {
+  if (welcomeCardStage.value !== "stack") {
+    return;
+  }
+
+  clearWelcomeCardTimer();
+  welcomeCardStage.value = "expanded";
+}
+
+function handleCollectWelcomeCard(): void {
+  if (welcomeCardStage.value !== "expanded") {
+    return;
+  }
+
+  clearWelcomeCardTimer();
+  welcomeCardStage.value = "collecting";
+  isShowcasePulsing.value = true;
+  scheduleWelcomeCardStage(() => {
+    markHomeWelcomeCardCollected(todayDateKey.value, activeWelcomeCard.value.id);
+    welcomeCardStage.value = "hidden";
+    isShowcasePulsing.value = false;
+    uni.showToast({
+      title: settingsStore.locale === "en-US" ? "Card saved" : "已经收下卡片",
+      icon: "none",
+    });
+  }, 420);
+}
+
 async function handleCreateAnotherJottingDraft() {
   if (pendingJottingDraft.value) {
     await draftStore.removeDraft(pendingJottingDraft.value.slotKey);
@@ -217,15 +388,18 @@ async function handleCreateAnotherJottingDraft() {
 
 onMounted(() => {
   dateChangeWatcher.start();
+  syncWelcomeCardPresentation();
 });
 
 onUnmounted(() => {
   dateChangeWatcher.stop();
+  clearWelcomeCardTimer();
 });
 
 onShow(() => {
   todayDateKey.value = formatDate(new Date(), "YYYY-MM-DD");
   dateChangeWatcher.sync();
+  syncWelcomeCardPresentation();
 });
 </script>
 
@@ -267,6 +441,55 @@ onShow(() => {
 
 .home-page__topnav-spacer {
   flex: 1;
+}
+
+.home-page__topnav-showcase-entry {
+  min-height: 72rpx;
+  display: inline-flex;
+  align-items: center;
+  color: var(--noche-muted);
+  transition: transform 220ms ease, color 180ms ease;
+}
+
+.home-page__topnav-showcase-entry--pulse {
+  transform: scale(1.08);
+  color: var(--noche-text);
+}
+
+.home-page__showcase-stack {
+  position: relative;
+  width: 52rpx;
+  height: 44rpx;
+}
+
+.home-page__showcase-stack-card {
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 38rpx;
+  height: 28rpx;
+  border-radius: 10rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(244, 236, 226, 0.94));
+  border: 1px solid rgba(195, 183, 169, 0.56);
+  box-shadow: 0 6rpx 16rpx rgba(75, 67, 58, 0.08);
+}
+
+.home-page__showcase-stack-card--back {
+  left: 0;
+  top: 8rpx;
+  transform: rotate(-8deg);
+  opacity: 0.74;
+}
+
+.home-page__showcase-stack-card--mid {
+  left: 8rpx;
+  top: 4rpx;
+  transform: rotate(-2deg);
+  opacity: 0.88;
+}
+
+.home-page__showcase-stack-card--front {
+  left: 16rpx;
+  top: 0;
 }
 
 .home-page__topnav-profile-entry {
@@ -543,6 +766,379 @@ onShow(() => {
   padding-left: 0.6em;
 }
 
+.home-page__welcome-card-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(245, 241, 234, 0.84);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.home-page__welcome-card-mask-close {
+  position: absolute;
+  inset: 0;
+}
+
+.home-page__welcome-card-mask--entering,
+.home-page__welcome-card-mask--stack,
+.home-page__welcome-card-mask--expanded,
+.home-page__welcome-card-mask--collecting,
+.home-page__welcome-card-mask--dismissing {
+  opacity: 1;
+}
+
+.home-page__welcome-card {
+  width: min(100%, 408px);
+  height: 500px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  transition:
+    opacity 280ms ease,
+    transform 320ms ease;
+}
+
+.home-page__welcome-card--entering,
+.home-page__welcome-card--stack,
+.home-page__welcome-card--expanded,
+.home-page__welcome-card--collecting {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.home-page__welcome-card--expanded {
+  transform: translateY(0) scale(1.03);
+}
+
+.home-page__welcome-card--collecting {
+  opacity: 0.16;
+  transform: translate(-44vw, -34vh) scale(0.18);
+}
+
+.home-page__welcome-card--dismissing {
+  opacity: 0;
+  transform: translateY(160px) scale(0.98);
+}
+
+.home-page__welcome-card-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.home-page__welcome-card-face {
+  position: absolute;
+  left: 50%;
+  width: 332px;
+  border-radius: 38px;
+  transition:
+    transform 320ms ease,
+    opacity 360ms ease,
+    box-shadow 360ms ease;
+}
+
+.home-page__welcome-card-face {
+  top: 48px;
+  height: 404px;
+  transform: translateX(-50%) scale(0.98);
+  z-index: 1;
+  opacity: 1;
+}
+
+.home-page__welcome-card-face-inner {
+  height: 404px;
+  padding: 36px 34px 30px;
+  border-radius: 38px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
+    linear-gradient(140deg, rgba(215, 205, 192, 0.16), rgba(215, 205, 192, 0) 48%),
+    var(--noche-surface);
+  border: 1px solid var(--noche-border);
+  box-shadow:
+    0 22px 58px rgba(44, 47, 48, 0.08),
+    0 8px 18px rgba(44, 47, 48, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-page__welcome-card-face-inner::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  pointer-events: none;
+}
+
+.home-page__welcome-card-face-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.26), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(205, 194, 179, 0.12), transparent 30%);
+  pointer-events: none;
+}
+
+.home-page__welcome-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 8px;
+}
+
+.home-page__welcome-card-header--title {
+  justify-content: center;
+  padding-bottom: 24px;
+}
+
+.home-page__welcome-card-header--reading {
+  justify-content: flex-start;
+  padding-bottom: 10px;
+}
+
+.home-page__welcome-card--stack .home-page__welcome-card-face,
+.home-page__welcome-card--entering .home-page__welcome-card-face {
+  transform: translateX(-50%) scale(0.98);
+}
+
+.home-page__welcome-card--expanded .home-page__welcome-card-face {
+  transform: translateX(-50%) scale(1.03);
+}
+
+.home-page__welcome-card--expanded .home-page__welcome-card-face-inner {
+  box-shadow:
+    0 28px 64px rgba(44, 47, 48, 0.09),
+    0 10px 24px rgba(44, 47, 48, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.home-page__welcome-card--collecting .home-page__welcome-card-face {
+  transform: translateX(-50%) scale(0.92);
+}
+
+.home-page__welcome-card--dismissing .home-page__welcome-card-face {
+  transform: translateX(-50%) translateY(120px) scale(0.98);
+}
+
+.home-page__welcome-card-glyph {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--noche-text);
+}
+
+.home-page__welcome-card-glyph-chip {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(247, 241, 233, 0.72)),
+    var(--noche-panel);
+  border: 1px solid var(--noche-border);
+  box-shadow:
+    0 6px 14px rgba(44, 47, 48, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.home-page__welcome-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+  padding-top: 10px;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.home-page__welcome-card-body--title {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 26px;
+}
+
+.home-page__welcome-card-body--reading {
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  gap: 18px;
+}
+
+.home-page__welcome-card-eyebrow {
+  font-family: "Inter", "PingFang SC", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--noche-muted);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  padding-left: 0.26em;
+}
+
+.home-page__welcome-card-eyebrow--title {
+  align-self: center;
+  letter-spacing: 0.34em;
+  padding-left: 0.34em;
+}
+
+.home-page__welcome-card-eyebrow--reading {
+  align-self: flex-start;
+}
+
+.home-page__welcome-card-title {
+  font-family: "Inter", "PingFang SC", sans-serif;
+  font-size: 96px;
+  line-height: 0.96;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  color: var(--noche-text);
+  white-space: pre-line;
+  max-width: 220px;
+  align-self: flex-start;
+}
+
+.home-page__welcome-card-title--cover {
+  text-align: center;
+  align-self: center;
+}
+
+.home-page__welcome-card-content {
+  font-size: 19px;
+  line-height: 2.02;
+  color: var(--noche-text);
+  letter-spacing: 0.02em;
+  max-width: 220px;
+  align-self: flex-start;
+}
+
+.home-page__welcome-card-content--reading {
+  text-align: left;
+}
+
+.home-page__welcome-card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.home-page__welcome-card-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(200, 191, 180, 0.1), rgba(200, 191, 180, 0.56), rgba(200, 191, 180, 0.1));
+}
+
+.home-page__welcome-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 10px 8px;
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0)),
+    rgba(233, 225, 214, 0.42);
+  border: 1px solid rgba(214, 204, 191, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.56);
+}
+
+.home-page__welcome-card-pill {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 62px;
+  padding: 0 18px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0)),
+    var(--noche-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 18px rgba(44, 47, 48, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--noche-border);
+  align-self: stretch;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.98);
+  transition: transform 220ms ease;
+}
+
+.home-page__welcome-card-pill::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  transform: translateX(-50%);
+  background: rgba(226, 218, 206, 0.82);
+  box-shadow:
+    inset 0 1px 2px rgba(126, 112, 96, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.5);
+  opacity: 0.92;
+}
+
+.home-page__welcome-card-pill::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  pointer-events: none;
+}
+
+.home-page__welcome-card-pill--primary-action {
+  width: min(100%, 244px);
+  flex: 0 1 auto;
+  align-self: center;
+}
+
+.home-page__welcome-card-pill--secondary {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0)),
+    var(--noche-surface);
+  box-shadow: none;
+}
+
+.home-page__welcome-card-pill-label {
+  font-family: "Inter", "PingFang SC", sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--noche-text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.home-page__welcome-card-pill-label--secondary {
+  color: var(--noche-muted);
+}
+
+.home-page__welcome-card--expanded .home-page__welcome-card-pill {
+  transform: scale(1);
+}
+
 .home-page__jotting-modal-mask {
   position: fixed;
   inset: 0;
@@ -626,12 +1222,22 @@ onShow(() => {
 .type-scale-large .home-page__hero-subtitle { font-size: 13px; }
 .type-scale-small .home-page__paper-heading { font-size: 28px; }
 .type-scale-large .home-page__paper-heading { font-size: 32px; }
+.type-scale-small .home-page__welcome-card-glyph { font-size: 24px; }
+.type-scale-large .home-page__welcome-card-glyph { font-size: 30px; }
 .type-scale-small .home-page__paper-subtitle,
+.type-scale-small .home-page__welcome-card-eyebrow,
 .type-scale-small .home-page__nav-entry-label,
 .type-scale-small .home-page__footer-text { font-size: 9px; }
 .type-scale-large .home-page__paper-subtitle,
+.type-scale-large .home-page__welcome-card-eyebrow,
 .type-scale-large .home-page__nav-entry-label,
 .type-scale-large .home-page__footer-text { font-size: 11px; }
+.type-scale-small .home-page__welcome-card-title { font-size: 46px; }
+.type-scale-large .home-page__welcome-card-title { font-size: 56px; }
+.type-scale-small .home-page__welcome-card-content { font-size: 14px; }
+.type-scale-large .home-page__welcome-card-content { font-size: 16px; }
+.type-scale-small .home-page__welcome-card-pill-label { font-size: 13px; }
+.type-scale-large .home-page__welcome-card-pill-label { font-size: 15px; }
 .type-scale-small .home-page__jotting-modal-title { font-size: 23px; }
 .type-scale-large .home-page__jotting-modal-title { font-size: 26px; }
 .type-scale-small .home-page__jotting-modal-copy { font-size: 12px; }

@@ -41,12 +41,15 @@ describe("diary prelude stitch parity", () => {
     expect(picker).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
-  it("keeps the picker compact enough to fit the main content on one screen", () => {
+  it("lets the picker exceed one screen when needed while staying visually compact by default", () => {
     const picker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
 
     expect(picker).toContain("paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`");
-    expect(picker).toContain("height: 100vh;");
-    expect(picker).toContain("min-height: 124rpx;");
+    expect(picker).toContain("min-height: 100vh;");
+    expect(picker).toContain("overflow-y: auto;");
+    expect(picker).not.toContain("overflow: hidden;");
+    expect(picker).not.toContain(".diary-prelude-picker {\r\n  height: 100vh;");
+    expect(picker).toContain("min-height: 116rpx;");
     expect(picker).toContain("min-height: 88rpx;");
   });
 

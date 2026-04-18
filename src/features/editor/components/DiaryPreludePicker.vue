@@ -228,11 +228,12 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker {
-  height: 100vh;
+  min-height: 100vh;
   background: #fbf9f5;
   color: #31332e;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -264,7 +265,7 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__hero {
-  padding: 18rpx 32rpx 20rpx;
+  padding: 14rpx 32rpx 16rpx;
   text-align: center;
 }
 
@@ -301,10 +302,11 @@ function handleSkip(): void {
   padding: 0 32rpx 0;
   display: flex;
   flex-direction: column;
+  gap: 16rpx;
 }
 
 .diary-prelude-picker__preview-card {
-  padding: 30rpx 28rpx 24rpx;
+  padding: 24rpx 24rpx 20rpx;
   border-radius: 30rpx;
   background: rgba(255, 255, 255, 0.88);
   display: flex;
@@ -322,7 +324,7 @@ function handleSkip(): void {
   align-items: center;
   justify-content: center;
   color: rgba(49, 51, 46, 0.88);
-  margin-bottom: 12rpx;
+  margin-bottom: 10rpx;
 }
 
 .diary-prelude-picker__preview-glyph {
@@ -334,7 +336,7 @@ function handleSkip(): void {
   font-size: 36rpx;
   line-height: 1.16;
   letter-spacing: 0.18em;
-  margin-bottom: 8rpx;
+  margin-bottom: 6rpx;
 }
 
 .diary-prelude-picker__preview-subline {
@@ -348,7 +350,7 @@ function handleSkip(): void {
   width: 72rpx;
   height: 1rpx;
   background: rgba(177, 179, 171, 0.28);
-  margin: 14rpx 0 10rpx;
+  margin: 12rpx 0 8rpx;
 }
 
 .diary-prelude-picker__preview-note {
@@ -358,11 +360,11 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__section {
-  margin-top: 22rpx;
+  margin-top: 0;
 }
 
 .diary-prelude-picker__section-head {
-  margin-bottom: 10rpx;
+  margin-bottom: 8rpx;
   display: flex;
   align-items: baseline;
   gap: 10rpx;
@@ -383,7 +385,7 @@ function handleSkip(): void {
 .diary-prelude-picker__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .diary-prelude-picker__grid--mood {
@@ -392,8 +394,8 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option {
   position: relative;
-  min-height: 124rpx;
-  padding: 18rpx 14rpx;
+  min-height: 116rpx;
+  padding: 16rpx 14rpx;
   border-radius: 22rpx;
   background: rgba(255, 255, 255, 0.68);
   border: 1rpx solid rgba(177, 179, 171, 0.16);
@@ -492,11 +494,11 @@ function handleSkip(): void {
 
 .diary-prelude-picker__footer {
   margin-top: auto;
-  padding-top: 18rpx;
+  padding-top: 14rpx;
   padding-bottom: 24rpx;
   display: flex;
   flex-direction: column;
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .diary-prelude-picker__confirm {
