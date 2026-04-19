@@ -11,7 +11,8 @@ describe("settings store", () => {
 
   it("hydrates persisted settings and persists sync setter updates", async () => {
     const repository = createMemoryPrefsRepository([
-      { key: "theme", value: "dark" },
+      { key: "themeFamily", value: "claude" },
+      { key: "themeMode", value: "dark" },
       { key: "locale", value: "en-US" },
       { key: "weekStartsOn", value: "0" },
       { key: "privacyLockEnabled", value: "1" },
@@ -26,7 +27,8 @@ describe("settings store", () => {
 
     await store.hydrate();
 
-    expect(store.theme).toBe("dark");
+    expect(store.themeFamily).toBe("claude");
+    expect(store.themeMode).toBe("dark");
     expect(store.locale).toBe("en-US");
     expect(store.weekStartsOn).toBe(0);
     expect(store.privacyLockEnabled).toBe(true);
@@ -36,7 +38,8 @@ describe("settings store", () => {
     expect(store.homeTitleMode).toBe("custom");
     expect(store.homeCustomTitle).toBe("今日有信");
 
-    store.setTheme("light");
+    store.setThemeFamily("default");
+    store.setThemeMode("light");
     store.setLocale("ja-JP");
     store.setWeekStartsOn(1);
     store.setPrivacyLockEnabled(false);
@@ -49,7 +52,8 @@ describe("settings store", () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(await repository.get("theme")).toEqual({ key: "theme", value: "light" });
+    expect(await repository.get("themeFamily")).toEqual({ key: "themeFamily", value: "default" });
+    expect(await repository.get("themeMode")).toEqual({ key: "themeMode", value: "light" });
     expect(await repository.get("locale")).toEqual({ key: "locale", value: "ja-JP" });
     expect(await repository.get("weekStartsOn")).toEqual({ key: "weekStartsOn", value: "1" });
     expect(await repository.get("privacyLockEnabled")).toEqual({ key: "privacyLockEnabled", value: "0" });
@@ -72,6 +76,19 @@ describe("settings store", () => {
 
     expect(store.homeTitleMode).toBe("custom");
     expect(store.homeCustomTitle).toBe("纸上光阴");
+  });
+
+  it("migrates the legacy theme preference into themeMode and defaults themeFamily", async () => {
+    const repository = createMemoryPrefsRepository([
+      { key: "theme", value: "dark" },
+    ]);
+    setPrefsRepository(repository);
+    const store = useSettingsStore();
+
+    await store.hydrate();
+
+    expect(store.themeFamily).toBe("default");
+    expect(store.themeMode).toBe("dark");
   });
 
   it("clears the legacy title mirror when switching back to random mode", async () => {

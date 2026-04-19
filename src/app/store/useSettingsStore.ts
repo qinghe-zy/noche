@@ -1,10 +1,12 @@
 import { defineStore } from "pinia";
 import { getPrefsRepository, setPrefsRepository } from "@/app/store/settingsRepository";
+import type { ThemeFamily, ThemeMode } from "@/shared/themeRegistry";
 
 export type HomeTitleMode = "random" | "custom";
 
 export interface SettingsState {
-  theme: "system" | "light" | "dark";
+  themeFamily: ThemeFamily;
+  themeMode: ThemeMode;
   locale: string;
   weekStartsOn: 0 | 1;
   privacyLockEnabled: boolean;
@@ -21,7 +23,8 @@ interface SettingsStoreState extends SettingsState {
 }
 
 const SETTINGS_DEFAULTS: SettingsState = {
-  theme: "system",
+  themeFamily: "default",
+  themeMode: "system",
   locale: "zh-CN",
   weekStartsOn: 1,
   privacyLockEnabled: false,
@@ -32,8 +35,12 @@ const SETTINGS_DEFAULTS: SettingsState = {
   homeCustomTitle: "",
 };
 
-function isTheme(value: string | null): value is SettingsState["theme"] {
+function isThemeMode(value: string | null): value is SettingsState["themeMode"] {
   return value === "system" || value === "light" || value === "dark";
+}
+
+function isThemeFamily(value: string | null): value is SettingsState["themeFamily"] {
+  return value === "default" || value === "claude";
 }
 
 function toWeekStartsOn(value: string | null): 0 | 1 | null {
@@ -91,8 +98,12 @@ function normalizeHomeCustomTitle(value: string | null): string {
 export { setPrefsRepository };
 
 export const useSettingsStore = defineStore("settings", {
+  getters: {
+    theme: (state): SettingsState["themeMode"] => state.themeMode,
+  },
   state: (): SettingsStoreState => ({
-    theme: "system",
+    themeFamily: "default",
+    themeMode: "system",
     locale: "zh-CN",
     weekStartsOn: 1,
     privacyLockEnabled: false,
@@ -112,6 +123,8 @@ export const useSettingsStore = defineStore("settings", {
       try {
         const repository = getPrefsRepository();
         const [
+          themeFamilyRecord,
+          themeModeRecord,
           themeRecord,
           localeRecord,
           weekStartsOnRecord,
@@ -123,6 +136,8 @@ export const useSettingsStore = defineStore("settings", {
           homeCustomTitleRecord,
           homeTitleRecord,
         ] = await Promise.all([
+          repository.get("themeFamily"),
+          repository.get("themeMode"),
           repository.get("theme"),
           repository.get("locale"),
           repository.get("weekStartsOn"),
@@ -134,13 +149,20 @@ export const useSettingsStore = defineStore("settings", {
           repository.get("homeCustomTitle"),
           repository.get("homeTitle"),
         ]);
-        const persistedTheme = themeRecord?.value ?? null;
+        const persistedThemeFamily = themeFamilyRecord?.value ?? null;
+        const persistedThemeMode = themeModeRecord?.value ?? null;
+        const persistedLegacyTheme = themeRecord?.value ?? null;
         const normalizedLegacyHomeTitle = normalizeHomeCustomTitle(homeTitleRecord?.value ?? null);
         const normalizedCustomHomeTitle = normalizeHomeCustomTitle(homeCustomTitleRecord?.value ?? null);
 
-        this.theme = isTheme(persistedTheme)
-          ? persistedTheme
-          : SETTINGS_DEFAULTS.theme;
+        this.themeFamily = isThemeFamily(persistedThemeFamily)
+          ? persistedThemeFamily
+          : SETTINGS_DEFAULTS.themeFamily;
+        this.themeMode = isThemeMode(persistedThemeMode)
+          ? persistedThemeMode
+          : isThemeMode(persistedLegacyTheme)
+            ? persistedLegacyTheme
+            : SETTINGS_DEFAULTS.themeMode;
         this.locale = localeRecord?.value ?? SETTINGS_DEFAULTS.locale;
         this.weekStartsOn = toWeekStartsOn(weekStartsOnRecord?.value ?? null) ?? SETTINGS_DEFAULTS.weekStartsOn;
         this.privacyLockEnabled = toBooleanFlag(privacyLockRecord?.value ?? null) ?? SETTINGS_DEFAULTS.privacyLockEnabled;
@@ -166,9 +188,16 @@ export const useSettingsStore = defineStore("settings", {
         this.isLoading = false;
       }
     },
-    setTheme(theme: SettingsState["theme"]) {
-      this.theme = theme;
-      void this.persistPreference("theme", theme);
+    setThemeFamily(themeFamily: SettingsState["themeFamily"]) {
+      this.themeFamily = themeFamily;
+      void this.persistPreference("themeFamily", themeFamily);
+    },
+    setThemeMode(themeMode: SettingsState["themeMode"]) {
+      this.themeMode = themeMode;
+      void this.persistPreference("themeMode", themeMode);
+    },
+    setTheme(theme: SettingsState["themeMode"]) {
+      this.setThemeMode(theme);
     },
     setLocale(locale: string) {
       this.locale = locale;

@@ -1,15 +1,9 @@
 import { computed } from "vue";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import type { SettingsState } from "@/app/store/useSettingsStore";
+import { THEME_TOKENS, type ResolvedColorScheme, type ResolvedThemeKey, type ThemeFamily, type ThemeMode } from "@/shared/themeRegistry";
 
-export type AppThemeMode = "system" | "light" | "dark";
-export type ResolvedTheme = "light" | "dark";
-
-export function resolveThemeMode(theme: AppThemeMode): ResolvedTheme {
-  if (theme === "light" || theme === "dark") {
-    return theme;
-  }
-
+export function resolveSystemTheme(): ResolvedColorScheme {
   if (typeof uni !== "undefined" && typeof uni.getSystemInfoSync === "function") {
     const systemTheme = (uni.getSystemInfoSync() as { theme?: string }).theme;
     if (systemTheme === "dark" || systemTheme === "light") {
@@ -24,8 +18,29 @@ export function resolveThemeMode(theme: AppThemeMode): ResolvedTheme {
   return "light";
 }
 
-export function resolveThemeClass(theme: AppThemeMode): string {
-  return resolveThemeMode(theme) === "dark" ? "theme-dark" : "theme-light";
+export function resolveThemeMode(themeMode: ThemeMode, systemTheme = resolveSystemTheme()): ResolvedColorScheme {
+  if (themeMode === "light" || themeMode === "dark") {
+    return themeMode;
+  }
+
+  return systemTheme;
+}
+
+export function resolveThemeKey(
+  themeFamily: ThemeFamily,
+  themeMode: ThemeMode,
+  systemTheme = resolveSystemTheme(),
+): ResolvedThemeKey {
+  const resolvedThemeMode = resolveThemeMode(themeMode, systemTheme);
+  return `${themeFamily}-${resolvedThemeMode}` as ResolvedThemeKey;
+}
+
+export function getThemeTokens(themeKey: ResolvedThemeKey) {
+  return THEME_TOKENS[themeKey];
+}
+
+export function resolveThemeClass(themeMode: ThemeMode): string {
+  return resolveThemeMode(themeMode) === "dark" ? "theme-dark" : "theme-light";
 }
 
 export function resolveTypographyClass(preset: SettingsState["writingPreset"]): string {
@@ -35,7 +50,13 @@ export function resolveTypographyClass(preset: SettingsState["writingPreset"]): 
 export function useThemeClass() {
   const settingsStore = useSettingsStore();
 
-  return computed(() => resolveThemeClass(settingsStore.theme));
+  return computed(() => resolveThemeClass(settingsStore.themeMode));
+}
+
+export function useResolvedThemeKey() {
+  const settingsStore = useSettingsStore();
+
+  return computed(() => resolveThemeKey(settingsStore.themeFamily, settingsStore.themeMode));
 }
 
 export function useTypographyClass() {
