@@ -156,7 +156,8 @@ import {
   PROFILE_HOME_TITLE_MAX,
   PROFILE_PREF_KEYS,
   PROFILE_PREVIEW_LIMIT,
-  formatProfileThemeLabel,
+  formatProfileThemeFamilyLabel,
+  formatProfileThemeModeLabel,
   formatProfileWeekStartLabel,
   isHomeTitleWithinLimit,
   type ProfileActionItem,
@@ -210,7 +211,8 @@ const {
   jumpToCurrentEntry,
 } = useProfileAlbum(PROFILE_PREVIEW_LIMIT);
 
-type ThemeOption = "system" | "light" | "dark";
+type ThemeFamilyOption = "default" | "claude";
+type ThemeModeOption = "system" | "light" | "dark";
 type LocaleOption = "zh-CN" | "en-US";
 type BackupFlow =
   | "export-default"
@@ -222,7 +224,8 @@ type BackupFlow =
 type ActiveSheet =
   | null
   | "appearance-root"
-  | "appearance-theme"
+  | "appearance-theme-family"
+  | "appearance-theme-mode"
   | "appearance-writing"
   | "appearance-home-title"
   | "appearance-album-count"
@@ -411,7 +414,8 @@ const actionItems = computed<ProfileActionItem[]>(() => [
       ? copy.value.profile.appearanceCopy
       : copy.value.profile.appearanceCopy,
     value: formatProfileAppearanceLabel(
-      settingsStore.theme,
+      settingsStore.themeFamily,
+      settingsStore.themeMode,
       settingsStore.locale,
       settingsStore.weekStartsOn,
     ),
@@ -460,8 +464,10 @@ const sheetTitle = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
       return copy.value.profile.appearanceTitle;
-    case "appearance-theme":
-      return copy.value.profile.themeTitle;
+    case "appearance-theme-family":
+      return copy.value.profile.themeStyleTitle;
+    case "appearance-theme-mode":
+      return copy.value.profile.themeModeTitle;
     case "appearance-writing":
       return copy.value.profile.appearanceTitle;
     case "appearance-home-title":
@@ -507,8 +513,13 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
     case "appearance-root":
       return [
         {
-          key: "theme",
-          title: `${copy.value.profile.themeTitle}：${formatProfileThemeLabel(settingsStore.theme, settingsStore.locale)}`,
+          key: "theme-family",
+          title: `${copy.value.profile.themeStyleTitle}：${formatProfileThemeFamilyLabel(settingsStore.themeFamily, settingsStore.locale)}`,
+          trailingIcon: "chevron-right",
+        },
+        {
+          key: "theme-mode",
+          title: `${copy.value.profile.themeModeTitle}：${formatProfileThemeModeLabel(settingsStore.themeMode, settingsStore.locale)}`,
           trailingIcon: "chevron-right",
         },
         {
@@ -547,11 +558,16 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
           trailingIcon: "chevron-right",
         },
       ];
-    case "appearance-theme":
+    case "appearance-theme-family":
       return [
-        { key: "system", title: copy.value.settings.followSystem, trailingIcon: settingsStore.theme === "system" ? "check" : undefined },
-        { key: "light", title: copy.value.settings.light, trailingIcon: settingsStore.theme === "light" ? "check" : undefined },
-        { key: "dark", title: copy.value.settings.dark, trailingIcon: settingsStore.theme === "dark" ? "check" : undefined },
+        { key: "default", title: copy.value.settings.themeDefault, trailingIcon: settingsStore.themeFamily === "default" ? "check" : undefined },
+        { key: "claude", title: copy.value.settings.themeClaude, trailingIcon: settingsStore.themeFamily === "claude" ? "check" : undefined },
+      ];
+    case "appearance-theme-mode":
+      return [
+        { key: "system", title: copy.value.settings.followSystem, trailingIcon: settingsStore.themeMode === "system" ? "check" : undefined },
+        { key: "light", title: copy.value.settings.light, trailingIcon: settingsStore.themeMode === "light" ? "check" : undefined },
+        { key: "dark", title: copy.value.settings.dark, trailingIcon: settingsStore.themeMode === "dark" ? "check" : undefined },
       ];
     case "appearance-writing":
       return [
@@ -1152,8 +1168,13 @@ async function openRestoreBackups(backupRoot: string): Promise<void> {
 async function handleSheetSelect(key: string): Promise<void> {
   switch (activeSheet.value) {
     case "appearance-root":
-      if (key === "theme") {
-        activeSheet.value = "appearance-theme";
+      if (key === "theme-family") {
+        activeSheet.value = "appearance-theme-family";
+        return;
+      }
+
+      if (key === "theme-mode") {
+        activeSheet.value = "appearance-theme-mode";
         return;
       }
 
@@ -1190,8 +1211,12 @@ async function handleSheetSelect(key: string): Promise<void> {
 
       activeSheet.value = "appearance-locale";
       return;
-    case "appearance-theme":
-      settingsStore.setTheme(key as ThemeOption);
+    case "appearance-theme-family":
+      settingsStore.setThemeFamily(key as ThemeFamilyOption);
+      activeSheet.value = "appearance-root";
+      return;
+    case "appearance-theme-mode":
+      settingsStore.setThemeMode(key as ThemeModeOption);
       activeSheet.value = "appearance-root";
       return;
     case "appearance-writing":
