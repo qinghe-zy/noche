@@ -20,8 +20,11 @@ describe("home card showcase parity", () => {
 
     expect(page).toContain("home-card-showcase-page__group");
     expect(page).toContain("home-card-showcase-page__paper-item");
+    expect(page).toContain("@longpress=");
     expect(page).toContain("home-card-showcase-page__detail-mask");
     expect(page).toContain("home-card-showcase-page__detail-card");
+    expect(page).toContain("PaperConfirmDialog");
+    expect(page).toContain("removeHomeWelcomeCardCollected");
     expect(page).toContain("readHomeWelcomeCardCollection");
     expect(page).toContain("today_quote");
     expect(page).toContain("mood_response");

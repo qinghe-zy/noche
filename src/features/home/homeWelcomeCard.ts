@@ -292,7 +292,9 @@ export function resolveHomeWelcomeCardSequence(card: HomeWelcomeCard): string {
 }
 
 export function shouldAutoShowHomeWelcomeCard(dateKey: string, lastSeenDate: string | null): boolean {
-  return lastSeenDate !== dateKey;
+  void dateKey;
+  void lastSeenDate;
+  return true;
 }
 
 export function readHomeWelcomeCardSeenDate(storage: JsonStorage = createUniJsonStorage()): string | null {
@@ -350,6 +352,14 @@ export function markHomeWelcomeCardCollected(
     type: card.type,
   });
   writeCollectionRecords(sortCollectedDescending(existingRecords), storage);
+}
+
+export function removeHomeWelcomeCardCollected(
+  cardId: string,
+  storage: JsonStorage = createUniJsonStorage(),
+): void {
+  const nextRecords = readHomeWelcomeCardCollection(storage).filter((record) => record.cardId !== cardId);
+  writeCollectionRecords(sortCollectedDescending(nextRecords), storage);
 }
 
 export function readHomeWelcomeCardHistory(storage: JsonStorage = createUniJsonStorage()): HomeWelcomeCardHistoryRecord[] {

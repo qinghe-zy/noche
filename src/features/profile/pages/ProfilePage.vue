@@ -20,6 +20,29 @@
           <text class="profile-page__banner-text">{{ pageError }}</text>
         </view>
 
+        <view
+          v-if="backupNoticeCopy"
+          class="profile-page__banner"
+          :class="{
+            'profile-page__banner--success': backupNoticeTone === 'success',
+            'profile-page__banner--error': backupNoticeTone === 'error',
+            'profile-page__banner--info': backupNoticeTone === 'info',
+          }"
+        >
+          <view class="profile-page__banner-head">
+            <text class="profile-page__banner-title">{{ backupNoticeTitle }}</text>
+            <text v-if="backupProgressPercent !== null" class="profile-page__banner-percent">{{ backupProgressPercent }}%</text>
+          </view>
+          <text class="profile-page__banner-text">{{ backupNoticeCopy }}</text>
+          <view v-if="backupProgressPercent !== null" class="profile-page__progress">
+            <view class="profile-page__progress-track">
+              <view class="profile-page__progress-fill" :style="{ width: `${backupProgressPercent}%` }" />
+            </view>
+            <text v-if="backupProgressStepText" class="profile-page__progress-text">{{ backupProgressStepText }}</text>
+            <text v-if="backupProgressElapsedText" class="profile-page__progress-meta">{{ backupProgressElapsedText }}</text>
+          </view>
+        </view>
+
         <ProfileStatsRow :stats="stats" :is-loading="statsLoading" />
 
         <ProfileMemoryAlbum
@@ -110,6 +133,7 @@ import { ROUTES } from "@/shared/constants/routes";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
+import { SQLITE_DB_PATH } from "@/data/db/schema";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import PaperInputDialog from "@/shared/ui/PaperInputDialog.vue";
 import PaperOptionSheet, { type PaperOptionSheetOption } from "@/shared/ui/PaperOptionSheet.vue";
@@ -141,11 +165,14 @@ import {
   DEFAULT_LOCAL_BACKUP_ROOT,
   exportLocalBackup,
   getLocalBackupErrorCode,
+  getLocalBackupErrorDetail,
   importLocalBackup,
   isLocalBackupAvailable,
   listLocalBackups,
   normalizeLocalBackupRoot,
+  PRIVATE_LOCAL_BACKUP_ROOT,
   restartAppAfterRestore,
+  type LocalBackupProgress,
   type LocalBackupSummary,
 } from "@/features/profile/localBackup";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
@@ -185,7 +212,13 @@ const {
 
 type ThemeOption = "system" | "light" | "dark";
 type LocaleOption = "zh-CN" | "en-US";
-type BackupFlow = "export-default" | "export-custom" | "restore-default" | "restore-custom";
+type BackupFlow =
+  | "export-default"
+  | "export-private"
+  | "export-custom"
+  | "restore-default"
+  | "restore-private"
+  | "restore-custom";
 type ActiveSheet =
   | null
   | "appearance-root"
@@ -237,7 +270,21 @@ const customBackupRoot = ref(DEFAULT_LOCAL_BACKUP_ROOT);
 const pendingBackupFlow = ref<BackupFlow | null>(null);
 const mediaViewerKind = ref<MediaViewerKind>(null);
 const isMediaViewerOpen = ref(false);
+const backupNoticeTitle = ref("");
+const backupNoticeCopy = ref("");
+const backupNoticeTone = ref<"success" | "error" | "info" | null>(null);
+const backupProgressRatio = ref<number | null>(null);
+const backupProgressLabel = ref<LocalBackupProgress["label"] | null>(null);
+const backupProgressDetail = ref("");
+const backupProgressStartedAt = ref<number | null>(null);
+const backupProgressNow = ref(Date.now());
 const footerText = computed(() => copy.value.profile.footerText);
+const backupProgressPercent = computed(() =>
+  backupProgressRatio.value === null ? null : Math.max(0, Math.min(100, Math.round(backupProgressRatio.value * 100))),
+);
+const backupProgressElapsedSeconds = computed(() =>
+  backupProgressStartedAt.value === null ? null : Math.max(0, Math.floor((backupProgressNow.value - backupProgressStartedAt.value) / 1000)),
+);
 const inputDialogConfirmText = computed(() => copy.value.common.save);
 const inputDialogCancelText = computed(() => copy.value.home.cancel);
 const sheetDismissText = computed(() =>
@@ -252,39 +299,100 @@ const dateChangeWatcher = createDateChangeWatcher({
     ]);
   },
 });
+let backupProgressTimer: ReturnType<typeof setInterval> | null = null;
 
-function resolveBackupErrorMessage(error: unknown, mode: "export" | "restore" = "export"): string {
+function appendBackupDiagnosticLines(
+  baseMessage: string,
+  error: unknown,
+  options: {
+    backupRoot?: string;
+    backupId?: string;
+  },
+): string {
+  const diagnostics: string[] = [];
+  const backupErrorCode = getLocalBackupErrorCode(error);
+  const backupDetail = getLocalBackupErrorDetail(error);
+
+  if (options.backupRoot) {
+    diagnostics.push(`${copy.value.profile.backupDetailRootLabel}：${options.backupRoot}`);
+  }
+
+  if (options.backupId) {
+    diagnostics.push(`${copy.value.profile.backupDetailBackupIdLabel}：${options.backupId}`);
+  }
+
+  if (backupErrorCode) {
+    diagnostics.push(`${copy.value.profile.backupDetailCodeLabel}：${backupErrorCode}`);
+  }
+
+  if (
+    backupErrorCode === "backup_database_unavailable"
+    || backupErrorCode === "backup_write_failed"
+    || backupErrorCode === "backup_restore_failed"
+  ) {
+    diagnostics.push(`${copy.value.profile.backupDetailDatabaseLabel}：${SQLITE_DB_PATH}`);
+  }
+
+  if (backupDetail && backupDetail !== baseMessage) {
+    diagnostics.push(`${copy.value.profile.backupDetailReasonLabel}：${backupDetail}`);
+  }
+
+  if (diagnostics.length === 0) {
+    return baseMessage;
+  }
+
+  return `${baseMessage}\n\n${copy.value.profile.backupDetailTitle}\n${diagnostics.join("\n")}`;
+}
+
+function resolveBackupErrorMessage(
+  error: unknown,
+  options: {
+    mode?: "export" | "restore";
+    backupRoot?: string;
+    backupId?: string;
+  } = {},
+): string {
+  const mode = options.mode ?? "export";
+
   if (!isLocalBackupAvailable()) {
     return copy.value.profile.backupUnavailable;
   }
 
   const backupErrorCode = getLocalBackupErrorCode(error);
   if (backupErrorCode === "backup_root_invalid") {
-    return copy.value.profile.backupFolderInvalid;
+    return appendBackupDiagnosticLines(copy.value.profile.backupFolderInvalid, error, options);
   }
 
   if (backupErrorCode === "backup_root_unwritable") {
-    return copy.value.profile.backupRootUnwritable;
+    return appendBackupDiagnosticLines(copy.value.profile.backupRootUnwritable, error, options);
   }
 
   if (backupErrorCode === "backup_database_unavailable") {
-    return copy.value.profile.backupDatabaseUnavailable;
+    return appendBackupDiagnosticLines(copy.value.profile.backupDatabaseUnavailable, error, options);
+  }
+
+  if (backupErrorCode === "backup_write_failed") {
+    return appendBackupDiagnosticLines(copy.value.profile.backupWriteFailedDetail, error, options);
   }
 
   if (backupErrorCode === "backup_manifest_invalid" || backupErrorCode === "backup_bundle_missing") {
-    return copy.value.profile.backupManifestInvalid;
+    return appendBackupDiagnosticLines(copy.value.profile.backupManifestInvalid, error, options);
   }
 
   if (backupErrorCode === "backup_restore_failed") {
-    return copy.value.profile.backupRestoreFailedDetail;
+    return appendBackupDiagnosticLines(copy.value.profile.backupRestoreFailedDetail, error, options);
   }
 
   const message = readErrorMessage(error);
   if (/Backup root must stay inside _documents or _downloads\./u.test(message)) {
-    return copy.value.profile.backupFolderInvalid;
+    return appendBackupDiagnosticLines(copy.value.profile.backupFolderInvalid, error, options);
   }
 
-  return mode === "restore" ? copy.value.profile.restoreFailed : copy.value.profile.exportFailed;
+  return appendBackupDiagnosticLines(
+    mode === "restore" ? copy.value.profile.restoreFailed : copy.value.profile.exportFailed,
+    error,
+    options,
+  );
 }
 
 function readErrorMessage(error: unknown): string {
@@ -497,6 +605,11 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
           copy: `${copy.value.profile.exportBackupDefaultCopy}\n${DEFAULT_LOCAL_BACKUP_ROOT}`,
         },
         {
+          key: "export-private",
+          title: copy.value.profile.exportBackupPrivate,
+          copy: `${copy.value.profile.exportBackupPrivateCopy}\n${PRIVATE_LOCAL_BACKUP_ROOT}`,
+        },
+        {
           key: "export-custom",
           title: copy.value.profile.exportBackupCustom,
           copy: `${copy.value.profile.exportBackupCustomCopy}\n${customBackupRoot.value}`,
@@ -505,6 +618,11 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
           key: "restore-default",
           title: copy.value.profile.restoreBackupDefault,
           copy: `${copy.value.profile.restoreBackupDefaultCopy}\n${DEFAULT_LOCAL_BACKUP_ROOT}`,
+        },
+        {
+          key: "restore-private",
+          title: copy.value.profile.restoreBackupPrivate,
+          copy: `${copy.value.profile.restoreBackupPrivateCopy}\n${PRIVATE_LOCAL_BACKUP_ROOT}`,
         },
         {
           key: "restore-custom",
@@ -689,6 +807,114 @@ function openInfoDialog(title: string, copyText: string): void {
   infoDialogOpen.value = true;
 }
 
+function showBackupToast(title: string, tone: "success" | "error" | "info"): void {
+  if (typeof uni === "undefined" || typeof uni.showToast !== "function") {
+    return;
+  }
+
+  uni.showToast({
+    title,
+    icon: tone === "info" ? "loading" : tone === "error" ? "none" : "success",
+    duration: tone === "info" ? 60000 : 2200,
+    mask: tone === "info",
+  });
+}
+
+function resolveBackupProgressStepText(
+  label: LocalBackupProgress["label"] | null,
+  detail: string,
+): string {
+  if (!label) {
+    return "";
+  }
+
+  const stepCopyMap: Record<LocalBackupProgress["label"], string> = {
+    "verify-root": copy.value.profile.backupStepVerifyRoot,
+    "verify-database": copy.value.profile.backupStepVerifyDatabase,
+    "prepare-directory": copy.value.profile.backupStepPrepareDirectory,
+    "close-database": copy.value.profile.backupStepCloseDatabase,
+    "copy-database": copy.value.profile.backupStepCopyDatabase,
+    "write-preferences": copy.value.profile.backupStepWritePreferences,
+    "write-draft-shadow": copy.value.profile.backupStepWriteDraftShadow,
+    "write-manifest": copy.value.profile.backupStepWriteManifest,
+    "copy-asset": copy.value.profile.backupStepCopyAsset,
+    "read-manifest": copy.value.profile.backupStepReadManifest,
+    "restore-asset": copy.value.profile.backupStepRestoreAsset,
+    "restore-storage": copy.value.profile.backupStepRestoreStorage,
+  };
+
+  const resolved = stepCopyMap[label];
+  return detail ? `${resolved} · ${detail}` : resolved;
+}
+
+const backupProgressStepText = computed(() =>
+  resolveBackupProgressStepText(backupProgressLabel.value, backupProgressDetail.value),
+);
+
+const backupProgressElapsedText = computed(() => {
+  if (backupProgressElapsedSeconds.value === null) {
+    return "";
+  }
+
+  return copy.value.profile.backupElapsedCopy.replace("{seconds}", String(backupProgressElapsedSeconds.value));
+});
+
+function startBackupProgressTimer(): void {
+  if (backupProgressTimer) {
+    return;
+  }
+
+  backupProgressTimer = setInterval(() => {
+    backupProgressNow.value = Date.now();
+  }, 1000);
+}
+
+function stopBackupProgressTimer(): void {
+  if (!backupProgressTimer) {
+    return;
+  }
+
+  clearInterval(backupProgressTimer);
+  backupProgressTimer = null;
+}
+
+function setBackupNotice(
+  title: string,
+  copyText: string,
+  tone: "success" | "error" | "info",
+): void {
+  backupNoticeTitle.value = title;
+  backupNoticeCopy.value = copyText;
+  backupNoticeTone.value = tone;
+  showBackupToast(title, tone);
+}
+
+function setBackupProgress(progress: LocalBackupProgress | null): void {
+  if (progress && backupProgressStartedAt.value === null) {
+    backupProgressStartedAt.value = Date.now();
+    backupProgressNow.value = backupProgressStartedAt.value;
+    startBackupProgressTimer();
+  }
+
+  if (!progress) {
+    backupProgressStartedAt.value = null;
+    backupProgressNow.value = Date.now();
+    stopBackupProgressTimer();
+  }
+
+  backupProgressRatio.value = progress?.ratio ?? null;
+  backupProgressLabel.value = progress?.label ?? null;
+  backupProgressDetail.value = progress?.detail ?? "";
+}
+
+function hideBackupProgressToast(): void {
+  if (typeof uni === "undefined" || typeof uni.hideToast !== "function") {
+    return;
+  }
+
+  uni.hideToast();
+}
+
 function closeInfoDialog(): void {
   infoDialogOpen.value = false;
   infoDialogTitle.value = "";
@@ -801,12 +1027,37 @@ async function chooseAndPersistProfileMedia(kind: "avatar" | "cover"): Promise<v
 
 async function runBackupExport(backupRoot: string): Promise<void> {
   if (!isLocalBackupAvailable()) {
+    setBackupNotice(copy.value.profile.exportFailed, copy.value.profile.backupUnavailable, "error");
+    setBackupProgress(null);
     openInfoDialog(copy.value.profile.exportFailed, copy.value.profile.backupUnavailable);
     return;
   }
 
+  setBackupNotice(
+    copy.value.profile.exportInProgress,
+    `${copy.value.profile.exportInProgressCopy}\n${backupRoot}`,
+    "info",
+  );
+  setBackupProgress({
+    mode: "export",
+    label: "prepare-directory",
+    ratio: 0,
+    completedUnits: 0,
+    totalUnits: 1,
+    detail: backupRoot,
+  });
+  console.info("[profile-backup] export start", {
+    backupRoot,
+  });
+
   try {
-    const result = await exportLocalBackup({ backupRoot });
+    const result = await exportLocalBackup({
+      backupRoot,
+      onProgress: (progress) => {
+        setBackupProgress(progress);
+      },
+    });
+    hideBackupProgressToast();
     await getPrefsRepository().set({
       key: PROFILE_PREF_KEYS.lastBackupAt,
       value: result.createdAt,
@@ -815,29 +1066,86 @@ async function runBackupExport(backupRoot: string): Promise<void> {
     const skippedCopy = result.skippedAssetCount
       ? `\n\n${copy.value.profile.exportSkippedAssetsCopy.replace("{count}", String(result.skippedAssetCount))}`
       : "";
-    openInfoDialog(copy.value.profile.exportSuccess, `${result.absolutePath}${skippedCopy}`);
+    const successCopy = `${result.absolutePath}${skippedCopy}`;
+    setBackupNotice(copy.value.profile.exportSuccess, successCopy, "success");
+    setBackupProgress(null);
+    openInfoDialog(copy.value.profile.exportSuccess, successCopy);
   } catch (error) {
-    openInfoDialog(copy.value.profile.exportFailed, resolveBackupErrorMessage(error, "export"));
+    hideBackupProgressToast();
+    console.error("[profile-backup] export failed", {
+      backupRoot,
+      error,
+    });
+    const failureCopy = resolveBackupErrorMessage(error, {
+      mode: "export",
+      backupRoot,
+    });
+    setBackupNotice(copy.value.profile.exportFailed, failureCopy, "error");
+    setBackupProgress(null);
+    openInfoDialog(copy.value.profile.exportFailed, failureCopy);
   }
 }
 
 async function openRestoreBackups(backupRoot: string): Promise<void> {
   if (!isLocalBackupAvailable()) {
+    setBackupNotice(copy.value.profile.restoreLoadingTitle, copy.value.profile.backupUnavailable, "error");
+    setBackupProgress(null);
     openInfoDialog(copy.value.profile.backupRootTitle, copy.value.profile.backupUnavailable);
     return;
   }
 
+  setBackupNotice(
+    copy.value.profile.restoreLoadingTitle,
+    `${copy.value.profile.restoreLoadingCopy}\n${backupRoot}`,
+    "info",
+  );
+  setBackupProgress({
+    mode: "restore",
+    label: "read-manifest",
+    ratio: 0,
+    completedUnits: 0,
+    totalUnits: 1,
+    detail: backupRoot,
+  });
+  console.info("[profile-backup] restore list start", {
+    backupRoot,
+  });
+
   try {
     activeBackupRoot.value = backupRoot;
     availableBackups.value = await listLocalBackups({ backupRoot });
+    hideBackupProgressToast();
     if (availableBackups.value.length === 0) {
+      setBackupNotice(
+        copy.value.profile.backupRootTitle,
+        `${copy.value.profile.noBackupYet}\n\n${backupRoot}`,
+        "error",
+      );
+      setBackupProgress(null);
       openInfoDialog(copy.value.profile.backupRootTitle, `${copy.value.profile.noBackupYet}\n\n${backupRoot}`);
       return;
     }
 
+    setBackupNotice(
+      copy.value.profile.restoreLoadingTitle,
+      `${copy.value.profile.restoreReadyCopy.replace("{count}", String(availableBackups.value.length))}\n${backupRoot}`,
+      "success",
+    );
+    setBackupProgress(null);
     activeSheet.value = "backup-restore";
   } catch (error) {
-    openInfoDialog(copy.value.profile.restoreFailed, resolveBackupErrorMessage(error, "restore"));
+    hideBackupProgressToast();
+    console.error("[profile-backup] restore list failed", {
+      backupRoot,
+      error,
+    });
+    const failureCopy = resolveBackupErrorMessage(error, {
+      mode: "restore",
+      backupRoot,
+    });
+    setBackupNotice(copy.value.profile.restoreFailed, failureCopy, "error");
+    setBackupProgress(null);
+    openInfoDialog(copy.value.profile.restoreFailed, failureCopy);
   }
 }
 
@@ -930,6 +1238,11 @@ async function handleSheetSelect(key: string): Promise<void> {
         return;
       }
 
+      if (key === "export-private") {
+        await runBackupExport(PRIVATE_LOCAL_BACKUP_ROOT);
+        return;
+      }
+
       if (key === "export-custom") {
         openBackupFolderDialog("export-custom");
         return;
@@ -937,6 +1250,11 @@ async function handleSheetSelect(key: string): Promise<void> {
 
       if (key === "restore-default") {
         await openRestoreBackups(DEFAULT_LOCAL_BACKUP_ROOT);
+        return;
+      }
+
+      if (key === "restore-private") {
+        await openRestoreBackups(PRIVATE_LOCAL_BACKUP_ROOT);
         return;
       }
 
@@ -970,15 +1288,47 @@ async function handleSheetSelect(key: string): Promise<void> {
           }
 
           try {
+            setBackupNotice(
+              copy.value.profile.restoreInProgress,
+              `${copy.value.profile.restoreInProgressCopy}\n${pendingRestoreBackup.value.absolutePath}`,
+              "info",
+            );
+            setBackupProgress({
+              mode: "restore",
+              label: "read-manifest",
+              ratio: 0,
+              completedUnits: 0,
+              totalUnits: 1,
+              detail: pendingRestoreBackup.value.backupId,
+            });
             await importLocalBackup(pendingRestoreBackup.value.backupId, {
               backupRoot: activeBackupRoot.value,
+              onProgress: (progress) => {
+                setBackupProgress(progress);
+              },
             });
+            hideBackupProgressToast();
+            setBackupNotice(copy.value.profile.restoreSuccess, pendingRestoreBackup.value.absolutePath, "success");
+            setBackupProgress(null);
             openInfoDialog(copy.value.profile.restoreSuccess, pendingRestoreBackup.value.absolutePath);
             setTimeout(() => {
               restartAppAfterRestore();
             }, 300);
           } catch (error) {
-            openInfoDialog(copy.value.profile.restoreFailed, resolveBackupErrorMessage(error, "restore"));
+            hideBackupProgressToast();
+            console.error("[profile-backup] restore failed", {
+              backupRoot: activeBackupRoot.value,
+              backupId: pendingRestoreBackup.value.backupId,
+              error,
+            });
+            const failureCopy = resolveBackupErrorMessage(error, {
+              mode: "restore",
+              backupRoot: activeBackupRoot.value,
+              backupId: pendingRestoreBackup.value.backupId,
+            });
+            setBackupNotice(copy.value.profile.restoreFailed, failureCopy, "error");
+            setBackupProgress(null);
+            openInfoDialog(copy.value.profile.restoreFailed, failureCopy);
           }
         },
       );
@@ -1156,6 +1506,7 @@ onShow(() => {
 
 onUnmounted(() => {
   dateChangeWatcher.stop();
+  stopBackupProgressTimer();
 });
 </script>
 
@@ -1193,10 +1544,87 @@ onUnmounted(() => {
   background: rgba(159, 64, 61, 0.07);
 }
 
+.profile-page__banner--success {
+  background: rgba(77, 122, 88, 0.1);
+}
+
+.profile-page__banner--info {
+  background: rgba(121, 92, 45, 0.1);
+}
+
+.profile-page__banner--error {
+  background: rgba(159, 64, 61, 0.07);
+}
+
+.profile-page__banner-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.profile-page__banner-title {
+  display: block;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: var(--noche-text);
+}
+
+.profile-page__banner-percent {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  line-height: 1.4;
+  color: var(--profile-soft-meta);
+}
+
 .profile-page__banner-text {
+  display: block;
+  margin-top: 6rpx;
   font-size: 22rpx;
   line-height: 1.7;
   color: #8a3d3a;
+}
+
+.profile-page__banner--info .profile-page__banner-text {
+  color: #7a6337;
+}
+
+.profile-page__banner--success .profile-page__banner-text {
+  color: #456a50;
+}
+
+.profile-page__progress {
+  margin-top: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.profile-page__progress-track {
+  width: 100%;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: rgba(116, 104, 84, 0.16);
+  overflow: hidden;
+}
+
+.profile-page__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95));
+  transition: width 220ms ease;
+}
+
+.profile-page__progress-text {
+  font-size: 20rpx;
+  line-height: 1.6;
+  color: var(--profile-soft-meta);
+}
+
+.profile-page__progress-meta {
+  font-size: 18rpx;
+  line-height: 1.5;
+  color: var(--profile-soft-hint);
 }
 
 .profile-page__footer {
@@ -1213,8 +1641,16 @@ onUnmounted(() => {
   padding-left: 0.28em;
 }
 
+.type-scale-small .profile-page__banner-title { font-size: 23rpx; }
+.type-scale-large .profile-page__banner-title { font-size: 26rpx; }
+.type-scale-small .profile-page__banner-percent { font-size: 21rpx; }
+.type-scale-large .profile-page__banner-percent { font-size: 24rpx; }
 .type-scale-small .profile-page__banner-text { font-size: 21rpx; }
 .type-scale-large .profile-page__banner-text { font-size: 24rpx; }
+.type-scale-small .profile-page__progress-text { font-size: 19rpx; }
+.type-scale-large .profile-page__progress-text { font-size: 22rpx; }
+.type-scale-small .profile-page__progress-meta { font-size: 17rpx; }
+.type-scale-large .profile-page__progress-meta { font-size: 20rpx; }
 .type-scale-small .profile-page__footer-text { font-size: 17rpx; }
 .type-scale-large .profile-page__footer-text { font-size: 19rpx; }
 </style>

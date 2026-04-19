@@ -7,6 +7,7 @@ import {
   isHomeWelcomeCardCollected,
   markHomeWelcomeCardCollected,
   markHomeWelcomeCardResolved,
+  removeHomeWelcomeCardCollected,
   markHomeWelcomeCardSeen,
   readHomeWelcomeCardCollection,
   readHomeWelcomeCardCollectionCount,
@@ -49,6 +50,8 @@ describe("home welcome card", () => {
       isActive: true,
       solarTerms: [],
     });
+    expect(firstCard?.content).not.toContain("第 ");
+    expect(firstCard?.content).not.toContain("张摘句卡");
   });
 
   it("returns a stable daily card for the same date", () => {
@@ -149,10 +152,10 @@ describe("home welcome card", () => {
     });
   });
 
-  it("only auto-shows the welcome card once per day", () => {
+  it("keeps the welcome card enabled for the current day instead of suppressing it after one view", () => {
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", null)).toBe(true);
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-15")).toBe(true);
-    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(false);
+    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(true);
   });
 
   it("persists the seen date with local-first storage", () => {
@@ -189,6 +192,26 @@ describe("home welcome card", () => {
     });
     expect(readHomeWelcomeCardCollectionCount(storage)).toBe(2);
     expect(storage.getString(HOME_WELCOME_CARD_COLLECTION_STORAGE_KEY)).toContain("card_014");
+  });
+
+  it("removes a collected card by card id without touching other showcase records", () => {
+    const storage = createMemoryJsonStorage();
+
+    markHomeWelcomeCardCollected("2026-04-16", "card_001", storage, "2026-04-16T08:00:00.000Z");
+    markHomeWelcomeCardCollected("2026-04-17", "card_014", storage, "2026-04-17T09:15:00.000Z");
+
+    removeHomeWelcomeCardCollected("card_001", storage);
+
+    expect(readHomeWelcomeCardCollection(storage)).toEqual([
+      {
+        cardId: "card_014",
+        collectedAt: "2026-04-17T09:15:00.000Z",
+        collectedDateKey: "2026-04-17",
+        type: "mood_response",
+      },
+    ]);
+    expect(readHomeWelcomeCardCollectionCount(storage)).toBe(1);
+    expect(isHomeWelcomeCardCollected("2026-12-31", "card_001", storage)).toBe(false);
   });
 
   it("stores display history as structured records that later rules can read back", () => {

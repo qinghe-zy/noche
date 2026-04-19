@@ -9,7 +9,9 @@ import {
 } from "@/shared/utils/localFiles";
 import { nowIso } from "@/shared/utils/date";
 
-export const DEFAULT_LOCAL_BACKUP_ROOT = "_documents/noche-backups";
+export const DEFAULT_LOCAL_BACKUP_ROOT = "_documents/eyot-backups";
+export const PRIVATE_LOCAL_BACKUP_ROOT = "_doc/eyot-backups";
+export const LOCAL_BACKUP_NATIVE_TIMEOUT_MS = 12000;
 const MANIFEST_NAME = "manifest.json";
 const PREFS_BACKUP_FILE = "storage/preferences.json";
 const DRAFT_SHADOW_BACKUP_FILE = "storage/draft-shadow.json";
@@ -58,8 +60,30 @@ export interface LocalBackupSummary {
   skippedAssetCount?: number;
 }
 
+export interface LocalBackupProgress {
+  mode: "export" | "restore";
+  label:
+    | "verify-root"
+    | "verify-database"
+    | "prepare-directory"
+    | "close-database"
+    | "copy-database"
+    | "write-preferences"
+    | "write-draft-shadow"
+    | "write-manifest"
+    | "copy-asset"
+    | "read-manifest"
+    | "restore-asset"
+    | "restore-storage";
+  ratio: number;
+  completedUnits: number;
+  totalUnits: number;
+  detail?: string;
+}
+
 export interface LocalBackupOptions {
   backupRoot?: string | null;
+  onProgress?: ((progress: LocalBackupProgress) => void) | null;
 }
 
 function createLocalBackupError(
@@ -73,12 +97,98 @@ function createLocalBackupError(
   return error;
 }
 
+function createNativeTimeoutError(stepLabel: string, timeoutMs = LOCAL_BACKUP_NATIVE_TIMEOUT_MS): Error {
+  return new Error(`${stepLabel} timed out after ${timeoutMs}ms.`);
+}
+
+function runTimedNativeStep<T>(
+  stepLabel: string,
+  runner: (
+    resolve: (value: T | PromiseLike<T>) => void,
+    reject: (reason?: unknown) => void,
+  ) => void,
+  timeoutMs = LOCAL_BACKUP_NATIVE_TIMEOUT_MS,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      reject(createNativeTimeoutError(stepLabel, timeoutMs));
+    }, timeoutMs);
+
+    const settle = <TValue>(callback: (value: TValue) => void) => (value: TValue) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearTimeout(timer);
+      callback(value);
+    };
+
+    try {
+      runner(
+        settle(resolve),
+        settle(reject),
+      );
+    } catch (error) {
+      settle(reject)(error);
+    }
+  });
+}
+
 export function getLocalBackupErrorCode(error: unknown): LocalBackupErrorCode | null {
   if (typeof error === "object" && error !== null && "code" in error) {
     return (error as { code?: LocalBackupErrorCode }).code ?? null;
   }
 
   return null;
+}
+
+function readUnknownErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message.trim();
+  }
+
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String((error as { message?: unknown }).message ?? "").trim();
+  }
+
+  return "";
+}
+
+export function getLocalBackupErrorDetail(error: unknown): string | null {
+  const queue: unknown[] = [error];
+  const seen = new Set<unknown>();
+  const messages: string[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (current && (typeof current === "object" || typeof current === "function")) {
+      if (seen.has(current)) {
+        continue;
+      }
+
+      seen.add(current);
+    }
+
+    const message = readUnknownErrorMessage(current);
+    if (message) {
+      messages.push(message);
+    }
+
+    if (typeof current === "object" && current !== null && "cause" in current) {
+      queue.push((current as { cause?: unknown }).cause);
+    }
+  }
+
+  const uniqueMessages = messages.filter((message, index) => messages.indexOf(message) === index);
+  return uniqueMessages.at(-1) ?? uniqueMessages[0] ?? null;
 }
 
 export function isLocalBackupAvailable(): boolean {
@@ -124,7 +234,46 @@ export function normalizeLocalBackupRoot(backupRoot?: string | null): string {
 }
 
 function resolveBackupRoot(options?: LocalBackupOptions): string {
-  return normalizeLocalBackupRoot(options?.backupRoot);
+  const trimmed = options?.backupRoot?.trim() ?? "";
+
+  if (!trimmed) {
+    return DEFAULT_LOCAL_BACKUP_ROOT;
+  }
+
+  const normalized = trimmed
+    .replace(/\\/gu, "/")
+    .replace(/\/+/gu, "/")
+    .replace(/\/$/u, "");
+
+  if (normalized === PRIVATE_LOCAL_BACKUP_ROOT) {
+    return PRIVATE_LOCAL_BACKUP_ROOT;
+  }
+
+  return normalizeLocalBackupRoot(normalized);
+}
+
+function createLocalBackupProgressReporter(
+  mode: LocalBackupProgress["mode"],
+  totalUnits: number,
+  onProgress?: ((progress: LocalBackupProgress) => void) | null,
+): (label: LocalBackupProgress["label"], detail?: string) => void {
+  let completedUnits = 0;
+
+  return (label, detail) => {
+    if (!onProgress) {
+      return;
+    }
+
+    completedUnits += 1;
+    onProgress({
+      mode,
+      label,
+      ratio: Math.min(1, completedUnits / totalUnits),
+      completedUnits,
+      totalUnits,
+      detail,
+    });
+  };
 }
 
 function toAbsoluteBackupPath(backupRoot: string, relativePath: string): string {
@@ -188,7 +337,7 @@ async function waitForPlusReady(): Promise<void> {
     throw createLocalBackupError("runtime_unavailable", "plus runtime is unavailable.");
   }
 
-  await new Promise<void>((resolve) => {
+  await runTimedNativeStep<void>("plusready", (resolve) => {
     document.addEventListener("plusready", () => resolve(), {
       once: true,
     });
@@ -261,8 +410,24 @@ function collectManagedBackupAssets(
 
 async function resolveEntry(url: string): Promise<any> {
   await waitForPlusReady();
-  return new Promise((resolve, reject) => {
+  return runTimedNativeStep(`resolve entry ${url}`, (resolve, reject) => {
     plus.io.resolveLocalFileSystemURL(url, resolve, reject);
+  });
+}
+
+async function requestFileSystemRootEntry(rootType: "_documents" | "_downloads"): Promise<any> {
+  await waitForPlusReady();
+  const type = rootType === "_documents" ? plus.io.PUBLIC_DOCUMENTS : plus.io.PUBLIC_DOWNLOADS;
+
+  return runTimedNativeStep(`request filesystem root ${rootType}`, (resolve, reject) => {
+    plus.io.requestFileSystem(type, (fs: { root?: unknown }) => {
+      if (fs.root) {
+        resolve(fs.root);
+        return;
+      }
+
+      reject(new Error(`Missing filesystem root for ${rootType}.`));
+    }, reject);
   });
 }
 
@@ -287,6 +452,10 @@ async function ensureDirectory(relativePath: string): Promise<any> {
       : undefined,
   );
 
+  if (normalizedPath === "_documents" || normalizedPath === "_downloads") {
+    return requestFileSystemRootEntry(normalizedPath);
+  }
+
   try {
     return await resolveEntry(normalizedPath);
   } catch (error) {
@@ -300,7 +469,7 @@ async function ensureDirectory(relativePath: string): Promise<any> {
       .slice(parentPath.length)
       .replace(/^\/+/u, "");
 
-    return new Promise((resolve, reject) => {
+    return runTimedNativeStep(`create directory ${normalizedPath}`, (resolve, reject) => {
       parentEntry.getDirectory(directoryName, { create: true }, resolve, reject);
     });
   }
@@ -343,7 +512,7 @@ async function assertBackupDatabaseReadable(): Promise<void> {
 async function removeEntryIfExists(url: string): Promise<void> {
   try {
     const entry = await resolveEntry(url);
-    await new Promise<void>((resolve, reject) => {
+    await runTimedNativeStep<void>(`remove entry ${url}`, (resolve, reject) => {
       if (entry.isDirectory) {
         entry.removeRecursively(() => resolve(), reject);
         return;
@@ -360,14 +529,14 @@ async function writeTextFile(backupRoot: string, relativePath: string, content: 
   const targetPath = toAbsoluteBackupPath(backupRoot, relativePath);
   const parent = await ensureParentDirectory(targetPath);
   const fileName = targetPath.split("/").pop() ?? "file.txt";
-  const fileEntry = await new Promise<any>((resolve, reject) => {
+  const fileEntry = await runTimedNativeStep<any>(`create file ${targetPath}`, (resolve, reject) => {
     parent.getFile(fileName, { create: true }, resolve, reject);
   });
-  const writer = await new Promise<any>((resolve, reject) => {
+  const writer = await runTimedNativeStep<any>(`create writer ${targetPath}`, (resolve, reject) => {
     fileEntry.createWriter(resolve, reject);
   });
 
-  await new Promise<void>((resolve, reject) => {
+  await runTimedNativeStep<void>(`write file ${targetPath}`, (resolve, reject) => {
     writer.onwrite = () => resolve();
     writer.onerror = reject;
     writer.write(content);
@@ -382,7 +551,7 @@ async function copyFile(sourceUri: string, backupRoot: string, targetRelativePat
 
   await removeEntryIfExists(absoluteTargetPath);
 
-  await new Promise<void>((resolve, reject) => {
+  await runTimedNativeStep<void>(`copy file ${sourceUri} -> ${absoluteTargetPath}`, (resolve, reject) => {
     sourceEntry.copyTo(parentDir, targetName, () => resolve(), reject);
   });
 }
@@ -394,17 +563,17 @@ async function copyBackupFileToOriginal(backupRoot: string, sourceRelativePath: 
 
   await removeEntryIfExists(originalUri);
 
-  await new Promise<void>((resolve, reject) => {
+  await runTimedNativeStep<void>(`restore file ${sourceRelativePath} -> ${originalUri}`, (resolve, reject) => {
     sourceEntry.copyTo(parentDir, fileName, () => resolve(), reject);
   });
 }
 
 async function readTextFile(backupRoot: string, relativePath: string): Promise<string> {
   const entry = await resolveEntry(toAbsoluteBackupPath(backupRoot, relativePath));
-  const file = await new Promise<any>((resolve, reject) => entry.file(resolve, reject));
+  const file = await runTimedNativeStep<any>(`read file metadata ${relativePath}`, (resolve, reject) => entry.file(resolve, reject));
   const reader = new FileReader();
 
-  return new Promise<string>((resolve, reject) => {
+  return runTimedNativeStep<string>(`read text ${relativePath}`, (resolve, reject) => {
     reader.onload = () => resolve(String(reader.result ?? ""));
     reader.onerror = reject;
     reader.readAsText(file);
@@ -416,25 +585,27 @@ async function readBackupManifest(backupRoot: string, backupId: string): Promise
   return JSON.parse(raw) as BackupManifest;
 }
 
-function closeSQLiteIfOpen(): void {
+async function closeSQLiteIfOpen(): Promise<void> {
   if (typeof plus === "undefined" || !plus.sqlite) {
     return;
   }
 
-  try {
-    const isOpen = plus.sqlite.isOpenDatabase({
-      name: SQLITE_DB_NAME,
-      path: SQLITE_DB_PATH,
-    });
+  const isOpen = plus.sqlite.isOpenDatabase({
+    name: SQLITE_DB_NAME,
+    path: SQLITE_DB_PATH,
+  });
 
-    if (isOpen) {
-      plus.sqlite.closeDatabase({
-        name: SQLITE_DB_NAME,
-      });
-    }
-  } catch {
-    // noop
+  if (!isOpen) {
+    return;
   }
+
+  await runTimedNativeStep<void>("close sqlite database", (resolve, reject) => {
+    plus.sqlite.closeDatabase({
+      name: SQLITE_DB_NAME,
+      success: () => resolve(),
+      fail: reject,
+    });
+  });
 }
 
 export async function listLocalBackups(options: LocalBackupOptions = {}): Promise<LocalBackupSummary[]> {
@@ -445,7 +616,7 @@ export async function listLocalBackups(options: LocalBackupOptions = {}): Promis
   try {
     const backupRoot = resolveBackupRoot(options);
     const rootEntry = await ensureDirectory(backupRoot);
-    const entries = await new Promise<any[]>((resolve, reject) => {
+    const entries = await runTimedNativeStep<any[]>(`read backup directory ${backupRoot}`, (resolve, reject) => {
       rootEntry.createReader().readEntries(resolve, reject);
     });
 
@@ -478,8 +649,6 @@ export async function exportLocalBackup(options: LocalBackupOptions = {}): Promi
   }
 
   const backupRoot = resolveBackupRoot(options);
-  await assertBackupRootWritable(backupRoot);
-  await assertBackupDatabaseReadable();
   const createdAt = nowIso();
   const backupId = createdAt.replace(/[:.]/gu, "-");
   const backupDir = `${backupRoot}/${backupId}`;
@@ -487,6 +656,7 @@ export async function exportLocalBackup(options: LocalBackupOptions = {}): Promi
   const drafts = await getDraftRepository().getAll();
   const managedAssets = collectManagedBackupAssets(entries, drafts);
   const assetPlan = await buildBackupAssetExportPlan(managedAssets, canResolveManagedAsset);
+  const reportProgress = createLocalBackupProgressReporter("export", 8 + assetPlan.assets.length, options.onProgress);
   const storageMap = getStorageMap();
   const manifest: BackupManifest = {
     version: 1,
@@ -499,23 +669,38 @@ export async function exportLocalBackup(options: LocalBackupOptions = {}): Promi
   };
 
   await ensureDirectory(backupDir);
-  closeSQLiteIfOpen();
+  reportProgress("prepare-directory", backupDir);
+  await assertBackupRootWritable(backupRoot);
+  reportProgress("verify-root", backupRoot);
+  await assertBackupDatabaseReadable();
+  reportProgress("verify-database", SQLITE_DB_PATH);
+  try {
+    await closeSQLiteIfOpen();
+    reportProgress("close-database", SQLITE_DB_PATH);
+  } catch (error) {
+    throw createLocalBackupError("backup_database_unavailable", "Failed to close SQLite before export.", error);
+  }
   try {
     await copyFile(SQLITE_DB_PATH, backupRoot, `${backupId}/${SQLITE_BACKUP_FILE}`);
+    reportProgress("copy-database", SQLITE_DB_PATH);
   } catch (error) {
     throw createLocalBackupError("backup_write_failed", "Failed to export SQLite backup.", error);
   }
   await writeTextFile(backupRoot, `${backupId}/${PREFS_BACKUP_FILE}`, storageMap.preferences);
+  reportProgress("write-preferences", PREFS_BACKUP_FILE);
   await writeTextFile(backupRoot, `${backupId}/${DRAFT_SHADOW_BACKUP_FILE}`, storageMap.draftShadow);
+  reportProgress("write-draft-shadow", DRAFT_SHADOW_BACKUP_FILE);
 
   let skippedAssetCount = assetPlan.skippedOriginalUris.length;
 
   for (const asset of manifest.assets) {
     try {
       await copyFile(asset.originalUri, backupRoot, `${backupId}/${asset.backupRelativePath}`);
+      reportProgress("copy-asset", asset.backupRelativePath);
     } catch (error) {
       if (isMissingManagedAssetError(error)) {
         skippedAssetCount += 1;
+        reportProgress("copy-asset", asset.backupRelativePath);
         continue;
       }
 
@@ -524,6 +709,7 @@ export async function exportLocalBackup(options: LocalBackupOptions = {}): Promi
   }
 
   await writeTextFile(backupRoot, `${backupId}/${MANIFEST_NAME}`, JSON.stringify(manifest, null, 2));
+  reportProgress("write-manifest", MANIFEST_NAME);
 
   return {
     backupId,
@@ -550,11 +736,19 @@ export async function importLocalBackup(backupId: string, options: LocalBackupOp
   } catch (error) {
     throw createLocalBackupError("backup_manifest_invalid", "Backup manifest is unavailable or invalid.", error);
   }
+  const reportProgress = createLocalBackupProgressReporter("restore", 4 + manifest.assets.length, options.onProgress);
+  reportProgress("read-manifest", backupId);
   const storage = createUniJsonStorage();
 
-  closeSQLiteIfOpen();
+  try {
+    await closeSQLiteIfOpen();
+    reportProgress("close-database", SQLITE_DB_PATH);
+  } catch (error) {
+    throw createLocalBackupError("backup_database_unavailable", "Failed to close SQLite before restore.", error);
+  }
   try {
     await copyBackupFileToOriginal(backupRoot, `${backupId}/${manifest.dbRelativePath}`, SQLITE_DB_PATH);
+    reportProgress("copy-database", SQLITE_DB_PATH);
   } catch (error) {
     throw createLocalBackupError("backup_restore_failed", "Failed to restore SQLite backup.", error);
   }
@@ -562,8 +756,10 @@ export async function importLocalBackup(backupId: string, options: LocalBackupOp
   for (const asset of manifest.assets) {
     try {
       await copyBackupFileToOriginal(backupRoot, `${backupId}/${asset.backupRelativePath}`, asset.originalUri);
+      reportProgress("restore-asset", asset.backupRelativePath);
     } catch (error) {
       if (isMissingManagedAssetError(error)) {
+        reportProgress("restore-asset", asset.backupRelativePath);
         continue;
       }
 
@@ -573,6 +769,7 @@ export async function importLocalBackup(backupId: string, options: LocalBackupOp
 
   storage.setString("noche.preferences.v1", await readTextFile(backupRoot, `${backupId}/${manifest.prefsRelativePath}`));
   storage.setString("noche.editor-draft-shadow.v1", await readTextFile(backupRoot, `${backupId}/${manifest.draftShadowRelativePath}`));
+  reportProgress("restore-storage", `${manifest.prefsRelativePath},${manifest.draftShadowRelativePath}`);
 }
 
 export function restartAppAfterRestore(): void {

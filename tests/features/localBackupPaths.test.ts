@@ -13,7 +13,7 @@ describe("local backup paths", () => {
   });
 
   it("normalizes a manually selected shared backup folder", () => {
-    expect(normalizeLocalBackupRoot("  _downloads/noche-backups/custom/  ")).toBe("_downloads/noche-backups/custom");
+    expect(normalizeLocalBackupRoot("  _downloads/eyot-backups/custom/  ")).toBe("_downloads/eyot-backups/custom");
     expect(normalizeLocalBackupRoot("_documents/my-backups")).toBe("_documents/my-backups");
   });
 
@@ -30,7 +30,7 @@ describe("local backup paths", () => {
   });
 
   it("derives parent directories without breaking file URL prefixes", () => {
-    expect(getParentDirectoryPath("_documents/noche-backups/2026/manifest.json")).toBe("_documents/noche-backups/2026");
+    expect(getParentDirectoryPath("_documents/eyot-backups/2026/manifest.json")).toBe("_documents/eyot-backups/2026");
     expect(getParentDirectoryPath("file:///storage/emulated/0/DCIM/cat.png")).toBe("file:///storage/emulated/0/DCIM");
     expect(getParentDirectoryPath("/storage/emulated/0/DCIM/cat.png")).toBe("/storage/emulated/0/DCIM");
   });

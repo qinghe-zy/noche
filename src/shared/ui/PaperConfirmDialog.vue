@@ -77,17 +77,22 @@ function handleMaskClose(): void {
 
 .paper-confirm-dialog {
   width: min(100%, 420px);
+  max-height: calc(100vh - 56px);
   background: var(--noche-surface);
   border: 1px solid var(--noche-border);
   border-radius: 22px;
   box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .paper-confirm-dialog__head {
   padding: 26px 24px 18px;
   text-align: center;
   border-bottom: 1px solid var(--noche-border);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .paper-confirm-dialog__title {
@@ -108,6 +113,7 @@ function handleMaskClose(): void {
 .paper-confirm-dialog__actions {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .paper-confirm-dialog__action {

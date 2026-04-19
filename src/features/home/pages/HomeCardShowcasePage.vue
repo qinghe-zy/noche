@@ -45,6 +45,7 @@
               :class="`home-card-showcase-page__paper-item--${record.type}`"
               @tap="openDetail(record.cardId)"
               @click="openDetail(record.cardId)"
+              @longpress="promptRemove(record)"
             >
               <view class="home-card-showcase-page__paper-item-head">
                 <text class="home-card-showcase-page__paper-item-eyebrow">{{ group.label }}</text>
@@ -85,6 +86,15 @@
         <text class="home-card-showcase-page__detail-content">{{ activeDetailCard.content }}</text>
       </view>
     </view>
+
+    <PaperConfirmDialog
+      :open="isDeleteDialogOpen"
+      :title="deleteDialogTitle"
+      :copy="deleteDialogCopy"
+      :actions="deleteDialogActions"
+      @close="closeDeleteDialog"
+      @action="handleDeleteDialogAction"
+    />
   </view>
 </template>
 
@@ -93,14 +103,15 @@ import { computed, ref } from "vue";
 import dayjs from "dayjs";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { ROUTES } from "@/shared/constants/routes";
-import { t } from "@/shared/i18n";
 import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import AppIcon from "@/shared/ui/AppIcon.vue";
+import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import {
   readHomeWelcomeCardCollection,
+  removeHomeWelcomeCardCollected,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardTheme,
   type HomeWelcomeCardCollectionRecord,
@@ -120,9 +131,15 @@ const settingsStore = useSettingsStore();
 const themeClass = useThemeClass();
 const typographyClass = useTypographyClass();
 const { statusBarHeight, topbarBottomSpacing, rpxToPx } = useEditorKeyboardViewport();
-const copy = computed(() => t(settingsStore.locale));
-const collection = computed(() => readHomeWelcomeCardCollection());
+const collectionVersion = ref(0);
 const activeDetailCardId = ref<string | null>(null);
+const pendingDeleteRecord = ref<HomeWelcomeCardCollectionRecord | null>(null);
+const isDeleteDialogOpen = ref(false);
+
+const collection = computed(() => {
+  collectionVersion.value;
+  return readHomeWelcomeCardCollection();
+});
 
 const pageEyebrow = computed(() => settingsStore.locale === "en-US" ? "CARD SHOWCASE" : "卡片展柜");
 const pageTitle = computed(() => settingsStore.locale === "en-US" ? "Collected Notes" : "收下的卡片");
@@ -130,6 +147,22 @@ const emptyTitle = computed(() => settingsStore.locale === "en-US" ? "No cards k
 const emptyCopy = computed(() => settingsStore.locale === "en-US"
   ? "The cards you keep will rest here quietly."
   : "那些被你收下的卡片，会安静地留在这里。");
+const deleteDialogTitle = computed(() => settingsStore.locale === "en-US" ? "Remove this card from the showcase?" : "从展柜里删除这张卡？");
+const deleteDialogCopy = computed(() => settingsStore.locale === "en-US"
+  ? "This only removes the collection record from the showcase. The card may still appear again on the home page later."
+  : "这次只会删除展柜里的收藏记录，不会拉黑这张卡；它以后仍可能再次出现在首页。");
+const deleteDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+  {
+    key: "keep",
+    title: settingsStore.locale === "en-US" ? "Keep it" : "先保留",
+    tone: "muted",
+  },
+  {
+    key: "delete",
+    title: settingsStore.locale === "en-US" ? "Delete" : "确认删除",
+    tone: "danger",
+  },
+]));
 const topbarInnerStyle = computed(() => ({
   paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
   paddingLeft: `${rpxToPx(32)}px`,
@@ -179,12 +212,45 @@ function resolveCardContent(cardId: string): string {
   return readHomeWelcomeCardById(cardId)?.content ?? "";
 }
 
+function refreshCollection(): void {
+  collectionVersion.value += 1;
+}
+
 function openDetail(cardId: string): void {
   activeDetailCardId.value = cardId;
 }
 
 function closeDetail(): void {
   activeDetailCardId.value = null;
+}
+
+function promptRemove(record: HomeWelcomeCardCollectionRecord): void {
+  pendingDeleteRecord.value = record;
+  isDeleteDialogOpen.value = true;
+}
+
+function closeDeleteDialog(): void {
+  isDeleteDialogOpen.value = false;
+  pendingDeleteRecord.value = null;
+}
+
+function handleDeleteDialogAction(actionKey: string): void {
+  const record = pendingDeleteRecord.value;
+  closeDeleteDialog();
+
+  if (actionKey !== "delete" || !record) {
+    return;
+  }
+
+  removeHomeWelcomeCardCollected(record.cardId);
+  if (activeDetailCardId.value === record.cardId) {
+    closeDetail();
+  }
+  refreshCollection();
+  uni.showToast({
+    title: settingsStore.locale === "en-US" ? "Removed from showcase" : "已从展柜移除",
+    icon: "none",
+  });
 }
 
 function handleGoBack(): void {
@@ -410,7 +476,7 @@ function handleGoBack(): void {
   flex-direction: column;
   gap: 22rpx;
 }
-</style>
+
 .home-card-showcase-page__detail-close {
   width: 72rpx;
   height: 72rpx;
@@ -426,3 +492,4 @@ function handleGoBack(): void {
   width: 32rpx;
   height: 32rpx;
 }
+</style>

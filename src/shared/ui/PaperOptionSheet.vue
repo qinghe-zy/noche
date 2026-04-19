@@ -89,17 +89,21 @@ function handleMaskClose(): void {
 
 .paper-option-sheet {
   width: min(100%, 420px);
+  max-height: calc(100vh - 56px);
   background: var(--noche-surface);
   border: 1px solid var(--noche-border);
   border-radius: 24px;
   box-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .paper-option-sheet__head {
   padding: 24px 22px 14px;
   text-align: center;
   border-bottom: 1px solid var(--noche-border);
+  flex-shrink: 0;
 }
 
 .paper-option-sheet__title {
@@ -120,6 +124,8 @@ function handleMaskClose(): void {
 .paper-option-sheet__options {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .paper-option-sheet__option {
@@ -170,6 +176,7 @@ function handleMaskClose(): void {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .paper-option-sheet__footer-text {

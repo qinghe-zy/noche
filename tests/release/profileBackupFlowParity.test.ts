@@ -11,8 +11,10 @@ describe("profile backup flow parity", () => {
     const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
 
     expect(profilePage).toContain("export-default");
+    expect(profilePage).toContain("export-private");
     expect(profilePage).toContain("export-custom");
     expect(profilePage).toContain("restore-default");
+    expect(profilePage).toContain("restore-private");
     expect(profilePage).toContain("restore-custom");
     expect(profilePage).toContain("backup-folder");
   });

@@ -164,23 +164,25 @@ const EXPLICIT_HOME_WELCOME_CARD_SEEDS = new Map<number, Partial<HomeWelcomeCard
 ]);
 
 function createDefaultHomeWelcomeCardContent(index: number, type: HomeWelcomeCardType): string {
+  void index;
+
   if (type === "mood_response") {
-    return `第 ${index} 张情绪卡提醒你，把此刻最真实的心绪先安放下来。`;
+    return "把此刻最真实的心绪先安放下来。";
   }
 
   if (type === "weather_season") {
-    return `第 ${index} 张时令卡替今天记一笔天气与季节留下来的细小线索。`;
+    return "替今天记一笔天气与季节留下来的细小线索。";
   }
 
   if (type === "action_prompt") {
-    return `第 ${index} 张行动卡想邀请你写下一件今天就能完成的小事。`;
+    return "写下一件今天就能完成的小事。";
   }
 
   if (type === "playful_draw") {
-    return `第 ${index} 张抽签卡想给今天一点轻松又刚好的偏爱。`;
+    return "给今天一点轻松又刚好的偏爱。";
   }
 
-  return `第 ${index} 张摘句卡提醒你，把今天的一瞬温柔轻轻收好。`;
+  return "把今天的一瞬温柔轻轻收好。";
 }
 
 function buildHomeWelcomeCardSeed(index: number, type: HomeWelcomeCardType): HomeWelcomeCardSeed {

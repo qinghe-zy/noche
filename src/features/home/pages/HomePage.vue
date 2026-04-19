@@ -192,14 +192,10 @@ import {
   isHomeWelcomeCardCollected,
   markHomeWelcomeCardCollected,
   markHomeWelcomeCardResolved,
-  markHomeWelcomeCardSeen,
-  readHomeWelcomeCardCollectionCount,
-  readHomeWelcomeCardSeenDate,
   resolveHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardGlyph,
   resolveHomeWelcomeCardTitle,
-  shouldAutoShowHomeWelcomeCard,
 } from "@/features/home/homeWelcomeCard";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
@@ -322,19 +318,12 @@ function resetWelcomeCard(): void {
 
 function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   clearWelcomeCardTimer();
-  const lastSeenDate = readHomeWelcomeCardSeenDate();
-
-  if (!shouldAutoShowHomeWelcomeCard(dateKey, lastSeenDate)) {
-    welcomeCardStage.value = "hidden";
-    return;
-  }
 
   if (isHomeWelcomeCardCollected(dateKey, activeWelcomeCard.value.id)) {
     welcomeCardStage.value = "hidden";
     return;
   }
 
-  markHomeWelcomeCardSeen(dateKey);
   markHomeWelcomeCardResolved(dateKey, activeWelcomeCard.value.id);
 
   welcomeCardStage.value = "entering";
