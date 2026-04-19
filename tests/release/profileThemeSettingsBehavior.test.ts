@@ -24,4 +24,16 @@ describe("profile theme settings behavior", () => {
     expect(i18n).toContain("themeClaude");
     expect(i18n).toContain("themeDefault");
   });
+
+  it("keeps shared sheets and topbar controls on semantic theme tokens", () => {
+    const topbarButton = readProjectFile("src/shared/ui/TopbarIconButton.vue");
+    const optionSheet = readProjectFile("src/shared/ui/PaperOptionSheet.vue");
+    const inputDialog = readProjectFile("src/shared/ui/PaperInputDialog.vue");
+    const confirmDialog = readProjectFile("src/shared/ui/PaperConfirmDialog.vue");
+
+    expect(topbarButton).toContain("var(--topbar-icon-color");
+    expect(optionSheet).toContain("var(--surface-primary");
+    expect(inputDialog).toContain("var(--surface-primary");
+    expect(confirmDialog).toContain("var(--surface-primary");
+  });
 });

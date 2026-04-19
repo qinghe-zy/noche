@@ -27,7 +27,14 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(138, 129, 120, 0.82);
+  color: var(--topbar-icon-color, var(--text-secondary, rgba(138, 129, 120, 0.82)));
+  border-radius: var(--radius-pill, 999rpx);
+  transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.topbar-icon-button:active {
+  background: var(--surface-primary, var(--noche-surface));
+  box-shadow: var(--shadow-ring, none);
 }
 
 .topbar-icon-button__icon {

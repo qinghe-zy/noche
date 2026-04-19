@@ -78,19 +78,21 @@ function handleMaskClose(): void {
 .paper-confirm-dialog {
   width: min(100%, 420px);
   max-height: calc(100vh - 56px);
-  background: var(--noche-surface);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
+  box-shadow: var(--shadow-whisper, 0 18px 40px rgba(44, 46, 42, 0.14));
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .paper-confirm-dialog__head {
   padding: 26px 24px 18px;
   text-align: center;
-  border-bottom: 1px solid var(--noche-border);
+  border-bottom: 1px solid var(--border-subtle, var(--noche-border));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -99,7 +101,8 @@ function handleMaskClose(): void {
   display: block;
   font-size: 24px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading, inherit);
 }
 
 .paper-confirm-dialog__copy {
@@ -107,7 +110,7 @@ function handleMaskClose(): void {
   margin-top: 10px;
   font-size: 13px;
   line-height: 1.8;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-confirm-dialog__actions {
@@ -127,23 +130,23 @@ function handleMaskClose(): void {
 }
 
 .paper-confirm-dialog__action + .paper-confirm-dialog__action {
-  border-top: 1px solid var(--noche-border);
+  border-top: 1px solid var(--border-subtle, var(--noche-border));
 }
 
 .paper-confirm-dialog__action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .paper-confirm-dialog__action-copy {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-confirm-dialog__action--muted .paper-confirm-dialog__action-title {
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-confirm-dialog__action--danger .paper-confirm-dialog__action-title {
