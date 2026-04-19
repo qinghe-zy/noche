@@ -1279,9 +1279,13 @@ watch(bodyViewportHeight, () => {
 
 .jotting-editor-shell {
   height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  --jotting-heading-font: var(--font-heading);
+  --jotting-body-font: var(--font-body);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 12%, transparent), transparent 28%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
   overflow: hidden;
   position: relative;
 }
@@ -1308,15 +1312,17 @@ watch(bodyViewportHeight, () => {
 .jotting-shell-edit__paper {
   margin: 0 32rpx;
   padding: 40rpx 44rpx;
-  background: var(--noche-surface);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
 }
 
 .jotting-shell-read__meta {
   display: block;
   margin-bottom: 24rpx;
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
   font-size: 20rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .jotting-shell-read__attachments,
@@ -1334,12 +1340,13 @@ watch(bodyViewportHeight, () => {
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: 20rpx;
-  background: var(--noche-panel);
+  background: var(--surface-secondary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
 }
 
 .jotting-shell-read__attachment-card--focused,
 .jotting-editor-shell__attachment-card--focused {
-  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
 }
 
 .jotting-shell-read__attachment-image,
@@ -1361,7 +1368,7 @@ watch(bodyViewportHeight, () => {
   margin: 24rpx 40rpx 0;
   text-align: right;
   font-size: 20rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-style: italic;
 }
 
@@ -1382,7 +1389,7 @@ watch(bodyViewportHeight, () => {
 .jotting-shell-edit__overlay-bg {
   position: absolute;
   inset: 0 0 auto 0;
-  background: var(--noche-bg);
+  background: var(--app-bg, var(--noche-bg));
 }
 
 .jotting-shell-read__topbar,
@@ -1428,19 +1435,21 @@ watch(bodyViewportHeight, () => {
 
 .jotting-shell-read__eyebrow,
 .jotting-shell-edit__eyebrow {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .jotting-shell-read__date,
 .jotting-shell-edit__date {
+  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
   letter-spacing: 0.04em;
 }
 
 .jotting-shell-read__title,
 .jotting-shell-edit__title-display {
+  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
   word-break: break-word;
 }
 
@@ -1485,7 +1494,8 @@ watch(bodyViewportHeight, () => {
   border: none;
   background: transparent;
   padding: 0;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
   font-size: 18px;
   line-height: 2;
 }
@@ -1513,13 +1523,13 @@ watch(bodyViewportHeight, () => {
 .jotting-editor-shell__icon-svg {
   width: 44rpx;
   height: 44rpx;
-  color: var(--noche-muted);
+  color: currentColor;
 }
 
 .jotting-editor-shell__continue-button {
   min-height: 56rpx;
   font-size: 24rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .jotting-editor-shell__spacer {
@@ -1533,7 +1543,7 @@ watch(bodyViewportHeight, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .jotting-editor-shell__meta-image-icon {
@@ -1548,11 +1558,12 @@ watch(bodyViewportHeight, () => {
   border: none;
   background: transparent;
   padding: 0;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
 }
 
 .jotting-editor-shell__title-placeholder {
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-weight: 300;
 }
 
@@ -1566,17 +1577,17 @@ watch(bodyViewportHeight, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--noche-panel);
+  background: var(--surface-primary, var(--noche-surface));
 }
 
 .jotting-editor-shell__attachment-remove-svg {
   width: 28rpx;
   height: 28rpx;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .jotting-editor-shell__placeholder {
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-weight: 300;
 }
 
@@ -1584,7 +1595,7 @@ watch(bodyViewportHeight, () => {
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-size: var(--jotting-writing-font-size, 18px);
   line-height: var(--jotting-writing-line-height, 36px);
   pointer-events: none;
