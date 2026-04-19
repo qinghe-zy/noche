@@ -489,7 +489,7 @@ onShow(() => {
   overflow: hidden;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 14%, transparent), transparent 28%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 18%, transparent), transparent 30%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
@@ -523,13 +523,13 @@ onShow(() => {
   min-height: 72rpx;
   display: inline-flex;
   align-items: center;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   transition: transform 220ms ease, color 180ms ease;
 }
 
 .home-page__topnav-showcase-entry--pulse {
   transform: scale(1.08);
-  color: var(--noche-text);
+  color: var(--accent-brand, var(--text-primary, var(--noche-text)));
 }
 
 .home-page__showcase-stack {
@@ -575,7 +575,7 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding: 0;
   box-shadow: none;
   outline: none;
@@ -598,7 +598,7 @@ onShow(() => {
 
 .home-page__topnav-profile-entry:active,
 .home-page__topnav-profile-entry:hover {
-  color: var(--noche-text);
+  color: var(--accent-brand, var(--text-primary, var(--noche-text)));
 }
 
 .home-page__main {
@@ -668,18 +668,24 @@ onShow(() => {
   width: min(100%, 340px);
   aspect-ratio: 1 / 1.4;
   padding: 48px;
-  background-color: var(--home-surface-primary, var(--noche-panel));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, var(--surface-secondary, #e3d5be) 12%)
+    );
+  border: 1px solid var(--border-subtle, var(--noche-border));
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 10px 30px -5px rgba(0, 0, 0, 0.05),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    0 18px 38px rgba(101, 81, 58, 0.09),
+    0 8px 18px rgba(101, 81, 58, 0.05),
+    var(--shadow-ring, 0 0 0 1px rgba(165, 133, 102, 0.28));
 }
 
 .home-page__paper-premium::after {
   content: "";
   position: absolute;
   inset: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #d7c8b1) 82%, transparent);
   pointer-events: none;
 }
 
@@ -935,13 +941,21 @@ onShow(() => {
   padding: 36px 34px 30px;
   border-radius: 38px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
-    linear-gradient(140deg, rgba(215, 205, 192, 0.16), rgba(215, 205, 192, 0) 48%),
-    var(--noche-surface);
-  border: 1px solid var(--noche-border);
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 94%, white 6%),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 86%, transparent)
+    ),
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--accent-brand, #c96442) 12%, transparent),
+      color-mix(in srgb, var(--accent-brand, #c96442) 0%, transparent) 48%
+    ),
+    var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   box-shadow:
-    0 22px 58px rgba(44, 47, 48, 0.08),
-    0 8px 18px rgba(44, 47, 48, 0.04),
+    0 24px 56px rgba(101, 81, 58, 0.12),
+    0 10px 24px rgba(101, 81, 58, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.58);
   display: flex;
   flex-direction: column;
@@ -956,7 +970,7 @@ onShow(() => {
   position: absolute;
   inset: 12px;
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.44);
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #d7c8b1) 56%, white);
   pointer-events: none;
 }
 
@@ -1233,10 +1247,12 @@ onShow(() => {
 
 .home-page__jotting-modal {
   width: min(100%, 420px);
-  background: rgba(252, 248, 241, 0.98);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, rgba(252, 248, 241, 0.98));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
+  box-shadow:
+    0 18px 40px rgba(101, 81, 58, 0.16),
+    var(--shadow-ring, 0 0 0 1px rgba(165, 133, 102, 0.28));
   overflow: hidden;
 }
 

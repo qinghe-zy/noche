@@ -1539,13 +1539,13 @@ onUnmounted(() => {
 .profile-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 10%, transparent), transparent 28%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 16%, transparent), transparent 30%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
-  --profile-soft-text: rgba(74, 70, 64, 0.88);
-  --profile-soft-meta: rgba(92, 87, 79, 0.8);
-  --profile-soft-hint: rgba(110, 104, 96, 0.72);
+  --profile-soft-text: color-mix(in srgb, var(--text-primary, #1b1713) 86%, white 14%);
+  --profile-soft-meta: var(--text-secondary, #6b6154);
+  --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
 }
 
 .theme-dark.profile-page {

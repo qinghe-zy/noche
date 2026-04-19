@@ -16,4 +16,15 @@ describe("theme resolution", () => {
     expect(tokens["--app-bg"]).toBe("#141413");
     expect(tokens["--text-secondary"]).toBe("#b0aea5");
   });
+
+  it("keeps Claude light visibly warmer and more editorial than default light", () => {
+    const tokens = getThemeTokens("claude-light");
+
+    expect(tokens["--app-bg"]).toBe("#efe7d8");
+    expect(tokens["--surface-primary"]).toBe("#fbf4e8");
+    expect(tokens["--surface-secondary"]).toBe("#e3d5be");
+    expect(tokens["--text-primary"]).toBe("#1b1713");
+    expect(tokens["--text-secondary"]).toBe("#6b6154");
+    expect(tokens["--border-subtle"]).toBe("#d7c8b1");
+  });
 });
