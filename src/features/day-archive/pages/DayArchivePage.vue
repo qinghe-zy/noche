@@ -108,7 +108,9 @@ onLoad((query) => {
 .day-archive-page {
   min-height: 100vh;
   padding: 56rpx 32rpx 72rpx;
-  background: var(--noche-bg);
+  background: var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .day-archive-page__hero,
@@ -138,7 +140,8 @@ onLoad((query) => {
   font-size: 58rpx;
   line-height: 1.1;
   font-weight: 600;
-  color: #1d1d1d;
+  color: var(--text-primary, #1d1d1d);
+  font-family: var(--font-heading);
 }
 
 .day-archive-page__subtitle {
@@ -166,8 +169,8 @@ onLoad((query) => {
 .day-archive-page__item {
   padding: 28rpx 24rpx;
   border-radius: 28rpx;
-  background: var(--noche-surface);
-  border: 1rpx solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1rpx solid var(--border-subtle, var(--noche-border));
 }
 
 .day-archive-page__state {
@@ -182,6 +185,7 @@ onLoad((query) => {
   font-size: 28rpx;
   line-height: 1.6;
   color: rgba(34, 34, 34, 0.68);
+  font-family: var(--font-body);
 }
 
 .day-archive-page__list {
@@ -203,7 +207,8 @@ onLoad((query) => {
   font-size: 34rpx;
   line-height: 1.3;
   font-weight: 600;
-  color: #1d1d1d;
+  color: var(--text-primary, #1d1d1d);
+  font-family: var(--font-heading);
 }
 
 .day-archive-page__item-content {

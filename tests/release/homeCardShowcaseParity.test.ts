@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("home card showcase parity", () => {
@@ -41,5 +41,13 @@ describe("home card showcase parity", () => {
     expect(page).toContain("paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`");
     expect(page).toContain("paddingBottom: `${topbarBottomSpacing.value}px`");
     expect(page).not.toContain("home-card-showcase-page__count");
+  });
+
+  it("starts moving the showcase page onto semantic tokens and heading fonts", () => {
+    const page = readProjectFile("src/features/home/pages/HomeCardShowcasePage.vue");
+
+    expect(page).toContain("var(--accent-brand)");
+    expect(page).toContain("var(--surface-primary");
+    expect(page).toContain("var(--font-heading)");
   });
 });

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("editor stitch parity", () => {
@@ -74,5 +74,16 @@ describe("editor stitch parity", () => {
     expect(futureShell).toContain(".theme-dark.editor-page");
     expect(futureShell).toContain(".theme-dark .editor-page__paper-surface");
     expect(futureShell).toContain(".theme-dark .editor-page__future-ribbon");
+  });
+
+  it("starts moving editor shells onto semantic tokens and heading/body font stacks", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+    const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
+
+    expect(diaryShell).toContain("var(--font-heading)");
+    expect(jottingShell).toContain("var(--font-body)");
+    expect(futureShell).toContain("var(--surface-primary");
+    expect(futureShell).toContain("var(--text-secondary");
   });
 });

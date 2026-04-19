@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("calendar stitch parity", () => {
@@ -22,5 +22,13 @@ describe("calendar stitch parity", () => {
     expect(calendarPage).toContain("TopbarIconButton");
     expect(calendarPage).toContain("AppIcon");
     expect(calendarPage).toContain("statusBarHeight.value + rpxToPx(32)");
+  });
+
+  it("starts moving calendar surfaces onto semantic tokens and heading fonts", () => {
+    const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+
+    expect(calendarPage).toContain("var(--surface-primary");
+    expect(calendarPage).toContain("var(--font-heading)");
+    expect(calendarPage).toContain("var(--accent-brand)");
   });
 });

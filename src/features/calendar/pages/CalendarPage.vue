@@ -457,12 +457,15 @@ onShow(() => {
 
 .calendar-page {
   height: 100vh;
-  background-color: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 10%, transparent), transparent 28%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  --calendar-accent-brand: var(--accent-brand);
 }
 
 .calendar-page__body {
@@ -478,7 +481,7 @@ onShow(() => {
 
 .calendar-page__topbar {
   width: 100%;
-  background: var(--noche-surface);
+  background: var(--surface-primary, var(--noche-surface));
 }
 
 .calendar-page__topbar-inner {
@@ -512,8 +515,9 @@ onShow(() => {
 .calendar-page__topbar-title {
   font-size: 30rpx;
   letter-spacing: 0.14em;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.14em;
+  font-family: var(--font-heading);
 }
 
 .calendar-page__main {
@@ -536,7 +540,8 @@ onShow(() => {
   display: block;
   font-size: 36px;
   line-height: 1.2;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading);
 }
 
 .calendar-page__hero-subtitle {
@@ -566,8 +571,8 @@ onShow(() => {
 }
 
 .calendar-page__paper-panel {
-  background: var(--noche-panel);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 18px;
   padding: 24px 18px calc(22px - 24rpx);
 }
@@ -673,7 +678,7 @@ onShow(() => {
   width: 28px;
   height: 28px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(246, 240, 232, 0.96) 0%, rgba(246, 240, 232, 0.52) 48%, rgba(246, 240, 232, 0) 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--calendar-accent-brand, #c96442) 18%, rgba(246, 240, 232, 0.96)) 0%, rgba(246, 240, 232, 0.52) 48%, rgba(246, 240, 232, 0) 72%);
   transform: translate(-50%, -58%);
   z-index: -1;
 }
@@ -725,8 +730,9 @@ onShow(() => {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   margin-bottom: 8px;
+  font-family: var(--font-heading);
 }
 
 .calendar-page__day-mailbox-body {
