@@ -83,7 +83,7 @@ defineEmits<{
   align-items: flex-end;
   justify-content: center;
   padding: 32rpx 24rpx 36rpx;
-  background: rgba(34, 32, 28, 0.42);
+  background: var(--overlay-blur-bg, rgba(34, 32, 28, 0.42));
   backdrop-filter: blur(14rpx);
 }
 
@@ -92,7 +92,7 @@ defineEmits<{
   max-height: 88vh;
   border-radius: 32rpx;
   overflow: hidden;
-  background: rgba(250, 247, 242, 0.98);
+  background: var(--surface-primary, rgba(250, 247, 242, 0.98));
   display: flex;
   flex-direction: column;
 }
@@ -109,7 +109,7 @@ defineEmits<{
 .profile-album-viewer__type {
   font-size: 19rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.72));
   letter-spacing: 0.14em;
 }
 
@@ -121,7 +121,7 @@ defineEmits<{
 .profile-album-viewer__image {
   width: 100%;
   border-radius: 24rpx;
-  background: rgba(239, 234, 226, 0.86);
+  background: var(--surface-secondary, rgba(239, 234, 226, 0.86));
 }
 
 .profile-album-viewer__meta {
@@ -141,7 +141,7 @@ defineEmits<{
 .profile-album-viewer__date {
   font-size: 28rpx;
   line-height: 1.4;
-  color: #31332e;
+  color: var(--text-primary, #31332e);
 }
 
 .profile-album-viewer__actions {
@@ -154,11 +154,11 @@ defineEmits<{
   width: 72rpx;
   height: 72rpx;
   border-radius: 999rpx;
-  background: rgba(238, 232, 223, 0.92);
+  background: var(--button-secondary-bg, rgba(238, 232, 223, 0.92));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c655c;
+  color: var(--button-secondary-text, #6c655c);
 }
 
 .profile-album-viewer__pager--disabled {
@@ -174,7 +174,7 @@ defineEmits<{
   flex: 1;
   min-height: 72rpx;
   border-radius: 999rpx;
-  background: #6a635a;
+  background: var(--button-primary-bg, #6a635a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +183,7 @@ defineEmits<{
 .profile-album-viewer__jump-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: #fbf9f5;
+  color: var(--button-primary-text, #fbf9f5);
   letter-spacing: 0.08em;
 }
 

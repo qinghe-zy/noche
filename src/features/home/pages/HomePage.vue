@@ -493,7 +493,7 @@ onShow(() => {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
+  font-family: var(--font-body, inherit);
   position: relative;
   --home-accent-brand: var(--accent-brand);
   --home-surface-primary: var(--surface-primary);
@@ -547,7 +547,7 @@ onShow(() => {
   border-radius: 10rpx;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(244, 236, 226, 0.94));
   border: 1px solid rgba(195, 183, 169, 0.56);
-  box-shadow: 0 6rpx 16rpx rgba(75, 67, 58, 0.08);
+  box-shadow: var(--shadow-whisper, 0 6px 16px rgba(75, 67, 58, 0.08));
 }
 
 .home-page__showcase-stack-card--back {
@@ -571,7 +571,7 @@ onShow(() => {
 
 .home-page__topnav-profile-entry {
   min-height: 72rpx;
-  border: 1px solid var(--button-ghost-border, transparent);
+  border: none;
   background: var(--button-ghost-bg, transparent);
   border-radius: var(--button-pill-radius, 999px);
   display: flex;
@@ -676,11 +676,8 @@ onShow(() => {
       color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
       color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, var(--surface-secondary, #e3d5be) 12%)
     );
-  border: 1px solid var(--border-subtle, var(--noche-border));
-  box-shadow:
-    0 18px 38px rgba(101, 81, 58, 0.09),
-    0 8px 18px rgba(101, 81, 58, 0.05),
-    var(--shadow-ring, 0 0 0 1px rgba(165, 133, 102, 0.28));
+  border: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--shadow-whisper, 0 18px 38px rgba(101, 81, 58, 0.09));
 }
 
 .home-page__paper-premium::after {
@@ -766,13 +763,12 @@ onShow(() => {
 }
 
 .home-page__paper-subtitle {
-  font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 10px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
   color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.4em;
-  font-family: var(--font-body);
+  font-family: var(--font-body, inherit);
 }
 
 .home-page__paper-seal {
@@ -831,7 +827,7 @@ onShow(() => {
 }
 
 .home-page__nav-entry-label {
-  font-family: var(--font-body, "Inter", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.3em;
   color: var(--text-secondary, var(--noche-muted));
@@ -852,11 +848,11 @@ onShow(() => {
 }
 
 .home-page__footer-text {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.6em;
   text-transform: uppercase;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.6em;
 }
 
@@ -948,23 +944,9 @@ onShow(() => {
   height: 404px;
   padding: 36px 34px 30px;
   border-radius: 38px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--surface-primary, #fbf4e8) 94%, white 6%),
-      color-mix(in srgb, var(--surface-primary, #fbf4e8) 86%, transparent)
-    ),
-    linear-gradient(
-      140deg,
-      color-mix(in srgb, var(--accent-brand, #c96442) 12%, transparent),
-      color-mix(in srgb, var(--accent-brand, #c96442) 0%, transparent) 48%
-    ),
-    var(--surface-primary, var(--noche-surface));
-  border: 1px solid var(--border-subtle, var(--noche-border));
-  box-shadow:
-    0 24px 56px rgba(101, 81, 58, 0.12),
-    0 10px 24px rgba(101, 81, 58, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  background: var(--surface-secondary, var(--noche-surface));
+  border: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--shadow-whisper, 0 24px 56px rgba(101, 81, 58, 0.12));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -987,6 +969,7 @@ onShow(() => {
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.26), transparent 34%),
     radial-gradient(circle at bottom right, rgba(205, 194, 179, 0.12), transparent 30%);
   pointer-events: none;
@@ -1021,10 +1004,7 @@ onShow(() => {
 }
 
 .home-page__welcome-card--expanded .home-page__welcome-card-face-inner {
-  box-shadow:
-    0 28px 64px rgba(44, 47, 48, 0.09),
-    0 10px 24px rgba(44, 47, 48, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  box-shadow: var(--shadow-whisper, 0 28px 64px rgba(44, 47, 48, 0.09));
 }
 
 .home-page__welcome-card--collecting .home-page__welcome-card-face {
@@ -1048,13 +1028,9 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(247, 241, 233, 0.72)),
-    var(--noche-panel);
-  border: 1px solid var(--noche-border);
-  box-shadow:
-    0 6px 14px rgba(44, 47, 48, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  background: var(--surface-secondary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-whisper, 0 6px 14px rgba(44, 47, 48, 0.05));
 }
 
 .home-page__welcome-card-body {
@@ -1083,10 +1059,10 @@ onShow(() => {
 }
 
 .home-page__welcome-card-eyebrow {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 12px;
   line-height: 1.5;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   letter-spacing: 0.26em;
   text-transform: uppercase;
   padding-left: 0.26em;
@@ -1103,12 +1079,12 @@ onShow(() => {
 }
 
 .home-page__welcome-card-title {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-heading, inherit);
   font-size: 48px;
   line-height: 0.96;
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  color: var(--noche-text);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-primary, var(--noche-text));
   white-space: pre-line;
   max-width: 220px;
   align-self: flex-start;
@@ -1120,9 +1096,10 @@ onShow(() => {
 }
 
 .home-page__welcome-card-content {
+  font-family: var(--font-body, inherit);
   font-size: 19px;
-  line-height: 2.02;
-  color: var(--noche-text);
+  line-height: 1.6;
+  color: var(--text-secondary, var(--noche-text));
   letter-spacing: 0.02em;
   max-width: 220px;
   align-self: flex-start;
@@ -1159,8 +1136,6 @@ onShow(() => {
     linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0)),
     rgba(233, 225, 214, 0.42);
   border: 1px solid rgba(214, 204, 191, 0.32);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.56);
 }
 
 .home-page__welcome-card-pill {
@@ -1220,18 +1195,17 @@ onShow(() => {
 }
 
 .home-page__welcome-card-pill-label {
-  font-family: var(--font-body, "Inter", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   font-size: 15px;
   line-height: 1;
   color: var(--button-primary-text, var(--noche-text));
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.01em;
 }
 
 .home-page__welcome-card-pill-label--secondary {
   color: var(--button-secondary-text, var(--noche-muted));
 }
-
 .home-page__welcome-card--expanded .home-page__welcome-card-pill {
   transform: scale(1);
 }

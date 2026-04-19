@@ -39,8 +39,15 @@ export function getThemeTokens(themeKey: ResolvedThemeKey) {
   return THEME_TOKENS[themeKey];
 }
 
-export function resolveThemeClass(themeMode: ThemeMode): string {
-  return resolveThemeMode(themeMode) === "dark" ? "theme-dark" : "theme-light";
+export function resolveThemeClass(
+  themeFamily: ThemeFamily,
+  themeMode: ThemeMode,
+  systemTheme = resolveSystemTheme(),
+): string {
+  const resolvedThemeMode = resolveThemeMode(themeMode, systemTheme);
+  const resolvedThemeKey = resolveThemeKey(themeFamily, themeMode, systemTheme);
+
+  return `theme-${resolvedThemeMode} theme-family-${themeFamily} theme-key-${resolvedThemeKey}`;
 }
 
 export function resolveTypographyClass(preset: SettingsState["writingPreset"]): string {
@@ -50,7 +57,7 @@ export function resolveTypographyClass(preset: SettingsState["writingPreset"]): 
 export function useThemeClass() {
   const settingsStore = useSettingsStore();
 
-  return computed(() => resolveThemeClass(settingsStore.themeMode));
+  return computed(() => resolveThemeClass(settingsStore.themeFamily, settingsStore.themeMode));
 }
 
 export function useResolvedThemeKey() {

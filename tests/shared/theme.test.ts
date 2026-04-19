@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getThemeTokens, resolveThemeKey } from "@/shared/theme";
+import { getThemeTokens, resolveThemeClass, resolveThemeKey } from "@/shared/theme";
 
 describe("theme resolution", () => {
   it("resolves claude family with explicit dark mode", () => {
@@ -26,5 +26,10 @@ describe("theme resolution", () => {
     expect(tokens["--text-primary"]).toBe("#1b1713");
     expect(tokens["--text-secondary"]).toBe("#6b6154");
     expect(tokens["--border-subtle"]).toBe("#d7c8b1");
+  });
+
+  it("resolves theme classes with mode, family, and key so pages can distinguish default from claude", () => {
+    expect(resolveThemeClass("default", "light", "light")).toBe("theme-light theme-family-default theme-key-default-light");
+    expect(resolveThemeClass("claude", "system", "dark")).toBe("theme-dark theme-family-claude theme-key-claude-dark");
   });
 });

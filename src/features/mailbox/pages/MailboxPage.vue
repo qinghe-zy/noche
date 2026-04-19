@@ -513,7 +513,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
+  font-family: var(--font-body, inherit);
   position: relative;
   overflow: hidden;
   overflow-x: hidden;
@@ -545,7 +545,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   letter-spacing: 0.25em;
   color: var(--text-primary, var(--noche-text));
   padding-left: 0.25em;
-  font-family: var(--font-heading);
+  font-family: var(--font-heading, inherit);
 }
 
 .mailbox-page__main {
@@ -622,7 +622,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill-text {
-  font-family: var(--mailbox-font-body, "Inter", sans-serif);
+  font-family: var(--font-body, inherit);
   color: var(--text-secondary, var(--noche-muted));
 }
 
@@ -644,6 +644,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   box-shadow: var(--button-secondary-shadow, none);
 }
 
+
 .mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
   color: var(--noche-text);
   font-weight: 600;
@@ -661,11 +662,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 15px;
   line-height: 1.8;
   text-align: center;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__state--error .mailbox-page__state-text {
-  color: #9f403d;
+  color: var(--button-danger-text, #9f403d);
 }
 
 .mailbox-page__retry {
@@ -703,10 +704,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__module-count {
   position: absolute;
   right: 0;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.18em;
-  color: rgba(121, 124, 117, 0.74);
+  color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.18em;
 }
 
@@ -716,11 +717,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__module-tab-text {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 11px;
   letter-spacing: 0.3em;
-  color: var(--noche-text);
-  font-weight: 600;
+  color: var(--text-primary, var(--noche-text));
+  font-weight: 500;
   padding-left: 0.3em;
 }
 
@@ -739,9 +740,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__module-empty-text {
+  font-family: var(--font-body, inherit);
   font-size: 13px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__list {
@@ -796,7 +798,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-dot {
   width: 4px;
   height: 4px;
-  background: rgba(177, 179, 171, 0.7);
+  background: var(--text-tertiary, rgba(177, 179, 171, 0.7));
 }
 
 .mailbox-page__entry-type,
@@ -804,11 +806,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-meta,
 .mailbox-page__sealed-lock-label,
 .mailbox-page__footer-text {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(121, 124, 117, 0.72);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__entry-type,
@@ -821,7 +823,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__entry-prelude-glyph {
@@ -842,13 +844,13 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: block;
   font-size: 13px;
   line-height: 1.9;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--text-secondary, var(--noche-text));
 }
 
 .mailbox-page__entry-foot {
   margin-top: 18px;
   padding-top: 14px;
-  border-top: 1px solid rgba(221, 212, 200, 0.8);
+  border-top: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -857,7 +859,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-icon {
   width: 16px;
   height: 16px;
-  color: rgba(177, 179, 171, 0.62);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__sealed-center {
@@ -892,10 +894,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-title {
+  font-family: var(--font-body, inherit);
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.12em;
-  color: rgba(87, 83, 73, 0.92);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.12em;
   text-align: center;
 }
@@ -908,18 +911,19 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-copy {
+  font-family: var(--font-body, inherit);
   font-size: 12px;
   line-height: 1.6;
   text-align: center;
-  color: rgba(99, 95, 85, 0.68);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__sealed-wax {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.12);
-  border: 1px solid rgba(138, 129, 120, 0.2);
+  background: var(--surface-secondary, rgba(138, 129, 120, 0.12));
+  border: 1px solid var(--border-subtle, rgba(138, 129, 120, 0.2));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -929,13 +933,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 5px;
   height: 5px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.28);
+  background: var(--border-prominent, rgba(138, 129, 120, 0.28));
 }
 
 .mailbox-page__fab {
-  position: fixed;
-  right: 24px;
-  bottom: 28px;
   width: 56px;
   height: 56px;
   border: 1px solid var(--button-primary-border, transparent);

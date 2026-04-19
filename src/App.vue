@@ -1,7 +1,7 @@
 <template>
   <view
     class="app-shell"
-    :class="[resolvedThemeClass, resolvedTypographyClass, `theme-key-${resolvedThemeKey}`]"
+    :class="[resolvedThemeClass, resolvedTypographyClass]"
     :data-theme-family="settingsStore.themeFamily"
     :data-theme-key="resolvedThemeKey"
     :style="resolvedThemeTokens"
@@ -64,12 +64,6 @@ const resolvedThemeTokens = computed(() => getThemeTokens(resolvedThemeKey.value
   background: var(--app-bg);
   color: var(--text-primary);
   --noche-overlay: var(--overlay-mask, var(--noche-overlay));
-}
-
-.theme-key-default-light,
-.theme-key-default-dark,
-.theme-key-claude-light,
-.theme-key-claude-dark {
   --noche-bg: var(--app-bg);
   --noche-surface: var(--surface-primary);
   --noche-panel: var(--surface-secondary);

@@ -1286,7 +1286,7 @@ watch(bodyViewportHeight, () => {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--jotting-body-font);
   overflow: hidden;
   position: relative;
 }
@@ -1321,7 +1321,7 @@ watch(bodyViewportHeight, () => {
 .jotting-shell-read__meta {
   display: block;
   margin-bottom: 24rpx;
-  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--jotting-body-font);
   font-size: 20rpx;
   color: var(--text-secondary, var(--noche-muted));
 }
@@ -1436,7 +1436,7 @@ watch(bodyViewportHeight, () => {
 
 .jotting-shell-read__eyebrow,
 .jotting-shell-edit__eyebrow {
-  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--jotting-body-font);
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--text-secondary, var(--noche-muted));
@@ -1444,13 +1444,13 @@ watch(bodyViewportHeight, () => {
 
 .jotting-shell-read__date,
 .jotting-shell-edit__date {
-  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--jotting-heading-font);
   letter-spacing: 0.04em;
 }
 
 .jotting-shell-read__title,
 .jotting-shell-edit__title-display {
-  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--jotting-heading-font);
   word-break: break-word;
 }
 
@@ -1496,7 +1496,7 @@ watch(bodyViewportHeight, () => {
   background: transparent;
   padding: 0;
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--jotting-body-font);
   font-size: 18px;
   line-height: 2;
 }
@@ -1560,7 +1560,7 @@ watch(bodyViewportHeight, () => {
   background: transparent;
   padding: 0;
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--jotting-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--jotting-heading-font);
 }
 
 .jotting-editor-shell__title-placeholder {

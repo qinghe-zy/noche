@@ -1543,16 +1543,16 @@ onUnmounted(() => {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
+  font-family: var(--font-body, inherit);
   --profile-soft-text: color-mix(in srgb, var(--text-primary, #1b1713) 86%, white 14%);
   --profile-soft-meta: var(--text-secondary, #6b6154);
   --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
 }
 
 .theme-dark.profile-page {
-  --profile-soft-text: rgba(241, 237, 230, 0.92);
-  --profile-soft-meta: rgba(224, 218, 208, 0.82);
-  --profile-soft-hint: rgba(224, 218, 208, 0.72);
+  --profile-soft-text: var(--text-primary, rgba(241, 237, 230, 0.92));
+  --profile-soft-meta: var(--text-secondary, rgba(224, 218, 208, 0.82));
+  --profile-soft-hint: var(--text-tertiary, rgba(224, 218, 208, 0.72));
 }
 
 .profile-page__scroll {
@@ -1575,15 +1575,15 @@ onUnmounted(() => {
 }
 
 .profile-page__banner--success {
-  background: rgba(77, 122, 88, 0.1);
+  background: var(--surface-secondary, rgba(77, 122, 88, 0.1));
 }
 
 .profile-page__banner--info {
-  background: rgba(121, 92, 45, 0.1);
+  background: var(--surface-secondary, rgba(121, 92, 45, 0.1));
 }
 
 .profile-page__banner--error {
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--surface-secondary, rgba(159, 64, 61, 0.07));
 }
 
 .profile-page__banner-head {
@@ -1597,7 +1597,7 @@ onUnmounted(() => {
   display: block;
   font-size: 24rpx;
   line-height: 1.55;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .profile-page__banner-percent {
@@ -1612,15 +1612,15 @@ onUnmounted(() => {
   margin-top: 6rpx;
   font-size: 22rpx;
   line-height: 1.7;
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .profile-page__banner--info .profile-page__banner-text {
-  color: #7a6337;
+  color: var(--text-primary, #7a6337);
 }
 
 .profile-page__banner--success .profile-page__banner-text {
-  color: #456a50;
+  color: var(--button-primary-bg, #456a50);
 }
 
 .profile-page__progress {
@@ -1634,14 +1634,14 @@ onUnmounted(() => {
   width: 100%;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(116, 104, 84, 0.16);
+  background: var(--surface-secondary, rgba(116, 104, 84, 0.16));
   overflow: hidden;
 }
 
 .profile-page__progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95));
+  background: var(--button-primary-bg, linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95)));
   transition: width 220ms ease;
 }
 

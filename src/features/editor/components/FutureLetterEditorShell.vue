@@ -802,7 +802,7 @@ watch(bodyViewportHeight, (nextHeight) => {
     var(--app-bg, var(--noche-bg));
   position: relative;
   overflow: hidden;
-  font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   color: var(--text-primary, var(--noche-text));
 }
 
@@ -816,12 +816,12 @@ watch(bodyViewportHeight, (nextHeight) => {
 .editor-page__topbar-inner { width: 100%; padding: 0 0 24rpx; display: flex; align-items: center; justify-content: space-between; }
 .editor-page__topbar-button { width: 88rpx; height: 88rpx; padding: 0; display: flex; align-items: center; justify-content: center; position: relative; color: var(--text-secondary, var(--noche-muted)); border: none; background: transparent; }
 .editor-page__topbar-svg { width: 44rpx; height: 44rpx; color: currentColor; }
-.editor-page__saved-hint { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif); font-size: 10px; letter-spacing: 2rpx; color: var(--text-secondary, var(--noche-muted)); }
+.editor-page__saved-hint { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-family: var(--font-body, inherit); font-size: 10px; letter-spacing: 2rpx; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__topbar-spacer { width: 88rpx; height: 88rpx; }
 .editor-page__meta { margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; padding: 0 8px; }
 .editor-page__meta-row { display: flex; align-items: center; justify-content: space-between; gap: 24rpx; }
-.editor-page__meta-date { font-family: var(--font-heading, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif); font-size: 14px; letter-spacing: 0.25em; color: var(--text-primary, var(--noche-text)); }
-.editor-page__meta-subtitle { font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif); font-size: 12px; letter-spacing: 0.32em; color: var(--text-secondary, var(--noche-muted)); text-transform: uppercase; }
+.editor-page__meta-date { font-family: var(--font-heading, inherit); font-size: 14px; letter-spacing: 0.25em; color: var(--text-primary, var(--noche-text)); }
+.editor-page__meta-subtitle { font-family: var(--font-body, inherit); font-size: 12px; letter-spacing: 0.32em; color: var(--text-secondary, var(--noche-muted)); text-transform: uppercase; }
 .editor-page__meta-image-button { width: 48rpx; height: 48rpx; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__meta-image-icon { width: 28rpx; height: 28rpx; color: currentColor; }
 .editor-page__notice { margin-bottom: 20rpx; font-size: 22rpx; line-height: 1.6; }
@@ -840,28 +840,28 @@ watch(bodyViewportHeight, (nextHeight) => {
 .editor-page__writing-scroll { height: 100%; }
 .editor-page__writing-stage { min-height: 100%; padding: 0 8px; }
 .editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), rgba(177, 179, 171, 0.18) calc(var(--editor-paper-line-height, 44px) - 6px), rgba(177, 179, 171, 0.18) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); background-size: 100% var(--editor-paper-line-height, 44px); }
-.editor-page__textarea,.editor-page__read-content { width: 100%; border: none; background: transparent; color: var(--text-primary, var(--noche-text)); font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif); font-size: var(--editor-writing-font-size, 18px); line-height: var(--editor-writing-line-height, 44px); padding: 0; overflow-wrap: anywhere; }
+.editor-page__textarea,.editor-page__read-content { width: 100%; border: none; background: transparent; color: var(--text-primary, var(--noche-text)); font-family: var(--font-body, inherit); font-size: var(--editor-writing-font-size, 18px); line-height: var(--editor-writing-line-height, 44px); padding: 0; overflow-wrap: anywhere; }
 .editor-page__textarea { transition: height 220ms ease-out; }
 .editor-page__placeholder { color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__blank-spacer { width: 100%; }
 .editor-page__writing-area { height: 100%; padding: 0 8px 120rpx; }
 .editor-page__writing-area--read { overflow: hidden; }
 .editor-page__read-header { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
-.editor-page__read-headline { font-family: var(--font-heading, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif); font-size: 24px; line-height: 1.4; color: var(--text-primary, var(--noche-text)); }
+.editor-page__read-headline { font-family: var(--font-heading, inherit); font-size: 24px; line-height: 1.4; color: var(--text-primary, var(--noche-text)); }
 .editor-page__read-content { white-space: pre-wrap; display: block; height: 100%; }
 .editor-page__sheet-mask { position: fixed; inset: 0; z-index: 20; background: color-mix(in srgb, var(--text-primary, #141413) 24%, transparent); display: flex; align-items: flex-end; }
 .editor-page__date-sheet { width: 100%; padding: 34rpx 28rpx 40rpx; background: var(--surface-primary, var(--noche-surface)); display: flex; flex-direction: column; gap: 18rpx; }
-.editor-page__sheet-title { font-family: var(--font-heading, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif); font-size: 34rpx; color: var(--text-primary, var(--noche-text)); }
+.editor-page__sheet-title { font-family: var(--font-heading, inherit); font-size: 34rpx; color: var(--text-primary, var(--noche-text)); }
 .editor-page__sheet-copy { font-size: 24rpx; line-height: 1.7; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__sheet-calendar-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
 .editor-page__sheet-calendar-nav { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__sheet-calendar-nav-icon { width: 28rpx; height: 28rpx; color: currentColor; }
-.editor-page__sheet-calendar-month { font-family: var(--font-heading, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif); font-size: 24rpx; letter-spacing: 0.16em; color: var(--text-primary, var(--noche-text)); }
+.editor-page__sheet-calendar-month { font-family: var(--font-heading, inherit); font-size: 24rpx; letter-spacing: 0.16em; color: var(--text-primary, var(--noche-text)); }
 .editor-page__date-chip-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .editor-page__date-chip { min-height: 52rpx; padding: 0 18rpx; display: flex; align-items: center; justify-content: center; border-radius: 9999rpx; background: var(--surface-secondary, var(--noche-panel)); border: 1rpx solid var(--border-subtle, var(--noche-border)); color: var(--text-secondary, var(--noche-muted)); font-size: 22rpx; }
 .editor-page__date-chip--active { background: var(--accent-brand, #c96442); color: var(--surface-primary, #faf9f5); border-color: var(--accent-brand, #c96442); }
 .editor-page__date-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8rpx; }
-.editor-page__date-weekday { text-align: center; font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif); font-size: 18rpx; letter-spacing: 0.14em; color: var(--text-secondary, var(--noche-muted)); }
+.editor-page__date-weekday { text-align: center; font-family: var(--font-body, inherit); font-size: 18rpx; letter-spacing: 0.14em; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10rpx; }
 .editor-page__date-cell { min-height: 60rpx; display: flex; align-items: center; justify-content: center; border-radius: 18rpx; color: var(--text-secondary, var(--noche-muted)); }
 .editor-page__date-cell--selected { background: color-mix(in srgb, var(--accent-brand, #c96442) 92%, transparent); color: var(--surface-primary, #faf9f5); }

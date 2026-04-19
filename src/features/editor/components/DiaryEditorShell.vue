@@ -1143,7 +1143,7 @@ watch(bodyViewportHeight, () => {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--diary-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--diary-body-font);
   position: relative;
   overflow: hidden;
 }
@@ -1252,7 +1252,7 @@ watch(bodyViewportHeight, () => {
 
 .diary-shell-read__date,
 .diary-shell-edit__date {
-  font-family: var(--diary-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--diary-heading-font);
   letter-spacing: 0.04em;
   overflow: hidden;
 }
@@ -1267,7 +1267,7 @@ watch(bodyViewportHeight, () => {
 
 .diary-shell-read__title,
 .diary-shell-edit__title-display {
-  font-family: var(--diary-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--diary-heading-font);
   min-width: 0;
   flex: 0 1 auto;
   overflow: hidden;
@@ -1356,7 +1356,7 @@ watch(bodyViewportHeight, () => {
   background: transparent;
   padding: 0;
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--diary-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--diary-body-font);
   font-size: 18px;
   line-height: 2.2;
 }
@@ -1381,7 +1381,7 @@ watch(bodyViewportHeight, () => {
   background: transparent;
   padding: 0;
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--diary-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--diary-heading-font);
 }
 
 .diary-editor-shell__title-placeholder {
@@ -1425,7 +1425,7 @@ watch(bodyViewportHeight, () => {
   top: 4rpx;
   left: 50%;
   transform: translateX(-50%);
-  font-family: var(--diary-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--diary-body-font);
   font-size: 18rpx;
   letter-spacing: 4rpx;
   color: var(--text-secondary, var(--noche-muted));

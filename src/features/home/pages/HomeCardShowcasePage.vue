@@ -276,7 +276,7 @@ function handleGoBack(): void {
     radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
-  font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
 }
 
 .home-card-showcase-page__topbar {
@@ -315,7 +315,7 @@ function handleGoBack(): void {
 .home-card-showcase-page__group-subtitle,
 .home-card-showcase-page__paper-item-eyebrow,
 .home-card-showcase-page__detail-eyebrow {
-  font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   font-size: 20rpx;
   line-height: 1.5;
   letter-spacing: 0.18em;
@@ -325,13 +325,13 @@ function handleGoBack(): void {
 .home-card-showcase-page__title,
 .home-card-showcase-page__group-title,
 .home-card-showcase-page__empty-title {
-  font-family: var(--home-showcase-heading-font, "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif);
+  font-family: var(--font-heading, inherit);
   font-size: 36rpx;
   line-height: 1.35;
 }
 
 .home-card-showcase-page__group-count {
-  font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
   color: var(--text-secondary, var(--noche-muted));
 }
@@ -433,7 +433,7 @@ function handleGoBack(): void {
 
 .home-card-showcase-page__paper-item-date,
 .home-card-showcase-page__detail-date {
-  font-family: var(--font-body, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
   color: var(--text-secondary, var(--noche-muted));
 }
