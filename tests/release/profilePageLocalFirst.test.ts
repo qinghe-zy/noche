@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("profile page local-first constraints", () => {
@@ -64,5 +64,17 @@ describe("profile page local-first constraints", () => {
     expect(profileHero).toContain("var(--profile-soft-text");
     expect(profileActionList).toContain("var(--profile-soft-meta");
     expect(profileStats).toContain("var(--profile-soft-meta");
+  });
+
+  it("starts moving profile surfaces onto semantic theme tokens and heading/body font stacks", () => {
+    const profilePage = readProjectFile("src/features/profile/pages/ProfilePage.vue");
+    const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
+    const profileActionList = readProjectFile("src/features/profile/components/ProfileActionList.vue");
+    const profileAlbum = readProjectFile("src/features/profile/components/ProfileMemoryAlbum.vue");
+
+    expect(profilePage).toContain("var(--surface-primary");
+    expect(profileHero).toContain("var(--font-heading)");
+    expect(profileActionList).toContain("var(--surface-primary");
+    expect(profileAlbum).toContain("var(--font-heading)");
   });
 });

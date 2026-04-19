@@ -488,10 +488,14 @@ onShow(() => {
   align-items: center;
   overflow: hidden;
   overflow-x: hidden;
-  background-color: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 14%, transparent), transparent 28%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
   position: relative;
+  --home-accent-brand: var(--accent-brand);
+  --home-surface-primary: var(--surface-primary);
 }
 
 .home-page__topnav {
@@ -626,15 +630,17 @@ onShow(() => {
   font-size: 38px;
   line-height: 1.15;
   font-weight: 200;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading);
 }
 
 .home-page__hero-subtitle {
   max-width: min(100%, 420px);
   font-size: 12px;
   line-height: 1.7;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   letter-spacing: 0.12em;
+  font-family: var(--font-body);
 }
 
 .home-page__letter-spacing-widest {
@@ -662,7 +668,7 @@ onShow(() => {
   width: min(100%, 340px);
   aspect-ratio: 1 / 1.4;
   padding: 48px;
-  background-color: var(--noche-panel);
+  background-color: var(--home-surface-primary, var(--noche-panel));
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.03),
     0 10px 30px -5px rgba(0, 0, 0, 0.05),
@@ -695,7 +701,7 @@ onShow(() => {
 .home-page__paper-inner {
   width: 100%;
   height: 100%;
-  border: 0.5px solid var(--noche-border);
+  border: 0.5px solid var(--border-subtle, var(--noche-border));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -732,7 +738,7 @@ onShow(() => {
 .home-page__paper-icon {
   width: 40px;
   height: 40px;
-  color: var(--noche-muted);
+  color: var(--home-accent-brand, var(--noche-muted));
 }
 
 .home-page__paper-copy {
@@ -746,8 +752,9 @@ onShow(() => {
   font-size: 30px;
   line-height: 1.3;
   font-weight: 300;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   text-align: center;
+  font-family: var(--font-heading);
 }
 
 .home-page__paper-subtitle {
@@ -755,8 +762,9 @@ onShow(() => {
   font-size: 10px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.4em;
+  font-family: var(--font-body);
 }
 
 .home-page__paper-seal {

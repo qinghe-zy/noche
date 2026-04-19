@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("home stitch parity", () => {
@@ -32,6 +32,15 @@ describe("home stitch parity", () => {
     expect(homePage).toContain("handleNavigate('editor', { type: 'diary', recordDate: todayDateKey })");
     expect(homePage).not.toContain(">日记</text>");
     expect(homePage).not.toContain(">写一张随笔</text>");
+  });
+
+  it("adopts semantic theme tokens and a heading/body font split for the Claude redesign", () => {
+    const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
+
+    expect(homePage).toContain("var(--font-heading)");
+    expect(homePage).toContain("var(--font-body)");
+    expect(homePage).toContain("var(--accent-brand)");
+    expect(homePage).toContain("var(--surface-primary)");
   });
 
   it("uses a date-stable daily prompt for the primary diary card", () => {

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("profile album square parity", () => {
@@ -14,5 +14,14 @@ describe("profile album square parity", () => {
     expect(profileAlbum).toContain("padding-top: 100%;");
     expect(profileAlbum).toContain("position: absolute;");
     expect(profileAlbum).not.toContain("aspect-ratio: 1;");
+  });
+
+  it("keeps album surfaces on semantic tokens for the Claude redesign", () => {
+    const profileAlbum = readProjectFile("src/features/profile/components/ProfileMemoryAlbum.vue");
+    const profileAlbumPage = readProjectFile("src/features/profile/pages/ProfileAlbumPage.vue");
+
+    expect(profileAlbum).toContain("var(--surface-primary");
+    expect(profileAlbum).toContain("var(--border-subtle");
+    expect(profileAlbumPage).toContain("var(--font-heading)");
   });
 });

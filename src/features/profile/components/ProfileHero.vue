@@ -123,6 +123,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   color: var(--profile-soft-text, var(--noche-text));
   letter-spacing: 0.22em;
   padding-left: 0.22em;
+  font-family: var(--font-heading);
 }
 
 .profile-hero__nav-spacer {
@@ -141,6 +142,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   padding: 6rpx;
   background: rgba(252, 250, 246, 0.94);
   box-shadow: 0 18rpx 34rpx rgba(49, 51, 46, 0.08);
+  border: 1rpx solid var(--border-subtle, rgba(221, 212, 200, 0.72));
 }
 
 .profile-hero__avatar-image,
@@ -183,8 +185,9 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   font-size: 44rpx;
   line-height: 1.22;
   font-weight: 400;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   letter-spacing: 0.04em;
+  font-family: var(--font-heading);
 }
 
 .profile-hero__name--empty {
@@ -197,6 +200,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   line-height: 1.72;
   color: var(--profile-soft-meta, var(--noche-muted));
   letter-spacing: 0.06em;
+  font-family: var(--font-body);
 }
 
 .type-scale-small .profile-hero__title { font-size: 26rpx; }

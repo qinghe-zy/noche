@@ -136,8 +136,9 @@ onShow(() => {
 <style scoped>
 .profile-album-page {
   min-height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
+  background: var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .profile-album-page__topbar {
@@ -161,9 +162,10 @@ onShow(() => {
 .profile-album-page__title {
   font-size: 30rpx;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   letter-spacing: 0.24em;
   padding-left: 0.24em;
+  font-family: var(--font-heading);
 }
 
 .profile-album-page__spacer {

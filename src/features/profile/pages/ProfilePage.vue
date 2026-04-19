@@ -1538,9 +1538,11 @@ onUnmounted(() => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 10%, transparent), transparent 28%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
   --profile-soft-text: rgba(74, 70, 64, 0.88);
   --profile-soft-meta: rgba(92, 87, 79, 0.8);
   --profile-soft-hint: rgba(110, 104, 96, 0.72);
@@ -1566,7 +1568,9 @@ onUnmounted(() => {
 .profile-page__banner {
   padding: 16rpx 18rpx;
   border-radius: 18rpx;
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--surface-primary, rgba(159, 64, 61, 0.07));
+  border: 1rpx solid var(--border-subtle, rgba(221, 212, 200, 0.72));
+  box-shadow: var(--shadow-ring, none);
 }
 
 .profile-page__banner--success {
