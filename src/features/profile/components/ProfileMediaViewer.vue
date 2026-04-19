@@ -63,7 +63,7 @@ defineEmits<{
   align-items: flex-end;
   justify-content: center;
   padding: 28rpx 24rpx 34rpx;
-  background: rgba(34, 32, 28, 0.42);
+  background: var(--overlay-mask, rgba(34, 32, 28, 0.42));
   backdrop-filter: blur(14rpx);
 }
 
@@ -71,7 +71,7 @@ defineEmits<{
   width: min(100%, 700rpx);
   border-radius: 32rpx;
   overflow: hidden;
-  background: rgba(250, 247, 242, 0.98);
+  background: var(--surface-primary, rgba(250, 247, 242, 0.98));
   display: flex;
   flex-direction: column;
 }
@@ -116,26 +116,30 @@ defineEmits<{
 .profile-media-viewer__action {
   flex: 1;
   min-height: 76rpx;
-  border-radius: 999rpx;
-  background: rgba(238, 232, 223, 0.92);
+  border-radius: var(--button-pill-radius, 999rpx);
+  background: var(--button-secondary-bg, rgba(238, 232, 223, 0.92));
+  border: 1rpx solid var(--button-secondary-border, transparent);
+  box-shadow: var(--button-secondary-shadow, none);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .profile-media-viewer__action--danger {
-  background: rgba(138, 61, 58, 0.12);
+  background: color-mix(in srgb, var(--button-primary-bg, #c96442) 12%, transparent);
+  border-color: color-mix(in srgb, var(--button-primary-bg, #c96442) 22%, transparent);
 }
 
 .profile-media-viewer__action-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: #6a635a;
+  color: var(--button-secondary-text, #6a635a);
   letter-spacing: 0.08em;
+  font-family: var(--font-body, inherit);
 }
 
 .profile-media-viewer__action-text--danger {
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .type-scale-small .profile-media-viewer__title,

@@ -126,31 +126,47 @@ function handleMaskClose(): void {
   gap: 6px;
   align-items: center;
   text-align: center;
-  background: transparent;
+  background: var(--button-primary-bg, transparent);
+  border: 1px solid var(--button-primary-border, transparent);
+  box-shadow: var(--button-primary-shadow, none);
+  border-radius: var(--button-radius, 18px);
+  margin: 10px 16px 0;
 }
 
 .paper-confirm-dialog__action + .paper-confirm-dialog__action {
-  border-top: 1px solid var(--border-subtle, var(--noche-border));
+  border-top: none;
 }
 
 .paper-confirm-dialog__action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: var(--text-primary, var(--noche-text));
+  color: var(--button-primary-text, var(--text-primary, var(--noche-text)));
 }
 
 .paper-confirm-dialog__action-copy {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-secondary, var(--noche-muted));
+  color: color-mix(in srgb, var(--button-primary-text, var(--text-primary, var(--noche-text))) 72%, transparent);
 }
 
 .paper-confirm-dialog__action--muted .paper-confirm-dialog__action-title {
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
+}
+
+.paper-confirm-dialog__action--muted {
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .paper-confirm-dialog__action--danger .paper-confirm-dialog__action-title {
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
+}
+
+.paper-confirm-dialog__action--danger {
+  background: color-mix(in srgb, var(--button-primary-bg, #c96442) 12%, transparent);
+  border-color: color-mix(in srgb, var(--button-primary-bg, #c96442) 22%, transparent);
+  box-shadow: none;
 }
 
 .type-scale-small .paper-confirm-dialog__title { font-size: 23px; }

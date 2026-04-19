@@ -797,8 +797,8 @@ watch(bodyViewportHeight, (nextHeight) => {
 .editor-page {
   height: 100vh;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 14%, transparent), transparent 26%),
-    radial-gradient(circle at top right, color-mix(in srgb, var(--surface-secondary, #e8e6dc) 42%, transparent), transparent 24%),
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 26%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   position: relative;
   overflow: hidden;
@@ -874,7 +874,7 @@ watch(bodyViewportHeight, (nextHeight) => {
 .editor-page__watermark { position: absolute; bottom: 20rpx; right: 40rpx; font-size: 180rpx; color: color-mix(in srgb, var(--text-secondary, #b0aea5) 38%, transparent); pointer-events: none; }
 .editor-page__seal { position: absolute; right: 28rpx; bottom: 20rpx; pointer-events: none; }
 .editor-page__signature-svg { width: 84rpx; height: 84rpx; color: color-mix(in srgb, var(--text-secondary, #b0aea5) 82%, transparent); }
-.theme-dark.editor-page { background: radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 16%, transparent), transparent 24%), radial-gradient(circle at top right, color-mix(in srgb, var(--surface-secondary, #1d1d1b) 72%, transparent), transparent 24%), var(--app-bg, var(--noche-bg)); }
+.theme-dark.editor-page { background: radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 24%), radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%), var(--app-bg, var(--noche-bg)); }
 .theme-dark .editor-page__paper-surface { background: linear-gradient(180deg, color-mix(in srgb, var(--surface-primary, #30302e) 94%, transparent), color-mix(in srgb, var(--surface-primary, #30302e) 82%, var(--app-bg, #141413) 18%)); }
 .theme-dark .editor-page__topbar-button,.theme-dark .editor-page__meta-date,.theme-dark .editor-page__read-headline,.theme-dark .editor-page__future-ribbon-value,.theme-dark .editor-page__sheet-title,.theme-dark .editor-page__sheet-calendar-month,.theme-dark .editor-page__sheet-button--secondary,.theme-dark .editor-page__textarea,.theme-dark .editor-page__read-content { color: var(--text-primary, var(--noche-text)); }
 .theme-dark .editor-page__meta-subtitle,.theme-dark .editor-page__future-ribbon-label,.theme-dark .editor-page__read-meta,.theme-dark .editor-page__future-ribbon-hint,.theme-dark .editor-page__saved-hint,.theme-dark .editor-page__date-weekday,.theme-dark .editor-page__placeholder { color: var(--text-secondary, var(--noche-muted)); }

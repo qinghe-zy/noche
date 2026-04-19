@@ -458,7 +458,8 @@ onShow(() => {
 .calendar-page {
   height: 100vh;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 10%, transparent), transparent 28%),
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 28%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
@@ -498,15 +499,18 @@ onShow(() => {
   height: 88rpx;
   border: none;
   background: transparent;
-  color: var(--noche-muted);
+  color: var(--button-secondary-text, var(--noche-muted));
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border-radius: var(--button-pill-radius, 999px);
+  border: 1px solid var(--button-secondary-border, transparent);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .calendar-page__topbar-button--label {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, "Inter", sans-serif);
   font-size: 20rpx;
   letter-spacing: 0.18em;
   padding-left: 0.18em;
@@ -589,7 +593,7 @@ onShow(() => {
   height: 56rpx;
   border: none;
   background: transparent;
-  color: var(--noche-muted);
+  color: var(--button-secondary-text, var(--noche-muted));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -733,6 +737,9 @@ onShow(() => {
   color: var(--text-primary, var(--noche-text));
   margin-bottom: 8px;
   font-family: var(--font-heading);
+  border-radius: var(--button-pill-radius, 999px);
+  border: 1px solid var(--button-secondary-border, transparent);
+  background: var(--button-ghost-bg, transparent);
 }
 
 .calendar-page__day-mailbox-body {
@@ -760,11 +767,12 @@ onShow(() => {
 .calendar-page__day-mailbox-action {
   min-height: 34px;
   padding: 0 14px;
-  border-radius: 9999px;
-  border: 1px solid var(--noche-border);
-  background: var(--noche-panel);
-  color: var(--noche-text);
+  border-radius: var(--button-pill-radius, 999px);
+  border: 1px solid var(--button-secondary-border, var(--noche-border));
+  background: var(--button-secondary-bg, var(--noche-panel));
+  color: var(--button-secondary-text, var(--noche-text));
   font-size: 12px;
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .calendar-page__day-mailbox-list {

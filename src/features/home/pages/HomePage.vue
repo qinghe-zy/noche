@@ -489,7 +489,8 @@ onShow(() => {
   overflow: hidden;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 18%, transparent), transparent 30%),
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 30%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
@@ -570,8 +571,9 @@ onShow(() => {
 
 .home-page__topnav-profile-entry {
   min-height: 72rpx;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--button-ghost-border, transparent);
+  background: var(--button-ghost-bg, transparent);
+  border-radius: var(--button-pill-radius, 999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -598,7 +600,7 @@ onShow(() => {
 
 .home-page__topnav-profile-entry:active,
 .home-page__topnav-profile-entry:hover {
-  color: var(--accent-brand, var(--text-primary, var(--noche-text)));
+  color: var(--button-primary-bg, var(--accent-brand, var(--text-primary, var(--noche-text))));
 }
 
 .home-page__main {
@@ -805,6 +807,9 @@ onShow(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 8px;
+  border-radius: var(--button-radius, 18px);
+  background: var(--button-ghost-bg, transparent);
+  border: 1px solid var(--button-ghost-border, transparent);
 }
 
 .home-page__nav-entry-icon {
@@ -813,8 +818,11 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--noche-border);
-  color: var(--noche-muted);
+  border: 1px solid var(--button-secondary-border, var(--noche-border));
+  color: var(--button-secondary-text, var(--noche-muted));
+  background: var(--button-secondary-bg, transparent);
+  border-radius: var(--button-radius, 18px);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .home-page__nav-entry-icon-svg {
@@ -823,10 +831,10 @@ onShow(() => {
 }
 
 .home-page__nav-entry-label {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, "Inter", "PingFang SC", sans-serif);
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.3em;
 }
 
@@ -1161,16 +1169,12 @@ onShow(() => {
   height: 62px;
   padding: 0 18px;
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0)),
-    var(--noche-panel);
+  background: var(--button-primary-bg, var(--noche-panel));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 8px 18px rgba(44, 47, 48, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.66);
-  border: 1px solid var(--noche-border);
+  box-shadow: var(--button-primary-shadow, 0 8px 18px rgba(44, 47, 48, 0.04));
+  border: 1px solid var(--button-primary-border, var(--noche-border));
   align-self: stretch;
   position: relative;
   overflow: hidden;
@@ -1210,23 +1214,22 @@ onShow(() => {
 }
 
 .home-page__welcome-card-pill--secondary {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0)),
-    var(--noche-surface);
-  box-shadow: none;
+  background: var(--button-secondary-bg, var(--noche-surface));
+  box-shadow: var(--button-secondary-shadow, none);
+  border-color: var(--button-secondary-border, var(--noche-border));
 }
 
 .home-page__welcome-card-pill-label {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, "Inter", "PingFang SC", sans-serif);
   font-size: 15px;
   line-height: 1;
-  color: var(--noche-text);
+  color: var(--button-primary-text, var(--noche-text));
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
 .home-page__welcome-card-pill-label--secondary {
-  color: var(--noche-muted);
+  color: var(--button-secondary-text, var(--noche-muted));
 }
 
 .home-page__welcome-card--expanded .home-page__welcome-card-pill {
@@ -1289,17 +1292,21 @@ onShow(() => {
   gap: 6px;
   align-items: center;
   text-align: center;
-  background: transparent;
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, transparent);
+  margin: 10px 16px 0;
+  border-radius: var(--button-radius, 18px);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .home-page__jotting-modal-action + .home-page__jotting-modal-action {
-  border-top: 1px solid var(--noche-border);
+  border-top: none;
 }
 
 .home-page__jotting-modal-action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--button-secondary-text, var(--noche-text));
 }
 
 .home-page__jotting-modal-action-copy {
@@ -1309,7 +1316,7 @@ onShow(() => {
 }
 
 .home-page__jotting-modal-action--muted .home-page__jotting-modal-action-title {
-  color: var(--noche-muted);
+  color: var(--button-ghost-text, var(--noche-muted));
 }
 
 .type-scale-small .home-page__hero-title { font-size: 36px; }

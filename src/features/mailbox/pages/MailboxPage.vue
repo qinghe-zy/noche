@@ -509,7 +509,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page {
   height: 100vh;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 10%, transparent), transparent 26%),
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 26%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, "Noto Serif SC", "Source Han Serif SC", serif);
@@ -638,8 +639,9 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill--active {
-  background: var(--noche-panel);
-  border: 1px solid var(--noche-border);
+  background: var(--button-secondary-bg, var(--noche-panel));
+  border: 1px solid var(--button-secondary-border, var(--noche-border));
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
@@ -669,10 +671,12 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__retry {
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid var(--noche-border);
-  background: var(--noche-panel);
+  border: 1px solid var(--button-secondary-border, var(--noche-border));
+  background: var(--button-secondary-bg, var(--noche-panel));
   font-size: 14px;
-  color: var(--noche-text);
+  color: var(--button-secondary-text, var(--noche-text));
+  border-radius: var(--button-pill-radius, 999px);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .mailbox-page__module-list {
@@ -934,11 +938,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   bottom: 28px;
   width: 56px;
   height: 56px;
-  border: none;
-  border-radius: 18px;
-  background: var(--noche-text);
-  color: var(--noche-bg);
-  box-shadow: 0 8px 18px rgba(49, 51, 46, 0.1);
+  border: 1px solid var(--button-primary-border, transparent);
+  border-radius: var(--button-radius, 18px);
+  background: var(--button-primary-bg, var(--noche-text));
+  color: var(--button-primary-text, var(--noche-bg));
+  box-shadow: var(--button-primary-shadow, 0 8px 18px rgba(49, 51, 46, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;

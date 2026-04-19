@@ -227,11 +227,13 @@ onLoad((query) => {
 .day-archive-page__primary-button {
   min-width: 240rpx;
   min-height: 88rpx;
-  border: none;
-  border-radius: 999rpx;
-  background: #1f1f1f;
-  color: #faf7f2;
+  border: 1rpx solid var(--button-primary-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  background: var(--button-primary-bg, #1f1f1f);
+  color: var(--button-primary-text, #faf7f2);
   font-size: 28rpx;
+  box-shadow: var(--button-primary-shadow, none);
+  font-family: var(--font-body, inherit);
 }
 
 .type-scale-small .day-archive-page__eyebrow,

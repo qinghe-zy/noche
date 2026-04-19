@@ -63,8 +63,11 @@ const resolvedThemeTokens = computed(() => getThemeTokens(resolvedThemeKey.value
 .theme-key-claude-dark {
   background: var(--app-bg);
   color: var(--text-primary);
+  --noche-overlay: var(--overlay-mask, var(--noche-overlay));
 }
 
+.theme-key-default-light,
+.theme-key-default-dark,
 .theme-key-claude-light,
 .theme-key-claude-dark {
   --noche-bg: var(--app-bg);

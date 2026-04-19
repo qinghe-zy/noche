@@ -1282,7 +1282,8 @@ watch(bodyViewportHeight, () => {
   --jotting-heading-font: var(--font-heading);
   --jotting-body-font: var(--font-body);
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 12%, transparent), transparent 28%),
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 28%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
     var(--app-bg, var(--noche-bg));
   color: var(--text-primary, var(--noche-text));
   font-family: var(--jotting-body-font, "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif);

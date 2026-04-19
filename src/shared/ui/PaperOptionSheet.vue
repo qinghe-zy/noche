@@ -137,10 +137,14 @@ function handleMaskClose(): void {
   justify-content: space-between;
   gap: 14px;
   padding: 20px 22px;
+  border-radius: var(--button-radius, 18px);
+  margin: 8px 12px 0;
+  background: var(--button-ghost-bg, transparent);
+  border: 1px solid var(--button-ghost-border, transparent);
 }
 
 .paper-option-sheet__option + .paper-option-sheet__option {
-  border-top: 1px solid var(--noche-border);
+  border-top: none;
 }
 
 .paper-option-sheet__option-copy {
@@ -164,7 +168,7 @@ function handleMaskClose(): void {
 }
 
 .paper-option-sheet__option--danger .paper-option-sheet__option-title {
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .paper-option-sheet__option-icon {
@@ -185,7 +189,12 @@ function handleMaskClose(): void {
 .paper-option-sheet__footer-text {
   font-size: 15px;
   line-height: 1.4;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, transparent);
+  border-radius: var(--button-pill-radius, 999px);
+  box-shadow: var(--button-secondary-shadow, none);
+  padding: 10px 18px;
 }
 
 .type-scale-small .paper-option-sheet__title { font-size: 21px; }

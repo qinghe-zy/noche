@@ -33,8 +33,9 @@ defineEmits<{
 }
 
 .topbar-icon-button:active {
-  background: var(--surface-primary, var(--noche-surface));
-  box-shadow: var(--shadow-ring, none);
+  background: var(--button-ghost-bg, var(--surface-primary, var(--noche-surface)));
+  border: 1px solid var(--button-ghost-border, transparent);
+  box-shadow: var(--button-secondary-shadow, var(--shadow-ring, none));
 }
 
 .topbar-icon-button__icon {
