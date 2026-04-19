@@ -112,12 +112,12 @@ import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import {
   readHomeWelcomeCardCollection,
   removeHomeWelcomeCardCollected,
+  resolveCollectedHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardTheme,
   type HomeWelcomeCardCollectionRecord,
   type HomeWelcomeCardType,
 } from "@/features/home/homeWelcomeCard";
-import { readHomeWelcomeCardById } from "@/features/home/homeWelcomeCardCatalog";
 
 const HOME_CARD_SHOWCASE_TYPES: HomeWelcomeCardType[] = [
   "today_quote",
@@ -188,7 +188,12 @@ const groupedCollection = computed(() => HOME_CARD_SHOWCASE_TYPES
   })
   .filter((group): group is NonNullable<typeof group> => group !== null));
 
-const activeDetailCard = computed(() => activeDetailCardId.value ? readHomeWelcomeCardById(activeDetailCardId.value) : null);
+const activeDetailRecord = computed(() => activeDetailCardId.value
+  ? collection.value.find((item) => item.cardId === activeDetailCardId.value) ?? null
+  : null);
+const activeDetailCard = computed(() => activeDetailRecord.value
+  ? resolveCollectedHomeWelcomeCard(activeDetailRecord.value)
+  : null);
 const activeDetailTheme = computed(() => resolveHomeWelcomeCardTheme(activeDetailCard.value?.type ?? "today_quote"));
 const activeDetailEyebrow = computed(() => activeDetailCard.value
   ? resolveHomeWelcomeCardEyebrow(activeDetailCard.value.type, settingsStore.locale)
@@ -209,7 +214,8 @@ function formatCollectedDate(dateKey: string): string {
 }
 
 function resolveCardContent(cardId: string): string {
-  return readHomeWelcomeCardById(cardId)?.content ?? "";
+  const record = collection.value.find((item) => item.cardId === cardId);
+  return record ? resolveCollectedHomeWelcomeCard(record)?.content ?? "" : "";
 }
 
 function refreshCollection(): void {

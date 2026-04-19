@@ -14,6 +14,7 @@ import {
   readHomeWelcomeCardHistory,
   readHomeWelcomeCardSeenDate,
   readHomeWelcomeCards,
+  resolveCollectedHomeWelcomeCard,
   isHomeWelcomeCardAvailableOnDate,
   resolveHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
@@ -21,6 +22,10 @@ import {
   resolveHomeWelcomeCardTheme,
   shouldAutoShowHomeWelcomeCard,
 } from "@/features/home/homeWelcomeCard";
+import {
+  HOME_WELCOME_CARD_REMOTE_CACHE_KEY,
+  createRemoteHomeWelcomeCardId,
+} from "@/features/home/homeWelcomeCardRemote";
 
 describe("home welcome card", () => {
   it("loads the full doc-backed card pool with metadata instead of the old sample subset", () => {
@@ -152,10 +157,10 @@ describe("home welcome card", () => {
     });
   });
 
-  it("keeps the welcome card enabled for the current day instead of suppressing it after one view", () => {
+  it("only auto-shows the welcome card the first time for a given day", () => {
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", null)).toBe(true);
     expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-15")).toBe(true);
-    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(true);
+    expect(shouldAutoShowHomeWelcomeCard("2026-04-16", "2026-04-16")).toBe(false);
   });
 
   it("persists the seen date with local-first storage", () => {
@@ -235,5 +240,43 @@ describe("home welcome card", () => {
       },
     ]);
     expect(storage.getString(HOME_WELCOME_CARD_HISTORY_STORAGE_KEY)).toContain("card_014");
+  });
+
+  it("stores remote cards as showcase snapshots so they still render without the local catalog", () => {
+    const storage = createMemoryJsonStorage({
+      [HOME_WELCOME_CARD_REMOTE_CACHE_KEY]: JSON.stringify({
+        "zh-CN:2026-04-19": {
+          id: createRemoteHomeWelcomeCardId("2026-04-19", "zh-CN"),
+          dateKey: "2026-04-19",
+          locale: "zh-CN",
+          type: "weather_season",
+          content: "雨线落慢一点的时候，句子也会自己靠近。",
+          generatedAt: "2026-04-19T08:30:00.000Z",
+        },
+      }),
+    });
+    const remoteCardId = createRemoteHomeWelcomeCardId("2026-04-19", "zh-CN");
+
+    markHomeWelcomeCardCollected("2026-04-19", remoteCardId, storage, "2026-04-19T08:31:00.000Z");
+
+    const collection = readHomeWelcomeCardCollection(storage);
+
+    expect(collection).toEqual([
+      {
+        cardId: remoteCardId,
+        collectedAt: "2026-04-19T08:31:00.000Z",
+        collectedDateKey: "2026-04-19",
+        type: "weather_season",
+        source: "remote",
+        contentSnapshot: "雨线落慢一点的时候，句子也会自己靠近。",
+        generatedAt: "2026-04-19T08:30:00.000Z",
+        locale: "zh-CN",
+      },
+    ]);
+    expect(resolveCollectedHomeWelcomeCard(collection[0], storage)).toMatchObject({
+      id: remoteCardId,
+      type: "weather_season",
+      content: "雨线落慢一点的时候，句子也会自己靠近。",
+    });
   });
 });

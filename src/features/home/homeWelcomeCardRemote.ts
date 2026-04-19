@@ -1,5 +1,9 @@
 import { createUniJsonStorage, type JsonStorage } from "@/shared/utils/storage";
 import type { HomeWelcomeCardType } from "@/features/home/homeWelcomeCardCatalog";
+import {
+  collectRecentDiaryPreludeContext,
+  type RemoteHomeWelcomeCardPromptContext,
+} from "@/features/home/homeWelcomeCardRemoteContext";
 
 export const HOME_WELCOME_CARD_REMOTE_CACHE_KEY = "home-welcome-card:remote-cache";
 export const HOME_WELCOME_CARD_REMOTE_TIMEOUT_MS = 3500;
@@ -22,6 +26,7 @@ export interface RemoteHomeWelcomeCardRequestConfig {
 }
 
 export interface RemoteHomeWelcomeCardPrefetchOptions extends RemoteHomeWelcomeCardRequestConfig {
+  context?: RemoteHomeWelcomeCardPromptContext | null;
   requestFn?: ((options: {
     url: string;
     method: "POST";
@@ -105,7 +110,12 @@ function hasUsableDeepSeekConfig(config: RemoteHomeWelcomeCardRequestConfig): bo
   return Boolean(config.apiKey?.trim());
 }
 
-function buildDeepSeekRequestMessages(dateKey: string, locale: string, now: Date) {
+function buildDeepSeekRequestMessages(
+  dateKey: string,
+  locale: string,
+  now: Date,
+  context: RemoteHomeWelcomeCardPromptContext | null,
+) {
   const nowIso = now.toISOString();
   const localizedLanguage = locale === "en-US" ? "English" : "简体中文";
 
@@ -119,6 +129,7 @@ function buildDeepSeekRequestMessages(dateKey: string, locale: string, now: Date
         `The "content" must be a single concise card body in ${localizedLanguage}.`,
         `Do not include numbering, labels, quotation marks, markdown, or phrases like "第几张卡" / "card".`,
         `Keep the tone gentle, local-first, paper-like, and suitable for the current date and time context.`,
+        `If recent diary weather or mood context is provided, adapt to it subtly without naming the source data.`,
         `Do not mention AI, models, or generation.`,
       ].join(" "),
     },
@@ -130,9 +141,38 @@ function buildDeepSeekRequestMessages(dateKey: string, locale: string, now: Date
         nowIso,
         appStyle: "quiet paper-like private writing",
         desiredLength: "18-40 Chinese characters or 8-24 English words",
+        recentPreludeContext: context,
       }),
     },
   ];
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasOnlyExpectedRemoteCardKeys(value: Record<string, unknown>): boolean {
+  const keys = Object.keys(value).sort();
+
+  return keys.length === 2 && keys[0] === "content" && keys[1] === "type";
+}
+
+function sanitizeRemoteCardContent(rawContent: string): string | null {
+  const nextContent = rawContent.replace(/\s+/gu, " ").trim();
+
+  if (!nextContent) {
+    return null;
+  }
+
+  if (
+    /```|`[^`]+`|\[[^\]]+\]\([^)]+\)|[*_~#>|]/u.test(nextContent)
+    || /^\s*(?:第\s*\d+\s*张卡|card\s*#?\d+|\d+\s*[.)、．])/iu.test(nextContent)
+    || /(第\s*\d+\s*张卡|提醒你|卡片提醒你|\bAI\b|模型|\bmodel\b)/iu.test(nextContent)
+  ) {
+    return null;
+  }
+
+  return nextContent;
 }
 
 function parseDeepSeekCardResponse(
@@ -149,9 +189,14 @@ function parseDeepSeekCardResponse(
   }
 
   try {
-    const parsed = JSON.parse(content) as { type?: string; content?: string };
-    const nextType = parsed.type?.trim() ?? "";
-    const nextContent = parsed.content?.trim() ?? "";
+    const parsed = JSON.parse(content) as unknown;
+
+    if (!isPlainObject(parsed) || !hasOnlyExpectedRemoteCardKeys(parsed)) {
+      return null;
+    }
+
+    const nextType = typeof parsed.type === "string" ? parsed.type.trim() : "";
+    const nextContent = typeof parsed.content === "string" ? sanitizeRemoteCardContent(parsed.content) : null;
 
     if (!isValidHomeWelcomeCardType(nextType) || !nextContent) {
       return null;
@@ -173,7 +218,9 @@ function parseDeepSeekCardResponse(
 function requestRemoteHomeWelcomeCard(
   dateKey: string,
   locale: string,
-  options: Required<Pick<RemoteHomeWelcomeCardPrefetchOptions, "requestFn" | "now">> & RemoteHomeWelcomeCardRequestConfig,
+  options: Required<Pick<RemoteHomeWelcomeCardPrefetchOptions, "requestFn" | "now">>
+    & RemoteHomeWelcomeCardRequestConfig
+    & { context: RemoteHomeWelcomeCardPromptContext | null },
 ): Promise<RemoteHomeWelcomeCardRecord | null> {
   const requestFn = options.requestFn;
 
@@ -197,7 +244,7 @@ function requestRemoteHomeWelcomeCard(
         response_format: { type: "json_object" },
         temperature: 0.9,
         max_tokens: 160,
-        messages: buildDeepSeekRequestMessages(dateKey, locale, options.now()),
+        messages: buildDeepSeekRequestMessages(dateKey, locale, options.now(), options.context),
       },
       success: (result) => {
         if (result.statusCode < 200 || result.statusCode >= 300) {
@@ -251,11 +298,16 @@ export async function prefetchRemoteHomeWelcomeCard(
     return pending;
   }
 
-  const nextPromise = requestRemoteHomeWelcomeCard(dateKey, locale, {
-    ...config,
-    requestFn: options.requestFn ?? (typeof uni !== "undefined" && typeof uni.request === "function" ? uni.request : null),
-    now: options.now ?? (() => new Date()),
-  }).then((record) => {
+  const nextPromise = Promise.resolve(
+    options.context === undefined ? collectRecentDiaryPreludeContext() : options.context ?? null,
+  ).then((context) =>
+    requestRemoteHomeWelcomeCard(dateKey, locale, {
+      ...config,
+      context,
+      requestFn: options.requestFn ?? (typeof uni !== "undefined" && typeof uni.request === "function" ? uni.request : null),
+      now: options.now ?? (() => new Date()),
+    }),
+  ).then((record) => {
     if (!record) {
       return null;
     }

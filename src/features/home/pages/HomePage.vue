@@ -190,20 +190,29 @@ import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 import {
   isHomeWelcomeCardCollected,
+  markHomeWelcomeCardSeen,
   markHomeWelcomeCardCollected,
   markHomeWelcomeCardResolved,
+  type HomeWelcomeCard,
+  readHomeWelcomeCardSeenDate,
   resolveHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardGlyph,
   resolveHomeWelcomeCardTitle,
+  shouldAutoShowHomeWelcomeCard,
 } from "@/features/home/homeWelcomeCard";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
+import {
+  prefetchRemoteHomeWelcomeCard,
+  type RemoteHomeWelcomeCardRecord,
+} from "@/features/home/homeWelcomeCardRemote";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import { t } from "@/shared/i18n";
 
 type HomeWelcomeCardStage = "hidden" | "entering" | "stack" | "expanded" | "collecting" | "dismissing";
+type ActiveHomeWelcomeCard = Pick<HomeWelcomeCard, "id" | "content" | "type"> & { source: "local" | "remote" };
 
 const draftStore = useDraftStore();
 const settingsStore = useSettingsStore();
@@ -217,7 +226,7 @@ const isShowcasePulsing = ref(false);
 const copy = computed(() => t(settingsStore.locale));
 const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const dailyPrompt = computed(() => resolveHomeDailyPrompt(todayDateKey.value));
-const activeWelcomeCard = computed(() => resolveHomeWelcomeCard(todayDateKey.value));
+const activeWelcomeCard = ref<ActiveHomeWelcomeCard>(resolveLocalActiveWelcomeCard(todayDateKey.value));
 const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   dateKey: todayDateKey.value,
   locale: settingsStore.locale,
@@ -250,7 +259,9 @@ const dateChangeWatcher = createDateChangeWatcher({
   onDateChange: (nextDateKey) => {
     todayDateKey.value = nextDateKey;
     resetWelcomeCard();
-    syncWelcomeCardPresentation(nextDateKey);
+    syncActiveWelcomeCardWithLocal(nextDateKey);
+    syncWelcomeCardAutoPresentation(nextDateKey);
+    void prefetchTodayRemoteWelcomeCard(nextDateKey);
   },
 });
 
@@ -316,6 +327,30 @@ function resetWelcomeCard(): void {
   isShowcasePulsing.value = false;
 }
 
+function resolveLocalActiveWelcomeCard(dateKey: string): ActiveHomeWelcomeCard {
+  const card = resolveHomeWelcomeCard(dateKey);
+
+  return {
+    id: card.id,
+    content: card.content,
+    type: card.type,
+    source: "local",
+  };
+}
+
+function resolveRemoteActiveWelcomeCard(card: RemoteHomeWelcomeCardRecord): ActiveHomeWelcomeCard {
+  return {
+    id: card.id,
+    content: card.content,
+    type: card.type,
+    source: "remote",
+  };
+}
+
+function syncActiveWelcomeCardWithLocal(dateKey = todayDateKey.value): void {
+  activeWelcomeCard.value = resolveLocalActiveWelcomeCard(dateKey);
+}
+
 function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   clearWelcomeCardTimer();
 
@@ -330,6 +365,40 @@ function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   scheduleWelcomeCardStage(() => {
     welcomeCardStage.value = "stack";
   }, 260);
+}
+
+function syncWelcomeCardAutoPresentation(dateKey = todayDateKey.value): void {
+  const lastSeenDate = readHomeWelcomeCardSeenDate();
+
+  if (!shouldAutoShowHomeWelcomeCard(dateKey, lastSeenDate)) {
+    clearWelcomeCardTimer();
+    welcomeCardStage.value = "hidden";
+    return;
+  }
+
+  markHomeWelcomeCardSeen(dateKey);
+  syncWelcomeCardPresentation(dateKey);
+}
+
+async function prefetchTodayRemoteWelcomeCard(dateKey = todayDateKey.value): Promise<void> {
+  const locale = settingsStore.locale;
+  const remoteCard = await prefetchRemoteHomeWelcomeCard(dateKey, locale);
+
+  if (!remoteCard || todayDateKey.value !== dateKey || settingsStore.locale !== locale) {
+    return;
+  }
+
+  if (isHomeWelcomeCardCollected(dateKey, remoteCard.id)) {
+    activeWelcomeCard.value = resolveRemoteActiveWelcomeCard(remoteCard);
+    welcomeCardStage.value = "hidden";
+    return;
+  }
+
+  if (["expanded", "collecting", "dismissing"].includes(welcomeCardStage.value)) {
+    return;
+  }
+
+  activeWelcomeCard.value = resolveRemoteActiveWelcomeCard(remoteCard);
 }
 
 function handleDismissWelcomeCard(): void {
@@ -387,7 +456,9 @@ async function handleCreateAnotherJottingDraft() {
 
 onMounted(() => {
   dateChangeWatcher.start();
-  syncWelcomeCardPresentation();
+  syncActiveWelcomeCardWithLocal();
+  syncWelcomeCardAutoPresentation();
+  void prefetchTodayRemoteWelcomeCard();
 });
 
 onUnmounted(() => {
@@ -398,7 +469,9 @@ onUnmounted(() => {
 onShow(() => {
   todayDateKey.value = formatDate(new Date(), "YYYY-MM-DD");
   dateChangeWatcher.sync();
-  syncWelcomeCardPresentation();
+  syncActiveWelcomeCardWithLocal();
+  syncWelcomeCardAutoPresentation();
+  void prefetchTodayRemoteWelcomeCard();
 });
 </script>
 

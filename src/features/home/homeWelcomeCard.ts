@@ -9,6 +9,7 @@ import {
 } from "@/features/home/homeWelcomeCardCatalog";
 import { resolveHomeWelcomeCardTheme } from "@/features/home/homeWelcomeCardTheme";
 import { isDateKeyOnSolarTerm } from "@/features/home/homeWelcomeCardSolarTerms";
+import { readRemoteHomeWelcomeCardById } from "@/features/home/homeWelcomeCardRemote";
 
 export type { HomeWelcomeCard, HomeWelcomeCardType } from "@/features/home/homeWelcomeCardCatalog";
 export { readHomeWelcomeCards, resolveHomeWelcomeCardTheme };
@@ -18,6 +19,10 @@ export interface HomeWelcomeCardCollectionRecord {
   collectedAt: string;
   collectedDateKey: string;
   type: HomeWelcomeCardType;
+  source?: "local" | "remote";
+  contentSnapshot?: string;
+  generatedAt?: string;
+  locale?: string;
 }
 
 export interface HomeWelcomeCardHistoryRecord {
@@ -40,6 +45,13 @@ const HOME_WELCOME_CARD_TRIGGER_PRIORITY: Record<HomeWelcomeCardTriggerMode, num
   conditional_priority: 1,
   random: 2,
 };
+const HOME_WELCOME_CARD_TYPES: HomeWelcomeCardType[] = [
+  "today_quote",
+  "mood_response",
+  "weather_season",
+  "playful_draw",
+  "action_prompt",
+];
 
 function hashDate(dateKey: string): number {
   return dateKey.split("").reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
@@ -73,6 +85,10 @@ function readRawJsonValue(key: string, storage: JsonStorage): unknown {
   }
 }
 
+function isValidHomeWelcomeCardType(value: string): value is HomeWelcomeCardType {
+  return HOME_WELCOME_CARD_TYPES.includes(value as HomeWelcomeCardType);
+}
+
 function normalizeCollectionRecord(record: unknown): HomeWelcomeCardCollectionRecord | null {
   if (!record || typeof record !== "object" || Array.isArray(record)) {
     return null;
@@ -84,14 +100,25 @@ function normalizeCollectionRecord(record: unknown): HomeWelcomeCardCollectionRe
     typeof source.cardId !== "string"
     || typeof source.collectedAt !== "string"
     || typeof source.collectedDateKey !== "string"
-    || typeof source.type !== "string"
   ) {
     return null;
   }
 
   const card = readHomeWelcomeCardById(source.cardId);
 
-  if (!card) {
+  if (card) {
+    return {
+      cardId: source.cardId,
+      collectedAt: source.collectedAt,
+      collectedDateKey: source.collectedDateKey,
+      type: card.type,
+    };
+  }
+
+  const sourceType = typeof source.type === "string" ? source.type.trim() : "";
+  const snapshot = typeof source.contentSnapshot === "string" ? source.contentSnapshot.trim() : "";
+
+  if (source.source !== "remote" || !isValidHomeWelcomeCardType(sourceType) || !snapshot) {
     return null;
   }
 
@@ -99,7 +126,11 @@ function normalizeCollectionRecord(record: unknown): HomeWelcomeCardCollectionRe
     cardId: source.cardId,
     collectedAt: source.collectedAt,
     collectedDateKey: source.collectedDateKey,
-    type: card.type,
+    type: sourceType,
+    source: "remote",
+    contentSnapshot: snapshot,
+    generatedAt: typeof source.generatedAt === "string" ? source.generatedAt : undefined,
+    locale: typeof source.locale === "string" ? source.locale : undefined,
   };
 }
 
@@ -292,9 +323,7 @@ export function resolveHomeWelcomeCardSequence(card: HomeWelcomeCard): string {
 }
 
 export function shouldAutoShowHomeWelcomeCard(dateKey: string, lastSeenDate: string | null): boolean {
-  void dateKey;
-  void lastSeenDate;
-  return true;
+  return lastSeenDate !== dateKey;
 }
 
 export function readHomeWelcomeCardSeenDate(storage: JsonStorage = createUniJsonStorage()): string | null {
@@ -339,17 +368,27 @@ export function markHomeWelcomeCardCollected(
   collectedAt = new Date().toISOString(),
 ): void {
   const card = readHomeWelcomeCardById(cardId);
+  const remoteCard = card ? null : readRemoteHomeWelcomeCardById(cardId, storage);
 
-  if (!card) {
+  if (!card && !remoteCard) {
     return;
   }
 
   const existingRecords = readHomeWelcomeCardCollection(storage).filter((record) => record.cardId !== cardId);
-  existingRecords.push({
+  existingRecords.push(card ? {
     cardId,
     collectedAt,
     collectedDateKey: dateKey,
     type: card.type,
+  } : {
+    cardId,
+    collectedAt,
+    collectedDateKey: dateKey,
+    type: remoteCard!.type,
+    source: "remote",
+    contentSnapshot: remoteCard!.content,
+    generatedAt: remoteCard!.generatedAt,
+    locale: remoteCard!.locale,
   });
   writeCollectionRecords(sortCollectedDescending(existingRecords), storage);
 }
@@ -392,4 +431,39 @@ export function markHomeWelcomeCardResolved(
     type: card.type,
   });
   writeHistoryRecords(sortDateDescending(existingRecords), storage);
+}
+
+export function resolveCollectedHomeWelcomeCard(
+  record: HomeWelcomeCardCollectionRecord,
+  storage: JsonStorage = createUniJsonStorage(),
+): { id: string; type: HomeWelcomeCardType; content: string } | null {
+  const localCard = readHomeWelcomeCardById(record.cardId);
+
+  if (localCard) {
+    return {
+      id: localCard.id,
+      type: localCard.type,
+      content: localCard.content,
+    };
+  }
+
+  const remoteCard = readRemoteHomeWelcomeCardById(record.cardId, storage);
+
+  if (remoteCard) {
+    return {
+      id: remoteCard.id,
+      type: remoteCard.type,
+      content: remoteCard.content,
+    };
+  }
+
+  if (record.source === "remote" && record.contentSnapshot) {
+    return {
+      id: record.cardId,
+      type: record.type,
+      content: record.contentSnapshot,
+    };
+  }
+
+  return null;
 }
