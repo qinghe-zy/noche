@@ -90,13 +90,15 @@ function handleMaskClose(): void {
 .paper-option-sheet {
   width: min(100%, 420px);
   max-height: calc(100vh - 56px);
-  background: var(--noche-surface);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 24px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
+  box-shadow: var(--shadow-whisper, 0 18px 40px rgba(44, 46, 42, 0.12));
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .paper-option-sheet__head {
@@ -110,7 +112,8 @@ function handleMaskClose(): void {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading, inherit);
 }
 
 .paper-option-sheet__copy {
@@ -118,7 +121,7 @@ function handleMaskClose(): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-option-sheet__options {
@@ -134,10 +137,14 @@ function handleMaskClose(): void {
   justify-content: space-between;
   gap: 14px;
   padding: 20px 22px;
+  border-radius: var(--button-radius, 18px);
+  margin: 8px 12px 0;
+  background: var(--button-ghost-bg, transparent);
+  border: 1px solid var(--button-ghost-border, transparent);
 }
 
 .paper-option-sheet__option + .paper-option-sheet__option {
-  border-top: 1px solid var(--noche-border);
+  border-top: none;
 }
 
 .paper-option-sheet__option-copy {
@@ -151,23 +158,23 @@ function handleMaskClose(): void {
 .paper-option-sheet__option-title {
   font-size: 17px;
   line-height: 1.45;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .paper-option-sheet__option-copy-text {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-option-sheet__option--danger .paper-option-sheet__option-title {
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .paper-option-sheet__option-icon {
   width: 16px;
   height: 16px;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-option-sheet__footer {
@@ -182,7 +189,12 @@ function handleMaskClose(): void {
 .paper-option-sheet__footer-text {
   font-size: 15px;
   line-height: 1.4;
-  color: var(--noche-muted);
+  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, transparent);
+  border-radius: var(--button-pill-radius, 999px);
+  box-shadow: var(--button-secondary-shadow, none);
+  padding: 10px 18px;
 }
 
 .type-scale-small .paper-option-sheet__title { font-size: 21px; }

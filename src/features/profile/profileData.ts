@@ -103,7 +103,7 @@ export function formatProfileBackupLabel(lastBackupAt: string | null, locale = "
     : `最近一次 ${formatDate(lastBackupAt, "YYYY.MM.DD HH:mm")}`;
 }
 
-export function formatProfileThemeLabel(theme: "system" | "light" | "dark", locale = "zh-CN"): string {
+export function formatProfileThemeModeLabel(theme: "system" | "light" | "dark", locale = "zh-CN"): string {
   if (locale === "en-US") {
     if (theme === "light") {
       return "Light";
@@ -127,6 +127,14 @@ export function formatProfileThemeLabel(theme: "system" | "light" | "dark", loca
   return "跟随系统";
 }
 
+export function formatProfileThemeFamilyLabel(themeFamily: "default" | "claude", locale = "zh-CN"): string {
+  if (locale === "en-US") {
+    return themeFamily === "claude" ? "Claude" : "Default";
+  }
+
+  return themeFamily === "claude" ? "Claude" : "默认";
+}
+
 export function formatProfileLocaleLabel(locale: string): string {
   if (locale === "en-US") {
     return "English";
@@ -144,11 +152,12 @@ export function formatProfileWeekStartLabel(weekStartsOn: 0 | 1, locale = "zh-CN
 }
 
 export function formatProfileAppearanceLabel(
-  theme: "system" | "light" | "dark",
+  themeFamily: "default" | "claude",
+  themeMode: "system" | "light" | "dark",
   locale: string,
   weekStartsOn: 0 | 1,
 ): string {
-  return `${formatProfileThemeLabel(theme, locale)} · ${formatProfileWeekStartLabel(weekStartsOn, locale)} · ${formatProfileLocaleLabel(locale)}`;
+  return `${formatProfileThemeFamilyLabel(themeFamily, locale)} · ${formatProfileThemeModeLabel(themeMode, locale)} · ${formatProfileWeekStartLabel(weekStartsOn, locale)} · ${formatProfileLocaleLabel(locale)}`;
 }
 
 export function countDisplayNameCharacters(displayName: string): number {

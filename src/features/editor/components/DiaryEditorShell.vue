@@ -1136,9 +1136,14 @@ watch(bodyViewportHeight, () => {
 
 .diary-editor-shell {
   height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  --diary-heading-font: var(--font-heading);
+  --diary-body-font: var(--font-body);
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 28%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--diary-body-font);
   position: relative;
   overflow: hidden;
 }
@@ -1149,8 +1154,12 @@ watch(bodyViewportHeight, () => {
   pointer-events: none;
   opacity: 0.03;
   background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.72)),
-    radial-gradient(circle at center, rgba(49, 51, 46, 0.06), transparent 60%);
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--surface-primary, #faf9f5) 82%, transparent),
+      color-mix(in srgb, var(--surface-primary, #faf9f5) 72%, transparent)
+    ),
+    radial-gradient(circle at center, color-mix(in srgb, var(--text-primary, #141413) 6%, transparent), transparent 60%);
 }
 
 .literary-text {
@@ -1181,7 +1190,9 @@ watch(bodyViewportHeight, () => {
 .diary-shell-edit__paper {
   margin: 0 32rpx;
   padding: 40rpx 44rpx;
-  background: var(--noche-surface);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
 }
 
 .diary-shell-read__overlay,
@@ -1196,7 +1207,7 @@ watch(bodyViewportHeight, () => {
 .diary-shell-edit__overlay-bg {
   position: absolute;
   inset: 0 0 auto 0;
-  background: var(--noche-bg);
+  background: var(--app-bg, var(--noche-bg));
 }
 
 .diary-shell-read__topbar,
@@ -1241,6 +1252,7 @@ watch(bodyViewportHeight, () => {
 
 .diary-shell-read__date,
 .diary-shell-edit__date {
+  font-family: var(--diary-heading-font);
   letter-spacing: 0.04em;
   overflow: hidden;
 }
@@ -1255,6 +1267,7 @@ watch(bodyViewportHeight, () => {
 
 .diary-shell-read__title,
 .diary-shell-edit__title-display {
+  font-family: var(--diary-heading-font);
   min-width: 0;
   flex: 0 1 auto;
   overflow: hidden;
@@ -1304,11 +1317,12 @@ watch(bodyViewportHeight, () => {
   padding: 0;
   overflow: hidden;
   border-radius: 24rpx;
-  background: var(--noche-surface);
+  background: var(--surface-secondary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
 }
 
 .diary-editor-shell__attachment-card--focused {
-  box-shadow: 0 0 0 2rpx rgba(109, 103, 95, 0.38);
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
 }
 
 .diary-editor-shell__attachment-image {
@@ -1326,13 +1340,13 @@ watch(bodyViewportHeight, () => {
   align-items: center;
   justify-content: center;
   border-radius: 999rpx;
-  background: var(--noche-panel);
+  background: var(--surface-primary, var(--noche-surface));
 }
 
 .diary-editor-shell__attachment-remove-svg {
   width: 28rpx;
   height: 28rpx;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .diary-editor-shell__textarea,
@@ -1341,7 +1355,8 @@ watch(bodyViewportHeight, () => {
   border: none;
   background: transparent;
   padding: 0;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--diary-body-font);
   font-size: 18px;
   line-height: 2.2;
 }
@@ -1365,11 +1380,12 @@ watch(bodyViewportHeight, () => {
   border: none;
   background: transparent;
   padding: 0;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--diary-heading-font);
 }
 
 .diary-editor-shell__title-placeholder {
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-weight: 300;
 }
 
@@ -1377,14 +1393,14 @@ watch(bodyViewportHeight, () => {
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-size: var(--diary-writing-font-size, 18px);
   line-height: var(--diary-writing-line-height, 40px);
   pointer-events: none;
 }
 
 .diary-editor-shell__placeholder {
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   font-weight: 300;
 }
 
@@ -1395,13 +1411,17 @@ watch(bodyViewportHeight, () => {
   align-items: center;
   justify-content: center;
   position: relative;
-  color: var(--noche-text);
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-topbar-bg, transparent);
+  border: 1px solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .diary-editor-shell__topbar-svg {
   width: 44rpx;
   height: 44rpx;
-  color: var(--noche-text);
+  color: currentColor;
 }
 
 .diary-editor-shell__saved-hint {
@@ -1409,16 +1429,24 @@ watch(bodyViewportHeight, () => {
   top: 4rpx;
   left: 50%;
   transform: translateX(-50%);
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--diary-body-font);
   font-size: 18rpx;
   letter-spacing: 4rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .diary-editor-shell__continue-button {
   min-height: 56rpx;
   font-size: 24rpx;
-  color: var(--noche-muted);
+  color: var(--button-pill-text, var(--text-primary, var(--noche-text)));
+  background: var(--button-pill-bg);
+  border: 1px solid var(--button-pill-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-pill-shadow, none);
+  padding: 0 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .diary-editor-shell__spacer {
@@ -1432,7 +1460,11 @@ watch(bodyViewportHeight, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--noche-muted);
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-topbar-bg, transparent);
+  border: 1px solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .diary-editor-shell__meta-image-icon {
@@ -1444,7 +1476,7 @@ watch(bodyViewportHeight, () => {
 .diary-editor-shell__notice {
   margin-bottom: 18rpx;
   font-size: 22rpx;
-  color: #8a3d3a;
+  color: var(--accent-brand, #c96442);
 }
 
 .diary-shell-edit__notice {

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("mailbox stitch parity", () => {
@@ -74,5 +74,13 @@ describe("mailbox stitch parity", () => {
     expect(mailboxPage).toContain("isDeleteDialogOpen");
     expect(mailboxPage).toContain("deleteDialogActions");
     expect(mailboxPage).toContain("handleDeleteDialogAction");
+  });
+
+  it("starts moving mailbox surfaces onto semantic tokens and heading/body font stacks", () => {
+    const mailboxPage = readProjectFile("src/features/mailbox/pages/MailboxPage.vue");
+
+    expect(mailboxPage).toContain("var(--surface-primary");
+    expect(mailboxPage).toContain("var(--font-heading)");
+    expect(mailboxPage).toContain("var(--font-body)");
   });
 });

@@ -112,12 +112,12 @@ import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import {
   readHomeWelcomeCardCollection,
   removeHomeWelcomeCardCollected,
+  resolveCollectedHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardTheme,
   type HomeWelcomeCardCollectionRecord,
   type HomeWelcomeCardType,
 } from "@/features/home/homeWelcomeCard";
-import { readHomeWelcomeCardById } from "@/features/home/homeWelcomeCardCatalog";
 
 const HOME_CARD_SHOWCASE_TYPES: HomeWelcomeCardType[] = [
   "today_quote",
@@ -188,7 +188,12 @@ const groupedCollection = computed(() => HOME_CARD_SHOWCASE_TYPES
   })
   .filter((group): group is NonNullable<typeof group> => group !== null));
 
-const activeDetailCard = computed(() => activeDetailCardId.value ? readHomeWelcomeCardById(activeDetailCardId.value) : null);
+const activeDetailRecord = computed(() => activeDetailCardId.value
+  ? collection.value.find((item) => item.cardId === activeDetailCardId.value) ?? null
+  : null);
+const activeDetailCard = computed(() => activeDetailRecord.value
+  ? resolveCollectedHomeWelcomeCard(activeDetailRecord.value)
+  : null);
 const activeDetailTheme = computed(() => resolveHomeWelcomeCardTheme(activeDetailCard.value?.type ?? "today_quote"));
 const activeDetailEyebrow = computed(() => activeDetailCard.value
   ? resolveHomeWelcomeCardEyebrow(activeDetailCard.value.type, settingsStore.locale)
@@ -209,7 +214,8 @@ function formatCollectedDate(dateKey: string): string {
 }
 
 function resolveCardContent(cardId: string): string {
-  return readHomeWelcomeCardById(cardId)?.content ?? "";
+  const record = collection.value.find((item) => item.cardId === cardId);
+  return record ? resolveCollectedHomeWelcomeCard(record)?.content ?? "" : "";
 }
 
 function refreshCollection(): void {
@@ -263,15 +269,21 @@ function handleGoBack(): void {
 <style scoped>
 .home-card-showcase-page {
   min-height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
+  --home-showcase-accent: var(--accent-brand);
+  --home-showcase-heading-font: var(--font-heading);
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 28%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .home-card-showcase-page__topbar {
   position: sticky;
   top: 0;
   width: 100%;
-  background: var(--noche-bg);
+  background: var(--app-bg, var(--noche-bg));
   z-index: 8;
 }
 
@@ -303,23 +315,25 @@ function handleGoBack(): void {
 .home-card-showcase-page__group-subtitle,
 .home-card-showcase-page__paper-item-eyebrow,
 .home-card-showcase-page__detail-eyebrow {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 20rpx;
   line-height: 1.5;
   letter-spacing: 0.18em;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .home-card-showcase-page__title,
-.home-card-showcase-page__group-title {
+.home-card-showcase-page__group-title,
+.home-card-showcase-page__empty-title {
+  font-family: var(--font-heading, inherit);
   font-size: 36rpx;
   line-height: 1.35;
 }
 
 .home-card-showcase-page__group-count {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .home-card-showcase-page__scroll {
@@ -353,38 +367,39 @@ function handleGoBack(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(194, 184, 171, 0.4);
+  background: var(--button-chip-bg);
+  border: 1px solid var(--button-chip-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-chip-shadow, var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72)));
 }
 
 .home-card-showcase-page__group-chip--today_quote,
 .home-card-showcase-page__paper-item--today_quote,
 .home-card-showcase-page__detail-card--today_quote {
-  background-color: rgba(249, 244, 236, 0.96);
+  background-color: color-mix(in srgb, var(--home-showcase-accent, #c96442) 8%, var(--surface-primary, #faf9f5));
 }
 
 .home-card-showcase-page__group-chip--mood_response,
 .home-card-showcase-page__paper-item--mood_response,
 .home-card-showcase-page__detail-card--mood_response {
-  background-color: rgba(244, 238, 234, 0.96);
+  background-color: color-mix(in srgb, var(--home-showcase-accent, #c96442) 11%, var(--surface-primary, #faf9f5));
 }
 
 .home-card-showcase-page__group-chip--weather_season,
 .home-card-showcase-page__paper-item--weather_season,
 .home-card-showcase-page__detail-card--weather_season {
-  background-color: rgba(240, 244, 244, 0.96);
+  background-color: color-mix(in srgb, var(--surface-secondary, #e8e6dc) 66%, var(--surface-primary, #faf9f5));
 }
 
 .home-card-showcase-page__group-chip--playful_draw,
 .home-card-showcase-page__paper-item--playful_draw,
 .home-card-showcase-page__detail-card--playful_draw {
-  background-color: rgba(247, 242, 235, 0.96);
+  background-color: color-mix(in srgb, var(--home-showcase-accent, #c96442) 9%, var(--surface-primary, #faf9f5));
 }
 
 .home-card-showcase-page__group-chip--action_prompt,
 .home-card-showcase-page__paper-item--action_prompt,
 .home-card-showcase-page__detail-card--action_prompt {
-  background-color: rgba(245, 239, 232, 0.96);
+  background-color: color-mix(in srgb, var(--home-showcase-accent, #c96442) 13%, var(--surface-primary, #faf9f5));
 }
 
 .home-card-showcase-page__group-icon,
@@ -402,8 +417,8 @@ function handleGoBack(): void {
 .home-card-showcase-page__paper-item {
   padding: 24rpx 26rpx;
   border-radius: 28rpx;
-  border: 1px solid rgba(194, 184, 171, 0.34);
-  box-shadow: 0 16rpx 34rpx rgba(63, 57, 51, 0.05);
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
   display: flex;
   flex-direction: column;
   gap: 14rpx;
@@ -418,16 +433,16 @@ function handleGoBack(): void {
 
 .home-card-showcase-page__paper-item-date,
 .home-card-showcase-page__detail-date {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .home-card-showcase-page__paper-item-content,
 .home-card-showcase-page__detail-content {
   font-size: 30rpx;
   line-height: 1.95;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .home-card-showcase-page__empty {
@@ -441,23 +456,18 @@ function handleGoBack(): void {
   text-align: center;
 }
 
-.home-card-showcase-page__empty-title {
-  font-size: 36rpx;
-  line-height: 1.4;
-}
-
 .home-card-showcase-page__empty-copy {
   max-width: 480rpx;
   font-size: 24rpx;
   line-height: 1.8;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .home-card-showcase-page__detail-mask {
   position: fixed;
   inset: 0;
   z-index: 24;
-  background: rgba(236, 230, 222, 0.72);
+  background: color-mix(in srgb, var(--accent-brand, #c96442) 10%, rgba(236, 230, 222, 0.76));
   backdrop-filter: blur(18px);
   display: flex;
   align-items: center;
@@ -469,8 +479,8 @@ function handleGoBack(): void {
   width: 100%;
   max-width: 620rpx;
   border-radius: 32rpx;
-  border: 1px solid rgba(194, 184, 171, 0.34);
-  box-shadow: 0 20rpx 48rpx rgba(63, 57, 51, 0.1);
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
   padding: 28rpx;
   display: flex;
   flex-direction: column;
@@ -484,12 +494,26 @@ function handleGoBack(): void {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.54);
-  border: 1px solid rgba(194, 184, 171, 0.4);
+  background: var(--button-topbar-bg);
+  border: 1px solid var(--button-topbar-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .home-card-showcase-page__detail-close-icon {
   width: 32rpx;
   height: 32rpx;
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+}
+
+.theme-family-claude .home-card-showcase-page__detail-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
+    color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, var(--surface-secondary, #e3d5be) 12%)
+  );
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 24rpx 44rpx color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
 }
 </style>

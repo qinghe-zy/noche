@@ -136,15 +136,16 @@ onShow(() => {
 <style scoped>
 .profile-album-page {
   min-height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
+  background: var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .profile-album-page__topbar {
   position: sticky;
   top: 0;
   width: 100%;
-  background: var(--noche-bg);
+  background: var(--button-topbar-bg, var(--app-bg, var(--noche-bg)));
   z-index: 8;
 }
 
@@ -161,9 +162,10 @@ onShow(() => {
 .profile-album-page__title {
   font-size: 30rpx;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   letter-spacing: 0.24em;
   padding-left: 0.24em;
+  font-family: var(--font-heading);
 }
 
 .profile-album-page__spacer {
@@ -190,9 +192,19 @@ onShow(() => {
 .profile-album-page__load-more-text {
   font-size: 20rpx;
   line-height: 1.5;
-  color: var(--noche-muted);
+  color: var(--button-pill-text, var(--noche-muted));
   letter-spacing: 0.12em;
   padding-left: 0.12em;
+}
+
+.profile-album-page__load-more {
+  min-height: 84rpx;
+  padding: 0 28rpx;
+  background: var(--button-pill-bg);
+  border: 1px solid var(--button-pill-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-pill-shadow, none);
+  align-items: center;
 }
 
 .type-scale-small .profile-album-page__title { font-size: 28rpx; }

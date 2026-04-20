@@ -1,14 +1,23 @@
 <template>
-  <view class="app-shell" :class="[resolvedThemeClass, resolvedTypographyClass]"></view>
+  <view
+    class="app-shell"
+    :class="[resolvedThemeClass, resolvedTypographyClass]"
+    :data-theme-family="settingsStore.themeFamily"
+    :data-theme-key="resolvedThemeKey"
+    :style="resolvedThemeTokens"
+  ></view>
 </template>
 
 <script setup lang="ts">
 import { useSettingsStore } from "@/app/store/useSettingsStore";
-import { useThemeClass, useTypographyClass } from "@/shared/theme";
+import { computed } from "vue";
+import { getThemeTokens, useResolvedThemeKey, useThemeClass, useTypographyClass } from "@/shared/theme";
 
-useSettingsStore();
+const settingsStore = useSettingsStore();
 const resolvedThemeClass = useThemeClass();
+const resolvedThemeKey = useResolvedThemeKey();
 const resolvedTypographyClass = useTypographyClass();
+const resolvedThemeTokens = computed(() => getThemeTokens(resolvedThemeKey.value));
 </script>
 
 <style>
@@ -46,5 +55,20 @@ const resolvedTypographyClass = useTypographyClass();
 
 .type-scale-large {
   --noche-type-scale: 1.08;
+}
+
+.theme-key-default-light,
+.theme-key-default-dark,
+.theme-key-claude-light,
+.theme-key-claude-dark {
+  background: var(--app-bg);
+  color: var(--text-primary);
+  --noche-overlay: var(--overlay-mask, var(--noche-overlay));
+  --noche-bg: var(--app-bg);
+  --noche-surface: var(--surface-primary);
+  --noche-panel: var(--surface-secondary);
+  --noche-text: var(--text-primary);
+  --noche-muted: var(--text-secondary);
+  --noche-border: var(--border-subtle);
 }
 </style>

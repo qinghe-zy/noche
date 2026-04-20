@@ -83,7 +83,7 @@ defineEmits<{
   align-items: flex-end;
   justify-content: center;
   padding: 32rpx 24rpx 36rpx;
-  background: rgba(34, 32, 28, 0.42);
+  background: var(--overlay-blur-bg, rgba(34, 32, 28, 0.42));
   backdrop-filter: blur(14rpx);
 }
 
@@ -92,7 +92,7 @@ defineEmits<{
   max-height: 88vh;
   border-radius: 32rpx;
   overflow: hidden;
-  background: rgba(250, 247, 242, 0.98);
+  background: var(--surface-primary, rgba(250, 247, 242, 0.98));
   display: flex;
   flex-direction: column;
 }
@@ -109,8 +109,9 @@ defineEmits<{
 .profile-album-viewer__type {
   font-size: 19rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.72));
   letter-spacing: 0.14em;
+  font-family: var(--font-body, inherit);
 }
 
 .profile-album-viewer__image-wrap {
@@ -121,7 +122,7 @@ defineEmits<{
 .profile-album-viewer__image {
   width: 100%;
   border-radius: 24rpx;
-  background: rgba(239, 234, 226, 0.86);
+  background: var(--surface-secondary, rgba(239, 234, 226, 0.86));
 }
 
 .profile-album-viewer__meta {
@@ -141,7 +142,8 @@ defineEmits<{
 .profile-album-viewer__date {
   font-size: 28rpx;
   line-height: 1.4;
-  color: #31332e;
+  color: var(--text-primary, #31332e);
+  font-family: var(--font-heading, inherit);
 }
 
 .profile-album-viewer__actions {
@@ -154,11 +156,13 @@ defineEmits<{
   width: 72rpx;
   height: 72rpx;
   border-radius: 999rpx;
-  background: rgba(238, 232, 223, 0.92);
+  background: var(--button-topbar-bg, var(--button-secondary-bg, rgba(238, 232, 223, 0.92)));
+  border: 1px solid var(--button-topbar-border, transparent);
+  box-shadow: var(--button-topbar-shadow, none);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c655c;
+  color: var(--button-topbar-text, var(--button-secondary-text, #6c655c));
 }
 
 .profile-album-viewer__pager--disabled {
@@ -174,7 +178,9 @@ defineEmits<{
   flex: 1;
   min-height: 72rpx;
   border-radius: 999rpx;
-  background: #6a635a;
+  background: var(--button-pill-bg, var(--button-primary-bg, #6a635a));
+  border: 1px solid var(--button-pill-border, var(--button-primary-border, transparent));
+  box-shadow: var(--button-pill-shadow, var(--button-primary-shadow, none));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,8 +189,9 @@ defineEmits<{
 .profile-album-viewer__jump-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: #fbf9f5;
+  color: var(--button-pill-text, var(--button-primary-text, #fbf9f5));
   letter-spacing: 0.08em;
+  font-family: var(--font-body, inherit);
 }
 
 .type-scale-small .profile-album-viewer__counter,

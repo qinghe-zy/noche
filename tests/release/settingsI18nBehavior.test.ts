@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("settings i18n behavior", () => {
@@ -13,8 +13,12 @@ describe("settings i18n behavior", () => {
     expect(profilePage).toContain("copy.value.settings.followSystem");
     expect(profilePage).toContain("copy.value.settings.light");
     expect(profilePage).toContain("copy.value.settings.dark");
+    expect(profilePage).toContain("copy.value.settings.themeDefault");
+    expect(profilePage).toContain("copy.value.settings.themeClaude");
     expect(profilePage).toContain("copy.value.profile.coverSheetTitle");
     expect(profilePage).toContain("copy.value.profile.avatarSheetTitle");
+    expect(profilePage).toContain("copy.value.profile.themeStyleTitle");
+    expect(profilePage).toContain("copy.value.profile.themeModeTitle");
     expect(profilePage).toContain("copy.value.settings.writingPresetSmall");
     expect(profilePage).toContain("copy.value.settings.writingPresetMedium");
     expect(profilePage).toContain("copy.value.settings.writingPresetLarge");

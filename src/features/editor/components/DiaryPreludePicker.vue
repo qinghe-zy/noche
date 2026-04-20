@@ -229,8 +229,8 @@ function handleSkip(): void {
 
 .diary-prelude-picker {
   min-height: 100vh;
-  background: #fbf9f5;
-  color: #31332e;
+  background: var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -245,7 +245,7 @@ function handleSkip(): void {
   opacity: 0.03;
   background:
     linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.74)),
-    radial-gradient(circle at center, rgba(49, 51, 46, 0.05), transparent 60%);
+    radial-gradient(circle at center, var(--text-primary, rgba(49, 51, 46, 0.05)), transparent 60%);
 }
 
 .diary-prelude-picker__topbar {
@@ -255,7 +255,7 @@ function handleSkip(): void {
   align-items: center;
   gap: 20rpx;
   padding-bottom: 12rpx;
-  background: rgba(251, 249, 245, 0.96);
+  background: color-mix(in srgb, var(--button-topbar-bg, var(--surface-primary, rgba(251, 249, 245, 0.96))) 92%, transparent);
   backdrop-filter: blur(12rpx);
 }
 
@@ -273,17 +273,26 @@ function handleSkip(): void {
   text-align: center;
   font-size: 24rpx;
   line-height: 1.5;
-  color: rgba(99, 95, 85, 0.74);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.74));
   letter-spacing: 0.1em;
 }
 
 .diary-prelude-picker__skip {
   min-width: 72rpx;
+  min-height: 56rpx;
   text-align: right;
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
-  color: rgba(138, 129, 120, 0.78);
-  transition: opacity 160ms ease, transform 180ms ease;
+  color: var(--button-topbar-text, var(--text-tertiary, rgba(138, 129, 120, 0.78)));
+  background: var(--button-topbar-bg, transparent);
+  border: 1rpx solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-topbar-shadow, none);
+  padding: 0 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 160ms ease, transform 180ms ease, background-color 180ms ease;
 }
 
 .diary-prelude-picker__skip:active {
@@ -308,7 +317,13 @@ function handleSkip(): void {
 .diary-prelude-picker__preview-card {
   padding: 24rpx 24rpx 20rpx;
   border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.88);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-primary, #faf9f5) 96%, white 4%),
+    color-mix(in srgb, var(--surface-primary, #faf9f5) 84%, var(--surface-secondary, #e8e6dc) 16%)
+  );
+  border: 1rpx solid var(--border-prominent, var(--border-subtle, rgba(177, 179, 171, 0.16)));
+  box-shadow: var(--shadow-whisper, none);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -319,11 +334,11 @@ function handleSkip(): void {
   width: 76rpx;
   height: 76rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.78);
+  background: var(--button-chip-bg, rgba(245, 244, 238, 0.78));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(49, 51, 46, 0.88);
+  color: var(--text-primary, rgba(49, 51, 46, 0.88));
   margin-bottom: 10rpx;
 }
 
@@ -337,26 +352,27 @@ function handleSkip(): void {
   line-height: 1.16;
   letter-spacing: 0.18em;
   margin-bottom: 6rpx;
+  font-family: var(--font-heading);
 }
 
 .diary-prelude-picker__preview-subline {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 15rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--text-tertiary, rgba(138, 129, 120, 0.72));
   letter-spacing: 0.28em;
 }
 
 .diary-prelude-picker__preview-line {
   width: 72rpx;
   height: 1rpx;
-  background: rgba(177, 179, 171, 0.28);
+  background: var(--border-subtle, rgba(177, 179, 171, 0.28));
   margin: 12rpx 0 8rpx;
 }
 
 .diary-prelude-picker__preview-note {
   font-size: 18rpx;
   line-height: 1.45;
-  color: rgba(99, 95, 85, 0.76);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.76));
 }
 
 .diary-prelude-picker__section {
@@ -373,12 +389,13 @@ function handleSkip(): void {
 .diary-prelude-picker__section-title {
   font-size: 22rpx;
   letter-spacing: 0.1em;
+  font-family: var(--font-heading);
 }
 
 .diary-prelude-picker__section-subtitle {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 13rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--text-tertiary, rgba(138, 129, 120, 0.72));
   letter-spacing: 0.24em;
 }
 
@@ -397,17 +414,17 @@ function handleSkip(): void {
   min-height: 116rpx;
   padding: 16rpx 14rpx;
   border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1rpx solid rgba(177, 179, 171, 0.16);
+  background: var(--button-option-bg, rgba(255, 255, 255, 0.68));
+  border: 1rpx solid var(--button-option-border, var(--border-subtle, rgba(177, 179, 171, 0.16)));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4rpx;
   text-align: center;
-  color: rgba(49, 51, 46, 0.86);
+  color: var(--button-option-text, var(--text-secondary, rgba(49, 51, 46, 0.86)));
   transform: translateY(0) scale(1);
-  box-shadow: 0 0 0 rgba(49, 51, 46, 0);
+  box-shadow: var(--button-option-shadow, var(--shadow-ring, 0 0 0 transparent));
   transition:
     transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -418,28 +435,26 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option:active {
   transform: translateY(1rpx) scale(0.985);
-  box-shadow: 0 8rpx 18rpx rgba(49, 51, 46, 0.06);
+  box-shadow: var(--button-option-shadow, 0 8rpx 18rpx rgba(49, 51, 46, 0.06));
 }
 
 .diary-prelude-picker__option--active {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(138, 129, 120, 0.48);
-  color: rgba(49, 51, 46, 0.96);
+  background: var(--button-option-active-bg, var(--surface-primary, rgba(255, 255, 255, 0.96)));
+  border-color: var(--button-option-active-border, var(--accent-brand, rgba(138, 129, 120, 0.48)));
+  color: var(--button-option-active-text, var(--text-primary, rgba(49, 51, 46, 0.96)));
   transform: translateY(-4rpx);
-  box-shadow:
-    0 14rpx 28rpx rgba(49, 51, 46, 0.08),
-    0 2rpx 0 rgba(255, 255, 255, 0.85) inset;
+  box-shadow: var(--button-option-active-shadow, 0 14rpx 28rpx rgba(49, 51, 46, 0.08));
 }
 
 .diary-prelude-picker__option-glyph-wrap {
   width: 42rpx;
   height: 42rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.92);
+  background: color-mix(in srgb, var(--button-option-bg, #faf9f5) 82%, white 18%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--button-option-text, var(--text-secondary, rgba(99, 95, 85, 0.82)));
   transition:
     background-color 220ms ease,
     color 180ms ease,
@@ -447,8 +462,8 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-glyph-wrap {
-  background: rgba(234, 229, 218, 0.82);
-  color: rgba(49, 51, 46, 0.94);
+  background: color-mix(in srgb, var(--button-option-active-text, #faf9f5) 18%, transparent);
+  color: var(--button-option-active-text, var(--text-primary, rgba(49, 51, 46, 0.94)));
   transform: scale(1.05);
 }
 
@@ -459,8 +474,8 @@ function handleSkip(): void {
   width: 10rpx;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(138, 129, 120, 0.82);
-  box-shadow: 0 0 0 4rpx rgba(234, 229, 218, 0.55);
+  background: var(--button-option-active-text, var(--accent-brand, rgba(138, 129, 120, 0.82)));
+  box-shadow: 0 0 0 4rpx color-mix(in srgb, var(--button-option-active-bg, #c96442) 26%, transparent);
 }
 
 .diary-prelude-picker__option-glyph {
@@ -475,20 +490,20 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-zh {
-  color: rgba(49, 51, 46, 0.98);
+  color: var(--button-option-active-text, var(--text-primary, rgba(49, 51, 46, 0.98)));
   transform: translateY(-1rpx);
 }
 
 .diary-prelude-picker__option-en {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 11rpx;
-  color: rgba(138, 129, 120, 0.68);
+  color: var(--text-tertiary, rgba(138, 129, 120, 0.68));
   letter-spacing: 0.22em;
   transition: color 180ms ease, letter-spacing 220ms ease;
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-en {
-  color: rgba(99, 95, 85, 0.78);
+  color: color-mix(in srgb, var(--button-option-active-text, #faf9f5) 82%, transparent);
   letter-spacing: 0.24em;
 }
 
@@ -503,13 +518,14 @@ function handleSkip(): void {
 
 .diary-prelude-picker__confirm {
   min-height: 88rpx;
-  border-radius: 999rpx;
-  background: rgba(95, 94, 94, 0.92);
+  border-radius: var(--button-pill-radius, 999rpx);
+  background: var(--button-pill-bg);
+  border: 1px solid var(--button-pill-border, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   transform: scale(1);
-  box-shadow: 0 10rpx 18rpx rgba(49, 51, 46, 0.1);
+  box-shadow: var(--button-pill-shadow, var(--button-primary-shadow, 0 10rpx 18rpx rgba(49, 51, 46, 0.1)));
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms ease,
@@ -518,25 +534,30 @@ function handleSkip(): void {
 
 .diary-prelude-picker__confirm:active {
   transform: scale(0.992);
-  box-shadow: 0 6rpx 12rpx rgba(49, 51, 46, 0.08);
+  box-shadow: var(--button-primary-shadow, 0 6rpx 12rpx rgba(49, 51, 46, 0.08));
 }
 
 .diary-prelude-picker__confirm--disabled {
-  background: rgba(177, 179, 171, 0.56);
+  background: var(--button-primary-bg, rgba(177, 179, 171, 0.56));
   box-shadow: none;
 }
 
 .diary-prelude-picker__confirm-label {
-  color: #faf7f6;
+  color: var(--button-pill-text, var(--button-primary-text, #faf7f6));
   font-size: 22rpx;
+  font-family: var(--font-body, inherit);
   letter-spacing: 0.12em;
+}
+
+.diary-prelude-picker__confirm--disabled .diary-prelude-picker__confirm-label {
+  color: var(--button-secondary-text, rgba(255, 255, 255, 0.7));
 }
 
 .diary-prelude-picker__hint {
   text-align: center;
   font-size: 16rpx;
   line-height: 1.35;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--text-tertiary, rgba(138, 129, 120, 0.72));
 }
 
 @media (prefers-reduced-motion: reduce) {

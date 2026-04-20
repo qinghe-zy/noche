@@ -190,20 +190,29 @@ import { createDateChangeWatcher } from "@/shared/utils/dateChange";
 import { resolveHomeDailyPrompt } from "@/features/home/homePrompt";
 import {
   isHomeWelcomeCardCollected,
+  markHomeWelcomeCardSeen,
   markHomeWelcomeCardCollected,
   markHomeWelcomeCardResolved,
+  type HomeWelcomeCard,
+  readHomeWelcomeCardSeenDate,
   resolveHomeWelcomeCard,
   resolveHomeWelcomeCardEyebrow,
   resolveHomeWelcomeCardGlyph,
   resolveHomeWelcomeCardTitle,
+  shouldAutoShowHomeWelcomeCard,
 } from "@/features/home/homeWelcomeCard";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
+import {
+  prefetchRemoteHomeWelcomeCard,
+  type RemoteHomeWelcomeCardRecord,
+} from "@/features/home/homeWelcomeCardRemote";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
 import { useThemeClass, useTypographyClass } from "@/shared/theme";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import { t } from "@/shared/i18n";
 
 type HomeWelcomeCardStage = "hidden" | "entering" | "stack" | "expanded" | "collecting" | "dismissing";
+type ActiveHomeWelcomeCard = Pick<HomeWelcomeCard, "id" | "content" | "type"> & { source: "local" | "remote" };
 
 const draftStore = useDraftStore();
 const settingsStore = useSettingsStore();
@@ -217,7 +226,7 @@ const isShowcasePulsing = ref(false);
 const copy = computed(() => t(settingsStore.locale));
 const todayDateKey = ref(formatDate(new Date(), "YYYY-MM-DD"));
 const dailyPrompt = computed(() => resolveHomeDailyPrompt(todayDateKey.value));
-const activeWelcomeCard = computed(() => resolveHomeWelcomeCard(todayDateKey.value));
+const activeWelcomeCard = ref<ActiveHomeWelcomeCard>(resolveLocalActiveWelcomeCard(todayDateKey.value));
 const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   dateKey: todayDateKey.value,
   locale: settingsStore.locale,
@@ -250,7 +259,9 @@ const dateChangeWatcher = createDateChangeWatcher({
   onDateChange: (nextDateKey) => {
     todayDateKey.value = nextDateKey;
     resetWelcomeCard();
-    syncWelcomeCardPresentation(nextDateKey);
+    syncActiveWelcomeCardWithLocal(nextDateKey);
+    syncWelcomeCardAutoPresentation(nextDateKey);
+    void prefetchTodayRemoteWelcomeCard(nextDateKey);
   },
 });
 
@@ -316,6 +327,30 @@ function resetWelcomeCard(): void {
   isShowcasePulsing.value = false;
 }
 
+function resolveLocalActiveWelcomeCard(dateKey: string): ActiveHomeWelcomeCard {
+  const card = resolveHomeWelcomeCard(dateKey);
+
+  return {
+    id: card.id,
+    content: card.content,
+    type: card.type,
+    source: "local",
+  };
+}
+
+function resolveRemoteActiveWelcomeCard(card: RemoteHomeWelcomeCardRecord): ActiveHomeWelcomeCard {
+  return {
+    id: card.id,
+    content: card.content,
+    type: card.type,
+    source: "remote",
+  };
+}
+
+function syncActiveWelcomeCardWithLocal(dateKey = todayDateKey.value): void {
+  activeWelcomeCard.value = resolveLocalActiveWelcomeCard(dateKey);
+}
+
 function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   clearWelcomeCardTimer();
 
@@ -330,6 +365,40 @@ function syncWelcomeCardPresentation(dateKey = todayDateKey.value): void {
   scheduleWelcomeCardStage(() => {
     welcomeCardStage.value = "stack";
   }, 260);
+}
+
+function syncWelcomeCardAutoPresentation(dateKey = todayDateKey.value): void {
+  const lastSeenDate = readHomeWelcomeCardSeenDate();
+
+  if (!shouldAutoShowHomeWelcomeCard(dateKey, lastSeenDate)) {
+    clearWelcomeCardTimer();
+    welcomeCardStage.value = "hidden";
+    return;
+  }
+
+  markHomeWelcomeCardSeen(dateKey);
+  syncWelcomeCardPresentation(dateKey);
+}
+
+async function prefetchTodayRemoteWelcomeCard(dateKey = todayDateKey.value): Promise<void> {
+  const locale = settingsStore.locale;
+  const remoteCard = await prefetchRemoteHomeWelcomeCard(dateKey, locale);
+
+  if (!remoteCard || todayDateKey.value !== dateKey || settingsStore.locale !== locale) {
+    return;
+  }
+
+  if (isHomeWelcomeCardCollected(dateKey, remoteCard.id)) {
+    activeWelcomeCard.value = resolveRemoteActiveWelcomeCard(remoteCard);
+    welcomeCardStage.value = "hidden";
+    return;
+  }
+
+  if (["expanded", "collecting", "dismissing"].includes(welcomeCardStage.value)) {
+    return;
+  }
+
+  activeWelcomeCard.value = resolveRemoteActiveWelcomeCard(remoteCard);
 }
 
 function handleDismissWelcomeCard(): void {
@@ -387,7 +456,9 @@ async function handleCreateAnotherJottingDraft() {
 
 onMounted(() => {
   dateChangeWatcher.start();
-  syncWelcomeCardPresentation();
+  syncActiveWelcomeCardWithLocal();
+  syncWelcomeCardAutoPresentation();
+  void prefetchTodayRemoteWelcomeCard();
 });
 
 onUnmounted(() => {
@@ -398,7 +469,9 @@ onUnmounted(() => {
 onShow(() => {
   todayDateKey.value = formatDate(new Date(), "YYYY-MM-DD");
   dateChangeWatcher.sync();
-  syncWelcomeCardPresentation();
+  syncActiveWelcomeCardWithLocal();
+  syncWelcomeCardAutoPresentation();
+  void prefetchTodayRemoteWelcomeCard();
 });
 </script>
 
@@ -415,10 +488,15 @@ onShow(() => {
   align-items: center;
   overflow: hidden;
   overflow-x: hidden;
-  background-color: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 30%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
   position: relative;
+  --home-accent-brand: var(--accent-brand);
+  --home-surface-primary: var(--surface-primary);
 }
 
 .home-page__topnav {
@@ -446,13 +524,13 @@ onShow(() => {
   min-height: 72rpx;
   display: inline-flex;
   align-items: center;
-  color: var(--noche-muted);
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
   transition: transform 220ms ease, color 180ms ease;
 }
 
 .home-page__topnav-showcase-entry--pulse {
   transform: scale(1.08);
-  color: var(--noche-text);
+  color: var(--accent-brand, var(--text-primary, var(--noche-text)));
 }
 
 .home-page__showcase-stack {
@@ -469,7 +547,7 @@ onShow(() => {
   border-radius: 10rpx;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(244, 236, 226, 0.94));
   border: 1px solid rgba(195, 183, 169, 0.56);
-  box-shadow: 0 6rpx 16rpx rgba(75, 67, 58, 0.08);
+  box-shadow: var(--shadow-whisper, 0 6px 16px rgba(75, 67, 58, 0.08));
 }
 
 .home-page__showcase-stack-card--back {
@@ -493,14 +571,15 @@ onShow(() => {
 
 .home-page__topnav-profile-entry {
   min-height: 72rpx;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--button-topbar-border, transparent);
+  background: var(--button-topbar-bg, var(--button-ghost-bg, transparent));
+  border-radius: var(--button-pill-radius, 999px);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--noche-muted);
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
   padding: 0;
-  box-shadow: none;
+  box-shadow: var(--button-topbar-shadow, none);
   outline: none;
   -webkit-tap-highlight-color: transparent;
   transition: color 160ms ease, opacity 160ms ease;
@@ -521,7 +600,7 @@ onShow(() => {
 
 .home-page__topnav-profile-entry:active,
 .home-page__topnav-profile-entry:hover {
-  color: var(--noche-text);
+  color: var(--button-topbar-active-text, var(--button-primary-bg, var(--accent-brand, var(--text-primary, var(--noche-text)))));
 }
 
 .home-page__main {
@@ -553,15 +632,17 @@ onShow(() => {
   font-size: 38px;
   line-height: 1.15;
   font-weight: 200;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading);
 }
 
 .home-page__hero-subtitle {
   max-width: min(100%, 420px);
   font-size: 12px;
   line-height: 1.7;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   letter-spacing: 0.12em;
+  font-family: var(--font-body);
 }
 
 .home-page__letter-spacing-widest {
@@ -589,18 +670,21 @@ onShow(() => {
   width: min(100%, 340px);
   aspect-ratio: 1 / 1.4;
   padding: 48px;
-  background-color: var(--noche-panel);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 10px 30px -5px rgba(0, 0, 0, 0.05),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, var(--surface-secondary, #e3d5be) 12%)
+    );
+  border: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--shadow-whisper, 0 18px 38px rgba(101, 81, 58, 0.09));
 }
 
 .home-page__paper-premium::after {
   content: "";
   position: absolute;
   inset: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #d7c8b1) 82%, transparent);
   pointer-events: none;
 }
 
@@ -622,7 +706,7 @@ onShow(() => {
 .home-page__paper-inner {
   width: 100%;
   height: 100%;
-  border: 0.5px solid var(--noche-border);
+  border: 0.5px solid var(--border-subtle, var(--noche-border));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -659,7 +743,7 @@ onShow(() => {
 .home-page__paper-icon {
   width: 40px;
   height: 40px;
-  color: var(--noche-muted);
+  color: var(--home-accent-brand, var(--noche-muted));
 }
 
 .home-page__paper-copy {
@@ -673,17 +757,18 @@ onShow(() => {
   font-size: 30px;
   line-height: 1.3;
   font-weight: 300;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   text-align: center;
+  font-family: var(--font-heading);
 }
 
 .home-page__paper-subtitle {
-  font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 10px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.4em;
+  font-family: var(--font-body, inherit);
 }
 
 .home-page__paper-seal {
@@ -718,6 +803,9 @@ onShow(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 8px;
+  border-radius: var(--button-radius, 18px);
+  background: var(--button-ghost-bg, transparent);
+  border: 1px solid var(--button-ghost-border, transparent);
 }
 
 .home-page__nav-entry-icon {
@@ -726,8 +814,11 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--noche-border);
-  color: var(--noche-muted);
+  border: 1px solid var(--button-secondary-border, var(--noche-border));
+  color: var(--button-secondary-text, var(--noche-muted));
+  background: var(--button-secondary-bg, transparent);
+  border-radius: var(--button-radius, 18px);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .home-page__nav-entry-icon-svg {
@@ -736,10 +827,10 @@ onShow(() => {
 }
 
 .home-page__nav-entry-label {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.3em;
 }
 
@@ -757,11 +848,11 @@ onShow(() => {
 }
 
 .home-page__footer-text {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.6em;
   text-transform: uppercase;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.6em;
 }
 
@@ -853,15 +944,9 @@ onShow(() => {
   height: 404px;
   padding: 36px 34px 30px;
   border-radius: 38px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
-    linear-gradient(140deg, rgba(215, 205, 192, 0.16), rgba(215, 205, 192, 0) 48%),
-    var(--noche-surface);
-  border: 1px solid var(--noche-border);
-  box-shadow:
-    0 22px 58px rgba(44, 47, 48, 0.08),
-    0 8px 18px rgba(44, 47, 48, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  background: var(--surface-secondary, var(--noche-surface));
+  border: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--shadow-whisper, 0 24px 56px rgba(101, 81, 58, 0.12));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -875,7 +960,7 @@ onShow(() => {
   position: absolute;
   inset: 12px;
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.44);
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #d7c8b1) 56%, white);
   pointer-events: none;
 }
 
@@ -884,6 +969,7 @@ onShow(() => {
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.26), transparent 34%),
     radial-gradient(circle at bottom right, rgba(205, 194, 179, 0.12), transparent 30%);
   pointer-events: none;
@@ -918,10 +1004,7 @@ onShow(() => {
 }
 
 .home-page__welcome-card--expanded .home-page__welcome-card-face-inner {
-  box-shadow:
-    0 28px 64px rgba(44, 47, 48, 0.09),
-    0 10px 24px rgba(44, 47, 48, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  box-shadow: var(--shadow-whisper, 0 28px 64px rgba(44, 47, 48, 0.09));
 }
 
 .home-page__welcome-card--collecting .home-page__welcome-card-face {
@@ -945,13 +1028,9 @@ onShow(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(247, 241, 233, 0.72)),
-    var(--noche-panel);
-  border: 1px solid var(--noche-border);
-  box-shadow:
-    0 6px 14px rgba(44, 47, 48, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  background: var(--surface-secondary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  box-shadow: var(--shadow-whisper, 0 6px 14px rgba(44, 47, 48, 0.05));
 }
 
 .home-page__welcome-card-body {
@@ -980,10 +1059,10 @@ onShow(() => {
 }
 
 .home-page__welcome-card-eyebrow {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 12px;
   line-height: 1.5;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   letter-spacing: 0.26em;
   text-transform: uppercase;
   padding-left: 0.26em;
@@ -1000,12 +1079,12 @@ onShow(() => {
 }
 
 .home-page__welcome-card-title {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-heading, inherit);
   font-size: 48px;
   line-height: 0.96;
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  color: var(--noche-text);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-primary, var(--noche-text));
   white-space: pre-line;
   max-width: 220px;
   align-self: flex-start;
@@ -1017,9 +1096,10 @@ onShow(() => {
 }
 
 .home-page__welcome-card-content {
+  font-family: var(--font-body, inherit);
   font-size: 19px;
-  line-height: 2.02;
-  color: var(--noche-text);
+  line-height: 1.6;
+  color: var(--text-secondary, var(--noche-text));
   letter-spacing: 0.02em;
   max-width: 220px;
   align-self: flex-start;
@@ -1056,8 +1136,6 @@ onShow(() => {
     linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0)),
     rgba(233, 225, 214, 0.42);
   border: 1px solid rgba(214, 204, 191, 0.32);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.56);
 }
 
 .home-page__welcome-card-pill {
@@ -1066,16 +1144,12 @@ onShow(() => {
   height: 62px;
   padding: 0 18px;
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0)),
-    var(--noche-panel);
+  background: var(--button-pill-bg, var(--button-primary-bg, var(--noche-panel)));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 8px 18px rgba(44, 47, 48, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.66);
-  border: 1px solid var(--noche-border);
+  box-shadow: var(--button-pill-shadow, var(--button-primary-shadow, 0 8px 18px rgba(44, 47, 48, 0.04)));
+  border: 1px solid var(--button-pill-border, var(--button-primary-border, var(--noche-border)));
   align-self: stretch;
   position: relative;
   overflow: hidden;
@@ -1115,25 +1189,23 @@ onShow(() => {
 }
 
 .home-page__welcome-card-pill--secondary {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0)),
-    var(--noche-surface);
-  box-shadow: none;
+  background: var(--button-chip-bg, var(--button-secondary-bg, var(--noche-surface)));
+  box-shadow: var(--button-chip-shadow, var(--button-secondary-shadow, none));
+  border-color: var(--button-chip-border, var(--button-secondary-border, var(--noche-border)));
 }
 
 .home-page__welcome-card-pill-label {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 15px;
   line-height: 1;
-  color: var(--noche-text);
-  font-weight: 700;
+  color: var(--button-pill-text, var(--button-primary-text, var(--noche-text)));
+  font-weight: 500;
   letter-spacing: 0.01em;
 }
 
 .home-page__welcome-card-pill-label--secondary {
-  color: var(--noche-muted);
+  color: var(--button-chip-text, var(--button-secondary-text, var(--noche-muted)));
 }
-
 .home-page__welcome-card--expanded .home-page__welcome-card-pill {
   transform: scale(1);
 }
@@ -1152,10 +1224,12 @@ onShow(() => {
 
 .home-page__jotting-modal {
   width: min(100%, 420px);
-  background: rgba(252, 248, 241, 0.98);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, rgba(252, 248, 241, 0.98));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
+  box-shadow:
+    0 18px 40px rgba(101, 81, 58, 0.16),
+    var(--shadow-ring, 0 0 0 1px rgba(165, 133, 102, 0.28));
   overflow: hidden;
 }
 
@@ -1192,17 +1266,21 @@ onShow(() => {
   gap: 6px;
   align-items: center;
   text-align: center;
-  background: transparent;
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, transparent);
+  margin: 10px 16px 0;
+  border-radius: var(--button-radius, 18px);
+  box-shadow: var(--button-secondary-shadow, none);
 }
 
 .home-page__jotting-modal-action + .home-page__jotting-modal-action {
-  border-top: 1px solid var(--noche-border);
+  border-top: none;
 }
 
 .home-page__jotting-modal-action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--button-secondary-text, var(--noche-text));
 }
 
 .home-page__jotting-modal-action-copy {
@@ -1212,7 +1290,170 @@ onShow(() => {
 }
 
 .home-page__jotting-modal-action--muted .home-page__jotting-modal-action-title {
-  color: var(--noche-muted);
+  color: var(--button-ghost-text, var(--noche-muted));
+}
+
+.theme-family-claude.home-page {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 16%, transparent), transparent 34%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--surface-secondary, #e3d5be) 88%, transparent), transparent 38%),
+    linear-gradient(180deg, color-mix(in srgb, var(--app-bg, #efe7d8) 90%, white 10%), var(--app-bg, #efe7d8));
+}
+
+.theme-family-claude .home-page__topnav-showcase-entry,
+.theme-family-claude .home-page__topnav-profile-entry {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, white 12%);
+  border-color: color-mix(in srgb, var(--border-subtle, #d7c8b1) 86%, transparent);
+  box-shadow: var(--shadow-ring, none);
+}
+
+.theme-family-claude .home-page__topnav-showcase-entry {
+  background: var(--button-primary-bg, #c96442);
+  border: 1px solid var(--button-primary-border, #c96442);
+  border-radius: var(--button-pill-radius, 999px);
+  padding: 0 18rpx;
+  color: var(--button-primary-text, #fbf4e8);
+  box-shadow: var(--button-primary-shadow, none);
+}
+
+.theme-family-claude .home-page__showcase-stack-card {
+  background: linear-gradient(180deg, color-mix(in srgb, white 86%, var(--surface-primary, #fbf4e8)), color-mix(in srgb, var(--surface-primary, #fbf4e8) 82%, var(--surface-secondary, #e3d5be) 18%));
+  border-color: var(--border-prominent, #c9b89e);
+}
+
+.theme-family-claude .home-page__paper-premium {
+  box-shadow:
+    0 24px 56px color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
+}
+
+.theme-family-claude .home-page__paper-inner {
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+}
+
+.theme-family-claude .home-page__paper-texture {
+  opacity: 1;
+}
+
+.theme-family-claude .home-page__paper-line {
+  background: var(--border-prominent, var(--noche-border));
+}
+
+.theme-family-claude .home-page__paper-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: var(--button-primary-bg, #c96442);
+  border: 1px solid var(--button-primary-border, #c96442);
+  box-shadow: var(--button-primary-shadow, none);
+}
+
+.theme-family-claude .home-page__paper-icon {
+  color: var(--button-primary-text, #fbf4e8);
+}
+
+.theme-family-claude .home-page__paper-heading {
+  font-size: 34px;
+  line-height: 1.24;
+}
+
+.theme-family-claude .home-page__paper-seal-dot {
+  border-color: var(--border-prominent, var(--noche-border));
+}
+
+.theme-family-claude .home-page__nav-entry {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 82%, transparent);
+  border-color: color-mix(in srgb, var(--border-subtle, #d7c8b1) 78%, transparent);
+  box-shadow: var(--shadow-ring, none);
+}
+
+.theme-family-claude .home-page__nav-entry-icon {
+  background: var(--button-pill-bg, transparent);
+  border-color: var(--button-pill-border, var(--noche-border));
+  box-shadow: var(--button-pill-shadow, none);
+  color: var(--button-pill-text, var(--text-secondary, var(--noche-muted)));
+}
+
+.theme-family-claude .home-page__nav-entry:first-child .home-page__nav-entry-icon {
+  background: var(--button-primary-bg, #c96442);
+  border-color: var(--button-primary-border, #c96442);
+  box-shadow: var(--button-primary-shadow, none);
+  color: var(--button-primary-text, #fbf4e8);
+}
+
+.theme-family-claude .home-page__nav-entry:nth-child(2) .home-page__nav-entry-icon {
+  background: var(--button-fab-bg, #1b1713);
+  border-color: var(--button-fab-border, #1b1713);
+  box-shadow: var(--button-fab-shadow, none);
+  color: var(--button-fab-text, #fbf4e8);
+}
+
+.theme-family-claude .home-page__welcome-card-face-inner {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 86%, var(--surface-secondary, #e3d5be) 14%)
+    );
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 24px 56px color-mix(in srgb, var(--text-primary, #1b1713) 10%, transparent),
+    var(--shadow-ring, none);
+}
+
+.theme-family-claude .home-page__welcome-card-face-inner::after {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 52%, transparent), transparent 62%),
+    radial-gradient(circle at top left, color-mix(in srgb, white 28%, transparent), transparent 34%),
+    radial-gradient(circle at bottom right, color-mix(in srgb, var(--surface-secondary, #e3d5be) 28%, transparent), transparent 30%);
+}
+
+.theme-family-claude .home-page__welcome-card-glyph-chip {
+  background: var(--button-chip-bg, var(--surface-secondary, var(--noche-panel)));
+  border: 1px solid var(--button-chip-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-chip-shadow, var(--shadow-whisper, none));
+}
+
+.theme-family-claude .home-page__welcome-card-divider {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--border-prominent, #c9b89e) 72%, transparent), transparent);
+}
+
+.theme-family-claude .home-page__welcome-card-actions {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, white 12%);
+  border: 1px solid color-mix(in srgb, var(--border-subtle, #d7c8b1) 82%, transparent);
+}
+
+.theme-family-claude .home-page__welcome-card-pill::before {
+  background: color-mix(in srgb, var(--button-pill-text, #3d3326) 18%, white);
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, var(--button-pill-text, #3d3326) 14%, transparent),
+    0 1px 0 color-mix(in srgb, white 56%, transparent);
+}
+
+.theme-family-claude .home-page__welcome-card-pill::after {
+  border-color: color-mix(in srgb, white 26%, transparent);
+}
+
+.theme-family-claude .home-page__jotting-modal {
+  background: var(--surface-primary, #fbf4e8);
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
+}
+
+.theme-family-claude .home-page__jotting-modal-head {
+  border-bottom: 1px solid var(--border-subtle, #d7c8b1);
+}
+
+.theme-family-claude .home-page__jotting-modal-title {
+  color: var(--text-primary, #1b1713);
+  font-family: var(--font-heading, inherit);
+}
+
+.theme-family-claude .home-page__jotting-modal-copy {
+  color: var(--text-secondary, #6b6154);
+  font-family: var(--font-body, inherit);
 }
 
 .type-scale-small .home-page__hero-title { font-size: 36px; }

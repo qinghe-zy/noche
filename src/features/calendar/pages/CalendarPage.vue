@@ -457,12 +457,16 @@ onShow(() => {
 
 .calendar-page {
   height: 100vh;
-  background-color: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 28%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  --calendar-accent-brand: var(--accent-brand);
 }
 
 .calendar-page__body {
@@ -478,7 +482,7 @@ onShow(() => {
 
 .calendar-page__topbar {
   width: 100%;
-  background: var(--noche-surface);
+  background: var(--surface-primary, var(--noche-surface));
 }
 
 .calendar-page__topbar-inner {
@@ -493,17 +497,19 @@ onShow(() => {
 .calendar-page__topbar-button {
   width: 88rpx;
   height: 88rpx;
-  border: none;
-  background: transparent;
-  color: var(--noche-muted);
+  background: var(--button-topbar-bg, transparent);
+  color: var(--button-topbar-text, var(--button-secondary-text, var(--noche-muted)));
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border-radius: var(--button-pill-radius, 999px);
+  border: 1px solid var(--button-topbar-border, transparent);
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .calendar-page__topbar-button--label {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 20rpx;
   letter-spacing: 0.18em;
   padding-left: 0.18em;
@@ -512,8 +518,9 @@ onShow(() => {
 .calendar-page__topbar-title {
   font-size: 30rpx;
   letter-spacing: 0.14em;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.14em;
+  font-family: var(--font-heading);
 }
 
 .calendar-page__main {
@@ -536,16 +543,17 @@ onShow(() => {
   display: block;
   font-size: 36px;
   line-height: 1.2;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading);
 }
 
 .calendar-page__hero-subtitle {
   display: block;
   margin-top: 8px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 11px;
   letter-spacing: 0.36em;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.36em;
   text-transform: uppercase;
 }
@@ -554,20 +562,20 @@ onShow(() => {
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 14px;
-  background: var(--noche-panel);
-  border: 1px solid var(--noche-border);
-  color: var(--noche-muted);
+  background: var(--surface-secondary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  color: var(--text-secondary, var(--noche-muted));
   font-size: 13px;
   line-height: 1.7;
 }
 
 .calendar-page__banner--error {
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .calendar-page__paper-panel {
-  background: var(--noche-panel);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-panel));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 18px;
   padding: 24px 18px calc(22px - 24rpx);
 }
@@ -582,13 +590,15 @@ onShow(() => {
 .calendar-page__month-button {
   width: 56rpx;
   height: 56rpx;
-  border: none;
-  background: transparent;
-  color: var(--noche-muted);
+  border: 1px solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999px);
+  background: var(--button-topbar-bg, transparent);
+  color: var(--button-topbar-text, var(--button-secondary-text, var(--noche-muted)));
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .calendar-page__month-button-icon {
@@ -598,10 +608,10 @@ onShow(() => {
 }
 
 .calendar-page__month-label {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 12px;
   letter-spacing: 0.28em;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.28em;
 }
 
@@ -613,10 +623,10 @@ onShow(() => {
 
 .calendar-page__weekday {
   text-align: center;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.14em;
 }
 
@@ -648,21 +658,21 @@ onShow(() => {
 }
 
 .calendar-page__day-number {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 18px;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   position: relative;
   z-index: 1;
 }
 
 .calendar-page__day--today .calendar-page__day-number {
-  font-weight: 700;
+  font-weight: 500;
   font-size: 20px;
-  color: #2b2925;
+  color: var(--text-primary, #2b2925);
 }
 
 .calendar-page__day--selected .calendar-page__day-number {
-  color: #1d1d1d;
+  color: var(--text-primary, #1d1d1d);
 }
 
 .calendar-page__day--selected .calendar-page__day-inner::before {
@@ -673,7 +683,7 @@ onShow(() => {
   width: 28px;
   height: 28px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(246, 240, 232, 0.96) 0%, rgba(246, 240, 232, 0.52) 48%, rgba(246, 240, 232, 0) 72%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--calendar-accent-brand, #c96442) 18%, rgba(246, 240, 232, 0.96)) 0%, rgba(246, 240, 232, 0.52) 48%, rgba(246, 240, 232, 0) 72%);
   transform: translate(-50%, -58%);
   z-index: -1;
 }
@@ -683,7 +693,7 @@ onShow(() => {
   width: 4px;
   height: 4px;
   border-radius: 9999px;
-  background: #5f5e5e;
+  background: var(--text-tertiary, #5f5e5e);
 }
 
 .calendar-page__marker {
@@ -696,7 +706,7 @@ onShow(() => {
 .calendar-page__day-mailbox {
   margin-top: 30px;
   padding-top: 24px;
-  border-top: 1px solid var(--noche-border);
+  border-top: 1px solid var(--border-subtle, var(--noche-border));
   min-height: 0;
 }
 
@@ -709,10 +719,10 @@ onShow(() => {
 }
 
 .calendar-page__day-mailbox-date {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.22em;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--text-secondary, var(--noche-muted));
   padding-left: 0.22em;
   text-transform: uppercase;
 }
@@ -725,15 +735,16 @@ onShow(() => {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   margin-bottom: 8px;
+  font-family: var(--font-heading);
 }
 
 .calendar-page__day-mailbox-body {
   display: block;
   font-size: 13px;
   line-height: 1.8;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .calendar-page__day-mailbox-empty {
@@ -748,17 +759,18 @@ onShow(() => {
 .calendar-page__day-mailbox-empty-text {
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.74);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .calendar-page__day-mailbox-action {
   min-height: 34px;
   padding: 0 14px;
-  border-radius: 9999px;
-  border: 1px solid var(--noche-border);
-  background: var(--noche-panel);
-  color: var(--noche-text);
+  border-radius: var(--button-pill-radius, 999px);
+  border: 1px solid var(--button-pill-border, var(--button-secondary-border, var(--noche-border)));
+  background: var(--button-pill-bg, var(--button-secondary-bg, var(--noche-panel)));
+  color: var(--button-pill-text, var(--button-secondary-text, var(--noche-text)));
   font-size: 12px;
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
 .calendar-page__day-mailbox-list {
@@ -773,7 +785,7 @@ onShow(() => {
 .calendar-page__day-mailbox-item {
   padding: 18px 0 20px;
   background: transparent;
-  border: 1px solid rgba(221, 212, 200, 0.52);
+  border: 1px solid var(--border-subtle, var(--noche-border));
   text-align: center;
   border-radius: 2px;
 }
@@ -794,10 +806,10 @@ onShow(() => {
 
 .calendar-page__day-mailbox-item-type,
 .calendar-page__day-mailbox-item-date {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.14em;
   text-transform: uppercase;
 }
@@ -806,7 +818,7 @@ onShow(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .calendar-page__day-mailbox-item-prelude-glyph {
@@ -818,7 +830,7 @@ onShow(() => {
   display: block;
   font-size: 18px;
   line-height: 1.45;
-  color: #31332e;
+  color: var(--text-primary, var(--noche-text));
   margin-bottom: 8px;
   text-align: center;
 }
@@ -827,7 +839,7 @@ onShow(() => {
   display: block;
   font-size: 13px;
   line-height: 1.8;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--text-secondary, var(--noche-text));
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -839,10 +851,10 @@ onShow(() => {
 .calendar-page__day-mailbox-item-status {
   display: block;
   margin-top: 10px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.14em;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.14em;
   text-transform: uppercase;
   text-align: center;
@@ -856,10 +868,10 @@ onShow(() => {
 
 .calendar-page__status-text,
 .calendar-page__legend-text {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.22em;
-  color: rgba(121, 124, 117, 0.8);
+  color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.22em;
 }
 

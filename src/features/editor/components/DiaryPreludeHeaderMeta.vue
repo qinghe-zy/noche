@@ -151,12 +151,12 @@ function handleEdit(): void {
 }
 
 .diary-prelude-header-meta__meta-text {
-  font-family: "Inter", "PingFang SC", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 22rpx;
   line-height: 1.6;
   font-weight: 400;
   letter-spacing: 0.12em;
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.78));
 }
 
 .diary-prelude-header-meta__icon {
@@ -165,7 +165,7 @@ function handleEdit(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.78));
   flex: 0 0 auto;
 }
 
@@ -184,6 +184,6 @@ function handleEdit(): void {
   display: block;
   font-size: 20rpx;
   line-height: 1.74;
-  color: rgba(99, 95, 85, 0.54);
+  color: var(--text-tertiary, rgba(99, 95, 85, 0.54));
 }
 </style>

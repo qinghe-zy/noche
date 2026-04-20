@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 function readProjectFile(relativePath: string): string {
-  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8").replace(/\r\n/g, "\n");
 }
 
 describe("editor stitch parity", () => {
@@ -68,11 +68,32 @@ describe("editor stitch parity", () => {
     expect(futureShell).toContain("border: none;");
   });
 
-  it("extends dark-theme overrides to the future letter shell instead of leaving the stationery page bright", () => {
+  it("isolates the future letter's Claude-dark overrides behind the Claude family instead of mutating every dark theme", () => {
     const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
 
-    expect(futureShell).toContain(".theme-dark.editor-page");
-    expect(futureShell).toContain(".theme-dark .editor-page__paper-surface");
-    expect(futureShell).toContain(".theme-dark .editor-page__future-ribbon");
+    expect(futureShell).toContain(".theme-family-claude.theme-key-claude-dark.editor-page");
+    expect(futureShell).toContain(".theme-family-claude.theme-key-claude-dark .editor-page__paper-surface");
+    expect(futureShell).toContain(".theme-family-claude.theme-key-claude-dark .editor-page__future-ribbon");
+    expect(futureShell).not.toContain(".theme-dark .editor-page__paper-surface");
+  });
+
+  it("starts moving editor shells onto semantic tokens and heading/body font stacks", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+    const jottingShell = readProjectFile("src/features/editor/components/JottingEditorShell.vue");
+    const futureShell = readProjectFile("src/features/editor/components/FutureLetterEditorShell.vue");
+    const preludePicker = readProjectFile("src/features/editor/components/DiaryPreludePicker.vue");
+
+    expect(diaryShell).toContain("var(--font-heading)");
+    expect(jottingShell).toContain("var(--font-body)");
+    expect(futureShell).toContain("var(--surface-primary");
+    expect(futureShell).toContain("var(--text-secondary");
+    expect(diaryShell).toContain("var(--button-topbar-text");
+    expect(diaryShell).toContain("var(--button-pill-bg");
+    expect(jottingShell).toContain("var(--button-topbar-text");
+    expect(jottingShell).toContain("var(--button-pill-bg");
+    expect(preludePicker).toContain("var(--button-pill-bg");
+    expect(preludePicker).toContain("var(--button-option-bg");
+    expect(preludePicker).toContain("var(--button-option-active-bg");
+    expect(preludePicker).toContain("var(--button-primary-bg");
   });
 });

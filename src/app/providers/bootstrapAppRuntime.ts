@@ -14,6 +14,8 @@ import type { IEntryRepository } from "@/data/repositories/entry.repository";
 import type { PrefsRepo } from "@/data/repositories/prefsRepo";
 import type { Entry } from "@/domain/entry/types";
 import { createUniJsonStorage } from "@/shared/utils/storage";
+import { formatDate } from "@/shared/utils/date";
+import { prefetchRemoteHomeWelcomeCard } from "@/features/home/homeWelcomeCardRemote";
 
 interface BootstrapPersistenceAdapters {
   draftRepository?: IDraftRepository;
@@ -94,5 +96,6 @@ export async function bootstrapAppRuntime(
   const appStore = useAppStore(pinia);
 
   await settingsStore.hydrate();
+  void prefetchRemoteHomeWelcomeCard(formatDate(new Date(), "YYYY-MM-DD"), settingsStore.locale);
   appStore.markReady();
 }

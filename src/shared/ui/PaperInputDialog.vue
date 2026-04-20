@@ -108,11 +108,13 @@ function handleInput(event: Event): void {
 
 .paper-input-dialog {
   width: min(100%, 420px);
-  background: var(--noche-surface);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   border-radius: 24px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
+  box-shadow: var(--shadow-whisper, 0 18px 40px rgba(44, 46, 42, 0.12));
   overflow: hidden;
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .paper-input-dialog__head {
@@ -124,7 +126,8 @@ function handleInput(event: Event): void {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-heading, inherit);
 }
 
 .paper-input-dialog__copy {
@@ -132,7 +135,7 @@ function handleInput(event: Event): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: var(--noche-muted);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .paper-input-dialog__body {
@@ -145,17 +148,18 @@ function handleInput(event: Event): void {
   padding: 16px 0;
   background: transparent;
   border: none;
-  border-top: 1px solid var(--noche-border);
-  border-bottom: 1px solid var(--noche-border);
+  border-top: 1px solid var(--border-subtle, var(--noche-border));
+  border-bottom: 1px solid var(--border-subtle, var(--noche-border));
   font-size: 16px;
   line-height: 1.75;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
 }
 
 .paper-input-dialog__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--noche-border);
+  border-top: 1px solid var(--border-subtle, var(--noche-border));
 }
 
 .paper-input-dialog__action {
@@ -163,20 +167,35 @@ function handleInput(event: Event): void {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--button-radius, 18px);
+  margin: 10px;
 }
 
 .paper-input-dialog__action + .paper-input-dialog__action {
-  border-left: 1px solid var(--noche-border);
+  border-left: none;
 }
 
 .paper-input-dialog__action-text {
   font-size: 16px;
   line-height: 1.4;
-  color: var(--noche-muted);
+  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
+  font-family: var(--font-body, inherit);
 }
 
 .paper-input-dialog__action-text--primary {
-  color: var(--noche-text);
+  color: var(--button-primary-text, var(--text-primary, var(--noche-text)));
+}
+
+.paper-input-dialog__action--muted {
+  background: var(--button-secondary-bg, transparent);
+  border: 1px solid var(--button-secondary-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-secondary-shadow, none);
+}
+
+.paper-input-dialog__action--primary {
+  background: var(--button-primary-bg, var(--text-primary, var(--noche-text)));
+  border: 1px solid var(--button-primary-border, transparent);
+  box-shadow: var(--button-primary-shadow, none);
 }
 
 .type-scale-small .paper-input-dialog__title { font-size: 21px; }

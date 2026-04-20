@@ -56,14 +56,15 @@ describe("home welcome card parity", () => {
     expect(homePage).toContain('welcomeCardStage.value = "entering";');
   });
 
-  it("keeps the card flow enabled without suppressing the same day after one view", () => {
+  it("suppresses auto-popup after the first open on the same day while keeping the card layer logic", () => {
     const homePage = readProjectFile("src/features/home/pages/HomePage.vue");
 
-    expect(homePage).not.toContain("readHomeWelcomeCardSeenDate");
-    expect(homePage).not.toContain("markHomeWelcomeCardSeen");
-    expect(homePage).not.toContain("const lastSeenDate");
+    expect(homePage).toContain("readHomeWelcomeCardSeenDate");
+    expect(homePage).toContain("markHomeWelcomeCardSeen");
+    expect(homePage).toContain("shouldAutoShowHomeWelcomeCard");
     expect(homePage).toContain("if (isHomeWelcomeCardCollected(dateKey, activeWelcomeCard.value.id)) {");
     expect(homePage).toContain('welcomeCardStage.value = "entering";');
+    expect(homePage).toContain('welcomeCardStage.value = "hidden";');
   });
 
   it("adds a top-left mini card-stack showcase entry that acts as the collect animation target", () => {

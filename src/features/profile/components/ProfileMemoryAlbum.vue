@@ -97,9 +97,10 @@ defineEmits<{
 .profile-album__title {
   font-size: 29rpx;
   line-height: 1.3;
-  color: #31332e;
+  color: var(--text-primary, #31332e);
   letter-spacing: 0.08em;
   padding-left: 0.08em;
+  font-family: var(--font-heading);
 }
 
 .profile-album__subtitle,
@@ -109,6 +110,7 @@ defineEmits<{
   line-height: 1.6;
   color: var(--profile-soft-meta, rgba(99, 95, 85, 0.56));
   letter-spacing: 0.04em;
+  font-family: var(--font-body);
 }
 
 .profile-album__all {
@@ -133,7 +135,8 @@ defineEmits<{
   padding-top: 100%;
   border-radius: 20rpx;
   overflow: hidden;
-  background: rgba(235, 231, 224, 0.88);
+  background: var(--surface-primary, rgba(235, 231, 224, 0.88));
+  border: 1rpx solid var(--border-subtle, rgba(221, 212, 200, 0.72));
 }
 
 .profile-album__image {
@@ -157,7 +160,8 @@ defineEmits<{
 .profile-album__state-title {
   font-size: 23rpx;
   line-height: 1.4;
-  color: #4d4943;
+  color: var(--text-primary, #4d4943);
+  font-family: var(--font-heading);
 }
 
 .profile-album__state-text {

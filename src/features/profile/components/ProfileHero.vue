@@ -71,7 +71,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   display: flex;
   flex-direction: column;
   gap: 22rpx;
-  background: var(--noche-bg);
+  background: var(--app-bg, var(--noche-bg));
 }
 
 .profile-hero__visual {
@@ -91,16 +91,28 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
 
 .profile-hero__cover-image,
 .profile-hero__cover-fallback {
-  background: rgba(233, 226, 213, 0.88);
+  background: color-mix(in srgb, var(--surface-secondary, #e3d5be) 82%, white 18%);
 }
 
 .profile-hero__cover-fallback {
-  background: linear-gradient(180deg, rgba(233, 226, 213, 0.94), rgba(244, 239, 232, 0.94));
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent-brand, #c96442) 14%, transparent), transparent 38%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-secondary, #e3d5be) 84%, white 16%),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 92%, transparent)
+    );
 }
 
 .profile-hero__mist {
   background:
-    linear-gradient(180deg, rgba(251, 249, 245, 0.12), rgba(251, 249, 245, 0.16) 34%, rgba(251, 249, 245, 0.34) 68%, rgba(251, 249, 245, 0.58));
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 8%, transparent),
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 16%, transparent) 34%,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 38%, transparent) 68%,
+      color-mix(in srgb, var(--surface-primary, #fbf4e8) 68%, transparent)
+    );
   backdrop-filter: blur(6rpx) saturate(0.96);
 }
 
@@ -123,6 +135,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   color: var(--profile-soft-text, var(--noche-text));
   letter-spacing: 0.22em;
   padding-left: 0.22em;
+  font-family: var(--font-heading);
 }
 
 .profile-hero__nav-spacer {
@@ -139,8 +152,11 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   height: 148rpx;
   border-radius: 999rpx;
   padding: 6rpx;
-  background: rgba(252, 250, 246, 0.94);
-  box-shadow: 0 18rpx 34rpx rgba(49, 51, 46, 0.08);
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%);
+  box-shadow:
+    0 18rpx 34rpx rgba(101, 81, 58, 0.12),
+    var(--shadow-ring, 0 0 0 1px rgba(165, 133, 102, 0.28));
+  border: 1rpx solid var(--border-subtle, rgba(221, 212, 200, 0.72));
 }
 
 .profile-hero__avatar-image,
@@ -155,14 +171,18 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.36), transparent 20%),
-    linear-gradient(180deg, #f2eadf, #e6dccf);
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.42), transparent 20%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-brand, #c96442) 14%, var(--surface-primary, #fbf4e8)),
+      color-mix(in srgb, var(--surface-secondary, #e3d5be) 82%, white 18%)
+    );
 }
 
 .profile-hero__avatar-plus {
   font-size: 68rpx;
   line-height: 1;
-  color: rgba(99, 95, 85, 0.68);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.68));
 }
 
 .profile-hero__identity {
@@ -183,8 +203,9 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   font-size: 44rpx;
   line-height: 1.22;
   font-weight: 400;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   letter-spacing: 0.04em;
+  font-family: var(--font-heading);
 }
 
 .profile-hero__name--empty {
@@ -197,6 +218,25 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   line-height: 1.72;
   color: var(--profile-soft-meta, var(--noche-muted));
   letter-spacing: 0.06em;
+  font-family: var(--font-body);
+}
+
+.theme-family-claude .profile-hero__avatar-shell {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 94%, white 6%);
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 20rpx 40rpx color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
+}
+
+.theme-family-claude .profile-hero__avatar-fallback {
+  background:
+    radial-gradient(circle at 30% 28%, color-mix(in srgb, white 42%, transparent), transparent 20%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-brand, #c96442) 18%, var(--surface-primary, #fbf4e8)),
+      color-mix(in srgb, var(--surface-secondary, #e3d5be) 78%, white 22%)
+    );
 }
 
 .type-scale-small .profile-hero__title { font-size: 26rpx; }

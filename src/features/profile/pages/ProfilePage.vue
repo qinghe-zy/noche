@@ -156,7 +156,8 @@ import {
   PROFILE_HOME_TITLE_MAX,
   PROFILE_PREF_KEYS,
   PROFILE_PREVIEW_LIMIT,
-  formatProfileThemeLabel,
+  formatProfileThemeFamilyLabel,
+  formatProfileThemeModeLabel,
   formatProfileWeekStartLabel,
   isHomeTitleWithinLimit,
   type ProfileActionItem,
@@ -210,7 +211,8 @@ const {
   jumpToCurrentEntry,
 } = useProfileAlbum(PROFILE_PREVIEW_LIMIT);
 
-type ThemeOption = "system" | "light" | "dark";
+type ThemeFamilyOption = "default" | "claude";
+type ThemeModeOption = "system" | "light" | "dark";
 type LocaleOption = "zh-CN" | "en-US";
 type BackupFlow =
   | "export-default"
@@ -222,7 +224,8 @@ type BackupFlow =
 type ActiveSheet =
   | null
   | "appearance-root"
-  | "appearance-theme"
+  | "appearance-theme-family"
+  | "appearance-theme-mode"
   | "appearance-writing"
   | "appearance-home-title"
   | "appearance-album-count"
@@ -411,7 +414,8 @@ const actionItems = computed<ProfileActionItem[]>(() => [
       ? copy.value.profile.appearanceCopy
       : copy.value.profile.appearanceCopy,
     value: formatProfileAppearanceLabel(
-      settingsStore.theme,
+      settingsStore.themeFamily,
+      settingsStore.themeMode,
       settingsStore.locale,
       settingsStore.weekStartsOn,
     ),
@@ -460,8 +464,10 @@ const sheetTitle = computed(() => {
   switch (activeSheet.value) {
     case "appearance-root":
       return copy.value.profile.appearanceTitle;
-    case "appearance-theme":
-      return copy.value.profile.themeTitle;
+    case "appearance-theme-family":
+      return copy.value.profile.themeStyleTitle;
+    case "appearance-theme-mode":
+      return copy.value.profile.themeModeTitle;
     case "appearance-writing":
       return copy.value.profile.appearanceTitle;
     case "appearance-home-title":
@@ -507,8 +513,13 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
     case "appearance-root":
       return [
         {
-          key: "theme",
-          title: `${copy.value.profile.themeTitle}：${formatProfileThemeLabel(settingsStore.theme, settingsStore.locale)}`,
+          key: "theme-family",
+          title: `${copy.value.profile.themeStyleTitle}：${formatProfileThemeFamilyLabel(settingsStore.themeFamily, settingsStore.locale)}`,
+          trailingIcon: "chevron-right",
+        },
+        {
+          key: "theme-mode",
+          title: `${copy.value.profile.themeModeTitle}：${formatProfileThemeModeLabel(settingsStore.themeMode, settingsStore.locale)}`,
           trailingIcon: "chevron-right",
         },
         {
@@ -547,11 +558,16 @@ const sheetOptions = computed<PaperOptionSheetOption[]>(() => {
           trailingIcon: "chevron-right",
         },
       ];
-    case "appearance-theme":
+    case "appearance-theme-family":
       return [
-        { key: "system", title: copy.value.settings.followSystem, trailingIcon: settingsStore.theme === "system" ? "check" : undefined },
-        { key: "light", title: copy.value.settings.light, trailingIcon: settingsStore.theme === "light" ? "check" : undefined },
-        { key: "dark", title: copy.value.settings.dark, trailingIcon: settingsStore.theme === "dark" ? "check" : undefined },
+        { key: "default", title: copy.value.settings.themeDefault, trailingIcon: settingsStore.themeFamily === "default" ? "check" : undefined },
+        { key: "claude", title: copy.value.settings.themeClaude, trailingIcon: settingsStore.themeFamily === "claude" ? "check" : undefined },
+      ];
+    case "appearance-theme-mode":
+      return [
+        { key: "system", title: copy.value.settings.followSystem, trailingIcon: settingsStore.themeMode === "system" ? "check" : undefined },
+        { key: "light", title: copy.value.settings.light, trailingIcon: settingsStore.themeMode === "light" ? "check" : undefined },
+        { key: "dark", title: copy.value.settings.dark, trailingIcon: settingsStore.themeMode === "dark" ? "check" : undefined },
       ];
     case "appearance-writing":
       return [
@@ -1152,8 +1168,13 @@ async function openRestoreBackups(backupRoot: string): Promise<void> {
 async function handleSheetSelect(key: string): Promise<void> {
   switch (activeSheet.value) {
     case "appearance-root":
-      if (key === "theme") {
-        activeSheet.value = "appearance-theme";
+      if (key === "theme-family") {
+        activeSheet.value = "appearance-theme-family";
+        return;
+      }
+
+      if (key === "theme-mode") {
+        activeSheet.value = "appearance-theme-mode";
         return;
       }
 
@@ -1190,8 +1211,12 @@ async function handleSheetSelect(key: string): Promise<void> {
 
       activeSheet.value = "appearance-locale";
       return;
-    case "appearance-theme":
-      settingsStore.setTheme(key as ThemeOption);
+    case "appearance-theme-family":
+      settingsStore.setThemeFamily(key as ThemeFamilyOption);
+      activeSheet.value = "appearance-root";
+      return;
+    case "appearance-theme-mode":
+      settingsStore.setThemeMode(key as ThemeModeOption);
       activeSheet.value = "appearance-root";
       return;
     case "appearance-writing":
@@ -1513,18 +1538,27 @@ onUnmounted(() => {
 <style scoped>
 .profile-page {
   min-height: 100vh;
-  background: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
-  --profile-soft-text: rgba(74, 70, 64, 0.88);
-  --profile-soft-meta: rgba(92, 87, 79, 0.8);
-  --profile-soft-hint: rgba(110, 104, 96, 0.72);
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 30%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
+  --profile-soft-text: color-mix(in srgb, var(--text-primary, #1b1713) 86%, white 14%);
+  --profile-soft-meta: var(--text-secondary, #6b6154);
+  --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
 }
 
-.theme-dark.profile-page {
-  --profile-soft-text: rgba(241, 237, 230, 0.92);
-  --profile-soft-meta: rgba(224, 218, 208, 0.82);
-  --profile-soft-hint: rgba(224, 218, 208, 0.72);
+.theme-family-claude.profile-page {
+  --profile-soft-text: color-mix(in srgb, var(--text-primary, #1b1713) 88%, var(--surface-primary, #fbf4e8) 12%);
+  --profile-soft-meta: var(--text-secondary, #6b6154);
+  --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
+}
+
+.theme-family-claude.theme-key-claude-dark.profile-page {
+  --profile-soft-text: var(--text-primary, rgba(241, 237, 230, 0.92));
+  --profile-soft-meta: var(--text-secondary, rgba(224, 218, 208, 0.82));
+  --profile-soft-hint: var(--text-tertiary, rgba(224, 218, 208, 0.72));
 }
 
 .profile-page__scroll {
@@ -1541,19 +1575,21 @@ onUnmounted(() => {
 .profile-page__banner {
   padding: 16rpx 18rpx;
   border-radius: 18rpx;
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--surface-primary, rgba(159, 64, 61, 0.07));
+  border: 1rpx solid var(--border-subtle, rgba(221, 212, 200, 0.72));
+  box-shadow: var(--shadow-ring, none);
 }
 
 .profile-page__banner--success {
-  background: rgba(77, 122, 88, 0.1);
+  background: var(--surface-secondary, rgba(77, 122, 88, 0.1));
 }
 
 .profile-page__banner--info {
-  background: rgba(121, 92, 45, 0.1);
+  background: var(--surface-secondary, rgba(121, 92, 45, 0.1));
 }
 
 .profile-page__banner--error {
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--surface-secondary, rgba(159, 64, 61, 0.07));
 }
 
 .profile-page__banner-head {
@@ -1567,7 +1603,7 @@ onUnmounted(() => {
   display: block;
   font-size: 24rpx;
   line-height: 1.55;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
 }
 
 .profile-page__banner-percent {
@@ -1582,15 +1618,15 @@ onUnmounted(() => {
   margin-top: 6rpx;
   font-size: 22rpx;
   line-height: 1.7;
-  color: #8a3d3a;
+  color: var(--button-danger-text, #8a3d3a);
 }
 
 .profile-page__banner--info .profile-page__banner-text {
-  color: #7a6337;
+  color: var(--text-primary, #7a6337);
 }
 
 .profile-page__banner--success .profile-page__banner-text {
-  color: #456a50;
+  color: var(--button-primary-bg, #456a50);
 }
 
 .profile-page__progress {
@@ -1604,14 +1640,14 @@ onUnmounted(() => {
   width: 100%;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(116, 104, 84, 0.16);
+  background: var(--surface-secondary, rgba(116, 104, 84, 0.16));
   overflow: hidden;
 }
 
 .profile-page__progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95));
+  background: var(--button-primary-bg, linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95)));
   transition: width 220ms ease;
 }
 
@@ -1625,6 +1661,32 @@ onUnmounted(() => {
   font-size: 18rpx;
   line-height: 1.5;
   color: var(--profile-soft-hint);
+}
+
+.theme-family-claude .profile-page__banner {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 92%, transparent);
+  border-color: var(--border-subtle, #d7c8b1);
+  box-shadow: var(--shadow-ring, none);
+}
+
+.theme-family-claude .profile-page__banner--success {
+  background: color-mix(in srgb, var(--accent-brand, #c96442) 10%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__banner--info {
+  background: color-mix(in srgb, var(--surface-secondary, #e3d5be) 82%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__banner--error {
+  background: color-mix(in srgb, var(--accent-brand, #c96442) 8%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__progress-track {
+  background: color-mix(in srgb, var(--surface-secondary, #e3d5be) 72%, transparent);
+}
+
+.theme-family-claude .profile-page__progress-fill {
+  background: linear-gradient(90deg, var(--accent-brand, #c96442), var(--accent-brand-soft, #d97757));
 }
 
 .profile-page__footer {

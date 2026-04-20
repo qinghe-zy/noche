@@ -84,14 +84,15 @@ const showEmptyHint = computed(() =>
   top: 14rpx;
   width: 1rpx;
   height: 42rpx;
-  background: rgba(177, 179, 171, 0.18);
+  background: var(--border-subtle, rgba(177, 179, 171, 0.18));
 }
 
 .profile-stats__value {
+  font-family: var(--font-heading);
   font-size: 48rpx;
   line-height: 1.1;
   font-weight: 400;
-  color: #31332e;
+  color: var(--text-primary, var(--noche-text));
 }
 
 .profile-stats__label {

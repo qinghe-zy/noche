@@ -508,21 +508,25 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 
 .mailbox-page {
   height: 100vh;
-  background-color: var(--noche-bg);
-  color: var(--noche-text);
-  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  background:
+    radial-gradient(circle at top left, var(--page-atmosphere-primary, transparent), transparent 26%),
+    radial-gradient(circle at top right, var(--page-atmosphere-secondary, transparent), transparent 24%),
+    var(--app-bg, var(--noche-bg));
+  color: var(--text-primary, var(--noche-text));
+  font-family: var(--font-body, inherit);
   position: relative;
   overflow: hidden;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  --mailbox-font-body: var(--font-body);
 }
 
 .mailbox-page__topbar {
   position: sticky;
   top: 0;
   width: 100%;
-  background: var(--noche-surface);
+  background: var(--surface-primary, var(--noche-surface));
   z-index: 20;
 }
 
@@ -539,8 +543,9 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 30rpx;
   font-weight: 300;
   letter-spacing: 0.25em;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.25em;
+  font-family: var(--font-heading, inherit);
 }
 
 .mailbox-page__main {
@@ -570,8 +575,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   gap: 4px;
   padding: 4px;
   border-radius: 18px;
-  border: 1px solid var(--noche-border);
-  background: var(--noche-surface);
+  border: 1px solid var(--border-subtle, var(--noche-border));
+  background: var(--surface-primary, var(--noche-surface));
 }
 
 .mailbox-page__tab-group--primary {
@@ -617,8 +622,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill-text {
-  font-family: "Inter", sans-serif;
-  color: var(--noche-muted);
+  font-family: var(--font-body, inherit);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__tab-pill-text--primary {
@@ -634,12 +639,14 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill--active {
-  background: var(--noche-panel);
-  border: 1px solid var(--noche-border);
+  background: var(--button-pill-bg, var(--button-secondary-bg, var(--noche-panel)));
+  border: 1px solid var(--button-pill-border, var(--button-secondary-border, var(--noche-border)));
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
+
 .mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
-  color: var(--noche-text);
+  color: var(--button-pill-text, var(--text-primary, var(--noche-text)));
   font-weight: 600;
 }
 
@@ -655,20 +662,22 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   font-size: 15px;
   line-height: 1.8;
   text-align: center;
-  color: rgba(99, 95, 85, 0.8);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__state--error .mailbox-page__state-text {
-  color: #9f403d;
+  color: var(--button-danger-text, #9f403d);
 }
 
 .mailbox-page__retry {
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid var(--noche-border);
-  background: var(--noche-panel);
+  border: 1px solid var(--button-pill-border, var(--button-secondary-border, var(--noche-border)));
+  background: var(--button-pill-bg, var(--button-secondary-bg, var(--noche-panel)));
   font-size: 14px;
-  color: var(--noche-text);
+  color: var(--button-pill-text, var(--button-secondary-text, var(--noche-text)));
+  border-radius: var(--button-pill-radius, 999px);
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
 .mailbox-page__module-list {
@@ -695,10 +704,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__module-count {
   position: absolute;
   right: 0;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 10px;
   letter-spacing: 0.18em;
-  color: rgba(121, 124, 117, 0.74);
+  color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.18em;
 }
 
@@ -708,11 +717,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__module-tab-text {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 11px;
   letter-spacing: 0.3em;
-  color: var(--noche-text);
-  font-weight: 600;
+  color: var(--text-primary, var(--noche-text));
+  font-weight: 500;
   padding-left: 0.3em;
 }
 
@@ -723,7 +732,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 14px;
   height: 1px;
   transform: translateX(-50%);
-  background: var(--noche-muted);
+  background: var(--border-prominent, var(--noche-muted));
 }
 
 .mailbox-page__module-empty {
@@ -731,9 +740,10 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__module-empty-text {
+  font-family: var(--font-body, inherit);
   font-size: 13px;
   line-height: 1.7;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__list {
@@ -754,15 +764,15 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__entry-card {
-  background: var(--noche-surface);
-  border: 1px solid var(--noche-border);
+  background: var(--surface-primary, var(--noche-surface));
+  border: 1px solid var(--border-subtle, var(--noche-border));
   padding: 24px 22px;
   border-radius: 18px;
 }
 
 .mailbox-page__entry-card--sealed {
-  background: var(--noche-panel);
-  border-color: var(--noche-border);
+  background: var(--surface-secondary, var(--noche-panel));
+  border-color: var(--border-subtle, var(--noche-border));
 }
 
 .mailbox-page__entry-head {
@@ -788,7 +798,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-dot {
   width: 4px;
   height: 4px;
-  background: rgba(177, 179, 171, 0.7);
+  background: var(--text-tertiary, rgba(177, 179, 171, 0.7));
 }
 
 .mailbox-page__entry-type,
@@ -796,11 +806,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-meta,
 .mailbox-page__sealed-lock-label,
 .mailbox-page__footer-text {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body, inherit);
   font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(121, 124, 117, 0.72);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__entry-type,
@@ -813,7 +823,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: rgba(121, 124, 117, 0.76);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__entry-prelude-glyph {
@@ -825,21 +835,22 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   display: block;
   font-size: 22px;
   line-height: 1.5;
-  color: var(--noche-text);
+  color: var(--text-primary, var(--noche-text));
   margin-bottom: 12px;
+  font-family: var(--font-heading);
 }
 
 .mailbox-page__entry-excerpt {
   display: block;
   font-size: 13px;
   line-height: 1.9;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--text-secondary, var(--noche-text));
 }
 
 .mailbox-page__entry-foot {
   margin-top: 18px;
   padding-top: 14px;
-  border-top: 1px solid rgba(221, 212, 200, 0.8);
+  border-top: 1px solid var(--border-prominent, var(--border-subtle, var(--noche-border)));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -848,7 +859,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__entry-icon {
   width: 16px;
   height: 16px;
-  color: rgba(177, 179, 171, 0.62);
+  color: var(--text-tertiary, var(--noche-muted));
 }
 
 .mailbox-page__sealed-center {
@@ -883,10 +894,11 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-title {
+  font-family: var(--font-body, inherit);
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.12em;
-  color: rgba(87, 83, 73, 0.92);
+  color: var(--text-primary, var(--noche-text));
   padding-left: 0.12em;
   text-align: center;
 }
@@ -899,18 +911,19 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__sealed-copy {
+  font-family: var(--font-body, inherit);
   font-size: 12px;
   line-height: 1.6;
   text-align: center;
-  color: rgba(99, 95, 85, 0.68);
+  color: var(--text-secondary, var(--noche-muted));
 }
 
 .mailbox-page__sealed-wax {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.12);
-  border: 1px solid rgba(138, 129, 120, 0.2);
+  background: var(--button-chip-bg, var(--surface-secondary, rgba(138, 129, 120, 0.12)));
+  border: 1px solid var(--button-chip-border, var(--border-subtle, rgba(138, 129, 120, 0.2)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,20 +933,17 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 5px;
   height: 5px;
   border-radius: 9999px;
-  background: rgba(138, 129, 120, 0.28);
+  background: var(--button-chip-text, var(--border-prominent, rgba(138, 129, 120, 0.28)));
 }
 
 .mailbox-page__fab {
-  position: fixed;
-  right: 24px;
-  bottom: 28px;
   width: 56px;
   height: 56px;
-  border: none;
-  border-radius: 18px;
-  background: var(--noche-text);
-  color: var(--noche-bg);
-  box-shadow: 0 8px 18px rgba(49, 51, 46, 0.1);
+  border: 1px solid var(--button-fab-border, var(--button-primary-border, transparent));
+  border-radius: var(--button-radius, 18px);
+  background: var(--button-fab-bg, var(--button-primary-bg, var(--noche-text)));
+  color: var(--button-fab-text, var(--button-primary-text, var(--noche-bg)));
+  box-shadow: var(--button-fab-shadow, var(--button-primary-shadow, 0 8px 18px rgba(49, 51, 46, 0.1)));
   display: flex;
   align-items: center;
   justify-content: center;
