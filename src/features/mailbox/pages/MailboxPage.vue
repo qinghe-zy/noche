@@ -639,14 +639,14 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 }
 
 .mailbox-page__tab-pill--active {
-  background: var(--button-secondary-bg, var(--noche-panel));
-  border: 1px solid var(--button-secondary-border, var(--noche-border));
-  box-shadow: var(--button-secondary-shadow, none);
+  background: var(--button-pill-bg, var(--button-secondary-bg, var(--noche-panel)));
+  border: 1px solid var(--button-pill-border, var(--button-secondary-border, var(--noche-border)));
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
 
 .mailbox-page__tab-pill--active .mailbox-page__tab-pill-text {
-  color: var(--noche-text);
+  color: var(--button-pill-text, var(--text-primary, var(--noche-text)));
   font-weight: 600;
 }
 
@@ -672,12 +672,12 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
 .mailbox-page__retry {
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid var(--button-secondary-border, var(--noche-border));
-  background: var(--button-secondary-bg, var(--noche-panel));
+  border: 1px solid var(--button-pill-border, var(--button-secondary-border, var(--noche-border)));
+  background: var(--button-pill-bg, var(--button-secondary-bg, var(--noche-panel)));
   font-size: 14px;
-  color: var(--button-secondary-text, var(--noche-text));
+  color: var(--button-pill-text, var(--button-secondary-text, var(--noche-text)));
   border-radius: var(--button-pill-radius, 999px);
-  box-shadow: var(--button-secondary-shadow, none);
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
 .mailbox-page__module-list {
@@ -732,7 +732,7 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 14px;
   height: 1px;
   transform: translateX(-50%);
-  background: var(--noche-muted);
+  background: var(--border-prominent, var(--noche-muted));
 }
 
 .mailbox-page__module-empty {
@@ -922,8 +922,8 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 14px;
   height: 14px;
   border-radius: 9999px;
-  background: var(--surface-secondary, rgba(138, 129, 120, 0.12));
-  border: 1px solid var(--border-subtle, rgba(138, 129, 120, 0.2));
+  background: var(--button-chip-bg, var(--surface-secondary, rgba(138, 129, 120, 0.12)));
+  border: 1px solid var(--button-chip-border, var(--border-subtle, rgba(138, 129, 120, 0.2)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -933,17 +933,17 @@ async function handleLockedFuture(entry: Entry): Promise<void> {
   width: 5px;
   height: 5px;
   border-radius: 9999px;
-  background: var(--border-prominent, rgba(138, 129, 120, 0.28));
+  background: var(--button-chip-text, var(--border-prominent, rgba(138, 129, 120, 0.28)));
 }
 
 .mailbox-page__fab {
   width: 56px;
   height: 56px;
-  border: 1px solid var(--button-primary-border, transparent);
+  border: 1px solid var(--button-fab-border, var(--button-primary-border, transparent));
   border-radius: var(--button-radius, 18px);
-  background: var(--button-primary-bg, var(--noche-text));
-  color: var(--button-primary-text, var(--noche-bg));
-  box-shadow: var(--button-primary-shadow, 0 8px 18px rgba(49, 51, 46, 0.1));
+  background: var(--button-fab-bg, var(--button-primary-bg, var(--noche-text)));
+  color: var(--button-fab-text, var(--button-primary-text, var(--noche-bg)));
+  box-shadow: var(--button-fab-shadow, var(--button-primary-shadow, 0 8px 18px rgba(49, 51, 46, 0.1)));
   display: flex;
   align-items: center;
   justify-content: center;

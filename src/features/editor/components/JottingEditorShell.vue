@@ -1519,6 +1519,11 @@ watch(bodyViewportHeight, () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-topbar-bg, transparent);
+  border: 1px solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .jotting-editor-shell__icon-svg {
@@ -1530,7 +1535,15 @@ watch(bodyViewportHeight, () => {
 .jotting-editor-shell__continue-button {
   min-height: 56rpx;
   font-size: 24rpx;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--button-pill-text, var(--text-primary, var(--noche-text)));
+  background: var(--button-pill-bg);
+  border: 1px solid var(--button-pill-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-pill-shadow, none);
+  padding: 0 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .jotting-editor-shell__spacer {
@@ -1544,7 +1557,11 @@ watch(bodyViewportHeight, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+  background: var(--button-topbar-bg, transparent);
+  border: 1px solid var(--button-topbar-border, transparent);
+  border-radius: var(--button-pill-radius, 999rpx);
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .jotting-editor-shell__meta-image-icon {

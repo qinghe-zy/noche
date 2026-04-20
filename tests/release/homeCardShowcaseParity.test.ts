@@ -49,5 +49,8 @@ describe("home card showcase parity", () => {
     expect(page).toContain("var(--accent-brand)");
     expect(page).toContain("var(--surface-primary");
     expect(page).toContain("var(--font-heading)");
+    expect(page).toContain("var(--button-chip-bg)");
+    expect(page).toContain("var(--button-topbar-bg)");
+    expect(page).toContain(".theme-family-claude .home-card-showcase-page__detail-card");
   });
 });

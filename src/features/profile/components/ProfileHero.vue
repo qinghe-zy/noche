@@ -221,6 +221,24 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   font-family: var(--font-body);
 }
 
+.theme-family-claude .profile-hero__avatar-shell {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 94%, white 6%);
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 20rpx 40rpx color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
+}
+
+.theme-family-claude .profile-hero__avatar-fallback {
+  background:
+    radial-gradient(circle at 30% 28%, color-mix(in srgb, white 42%, transparent), transparent 20%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent-brand, #c96442) 18%, var(--surface-primary, #fbf4e8)),
+      color-mix(in srgb, var(--surface-secondary, #e3d5be) 78%, white 22%)
+    );
+}
+
 .type-scale-small .profile-hero__title { font-size: 26rpx; }
 .type-scale-large .profile-hero__title { font-size: 30rpx; }
 .type-scale-small .profile-hero__name { font-size: 41rpx; }

@@ -1549,7 +1549,13 @@ onUnmounted(() => {
   --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
 }
 
-.theme-dark.profile-page {
+.theme-family-claude.profile-page {
+  --profile-soft-text: color-mix(in srgb, var(--text-primary, #1b1713) 88%, var(--surface-primary, #fbf4e8) 12%);
+  --profile-soft-meta: var(--text-secondary, #6b6154);
+  --profile-soft-hint: color-mix(in srgb, var(--text-secondary, #6b6154) 82%, transparent);
+}
+
+.theme-family-claude.theme-key-claude-dark.profile-page {
   --profile-soft-text: var(--text-primary, rgba(241, 237, 230, 0.92));
   --profile-soft-meta: var(--text-secondary, rgba(224, 218, 208, 0.82));
   --profile-soft-hint: var(--text-tertiary, rgba(224, 218, 208, 0.72));
@@ -1655,6 +1661,32 @@ onUnmounted(() => {
   font-size: 18rpx;
   line-height: 1.5;
   color: var(--profile-soft-hint);
+}
+
+.theme-family-claude .profile-page__banner {
+  background: color-mix(in srgb, var(--surface-primary, #fbf4e8) 92%, transparent);
+  border-color: var(--border-subtle, #d7c8b1);
+  box-shadow: var(--shadow-ring, none);
+}
+
+.theme-family-claude .profile-page__banner--success {
+  background: color-mix(in srgb, var(--accent-brand, #c96442) 10%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__banner--info {
+  background: color-mix(in srgb, var(--surface-secondary, #e3d5be) 82%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__banner--error {
+  background: color-mix(in srgb, var(--accent-brand, #c96442) 8%, var(--surface-primary, #fbf4e8));
+}
+
+.theme-family-claude .profile-page__progress-track {
+  background: color-mix(in srgb, var(--surface-secondary, #e3d5be) 72%, transparent);
+}
+
+.theme-family-claude .profile-page__progress-fill {
+  background: linear-gradient(90deg, var(--accent-brand, #c96442), var(--accent-brand-soft, #d97757));
 }
 
 .profile-page__footer {

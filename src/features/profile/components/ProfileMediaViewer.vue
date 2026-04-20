@@ -87,8 +87,9 @@ defineEmits<{
 .profile-media-viewer__close-text {
   font-size: 19rpx;
   line-height: 1.6;
-  color: rgba(99, 95, 85, 0.72);
+  color: var(--text-secondary, rgba(99, 95, 85, 0.72));
   letter-spacing: 0.14em;
+  font-family: var(--font-body, inherit);
 }
 
 .profile-media-viewer__image-wrap {
@@ -100,11 +101,11 @@ defineEmits<{
   width: 100%;
   aspect-ratio: 1.25;
   border-radius: 24rpx;
-  background: rgba(235, 231, 224, 0.88);
+  background: var(--surface-secondary, rgba(235, 231, 224, 0.88));
 }
 
 .profile-media-viewer__fallback {
-  background: linear-gradient(180deg, rgba(233, 226, 213, 0.94), rgba(244, 239, 232, 0.94));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-secondary, #e3d5be) 84%, white 16%), color-mix(in srgb, var(--surface-primary, #fbf4e8) 92%, transparent));
 }
 
 .profile-media-viewer__actions {
@@ -117,9 +118,9 @@ defineEmits<{
   flex: 1;
   min-height: 76rpx;
   border-radius: var(--button-pill-radius, 999rpx);
-  background: var(--button-secondary-bg, rgba(238, 232, 223, 0.92));
-  border: 1rpx solid var(--button-secondary-border, transparent);
-  box-shadow: var(--button-secondary-shadow, none);
+  background: var(--button-pill-bg, var(--button-secondary-bg, rgba(238, 232, 223, 0.92)));
+  border: 1rpx solid var(--button-pill-border, var(--button-secondary-border, transparent));
+  box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,7 +134,7 @@ defineEmits<{
 .profile-media-viewer__action-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: var(--button-secondary-text, #6a635a);
+  color: var(--button-pill-text, var(--button-secondary-text, #6a635a));
   letter-spacing: 0.08em;
   font-family: var(--font-body, inherit);
 }

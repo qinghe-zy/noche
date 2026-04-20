@@ -154,9 +154,9 @@ onLoad((query) => {
   margin-bottom: 24rpx;
   padding: 18rpx 22rpx;
   border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1rpx solid rgba(34, 34, 34, 0.06);
-  color: rgba(34, 34, 34, 0.76);
+  background: var(--surface-secondary, rgba(255, 255, 255, 0.72));
+  border: 1rpx solid var(--border-subtle, rgba(34, 34, 34, 0.06));
+  color: var(--text-secondary, rgba(34, 34, 34, 0.76));
   font-size: 24rpx;
 }
 
@@ -184,7 +184,7 @@ onLoad((query) => {
 .day-archive-page__state-text {
   font-size: 28rpx;
   line-height: 1.6;
-  color: rgba(34, 34, 34, 0.68);
+  color: var(--text-secondary, rgba(34, 34, 34, 0.68));
   font-family: var(--font-body);
 }
 
@@ -216,7 +216,7 @@ onLoad((query) => {
   margin-top: 14rpx;
   font-size: 28rpx;
   line-height: 1.7;
-  color: rgba(34, 34, 34, 0.74);
+  color: var(--text-secondary, rgba(34, 34, 34, 0.74));
   white-space: pre-wrap;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -227,12 +227,12 @@ onLoad((query) => {
 .day-archive-page__primary-button {
   min-width: 240rpx;
   min-height: 88rpx;
-  border: 1rpx solid var(--button-primary-border, transparent);
+  border: 1rpx solid var(--button-pill-border, var(--button-primary-border, transparent));
   border-radius: var(--button-pill-radius, 999rpx);
-  background: var(--button-primary-bg, #1f1f1f);
-  color: var(--button-primary-text, #faf7f2);
+  background: var(--button-pill-bg, var(--button-primary-bg, #1f1f1f));
+  color: var(--button-pill-text, var(--button-primary-text, #faf7f2));
   font-size: 28rpx;
-  box-shadow: var(--button-primary-shadow, none);
+  box-shadow: var(--button-pill-shadow, var(--button-primary-shadow, none));
   font-family: var(--font-body, inherit);
 }
 

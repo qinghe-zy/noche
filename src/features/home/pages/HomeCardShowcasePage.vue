@@ -367,9 +367,9 @@ function handleGoBack(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface-primary, var(--noche-surface));
-  border: 1px solid var(--border-subtle, var(--noche-border));
-  box-shadow: var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72));
+  background: var(--button-chip-bg);
+  border: 1px solid var(--button-chip-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-chip-shadow, var(--shadow-ring, 0 0 0 1px rgba(221, 212, 200, 0.72)));
 }
 
 .home-card-showcase-page__group-chip--today_quote,
@@ -494,13 +494,26 @@ function handleGoBack(): void {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--surface-primary, #faf9f5) 92%, transparent);
-  border: 1px solid var(--border-subtle, var(--noche-border));
+  background: var(--button-topbar-bg);
+  border: 1px solid var(--button-topbar-border, var(--border-subtle, var(--noche-border)));
+  box-shadow: var(--button-topbar-shadow, none);
 }
 
 .home-card-showcase-page__detail-close-icon {
   width: 32rpx;
   height: 32rpx;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--button-topbar-text, var(--text-secondary, var(--noche-muted)));
+}
+
+.theme-family-claude .home-card-showcase-page__detail-card {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-primary, #fbf4e8) 96%, white 4%),
+    color-mix(in srgb, var(--surface-primary, #fbf4e8) 88%, var(--surface-secondary, #e3d5be) 12%)
+  );
+  border-color: var(--border-prominent, var(--border-subtle, #d7c8b1));
+  box-shadow:
+    0 24rpx 44rpx color-mix(in srgb, var(--text-primary, #1b1713) 12%, transparent),
+    var(--shadow-ring, none);
 }
 </style>

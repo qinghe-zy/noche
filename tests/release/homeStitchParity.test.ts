@@ -41,6 +41,8 @@ describe("home stitch parity", () => {
     expect(homePage).toContain("var(--font-body)");
     expect(homePage).toContain("var(--accent-brand)");
     expect(homePage).toContain("var(--surface-primary)");
+    expect(homePage).toContain(".theme-family-claude .home-page__welcome-card-face-inner");
+    expect(homePage).toContain("var(--button-pill-bg");
   });
 
   it("uses a date-stable daily prompt for the primary diary card", () => {

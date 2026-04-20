@@ -111,6 +111,7 @@ defineEmits<{
   line-height: 1.6;
   color: var(--text-secondary, rgba(99, 95, 85, 0.72));
   letter-spacing: 0.14em;
+  font-family: var(--font-body, inherit);
 }
 
 .profile-album-viewer__image-wrap {
@@ -142,6 +143,7 @@ defineEmits<{
   font-size: 28rpx;
   line-height: 1.4;
   color: var(--text-primary, #31332e);
+  font-family: var(--font-heading, inherit);
 }
 
 .profile-album-viewer__actions {
@@ -154,11 +156,13 @@ defineEmits<{
   width: 72rpx;
   height: 72rpx;
   border-radius: 999rpx;
-  background: var(--button-secondary-bg, rgba(238, 232, 223, 0.92));
+  background: var(--button-topbar-bg, var(--button-secondary-bg, rgba(238, 232, 223, 0.92)));
+  border: 1px solid var(--button-topbar-border, transparent);
+  box-shadow: var(--button-topbar-shadow, none);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--button-secondary-text, #6c655c);
+  color: var(--button-topbar-text, var(--button-secondary-text, #6c655c));
 }
 
 .profile-album-viewer__pager--disabled {
@@ -174,7 +178,9 @@ defineEmits<{
   flex: 1;
   min-height: 72rpx;
   border-radius: 999rpx;
-  background: var(--button-primary-bg, #6a635a);
+  background: var(--button-pill-bg, var(--button-primary-bg, #6a635a));
+  border: 1px solid var(--button-pill-border, var(--button-primary-border, transparent));
+  box-shadow: var(--button-pill-shadow, var(--button-primary-shadow, none));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,8 +189,9 @@ defineEmits<{
 .profile-album-viewer__jump-text {
   font-size: 24rpx;
   line-height: 1.4;
-  color: var(--button-primary-text, #fbf9f5);
+  color: var(--button-pill-text, var(--button-primary-text, #fbf9f5));
   letter-spacing: 0.08em;
+  font-family: var(--font-body, inherit);
 }
 
 .type-scale-small .profile-album-viewer__counter,

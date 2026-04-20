@@ -71,10 +71,16 @@ describe("profile page local-first constraints", () => {
     const profileHero = readProjectFile("src/features/profile/components/ProfileHero.vue");
     const profileActionList = readProjectFile("src/features/profile/components/ProfileActionList.vue");
     const profileAlbum = readProjectFile("src/features/profile/components/ProfileMemoryAlbum.vue");
+    const profileAlbumPage = readProjectFile("src/features/profile/pages/ProfileAlbumPage.vue");
 
     expect(profilePage).toContain("var(--surface-primary");
     expect(profileHero).toContain("var(--font-heading)");
     expect(profileActionList).toContain("var(--surface-primary");
     expect(profileAlbum).toContain("var(--font-heading)");
+    expect(profilePage).toContain(".theme-family-claude.profile-page");
+    expect(profilePage).not.toContain(".theme-dark.profile-page {");
+    expect(profileHero).toContain(".theme-family-claude .profile-hero__avatar-shell");
+    expect(profileAlbumPage).toContain("var(--button-topbar-bg");
+    expect(profileAlbumPage).toContain("var(--button-pill-bg");
   });
 });
