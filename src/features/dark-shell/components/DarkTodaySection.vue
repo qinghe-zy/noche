@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { waitForBootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
 import { useArchiveStore } from "@/app/store/useArchiveStore";
 import { getEntryRepository } from "@/app/store/entryRepository";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
@@ -120,7 +119,6 @@ function openArchive() {
 }
 
 async function loadTodayData(): Promise<void> {
-  await waitForBootstrapAppRuntime();
   await archiveStore.resolveTodayQuestion(todayDate.value);
 
   const [statsSnapshot, futures] = await Promise.all([
