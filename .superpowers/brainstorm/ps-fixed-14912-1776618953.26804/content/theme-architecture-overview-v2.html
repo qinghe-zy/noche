@@ -1,0 +1,486 @@
+<style>
+  :root {
+    --paper: #f5f4ed;
+    --ivory: #faf9f5;
+    --sand: #e8e6dc;
+    --ink: #141413;
+    --charcoal: #30302e;
+    --warm-text: #5e5d59;
+    --warm-light: #b0aea5;
+    --brand: #c96442;
+    --brand-soft: #d97757;
+  }
+
+  .hero-band {
+    border-radius: 32px;
+    padding: 28px 30px;
+    background:
+      radial-gradient(circle at top left, rgba(201, 100, 66, 0.16), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,0.38), rgba(255,255,255,0)),
+      var(--paper);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    box-shadow: 0 0 0 1px rgba(209, 207, 197, 0.8);
+    margin-bottom: 24px;
+  }
+
+  .hero-band h2 {
+    margin-bottom: 10px;
+  }
+
+  .theme-split {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 18px;
+  }
+
+  .system-card {
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    background: var(--ivory);
+    box-shadow: 0 4px 24px rgba(20, 20, 19, 0.05);
+  }
+
+  .system-card.dark {
+    background: var(--ink);
+    border-color: rgba(176, 174, 165, 0.12);
+    color: #faf9f5;
+  }
+
+  .system-card__head {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(20, 20, 19, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .system-card.dark .system-card__head {
+    border-bottom-color: rgba(176, 174, 165, 0.12);
+  }
+
+  .system-card__label {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+
+  .system-card.dark .system-card__label {
+    color: var(--brand-soft);
+  }
+
+  .system-card__title {
+    font-family: Georgia, serif;
+    font-size: 28px;
+    line-height: 1.12;
+    color: var(--ink);
+    margin-top: 10px;
+  }
+
+  .system-card.dark .system-card__title {
+    color: #faf9f5;
+  }
+
+  .system-card__body {
+    padding: 20px;
+  }
+
+  .theme-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .theme-pill {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(201, 100, 66, 0.12);
+    color: #8e513d;
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .theme-pill.ghost {
+    background: rgba(77, 76, 72, 0.08);
+    color: #5e5d59;
+  }
+
+  .system-card.dark .theme-pill.ghost {
+    background: rgba(176, 174, 165, 0.1);
+    color: var(--warm-light);
+  }
+
+  .token-strip {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .swatch {
+    width: 58px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+  }
+
+  .editorial-pages {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+  }
+
+  .page {
+    border-radius: 30px;
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    box-shadow: 0 4px 24px rgba(20, 20, 19, 0.05);
+  }
+
+  .page.dark {
+    background: var(--ink);
+    border-color: rgba(176, 174, 165, 0.12);
+    color: #faf9f5;
+  }
+
+  .page__top {
+    padding: 18px 22px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--warm-text);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .page.dark .page__top {
+    color: var(--warm-light);
+  }
+
+  .page__body {
+    padding: 0 22px 22px;
+  }
+
+  .page__hero {
+    font-family: Georgia, serif;
+    font-size: 32px;
+    line-height: 1.08;
+    color: var(--ink);
+    margin: 8px 0 10px;
+  }
+
+  .page.dark .page__hero {
+    color: #faf9f5;
+  }
+
+  .page__copy {
+    color: var(--warm-text);
+    font-size: 13px;
+    line-height: 1.72;
+  }
+
+  .page.dark .page__copy {
+    color: var(--warm-light);
+  }
+
+  .page__feature,
+  .page__letter,
+  .page__profile {
+    margin-top: 18px;
+    border-radius: 26px;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    background: rgba(255,255,255,0.62);
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page.dark .page__feature,
+  .page.dark .page__letter,
+  .page.dark .page__profile {
+    background: rgba(48, 48, 46, 0.96);
+    border-color: rgba(176, 174, 165, 0.12);
+  }
+
+  .page__feature::before,
+  .page__letter::before,
+  .page__profile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(201, 100, 66, 0.12), transparent 34%);
+    pointer-events: none;
+  }
+
+  .page__kicker {
+    position: relative;
+    z-index: 1;
+    color: var(--brand);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .page__headline {
+    position: relative;
+    z-index: 1;
+    font-family: Georgia, serif;
+    font-size: 24px;
+    line-height: 1.14;
+    margin-top: 10px;
+  }
+
+  .page__lines {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page__line {
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(94, 93, 89, 0.14);
+  }
+
+  .page.dark .page__line {
+    background: rgba(176, 174, 165, 0.14);
+  }
+
+  .page__chapter {
+    margin-top: 18px;
+    border-radius: 24px;
+    background: var(--charcoal);
+    color: #faf9f5;
+    padding: 18px;
+  }
+
+  .page__chapter-copy {
+    color: var(--warm-light);
+    font-size: 13px;
+    line-height: 1.72;
+  }
+
+  .section-band {
+    margin-top: 26px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(20, 20, 19, 0.02), rgba(20, 20, 19, 0.05));
+    padding: 20px;
+  }
+
+  .notes {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .note {
+    border-radius: 20px;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    padding: 14px;
+  }
+
+  .note strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .note p {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--warm-text);
+  }
+
+  @media (max-width: 900px) {
+    .theme-split,
+    .editorial-pages,
+    .notes {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="hero-band">
+  <div class="label">Stronger Claude Direction</div>
+  <h2>Push the app closer to Claude's editorial warmth.</h2>
+  <p class="subtitle">This iteration increases the parchment feeling, serif hierarchy, terracotta presence, and chapter-like dark/light rhythm so the product feels more intentionally Claude-like.</p>
+</div>
+
+<div class="theme-split">
+  <div class="system-card">
+    <div class="system-card__head">
+      <div>
+        <div class="system-card__label">Theme Structure</div>
+        <div class="system-card__title">Family and mode stay separate.</div>
+      </div>
+    </div>
+    <div class="system-card__body">
+      <p class="subtitle">`claude` becomes a real visual family, not just a color preset. Mode then resolves it into light or dark.</p>
+      <div class="theme-pills">
+        <span class="theme-pill">family: default</span>
+        <span class="theme-pill">family: claude</span>
+        <span class="theme-pill ghost">mode: system</span>
+        <span class="theme-pill ghost">mode: light</span>
+        <span class="theme-pill ghost">mode: dark</span>
+      </div>
+      <div class="token-strip">
+        <span class="swatch" style="background:#f5f4ed;"></span>
+        <span class="swatch" style="background:#faf9f5;"></span>
+        <span class="swatch" style="background:#e8e6dc;"></span>
+        <span class="swatch" style="background:#c96442;"></span>
+        <span class="swatch" style="background:#141413;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="system-card dark">
+    <div class="system-card__head">
+      <div>
+        <div class="system-card__label">Claude Dark</div>
+        <div class="system-card__title">A warm writing room, not a generic dark mode.</div>
+      </div>
+    </div>
+    <div class="system-card__body">
+      <p class="subtitle">Dark mode still keeps the same voice: parchment memory, terracotta accents, serif authority, and warm silver reading text.</p>
+      <div class="theme-pills">
+        <span class="theme-pill">deep dark</span>
+        <span class="theme-pill">dark surface</span>
+        <span class="theme-pill ghost">warm silver text</span>
+      </div>
+      <div class="token-strip">
+        <span class="swatch" style="background:#141413;border-color:rgba(255,255,255,0.08);"></span>
+        <span class="swatch" style="background:#30302e;border-color:rgba(255,255,255,0.08);"></span>
+        <span class="swatch" style="background:#b0aea5;"></span>
+        <span class="swatch" style="background:#d97757;"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="editorial-pages">
+  <div class="page">
+    <div class="page__top">
+      <span>Home</span>
+      <span>Claude Light</span>
+    </div>
+    <div class="page__body">
+      <div class="page__hero">The homepage should feel like opening a thoughtfully edited journal, not landing on a utility dashboard.</div>
+      <div class="page__copy">Bigger serif headline, warmer page shell, more visible terracotta CTA, and a featured card that feels like a premium paper object.</div>
+      <div class="page__feature">
+        <div class="page__kicker">Daily Focus</div>
+        <div class="page__headline">Write today's page with a terracotta action moment.</div>
+        <div class="page__lines">
+          <div class="page__line"></div>
+          <div class="page__line" style="width:86%;"></div>
+          <div class="page__line" style="width:72%;"></div>
+        </div>
+      </div>
+      <div class="page__chapter">
+        <div class="page__kicker" style="color:#d97757;">Chapter Rhythm</div>
+        <div class="page__chapter-copy">Use full dark bands or deep inset cards to create that Claude-like chapter pacing instead of keeping every block equally light.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page__top">
+      <span>Mailbox + Calendar</span>
+      <span>Archive Feeling</span>
+    </div>
+    <div class="page__body">
+      <div class="page__hero">Lists should read like filed letters and dated pages.</div>
+      <div class="page__copy">The current pages are functional, but still too generic. We should make them more archival, tactile, and editorial.</div>
+      <div class="page__letter">
+        <div class="page__kicker">Filed Entries</div>
+        <div class="page__headline">Cards gain more typographic gravity and warmer structure.</div>
+        <div class="page__lines">
+          <div class="page__line"></div>
+          <div class="page__line"></div>
+          <div class="page__line" style="width:68%;"></div>
+        </div>
+      </div>
+      <div class="page__feature">
+        <div class="page__kicker">Calendar</div>
+        <div class="page__headline">Month grid above, selected-day archive below, with one shared tone.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page dark">
+    <div class="page__top">
+      <span>Editor</span>
+      <span>Claude Dark</span>
+    </div>
+    <div class="page__body">
+      <div class="page__hero">The editor becomes a warm nocturnal study.</div>
+      <div class="page__copy">Less app chrome, more reading-room mood. Keep the writing surface clear and tactile, with terracotta only for high-value actions.</div>
+      <div class="page__letter">
+        <div class="page__kicker">Writing Surface</div>
+        <div class="page__headline">Dark shell outside, softer paper contrast inside.</div>
+        <div class="page__lines">
+          <div class="page__line"></div>
+          <div class="page__line"></div>
+          <div class="page__line" style="width:74%;"></div>
+        </div>
+      </div>
+      <div class="page__feature">
+        <div class="page__kicker">Interaction Tone</div>
+        <div class="page__headline">Warm silver text, charcoal surfaces, terracotta emphasis, no cold neon accents.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="page__top">
+      <span>Profile</span>
+      <span>Theme Showroom</span>
+    </div>
+    <div class="page__body">
+      <div class="page__hero">Profile should be where the theme system feels obvious and premium.</div>
+      <div class="page__copy">Appearance settings become a composed editorial control panel rather than a plain option sheet list.</div>
+      <div class="page__profile">
+        <div class="page__kicker">Appearance</div>
+        <div class="page__headline">Theme family, mode, type scale, and future extensibility all read clearly.</div>
+        <div class="page__lines">
+          <div class="page__line"></div>
+          <div class="page__line"></div>
+          <div class="page__line" style="width:62%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-band">
+  <div class="label">How this is stronger than v1</div>
+  <div class="notes">
+    <div class="note">
+      <strong>More Claude typography</strong>
+      <p>Headlines get larger serif presence and tighter editorial hierarchy instead of staying halfway between current app and Claude.</p>
+    </div>
+    <div class="note">
+      <strong>More terracotta confidence</strong>
+      <p>The brand accent becomes a real visual signal, not just a tiny supporting detail.</p>
+    </div>
+    <div class="note">
+      <strong>More chapter rhythm</strong>
+      <p>Dark and light sections are used more deliberately, which is one of the strongest Claude signatures in the reference.</p>
+    </div>
+  </div>
+</div>

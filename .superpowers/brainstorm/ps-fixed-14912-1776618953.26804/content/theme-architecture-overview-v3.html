@@ -1,0 +1,544 @@
+<style>
+  :root {
+    --paper: #f5f4ed;
+    --ivory: #faf9f5;
+    --sand: #e8e6dc;
+    --ink: #141413;
+    --charcoal: #30302e;
+    --warm-text: #5e5d59;
+    --warm-light: #b0aea5;
+    --brand: #c96442;
+    --brand-strong: #bb5a39;
+    --brand-soft: #d97757;
+    --olive: #6a6a5e;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(201, 100, 66, 0.14), transparent 30%),
+      linear-gradient(180deg, #f7f5ee, #f2efe6);
+  }
+
+  .impact-hero {
+    border-radius: 36px;
+    padding: 34px 34px 30px;
+    background:
+      radial-gradient(circle at top left, rgba(201, 100, 66, 0.24), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(106, 106, 94, 0.1), transparent 26%),
+      linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0)),
+      var(--paper);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    box-shadow:
+      0 0 0 1px rgba(209, 207, 197, 0.8),
+      0 10px 40px rgba(20, 20, 19, 0.05);
+    margin-bottom: 24px;
+  }
+
+  .impact-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 52px;
+    line-height: 0.98;
+    color: var(--ink);
+    margin: 12px 0 16px;
+    max-width: 760px;
+  }
+
+  .impact-subtitle {
+    max-width: 760px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--warm-text);
+  }
+
+  .impact-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  .impact-badge {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--brand);
+    color: #faf9f5;
+    box-shadow: 0 0 0 1px rgba(187, 90, 57, 0.4);
+  }
+
+  .impact-badge.ghost {
+    background: rgba(48, 48, 46, 0.06);
+    color: var(--warm-text);
+    box-shadow: 0 0 0 1px rgba(48, 48, 46, 0.08);
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 18px;
+  }
+
+  .panel {
+    border-radius: 32px;
+    overflow: hidden;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    background: var(--ivory);
+    box-shadow: 0 4px 24px rgba(20, 20, 19, 0.05);
+  }
+
+  .panel.dark {
+    background: var(--ink);
+    border-color: rgba(176, 174, 165, 0.12);
+    color: #faf9f5;
+  }
+
+  .panel__head {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid rgba(20, 20, 19, 0.08);
+  }
+
+  .panel.dark .panel__head {
+    border-bottom-color: rgba(176, 174, 165, 0.12);
+  }
+
+  .panel__label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+
+  .panel__title {
+    font-family: Georgia, serif;
+    font-size: 30px;
+    line-height: 1.08;
+    margin-top: 10px;
+    color: var(--ink);
+  }
+
+  .panel.dark .panel__title {
+    color: #faf9f5;
+  }
+
+  .panel__body {
+    padding: 20px 22px 22px;
+  }
+
+  .token-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .token-pill {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(201, 100, 66, 0.12);
+    color: #8e513d;
+  }
+
+  .token-pill.ghost {
+    background: rgba(48, 48, 46, 0.08);
+    color: var(--warm-text);
+  }
+
+  .panel.dark .token-pill.ghost {
+    background: rgba(176, 174, 165, 0.1);
+    color: var(--warm-light);
+  }
+
+  .font-demo {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .font-row {
+    border-radius: 22px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+  }
+
+  .font-row strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+
+  .font-row.serif .sample {
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", serif;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .font-row.sans .sample {
+    font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--warm-text);
+  }
+
+  .font-meta {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--warm-text);
+  }
+
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+
+  .page-card {
+    border-radius: 32px;
+    overflow: hidden;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    background: var(--paper);
+    box-shadow:
+      0 4px 24px rgba(20, 20, 19, 0.05),
+      0 0 0 1px rgba(209, 207, 197, 0.7);
+  }
+
+  .page-card.dark {
+    background:
+      radial-gradient(circle at top left, rgba(217, 119, 87, 0.12), transparent 28%),
+      var(--ink);
+    border-color: rgba(176, 174, 165, 0.12);
+    color: #faf9f5;
+  }
+
+  .page-card__top {
+    padding: 18px 22px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--warm-text);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .page-card.dark .page-card__top {
+    color: var(--warm-light);
+  }
+
+  .page-card__body {
+    padding: 0 22px 22px;
+  }
+
+  .page-card__hero {
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+    font-size: 34px;
+    line-height: 1.04;
+    color: var(--ink);
+    margin: 8px 0 10px;
+  }
+
+  .page-card.dark .page-card__hero {
+    color: #faf9f5;
+  }
+
+  .page-card__copy {
+    font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--warm-text);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .page-card.dark .page-card__copy {
+    color: var(--warm-light);
+  }
+
+  .editorial-block,
+  .chapter-block,
+  .settings-block {
+    margin-top: 18px;
+    border-radius: 28px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(20, 20, 19, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0)),
+      rgba(255,255,255,0.72);
+  }
+
+  .editorial-block::before,
+  .chapter-block::before,
+  .settings-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(201, 100, 66, 0.16), transparent 30%);
+    pointer-events: none;
+  }
+
+  .page-card.dark .editorial-block,
+  .page-card.dark .chapter-block,
+  .page-card.dark .settings-block {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0)),
+      rgba(48, 48, 46, 0.96);
+    border-color: rgba(176, 174, 165, 0.12);
+  }
+
+  .block-kicker {
+    position: relative;
+    z-index: 1;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brand);
+  }
+
+  .block-title {
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+    font-size: 24px;
+    line-height: 1.12;
+  }
+
+  .block-lines {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .block-line {
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(94, 93, 89, 0.16);
+  }
+
+  .page-card.dark .block-line {
+    background: rgba(176, 174, 165, 0.14);
+  }
+
+  .impact-row {
+    margin-top: 26px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .impact-note {
+    border-radius: 24px;
+    padding: 16px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(20, 20, 19, 0.08);
+  }
+
+  .impact-note strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .impact-note p {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--warm-text);
+  }
+
+  @media (max-width: 900px) {
+    .split-grid,
+    .page-grid,
+    .impact-row {
+      grid-template-columns: 1fr;
+    }
+
+    .impact-title {
+      font-size: 40px;
+    }
+  }
+</style>
+
+<div class="impact-hero">
+  <div class="label">Higher Impact + Chinese Typography</div>
+  <div class="impact-title">Make the app feel unmistakably Claude-like, not just politely inspired by it.</div>
+  <div class="impact-subtitle">This pass increases visual impact through larger editorial serif headlines, stronger terracotta moments, clearer dark/light chapter contrast, and a unified Chinese font system so the tone survives beyond Latin fallback typography.</div>
+  <div class="impact-badges">
+    <span class="impact-badge">Bigger editorial contrast</span>
+    <span class="impact-badge">Stronger terracotta</span>
+    <span class="impact-badge">Unified Chinese fonts</span>
+    <span class="impact-badge ghost">Family + mode architecture stays</span>
+  </div>
+</div>
+
+<div class="split-grid">
+  <div class="panel">
+    <div class="panel__head">
+      <div class="panel__label">Theme System</div>
+      <div class="panel__title">Claude is a family. Light and dark are how that family is rendered.</div>
+    </div>
+    <div class="panel__body">
+      <p class="subtitle">We keep the scalable structure from before, but the Claude family itself gets a more assertive personality so it feels worth choosing.</p>
+      <div class="token-stack">
+        <span class="token-pill">family: default</span>
+        <span class="token-pill">family: claude</span>
+        <span class="token-pill ghost">mode: system</span>
+        <span class="token-pill ghost">mode: light</span>
+        <span class="token-pill ghost">mode: dark</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel dark">
+    <div class="panel__head">
+      <div class="panel__label">Chinese Font Strategy</div>
+      <div class="panel__title">Chinese typography should carry the same editorial voice.</div>
+    </div>
+    <div class="panel__body">
+      <p class="subtitle">If we only tune color and spacing, the app still loses Claude's personality in Chinese. Typography has to be designed as part of the theme.</p>
+      <div class="token-stack">
+        <span class="token-pill">Serif heading</span>
+        <span class="token-pill ghost">Sans UI/body</span>
+        <span class="token-pill ghost">Shared fallbacks</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:18px;">
+  <div class="panel__head">
+    <div class="panel__label">Chinese Font Pairing</div>
+    <div class="panel__title">One serif family for headings, one sans family for interface and body.</div>
+  </div>
+  <div class="panel__body">
+    <div class="font-demo">
+      <div class="font-row serif">
+        <strong>Heading / Editorial Serif</strong>
+        <div class="sample">在纸页之间，今天的心绪也值得被认真排版。</div>
+        <div class="font-meta">Recommended stack: `Source Han Serif SC`, `Noto Serif SC`, `Songti SC`, `STSong`, `serif`</div>
+      </div>
+      <div class="font-row sans">
+        <strong>UI / Body Sans</strong>
+        <div class="sample">外观设置、日历、信箱、编辑器正文说明、按钮、标签、状态信息统一走中文无衬线，保证可读性和整站秩序。</div>
+        <div class="font-meta">Recommended stack: `Source Han Sans SC`, `Noto Sans SC`, `PingFang SC`, `Microsoft YaHei`, `sans-serif`</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-grid">
+  <div class="page-card">
+    <div class="page-card__top">
+      <span>Home</span>
+      <span>Claude Light</span>
+    </div>
+    <div class="page-card__body">
+      <div class="page-card__hero">主页应该更像一本正在展开的刊物扉页。</div>
+      <div class="page-card__copy">不只是更暖，而是更有“社论首页”的仪式感。主标题更大，焦点卡片更像高质量纸张对象，陶土色 CTA 更明确。</div>
+      <div class="editorial-block">
+        <div class="block-kicker">Opening Chapter</div>
+        <div class="block-title">写下今天这一页，像翻开一本认真编辑过的刊物。</div>
+        <div class="block-lines">
+          <div class="block-line"></div>
+          <div class="block-line" style="width:82%;"></div>
+          <div class="block-line" style="width:68%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-card">
+    <div class="page-card__top">
+      <span>Mailbox + Calendar</span>
+      <span>Archive</span>
+    </div>
+    <div class="page-card__body">
+      <div class="page-card__hero">信箱与日历要更像归档系统，而不是普通列表页。</div>
+      <div class="page-card__copy">通过更强的标题、分章式模块、暖色边界和档案感卡片，让“信件、日期、记录”变成统一叙事。</div>
+      <div class="chapter-block">
+        <div class="block-kicker">Filed Letters</div>
+        <div class="block-title">打开、待启、归档，都应该有更明确的情绪分层。</div>
+        <div class="block-lines">
+          <div class="block-line"></div>
+          <div class="block-line"></div>
+          <div class="block-line" style="width:64%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-card dark">
+    <div class="page-card__top">
+      <span>Editor</span>
+      <span>Claude Dark</span>
+    </div>
+    <div class="page-card__body">
+      <div class="page-card__hero">编辑器要成为温暖的夜间书房，而不是冷黑写作器。</div>
+      <div class="page-card__copy">深底、暖银文字、焦炭色容器、陶土点缀，写作区域清晰但不刺眼，整页气氛更沉浸。</div>
+      <div class="editorial-block">
+        <div class="block-kicker">Warm Dark Room</div>
+        <div class="block-title">外层是近黑壳体，内层是更柔和的书写纸面。</div>
+        <div class="block-lines">
+          <div class="block-line"></div>
+          <div class="block-line"></div>
+          <div class="block-line" style="width:70%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-card">
+    <div class="page-card__top">
+      <span>Profile</span>
+      <span>Showroom</span>
+    </div>
+    <div class="page-card__body">
+      <div class="page-card__hero">个人中心需要像主题展厅，而不是设置列表。</div>
+      <div class="page-card__copy">外观设置这里要最清楚地体现“主题家族 + 明暗模式 + 字体层级”的完整体系，也要为未来主题预留空间。</div>
+      <div class="settings-block">
+        <div class="block-kicker">Appearance</div>
+        <div class="block-title">主题风格、明暗模式、字号与中文字体气质统一呈现。</div>
+        <div class="block-lines">
+          <div class="block-line"></div>
+          <div class="block-line"></div>
+          <div class="block-line" style="width:58%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="impact-row">
+  <div class="impact-note">
+    <strong>更大的视觉冲击</strong>
+    <p>标题更大，深浅反差更明显，陶土色从“辅助色”升级为“品牌动作色”。</p>
+  </div>
+  <div class="impact-note">
+    <strong>更像 Claude 的节奏</strong>
+    <p>通过 light/dark 章节切换、纸张层次、环形阴影和更编辑化的版面，强化 Claude 的社论感。</p>
+  </div>
+  <div class="impact-note">
+    <strong>中文不再掉气质</strong>
+    <p>中文标题与正文分别绑定固定字体策略，避免中文场景下主题气质坍缩回默认系统字体。</p>
+  </div>
+</div>

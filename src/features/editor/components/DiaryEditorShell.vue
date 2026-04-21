@@ -1455,4 +1455,90 @@ watch(bodyViewportHeight, () => {
 .diary-shell-edit__bottom-pad {
   height: 96rpx;
 }
+
+.theme-dark.diary-editor-shell {
+  --diary-paper-base: linear-gradient(180deg, rgba(24, 20, 16, 0.985), rgba(18, 14, 11, 0.985));
+  --diary-paper-ink: #f0e8d5;
+  --diary-paper-ink-soft: #e2d8c0;
+  --diary-paper-muted: rgba(196, 181, 152, 0.78);
+  --diary-paper-muted-soft: rgba(143, 125, 98, 0.88);
+  --diary-paper-line: rgba(240, 232, 213, 0.065);
+  --diary-paper-border: rgba(76, 63, 45, 0.62);
+  --diary-paper-panel: rgba(34, 28, 21, 0.84);
+  --diary-paper-shadow: rgba(0, 0, 0, 0.28);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__grain {
+  opacity: 0.055;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(201, 150, 60, 0.08), transparent 18%),
+    radial-gradient(circle at 84% 14%, rgba(226, 216, 192, 0.05), transparent 20%),
+    linear-gradient(to bottom, rgba(12, 10, 8, 0.24), rgba(12, 10, 8, 0.08));
+}
+
+.theme-dark.diary-editor-shell .diary-shell-read__paper,
+.theme-dark.diary-editor-shell .diary-shell-edit__paper {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(201, 150, 60, 0.08), transparent 18%),
+    radial-gradient(circle at 84% 8%, rgba(240, 232, 213, 0.045), transparent 24%),
+    linear-gradient(180deg, rgba(240, 232, 213, 0.025), rgba(240, 232, 213, 0)),
+    var(--diary-paper-base);
+  box-shadow:
+    inset 0 1px 0 rgba(240, 232, 213, 0.04),
+    inset 0 0 0 1rpx var(--diary-paper-border),
+    0 18rpx 44rpx var(--diary-paper-shadow);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__textarea,
+.theme-dark.diary-editor-shell .diary-shell-read__content {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent calc(var(--diary-writing-line-height, 40px) - 6px),
+    var(--diary-paper-line) calc(var(--diary-writing-line-height, 40px) - 6px),
+    var(--diary-paper-line) calc(var(--diary-writing-line-height, 40px) - 4px),
+    transparent calc(var(--diary-writing-line-height, 40px) - 4px),
+    transparent var(--diary-writing-line-height, 40px)
+  );
+  background-size: 100% var(--diary-writing-line-height, 40px);
+  color: var(--diary-paper-ink);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__title-input,
+.theme-dark.diary-editor-shell .diary-shell-read__date,
+.theme-dark.diary-editor-shell .diary-shell-edit__date,
+.theme-dark.diary-editor-shell .diary-shell-read__title,
+.theme-dark.diary-editor-shell .diary-shell-edit__title-display,
+.theme-dark.diary-editor-shell .diary-editor-shell__icon-button,
+.theme-dark.diary-editor-shell .diary-editor-shell__topbar-svg {
+  color: var(--diary-paper-ink);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__title-placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__inline-placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__saved-hint,
+.theme-dark.diary-editor-shell .diary-editor-shell__continue-button,
+.theme-dark.diary-editor-shell .diary-editor-shell__meta-image-button {
+  color: var(--diary-paper-muted);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-card {
+  background: var(--diary-paper-panel);
+  box-shadow: inset 0 0 0 1rpx rgba(240, 232, 213, 0.04);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-remove {
+  background: rgba(22, 18, 14, 0.9);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-remove-svg {
+  color: var(--diary-paper-ink-soft);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__notice {
+  color: rgba(232, 186, 176, 0.88);
+}
 </style>

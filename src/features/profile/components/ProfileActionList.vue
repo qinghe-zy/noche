@@ -34,7 +34,7 @@ defineEmits<{
 
 <style scoped>
 .profile-action-list {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.14);
+  border-top: 1rpx solid var(--profile-line, rgba(177, 179, 171, 0.14));
 }
 
 .profile-action-list__item {
@@ -46,7 +46,7 @@ defineEmits<{
 }
 
 .profile-action-list__item + .profile-action-list__item {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.09);
+  border-top: 1rpx solid var(--profile-line, rgba(177, 179, 171, 0.09));
 }
 
 .profile-action-list__copy {
@@ -60,7 +60,7 @@ defineEmits<{
 .profile-action-list__title {
   font-size: 25rpx;
   line-height: 1.35;
-  color: #31332e;
+  color: var(--profile-title, #31332e);
   letter-spacing: 0.02em;
 }
 

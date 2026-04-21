@@ -91,16 +91,17 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
 
 .profile-hero__cover-image,
 .profile-hero__cover-fallback {
-  background: rgba(233, 226, 213, 0.88);
+  background: var(--profile-surface, rgba(233, 226, 213, 0.88));
 }
 
 .profile-hero__cover-fallback {
-  background: linear-gradient(180deg, rgba(233, 226, 213, 0.94), rgba(244, 239, 232, 0.94));
+  background: var(--profile-cover-fallback, linear-gradient(180deg, rgba(233, 226, 213, 0.94), rgba(244, 239, 232, 0.94)));
 }
 
 .profile-hero__mist {
   background:
-    linear-gradient(180deg, rgba(251, 249, 245, 0.12), rgba(251, 249, 245, 0.16) 34%, rgba(251, 249, 245, 0.34) 68%, rgba(251, 249, 245, 0.58));
+    var(--profile-hero-glow, transparent),
+    var(--profile-mist, linear-gradient(180deg, rgba(251, 249, 245, 0.12), rgba(251, 249, 245, 0.16) 34%, rgba(251, 249, 245, 0.34) 68%, rgba(251, 249, 245, 0.58)));
   backdrop-filter: blur(6rpx) saturate(0.96);
 }
 
@@ -139,8 +140,8 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   height: 148rpx;
   border-radius: 999rpx;
   padding: 6rpx;
-  background: rgba(252, 250, 246, 0.94);
-  box-shadow: 0 18rpx 34rpx rgba(49, 51, 46, 0.08);
+  background: var(--profile-avatar-shell, rgba(252, 250, 246, 0.94));
+  box-shadow: 0 18rpx 34rpx var(--profile-avatar-shadow, rgba(49, 51, 46, 0.08));
 }
 
 .profile-hero__avatar-image,
@@ -154,9 +155,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.36), transparent 20%),
-    linear-gradient(180deg, #f2eadf, #e6dccf);
+  background: var(--profile-avatar-fallback, radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.36), transparent 20%), linear-gradient(180deg, #f2eadf, #e6dccf));
 }
 
 .profile-hero__avatar-plus {
@@ -183,7 +182,7 @@ const resolvedDisplayName = computed(() => props.displayName || props.displayNam
   font-size: 44rpx;
   line-height: 1.22;
   font-weight: 400;
-  color: var(--noche-text);
+  color: var(--profile-title, var(--noche-text));
   letter-spacing: 0.04em;
 }
 

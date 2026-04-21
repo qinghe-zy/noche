@@ -31,12 +31,16 @@ export function createSQLiteArchiveRepository(client: SQLiteClient): IArchiveRep
   return {
     async saveQuestion(question) {
       await client.execute(
-        `INSERT OR IGNORE INTO ${TABLES.archiveQuestions} (
+        `INSERT INTO ${TABLES.archiveQuestions} (
           date,
           question,
           source,
           created_at
-        ) VALUES (?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?)
+        ON CONFLICT(date) DO UPDATE SET
+          question = excluded.question,
+          source = excluded.source,
+          created_at = excluded.created_at`,
         [question.date, question.question, question.source, question.createdAt],
       );
     },
@@ -100,6 +104,14 @@ export function createSQLiteArchiveRepository(client: SQLiteClient): IArchiveRep
       );
 
       return entry;
+    },
+
+    async deleteByDate(date) {
+      await client.execute(
+        `DELETE FROM ${TABLES.archiveEntries}
+         WHERE date = ?`,
+        [date],
+      );
     },
 
     async getByDate(date) {

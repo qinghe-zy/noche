@@ -228,14 +228,49 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker {
+  --prelude-bg: #fbf9f5;
+  --prelude-text: #31332e;
+  --prelude-muted: rgba(99, 95, 85, 0.76);
+  --prelude-soft: rgba(138, 129, 120, 0.72);
+  --prelude-line: rgba(177, 179, 171, 0.16);
+  --prelude-line-strong: rgba(177, 179, 171, 0.28);
+  --prelude-surface: rgba(255, 255, 255, 0.88);
+  --prelude-panel: rgba(255, 255, 255, 0.68);
+  --prelude-panel-strong: rgba(255, 255, 255, 0.96);
+  --prelude-topbar: rgba(251, 249, 245, 0.96);
+  --prelude-glyph: rgba(245, 244, 238, 0.92);
+  --prelude-mark: rgba(138, 129, 120, 0.82);
+  --prelude-confirm: rgba(95, 94, 94, 0.92);
+  --prelude-confirm-disabled: rgba(177, 179, 171, 0.56);
+  --prelude-confirm-text: #faf7f6;
+  --prelude-shadow: rgba(49, 51, 46, 0.1);
   min-height: 100vh;
-  background: #fbf9f5;
-  color: #31332e;
+  background: var(--prelude-bg);
+  color: var(--prelude-text);
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.theme-dark.diary-prelude-picker {
+  --prelude-bg: var(--noche-shell-bg);
+  --prelude-text: var(--noche-shell-text);
+  --prelude-muted: var(--noche-shell-muted);
+  --prelude-soft: var(--noche-shell-soft);
+  --prelude-line: var(--noche-shell-line);
+  --prelude-line-strong: var(--noche-shell-line-strong);
+  --prelude-surface: rgba(18, 15, 10, 0.94);
+  --prelude-panel: rgba(23, 19, 12, 0.88);
+  --prelude-panel-strong: rgba(28, 23, 15, 0.96);
+  --prelude-topbar: rgba(12, 10, 8, 0.96);
+  --prelude-glyph: rgba(234, 226, 206, 0.1);
+  --prelude-mark: var(--noche-shell-accent);
+  --prelude-confirm: rgba(118, 37, 30, 0.92);
+  --prelude-confirm-disabled: rgba(61, 53, 40, 0.82);
+  --prelude-confirm-text: var(--noche-shell-text);
+  --prelude-shadow: rgba(0, 0, 0, 0.26);
 }
 
 .diary-prelude-picker__grain {
@@ -255,7 +290,7 @@ function handleSkip(): void {
   align-items: center;
   gap: 20rpx;
   padding-bottom: 12rpx;
-  background: rgba(251, 249, 245, 0.96);
+  background: var(--prelude-topbar);
   backdrop-filter: blur(12rpx);
 }
 
@@ -273,7 +308,7 @@ function handleSkip(): void {
   text-align: center;
   font-size: 24rpx;
   line-height: 1.5;
-  color: rgba(99, 95, 85, 0.74);
+  color: var(--prelude-muted);
   letter-spacing: 0.1em;
 }
 
@@ -282,7 +317,7 @@ function handleSkip(): void {
   text-align: right;
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 22rpx;
-  color: rgba(138, 129, 120, 0.78);
+  color: var(--prelude-soft);
   transition: opacity 160ms ease, transform 180ms ease;
 }
 
@@ -308,7 +343,9 @@ function handleSkip(): void {
 .diary-prelude-picker__preview-card {
   padding: 24rpx 24rpx 20rpx;
   border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--prelude-surface);
+  border: 1rpx solid var(--prelude-line);
+  box-shadow: 0 18rpx 38rpx var(--prelude-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -319,11 +356,11 @@ function handleSkip(): void {
   width: 76rpx;
   height: 76rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.78);
+  background: var(--prelude-glyph);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(49, 51, 46, 0.88);
+  color: var(--prelude-text);
   margin-bottom: 10rpx;
 }
 
@@ -342,21 +379,21 @@ function handleSkip(): void {
 .diary-prelude-picker__preview-subline {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 15rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--prelude-soft);
   letter-spacing: 0.28em;
 }
 
 .diary-prelude-picker__preview-line {
   width: 72rpx;
   height: 1rpx;
-  background: rgba(177, 179, 171, 0.28);
+  background: var(--prelude-line-strong);
   margin: 12rpx 0 8rpx;
 }
 
 .diary-prelude-picker__preview-note {
   font-size: 18rpx;
   line-height: 1.45;
-  color: rgba(99, 95, 85, 0.76);
+  color: var(--prelude-muted);
 }
 
 .diary-prelude-picker__section {
@@ -378,7 +415,7 @@ function handleSkip(): void {
 .diary-prelude-picker__section-subtitle {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 13rpx;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--prelude-soft);
   letter-spacing: 0.24em;
 }
 
@@ -397,17 +434,17 @@ function handleSkip(): void {
   min-height: 116rpx;
   padding: 16rpx 14rpx;
   border-radius: 22rpx;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1rpx solid rgba(177, 179, 171, 0.16);
+  background: var(--prelude-panel);
+  border: 1rpx solid var(--prelude-line);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4rpx;
   text-align: center;
-  color: rgba(49, 51, 46, 0.86);
+  color: var(--prelude-text);
   transform: translateY(0) scale(1);
-  box-shadow: 0 0 0 rgba(49, 51, 46, 0);
+  box-shadow: 0 0 0 var(--prelude-shadow);
   transition:
     transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -418,28 +455,28 @@ function handleSkip(): void {
 
 .diary-prelude-picker__option:active {
   transform: translateY(1rpx) scale(0.985);
-  box-shadow: 0 8rpx 18rpx rgba(49, 51, 46, 0.06);
+  box-shadow: 0 8rpx 18rpx var(--prelude-shadow);
 }
 
 .diary-prelude-picker__option--active {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(138, 129, 120, 0.48);
-  color: rgba(49, 51, 46, 0.96);
+  background: var(--prelude-panel-strong);
+  border-color: var(--prelude-mark);
+  color: var(--prelude-text);
   transform: translateY(-4rpx);
   box-shadow:
-    0 14rpx 28rpx rgba(49, 51, 46, 0.08),
-    0 2rpx 0 rgba(255, 255, 255, 0.85) inset;
+    0 14rpx 28rpx var(--prelude-shadow),
+    0 2rpx 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 .diary-prelude-picker__option-glyph-wrap {
   width: 42rpx;
   height: 42rpx;
   border-radius: 999rpx;
-  background: rgba(245, 244, 238, 0.92);
+  background: var(--prelude-glyph);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(99, 95, 85, 0.82);
+  color: var(--prelude-muted);
   transition:
     background-color 220ms ease,
     color 180ms ease,
@@ -447,8 +484,8 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-glyph-wrap {
-  background: rgba(234, 229, 218, 0.82);
-  color: rgba(49, 51, 46, 0.94);
+  background: rgba(88, 68, 37, 0.38);
+  color: var(--prelude-text);
   transform: scale(1.05);
 }
 
@@ -459,8 +496,8 @@ function handleSkip(): void {
   width: 10rpx;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(138, 129, 120, 0.82);
-  box-shadow: 0 0 0 4rpx rgba(234, 229, 218, 0.55);
+  background: var(--prelude-mark);
+  box-shadow: 0 0 0 4rpx rgba(184, 136, 58, 0.18);
 }
 
 .diary-prelude-picker__option-glyph {
@@ -475,20 +512,20 @@ function handleSkip(): void {
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-zh {
-  color: rgba(49, 51, 46, 0.98);
+  color: var(--prelude-text);
   transform: translateY(-1rpx);
 }
 
 .diary-prelude-picker__option-en {
   font-family: "Inter", "PingFang SC", sans-serif;
   font-size: 11rpx;
-  color: rgba(138, 129, 120, 0.68);
+  color: var(--prelude-soft);
   letter-spacing: 0.22em;
   transition: color 180ms ease, letter-spacing 220ms ease;
 }
 
 .diary-prelude-picker__option--active .diary-prelude-picker__option-en {
-  color: rgba(99, 95, 85, 0.78);
+  color: var(--prelude-muted);
   letter-spacing: 0.24em;
 }
 
@@ -504,12 +541,12 @@ function handleSkip(): void {
 .diary-prelude-picker__confirm {
   min-height: 88rpx;
   border-radius: 999rpx;
-  background: rgba(95, 94, 94, 0.92);
+  background: var(--prelude-confirm);
   display: flex;
   align-items: center;
   justify-content: center;
   transform: scale(1);
-  box-shadow: 0 10rpx 18rpx rgba(49, 51, 46, 0.1);
+  box-shadow: 0 10rpx 18rpx var(--prelude-shadow);
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms ease,
@@ -518,16 +555,16 @@ function handleSkip(): void {
 
 .diary-prelude-picker__confirm:active {
   transform: scale(0.992);
-  box-shadow: 0 6rpx 12rpx rgba(49, 51, 46, 0.08);
+  box-shadow: 0 6rpx 12rpx var(--prelude-shadow);
 }
 
 .diary-prelude-picker__confirm--disabled {
-  background: rgba(177, 179, 171, 0.56);
+  background: var(--prelude-confirm-disabled);
   box-shadow: none;
 }
 
 .diary-prelude-picker__confirm-label {
-  color: #faf7f6;
+  color: var(--prelude-confirm-text);
   font-size: 22rpx;
   letter-spacing: 0.12em;
 }
@@ -536,7 +573,7 @@ function handleSkip(): void {
   text-align: center;
   font-size: 16rpx;
   line-height: 1.35;
-  color: rgba(138, 129, 120, 0.72);
+  color: var(--prelude-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

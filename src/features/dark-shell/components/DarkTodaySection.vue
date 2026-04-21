@@ -1,8 +1,15 @@
 <template>
   <scroll-view class="dark-today" scroll-y>
     <view class="dark-today__inner">
+      <view class="dark-today__topbar">
+        <view class="dark-today__profile-entry" @tap="openProfile">
+          <text class="dark-today__profile-entry-label">{{ copy.home.profileCenter }}</text>
+          <text class="dark-today__profile-entry-arrow">↗</text>
+        </view>
+      </view>
+
       <text class="dark-today__date">{{ displayDate }}</text>
-      <text class="dark-today__title">{{ homeHeroTitle }}</text>
+      <text class="dark-today__title" :style="titleStyle">{{ homeHeroTitle }}</text>
       <text class="dark-today__subtitle">{{ subtitle }}</text>
 
       <view class="dark-today__divider">
@@ -53,17 +60,23 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { waitForBootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
 import { useArchiveStore } from "@/app/store/useArchiveStore";
 import { getEntryRepository } from "@/app/store/entryRepository";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
+import type { Entry } from "@/domain/entry/types";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
 import { ROUTES } from "@/shared/constants/routes";
 import { t } from "@/shared/i18n";
 import { formatDate } from "@/shared/utils/date";
-import type { Entry } from "@/domain/entry/types";
+
+const props = defineProps<{
+  welcomeContent?: string;
+}>();
 
 const emit = defineEmits<{
   (event: "open-archive", mode: "main" | "write"): void;
+  (event: "open-profile"): void;
 }>();
 
 const settingsStore = useSettingsStore();
@@ -82,7 +95,47 @@ const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   titleMode: settingsStore.homeTitleMode,
   customTitle: settingsStore.homeCustomTitle,
 }));
-const subtitle = computed(() => copy.value.home.heroSubtitle);
+const titleLength = computed(() => Array.from(homeHeroTitle.value.trim()).length || 1);
+const titleStyle = computed(() => {
+  if (titleLength.value <= 2) {
+    return {
+      fontSize: "58px",
+      letterSpacing: "0.64em",
+      paddingLeft: "0.64em",
+    };
+  }
+
+  if (titleLength.value === 3) {
+    return {
+      fontSize: "50px",
+      letterSpacing: "0.34em",
+      paddingLeft: "0.34em",
+    };
+  }
+
+  if (titleLength.value === 4) {
+    return {
+      fontSize: "42px",
+      letterSpacing: "0.18em",
+      paddingLeft: "0.18em",
+    };
+  }
+
+  if (titleLength.value === 5) {
+    return {
+      fontSize: "36px",
+      letterSpacing: "0.08em",
+      paddingLeft: "0.08em",
+    };
+  }
+
+  return {
+    fontSize: "32px",
+    letterSpacing: "0.04em",
+    paddingLeft: "0.04em",
+  };
+});
+const subtitle = computed(() => props.welcomeContent?.trim() || copy.value.home.heroSubtitle);
 const todayQuestion = computed(() => archiveStore.todayQuestion?.question ?? "今天你最想留下什么？");
 const streakText = computed(() => `第${Math.max(recordedDays.value, 1)}天`);
 const stats = computed(() => ([
@@ -99,6 +152,10 @@ function openArchive() {
   emit("open-archive", archiveStore.hasAnsweredToday ? "main" : "write");
 }
 
+function openProfile() {
+  emit("open-profile");
+}
+
 function handleOpenEntry(entryId: string) {
   uni.navigateTo({
     url: `/${ROUTES.editor}?mode=read&entryId=${entryId}`,
@@ -106,6 +163,7 @@ function handleOpenEntry(entryId: string) {
 }
 
 async function loadTodayData(): Promise<void> {
+  await waitForBootstrapAppRuntime();
   await archiveStore.resolveTodayQuestion(todayDate.value);
 
   const [jottings, statsSnapshot, futures] = await Promise.all([
@@ -136,6 +194,39 @@ onMounted(() => {
   padding: 52px 28px 104px;
 }
 
+.dark-today__topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.dark-today__profile-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(76, 63, 45, 0.82);
+  background: rgba(19, 16, 9, 0.88);
+  box-shadow:
+    0 0 0 1px rgba(201, 150, 60, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(201, 150, 60, 0.14);
+}
+
+.dark-today__profile-entry-label {
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  color: #eae2ce;
+}
+
+.dark-today__profile-entry-arrow {
+  font-size: 12px;
+  line-height: 1;
+  color: #c9963c;
+}
+
 .dark-today__date {
   display: block;
   font-size: 12px;
@@ -146,11 +237,11 @@ onMounted(() => {
 .dark-today__title {
   display: block;
   margin-top: 22px;
-  font-size: 58px;
+  max-width: 100%;
   line-height: 1.05;
   font-weight: 300;
-  letter-spacing: 0.64em;
-  padding-left: 0.64em;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .dark-today__subtitle {
@@ -201,10 +292,14 @@ onMounted(() => {
 }
 
 .dark-today__question-card {
-  border: 1px solid #1e1a14;
+  border: 1px solid rgba(76, 63, 45, 0.88);
   border-left: 2px solid #a83228;
   background: #131009;
   padding: 22px 22px 20px;
+  box-shadow:
+    0 0 0 1px rgba(201, 150, 60, 0.06),
+    0 18px 34px rgba(0, 0, 0, 0.28),
+    0 0 16px rgba(168, 50, 40, 0.12);
 }
 
 .dark-today__question {
@@ -227,9 +322,12 @@ onMounted(() => {
 }
 
 .dark-today__stat {
-  border: 1px solid #1e1a14;
+  border: 1px solid rgba(76, 63, 45, 0.84);
   background: #0c0a08;
   padding: 16px 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(234, 226, 206, 0.03),
+    0 0 14px rgba(201, 150, 60, 0.08);
 }
 
 .dark-today__stat-value {

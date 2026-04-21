@@ -141,4 +141,13 @@ describe("release readiness", () => {
     expect(editorPage).not.toContain("Draft saved");
     expect(editorPage).not.toContain("Write something first");
   });
+
+  it("waits for runtime bootstrap before loading archive questions from dark entry points", () => {
+    const darkTodaySection = readProjectFile("src/features/dark-shell/components/DarkTodaySection.vue");
+    const archivePage = readProjectFile("src/features/archive/pages/ArchivePage.vue");
+
+    expect(darkTodaySection).toContain("waitForBootstrapAppRuntime");
+    expect(archivePage).toContain("waitForBootstrapAppRuntime");
+  });
+
 });

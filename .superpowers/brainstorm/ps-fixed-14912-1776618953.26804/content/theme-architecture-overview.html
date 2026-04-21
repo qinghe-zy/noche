@@ -1,0 +1,386 @@
+<style>
+  .grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .theme-matrix {
+    display: grid;
+    grid-template-columns: 160px repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .matrix-head,
+  .matrix-cell {
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid rgba(120, 106, 84, 0.18);
+  }
+
+  .matrix-head {
+    background: rgba(255, 248, 239, 0.72);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d655b;
+  }
+
+  .matrix-cell {
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  .matrix-cell strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #221f1a;
+  }
+
+  .token-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .token {
+    min-width: 42px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cards.pages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-card {
+    min-height: 280px;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(120, 106, 84, 0.18);
+    background: #f8f4eb;
+    box-shadow: 0 8px 32px rgba(34, 28, 19, 0.06);
+  }
+
+  .page-card.dark {
+    background: #1b1a18;
+    color: #f4efe5;
+    border-color: rgba(255, 243, 228, 0.08);
+  }
+
+  .mock-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6d655b;
+  }
+
+  .page-card.dark .mock-topbar {
+    color: #b9b0a4;
+  }
+
+  .mock-body {
+    padding: 0 20px 20px;
+  }
+
+  .hero-serif {
+    font-family: Georgia, serif;
+    font-size: 30px;
+    line-height: 1.12;
+    margin: 14px 0 10px;
+  }
+
+  .subcopy {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #6d655b;
+  }
+
+  .page-card.dark .subcopy {
+    color: #b9b0a4;
+  }
+
+  .paper-panel,
+  .list-card,
+  .note-card,
+  .profile-panel {
+    border-radius: 24px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid rgba(120, 106, 84, 0.16);
+    background: rgba(255, 250, 243, 0.9);
+  }
+
+  .page-card.dark .paper-panel,
+  .page-card.dark .list-card,
+  .page-card.dark .note-card,
+  .page-card.dark .profile-panel {
+    background: rgba(48, 48, 46, 0.95);
+    border-color: rgba(255, 243, 228, 0.08);
+  }
+
+  .mini-pill-row,
+  .mini-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .mini-pill,
+  .mini-tag {
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(201, 100, 66, 0.14);
+    color: #8a4f3b;
+  }
+
+  .mini-tag.ghost {
+    background: rgba(110, 101, 92, 0.08);
+    color: #6d655b;
+  }
+
+  .page-card.dark .mini-tag.ghost {
+    background: rgba(255, 243, 228, 0.08);
+    color: #c0b8ab;
+  }
+
+  .list-line {
+    height: 44px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(120, 106, 84, 0.1);
+    margin-top: 10px;
+  }
+
+  .page-card.dark .list-line {
+    background: rgba(255, 243, 228, 0.05);
+    border-color: rgba(255, 243, 228, 0.05);
+  }
+
+  .split-note {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .note-sheet {
+    min-height: 120px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(120, 106, 84, 0.12);
+  }
+
+  .page-card.dark .note-sheet {
+    background: rgba(255, 243, 228, 0.05);
+    border-color: rgba(255, 243, 228, 0.05);
+  }
+
+  .small-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #8a4f3b;
+  }
+
+  .footnote {
+    margin-top: 10px;
+    color: #6d655b;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .theme-matrix,
+    .cards.pages {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<h2>Theme System And Page Direction</h2>
+<p class="subtitle">Section 1 and 2 combined: a scalable theme architecture plus the first-pass redesign direction for the core pages.</p>
+
+<div class="section">
+  <div class="label">Theme Model</div>
+  <div class="theme-matrix">
+    <div class="matrix-head">Layer</div>
+    <div class="matrix-head">Default</div>
+    <div class="matrix-head">Claude Light</div>
+    <div class="matrix-head">Claude Dark</div>
+
+    <div class="matrix-cell">
+      <strong>Family</strong>
+      <div class="footnote">`default` and `claude` live beside each other. New families can be added later without changing page logic.</div>
+    </div>
+    <div class="matrix-cell">
+      <strong>Quiet baseline</strong>
+      <div class="token-row">
+        <span class="token" style="background:#fbf9f5;">bg</span>
+        <span class="token" style="background:#ffffff;">panel</span>
+        <span class="token" style="background:#31332e;color:#fff;">text</span>
+      </div>
+    </div>
+    <div class="matrix-cell">
+      <strong>Warm editorial</strong>
+      <div class="token-row">
+        <span class="token" style="background:#f5f4ed;">bg</span>
+        <span class="token" style="background:#faf9f5;">panel</span>
+        <span class="token" style="background:#c96442;color:#fff;">brand</span>
+      </div>
+    </div>
+    <div class="matrix-cell">
+      <strong>Warm dark</strong>
+      <div class="token-row">
+        <span class="token" style="background:#141413;color:#fff;">bg</span>
+        <span class="token" style="background:#30302e;color:#fff;">panel</span>
+        <span class="token" style="background:#b0aea5;">text</span>
+      </div>
+    </div>
+
+    <div class="matrix-cell">
+      <strong>Mode</strong>
+      <div class="footnote">`system / light / dark` is a separate dimension. It resolves the final token set instead of replacing the family.</div>
+    </div>
+    <div class="matrix-cell">
+      <strong>default + mode</strong>
+      <div class="footnote">Keeps current app tone available for users who do not want the Claude aesthetic.</div>
+    </div>
+    <div class="matrix-cell">
+      <strong>claude + light</strong>
+      <div class="footnote">Parchment surfaces, serif headings, terracotta accents, ring shadows, editorial spacing.</div>
+    </div>
+    <div class="matrix-cell">
+      <strong>claude + dark</strong>
+      <div class="footnote">Deep Dark and Dark Surface with Warm Silver text, same Claude typography and rhythm.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Page Redesign Direction</div>
+  <div class="cards pages">
+    <div class="page-card">
+      <div class="mock-topbar">
+        <span>Home</span>
+        <span>Profile</span>
+      </div>
+      <div class="mock-body">
+        <div class="hero-serif">A quieter, more editorial home.</div>
+        <div class="subcopy">The hero becomes a reading moment instead of a sparse utility page. The primary action card feels like a premium paper object.</div>
+        <div class="paper-panel">
+          <div class="small-label">Daily Focus</div>
+          <div class="hero-serif" style="font-size:22px; margin-top:10px;">Write today's page</div>
+          <div class="mini-pill-row">
+            <div class="mini-pill">Terracotta CTA</div>
+            <div class="mini-tag ghost">Warm paper shell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="mock-topbar">
+        <span>Mailbox</span>
+        <span>Calendar</span>
+      </div>
+      <div class="mock-body">
+        <div class="hero-serif">Cards become filed letters, not generic list blocks.</div>
+        <div class="subcopy">Mailbox and calendar share one visual language: archival, tactile, and neatly categorized.</div>
+        <div class="list-card">
+          <div class="mini-list">
+            <div class="mini-tag">Documentary</div>
+            <div class="mini-tag ghost">Distant</div>
+          </div>
+          <div class="list-line"></div>
+          <div class="list-line"></div>
+          <div class="list-line" style="width:82%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card dark">
+      <div class="mock-topbar">
+        <span>Editor</span>
+        <span>Claude Dark</span>
+      </div>
+      <div class="mock-body">
+        <div class="hero-serif">Warm dark writing room.</div>
+        <div class="subcopy">The editor should feel intimate and low-glare, not black-and-neon. Writing stays central, chrome recedes.</div>
+        <div class="note-card">
+          <div class="small-label">Writing Surface</div>
+          <div class="split-note">
+            <div class="note-sheet"></div>
+            <div class="note-sheet"></div>
+          </div>
+          <div class="mini-pill-row">
+            <div class="mini-pill">Warm silver text</div>
+            <div class="mini-tag ghost">Deep dark shell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="mock-topbar">
+        <span>Profile</span>
+        <span>Appearance</span>
+      </div>
+      <div class="mock-body">
+        <div class="hero-serif">Profile becomes the theme showroom.</div>
+        <div class="subcopy">Appearance settings should clearly separate theme family and mode, with live-friendly labels and future extensibility.</div>
+        <div class="profile-panel">
+          <div class="small-label">Appearance</div>
+          <div class="list-line"></div>
+          <div class="list-line"></div>
+          <div class="list-line" style="width:74%;"></div>
+          <div class="mini-pill-row">
+            <div class="mini-pill">Theme family</div>
+            <div class="mini-tag ghost">Mode</div>
+            <div class="mini-tag ghost">Type scale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">What changes everywhere</div>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Design constants</h4>
+      <ul>
+        <li>Serif headlines, sans UI text</li>
+        <li>Warm neutral palette, no cool blue-gray drift</li>
+        <li>Ring shadows instead of heavy drop shadows</li>
+        <li>More generous section spacing and softer radii</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Implementation implications</h4>
+      <ul>
+        <li>Move pages away from hardcoded color values</li>
+        <li>Promote shared surface, text, border, and accent tokens</li>
+        <li>Split settings UI into theme family and mode</li>
+        <li>Refit shared dialogs and topbars before polishing pages</li>
+      </ul>
+    </div>
+  </div>
+</div>

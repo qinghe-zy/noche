@@ -874,16 +874,48 @@ watch(bodyViewportHeight, (nextHeight) => {
 .editor-page__watermark { position: absolute; bottom: 20rpx; right: 40rpx; font-size: 180rpx; color: rgba(217, 219, 210, 0.2); pointer-events: none; }
 .editor-page__seal { position: absolute; right: 28rpx; bottom: 20rpx; pointer-events: none; }
 .editor-page__signature-svg { width: 84rpx; height: 84rpx; color: rgba(95, 94, 94, 0.72); }
-.theme-dark.editor-page { background: radial-gradient(circle at top left, rgba(129, 112, 92, 0.18), transparent 24%), radial-gradient(circle at top right, rgba(88, 92, 112, 0.14), transparent 24%), var(--noche-bg); }
-.theme-dark .editor-page__paper-surface { background: linear-gradient(180deg, rgba(31, 30, 28, 0.98), rgba(24, 24, 23, 0.98)); }
-.theme-dark .editor-page__topbar-button,.theme-dark .editor-page__meta-date,.theme-dark .editor-page__read-headline,.theme-dark .editor-page__future-ribbon-value,.theme-dark .editor-page__sheet-title,.theme-dark .editor-page__sheet-calendar-month,.theme-dark .editor-page__sheet-button--secondary,.theme-dark .editor-page__textarea,.theme-dark .editor-page__read-content { color: var(--noche-text); }
-.theme-dark .editor-page__meta-subtitle,.theme-dark .editor-page__future-ribbon-label,.theme-dark .editor-page__read-meta,.theme-dark .editor-page__future-ribbon-hint,.theme-dark .editor-page__saved-hint,.theme-dark .editor-page__date-weekday,.theme-dark .editor-page__placeholder { color: var(--noche-muted); }
+.theme-dark.editor-page {
+  --future-paper-base: linear-gradient(180deg, rgba(24, 20, 16, 0.985), rgba(18, 14, 11, 0.985));
+  --future-paper-ink: #f0e8d5;
+  --future-paper-ink-soft: #e2d8c0;
+  --future-paper-muted: rgba(196, 181, 152, 0.78);
+  --future-paper-muted-soft: rgba(143, 125, 98, 0.88);
+  --future-paper-line: rgba(240, 232, 213, 0.065);
+  --future-paper-border: rgba(76, 63, 45, 0.62);
+  --future-paper-panel: rgba(34, 28, 21, 0.84);
+  background:
+    radial-gradient(circle at top left, rgba(201, 150, 60, 0.14), transparent 24%),
+    radial-gradient(circle at top right, rgba(226, 216, 192, 0.06), transparent 22%),
+    var(--noche-bg);
+}
+
+.theme-dark .editor-page__paper-noise {
+  opacity: 0.055;
+  background:
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.04) 100%),
+    radial-gradient(circle at 18% 10%, rgba(201, 150, 60, 0.04), transparent 18%);
+}
+
+.theme-dark .editor-page__paper-surface {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(201, 150, 60, 0.08), transparent 18%),
+    radial-gradient(circle at 84% 8%, rgba(240, 232, 213, 0.045), transparent 24%),
+    linear-gradient(180deg, rgba(240, 232, 213, 0.025), rgba(240, 232, 213, 0)),
+    var(--future-paper-base);
+  box-shadow:
+    inset 0 1px 0 rgba(240, 232, 213, 0.04),
+    inset 0 0 0 1rpx var(--future-paper-border);
+}
+
+.theme-dark .editor-page__topbar-button,.theme-dark .editor-page__meta-date,.theme-dark .editor-page__read-headline,.theme-dark .editor-page__future-ribbon-value,.theme-dark .editor-page__sheet-title,.theme-dark .editor-page__sheet-calendar-month,.theme-dark .editor-page__sheet-button--secondary,.theme-dark .editor-page__textarea,.theme-dark .editor-page__read-content { color: var(--future-paper-ink); }
+.theme-dark .editor-page__meta-subtitle,.theme-dark .editor-page__future-ribbon-label,.theme-dark .editor-page__read-meta,.theme-dark .editor-page__future-ribbon-hint,.theme-dark .editor-page__saved-hint,.theme-dark .editor-page__date-weekday,.theme-dark .editor-page__placeholder { color: var(--future-paper-muted); }
 .theme-dark .editor-page__meta-image-button { color: var(--noche-muted); }
-.theme-dark .editor-page__future-ribbon { border-bottom-color: rgba(117, 110, 101, 0.36); }
-.theme-dark .editor-page__attachment-card { background: rgba(42, 41, 38, 0.74); }
-.theme-dark .editor-page__attachment-remove { background: rgba(36, 35, 32, 0.88); }
-.theme-dark .editor-page__attachment-remove-svg,.theme-dark .editor-page__topbar-svg,.theme-dark .editor-page__sheet-calendar-nav-icon { color: var(--noche-text); }
-.theme-dark .editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 6px), rgba(117, 110, 101, 0.28) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); }
+.theme-dark .editor-page__meta-image-button { color: var(--future-paper-muted); }
+.theme-dark .editor-page__future-ribbon { border-bottom-color: rgba(201, 150, 60, 0.28); }
+.theme-dark .editor-page__attachment-card { background: var(--future-paper-panel); box-shadow: inset 0 0 0 1rpx rgba(240, 232, 213, 0.04); }
+.theme-dark .editor-page__attachment-remove { background: rgba(22, 18, 14, 0.9); }
+.theme-dark .editor-page__attachment-remove-svg,.theme-dark .editor-page__topbar-svg,.theme-dark .editor-page__sheet-calendar-nav-icon { color: var(--future-paper-ink-soft); }
+.theme-dark .editor-page__writing-lines { background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(var(--editor-paper-line-height, 44px) - 6px), var(--future-paper-line) calc(var(--editor-paper-line-height, 44px) - 6px), var(--future-paper-line) calc(var(--editor-paper-line-height, 44px) - 4px), transparent calc(var(--editor-paper-line-height, 44px) - 4px), transparent var(--editor-paper-line-height, 44px)); }
 .theme-dark .editor-page__date-chip,.theme-dark .editor-page__date-cell,.theme-dark .editor-page__date-sheet { background: rgba(34, 33, 31, 0.98); color: var(--noche-text); }
 .theme-dark .editor-page__sheet-copy { color: var(--noche-muted); }
 .theme-dark .editor-page__sheet-button--primary,.theme-dark .editor-page__date-chip--active,.theme-dark .editor-page__date-cell--selected { background: rgba(232, 225, 214, 0.18); color: var(--noche-text); border-color: rgba(232, 225, 214, 0.18); }

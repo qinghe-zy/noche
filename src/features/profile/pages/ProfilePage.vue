@@ -1519,12 +1519,46 @@ onUnmounted(() => {
   --profile-soft-text: rgba(74, 70, 64, 0.88);
   --profile-soft-meta: rgba(92, 87, 79, 0.8);
   --profile-soft-hint: rgba(110, 104, 96, 0.72);
+  --profile-surface: rgba(255, 255, 255, 0.72);
+  --profile-surface-strong: rgba(255, 255, 255, 0.9);
+  --profile-line: rgba(177, 179, 171, 0.14);
+  --profile-line-strong: rgba(177, 179, 171, 0.2);
+  --profile-title: #31332e;
+  --profile-cover-fallback: linear-gradient(180deg, rgba(233, 226, 213, 0.94), rgba(244, 239, 232, 0.94));
+  --profile-mist: linear-gradient(180deg, rgba(251, 249, 245, 0.12), rgba(251, 249, 245, 0.16) 34%, rgba(251, 249, 245, 0.34) 68%, rgba(251, 249, 245, 0.58));
+  --profile-avatar-shell: rgba(252, 250, 246, 0.94);
+  --profile-avatar-shadow: rgba(49, 51, 46, 0.08);
+  --profile-avatar-fallback: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.36), transparent 20%), linear-gradient(180deg, #f2eadf, #e6dccf);
+  --profile-hero-glow: transparent;
+  --profile-banner-danger-bg: rgba(159, 64, 61, 0.07);
+  --profile-banner-danger-text: #8a3d3a;
+  --profile-banner-info-bg: rgba(121, 92, 45, 0.1);
+  --profile-banner-info-text: #7a6337;
+  --profile-banner-success-bg: rgba(77, 122, 88, 0.1);
+  --profile-banner-success-text: #456a50;
 }
 
 .theme-dark.profile-page {
   --profile-soft-text: rgba(241, 237, 230, 0.92);
   --profile-soft-meta: rgba(224, 218, 208, 0.82);
   --profile-soft-hint: rgba(224, 218, 208, 0.72);
+  --profile-surface: rgba(20, 17, 11, 0.96);
+  --profile-surface-strong: rgba(24, 20, 13, 0.94);
+  --profile-line: var(--noche-shell-line);
+  --profile-line-strong: var(--noche-shell-line-strong);
+  --profile-title: var(--noche-shell-text);
+  --profile-cover-fallback: radial-gradient(circle at 18% 24%, rgba(184, 136, 58, 0.14), transparent 24%), linear-gradient(180deg, rgba(23, 20, 16, 0.96), rgba(14, 11, 9, 0.98));
+  --profile-mist: linear-gradient(180deg, rgba(9, 8, 7, 0.08), rgba(9, 8, 7, 0.18) 32%, rgba(9, 8, 7, 0.42) 68%, rgba(9, 8, 7, 0.68));
+  --profile-avatar-shell: rgba(24, 20, 13, 0.94);
+  --profile-avatar-shadow: rgba(0, 0, 0, 0.24);
+  --profile-avatar-fallback: radial-gradient(circle at 30% 28%, rgba(234, 226, 206, 0.14), transparent 20%), linear-gradient(180deg, rgba(48, 40, 27, 0.98), rgba(22, 18, 12, 0.98));
+  --profile-hero-glow: radial-gradient(circle at 85% 24%, rgba(184, 136, 58, 0.16), transparent 24%);
+  --profile-banner-danger-bg: rgba(139, 32, 32, 0.18);
+  --profile-banner-danger-text: rgba(236, 191, 185, 0.9);
+  --profile-banner-info-bg: rgba(184, 136, 58, 0.12);
+  --profile-banner-info-text: rgba(224, 196, 143, 0.9);
+  --profile-banner-success-bg: rgba(86, 110, 82, 0.18);
+  --profile-banner-success-text: rgba(194, 221, 188, 0.9);
 }
 
 .profile-page__scroll {
@@ -1538,22 +1572,28 @@ onUnmounted(() => {
   gap: 32rpx;
 }
 
+.theme-dark.profile-page .profile-page__content {
+  padding-top: 20rpx;
+}
+
 .profile-page__banner {
   padding: 16rpx 18rpx;
   border-radius: 18rpx;
-  background: rgba(159, 64, 61, 0.07);
+  border: 1rpx solid var(--profile-line);
+  background: var(--profile-banner-danger-bg);
+  box-shadow: 0 16rpx 36rpx rgba(0, 0, 0, 0.08);
 }
 
 .profile-page__banner--success {
-  background: rgba(77, 122, 88, 0.1);
+  background: var(--profile-banner-success-bg);
 }
 
 .profile-page__banner--info {
-  background: rgba(121, 92, 45, 0.1);
+  background: var(--profile-banner-info-bg);
 }
 
 .profile-page__banner--error {
-  background: rgba(159, 64, 61, 0.07);
+  background: var(--profile-banner-danger-bg);
 }
 
 .profile-page__banner-head {
@@ -1582,15 +1622,15 @@ onUnmounted(() => {
   margin-top: 6rpx;
   font-size: 22rpx;
   line-height: 1.7;
-  color: #8a3d3a;
+  color: var(--profile-banner-danger-text);
 }
 
 .profile-page__banner--info .profile-page__banner-text {
-  color: #7a6337;
+  color: var(--profile-banner-info-text);
 }
 
 .profile-page__banner--success .profile-page__banner-text {
-  color: #456a50;
+  color: var(--profile-banner-success-text);
 }
 
 .profile-page__progress {
@@ -1604,15 +1644,22 @@ onUnmounted(() => {
   width: 100%;
   height: 10rpx;
   border-radius: 999rpx;
-  background: rgba(116, 104, 84, 0.16);
+  background: rgba(196, 183, 157, 0.16);
   overflow: hidden;
 }
 
 .profile-page__progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(164, 126, 56, 0.72), rgba(198, 162, 97, 0.95));
+  background: linear-gradient(90deg, rgba(126, 91, 33, 0.94), rgba(204, 168, 95, 0.96));
   transition: width 220ms ease;
+}
+
+.profile-page__menu {
+  padding: 8rpx 18rpx;
+  border: 1rpx solid var(--profile-line);
+  background: var(--profile-surface);
+  box-shadow: 0 16rpx 34rpx rgba(0, 0, 0, 0.06);
 }
 
 .profile-page__progress-text {

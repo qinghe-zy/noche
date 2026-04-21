@@ -97,7 +97,7 @@ defineEmits<{
 .profile-album__title {
   font-size: 29rpx;
   line-height: 1.3;
-  color: #31332e;
+  color: var(--profile-title, #31332e);
   letter-spacing: 0.08em;
   padding-left: 0.08em;
 }
@@ -133,7 +133,8 @@ defineEmits<{
   padding-top: 100%;
   border-radius: 20rpx;
   overflow: hidden;
-  background: rgba(235, 231, 224, 0.88);
+  background: var(--profile-surface, rgba(235, 231, 224, 0.88));
+  border: 1rpx solid var(--profile-line, rgba(177, 179, 171, 0.14));
 }
 
 .profile-album__image {
@@ -157,7 +158,7 @@ defineEmits<{
 .profile-album__state-title {
   font-size: 23rpx;
   line-height: 1.4;
-  color: #4d4943;
+  color: var(--profile-title, #4d4943);
 }
 
 .profile-album__state-text {
@@ -167,8 +168,8 @@ defineEmits<{
 }
 
 .profile-album__state--empty {
-  border-top: 1rpx solid rgba(177, 179, 171, 0.12);
-  border-bottom: 1rpx solid rgba(177, 179, 171, 0.08);
+  border-top: 1rpx solid var(--profile-line, rgba(177, 179, 171, 0.12));
+  border-bottom: 1rpx solid var(--profile-line, rgba(177, 179, 171, 0.08));
 }
 
 .type-scale-small .profile-album__title { font-size: 27rpx; }

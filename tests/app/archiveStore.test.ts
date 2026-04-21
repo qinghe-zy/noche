@@ -22,4 +22,16 @@ describe("archive store", () => {
     expect(store.todayEntry?.answer).toBe("今天想留下安静。");
     expect(store.hasAnsweredToday).toBe(true);
   });
+
+  it("deletes an answered archive entry and refreshes today's answered state", async () => {
+    const store = useArchiveStore();
+    await store.resolveTodayQuestion("2026-04-21");
+    await store.answerToday("今天想留下安静。");
+
+    await store.deleteArchiveEntry("2026-04-21");
+
+    expect(store.todayEntry).toBeNull();
+    expect(store.hasAnsweredToday).toBe(false);
+    expect(store.history).toEqual([]);
+  });
 });

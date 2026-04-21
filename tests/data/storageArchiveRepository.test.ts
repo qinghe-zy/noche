@@ -38,4 +38,47 @@ describe("storageArchiveRepository", () => {
     const oneYearAgo = await repository.getOneYearAgo("2026-04-21");
     expect(oneYearAgo?.date).toBe("2025-04-21");
   });
+
+  it("allows a later resolved daily question to replace the previous card during testing", async () => {
+    const storage = createMemoryJsonStorage();
+    const repository = createStorageArchiveRepository(storage);
+
+    await repository.saveQuestion({
+      date: "2026-04-21",
+      question: "第一张测试问题？",
+      source: "fallback",
+      createdAt: "2026-04-21T08:00:00.000Z",
+    });
+    await repository.saveQuestion({
+      date: "2026-04-21",
+      question: "第二张测试问题？",
+      source: "remote",
+      createdAt: "2026-04-21T08:01:00.000Z",
+    });
+
+    expect(await repository.getQuestionByDate("2026-04-21")).toMatchObject({
+      question: "第二张测试问题？",
+      source: "remote",
+    });
+  });
+
+  it("deletes an answered archive entry without removing the cached question", async () => {
+    const storage = createMemoryJsonStorage();
+    const repository = createStorageArchiveRepository(storage);
+
+    await repository.saveQuestion({
+      date: "2026-04-21",
+      question: "今天想保存什么？",
+      source: "fallback",
+      createdAt: "2026-04-21T08:00:00.000Z",
+    });
+    await repository.answerToday("2026-04-21", "保存一个下午。");
+
+    await repository.deleteByDate("2026-04-21");
+
+    expect(await repository.getByDate("2026-04-21")).toBeNull();
+    expect(await repository.getQuestionByDate("2026-04-21")).toMatchObject({
+      question: "今天想保存什么？",
+    });
+  });
 });

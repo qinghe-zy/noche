@@ -1,0 +1,66 @@
+<h2>深色模式全面升级：边界确认</h2>
+<p class="subtitle">目标是重做暗色体验，但不扰动浅色模式；先确认范围，再谈页面视觉。</p>
+
+<div class="mockup">
+  <div class="mockup-header">Boundary Map · 深色模式专属改造</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div style="border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:18px;background:#15120e;color:#efe5ce;">
+        <div class="label">In Scope</div>
+        <h3 style="margin-top:6px;">只在 theme-dark 生效</h3>
+        <ul style="line-height:1.9;margin:10px 0 0 18px;">
+          <li>主页按 chisu-v2.jsx 复刻：底部导航、今日一问、最近随笔、邮箱入口</li>
+          <li>邮箱 / 日历 / 条目阅读 / 随笔 / 未来信页面跟随 chisu-v2 的暗色壳</li>
+          <li>新增「档案馆」页面，交互参考 archives.jsx</li>
+          <li>档案馆每日一问：每天一个问题，回答保存为私人日记式记录</li>
+          <li>一年后展示「今天一年前你在想什么」</li>
+        </ul>
+      </div>
+
+      <div style="border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px;background:#f8f4ec;color:#2e2b25;">
+        <div class="label">Protected</div>
+        <h3 style="margin-top:6px;">浅色模式保持原样</h3>
+        <ul style="line-height:1.9;margin:10px 0 0 18px;">
+          <li>不改浅色页面布局和视觉 token</li>
+          <li>不改现有日记 / 随笔 / 未来信的保存逻辑</li>
+          <li>不破坏已有草稿、邮箱、日历和阅读入口</li>
+          <li>不重写无关 store / repository</li>
+          <li>必要数据扩展要可迁移、可回退、可测试</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;border:1px solid rgba(201,150,60,.35);border-radius:14px;padding:16px;background:rgba(201,150,60,.08);">
+      <div class="label">Recommended Data Boundary</div>
+      <p style="margin:8px 0 0;line-height:1.75;">
+        档案馆不要新建一套孤立日记系统；推荐新增一个 archive-question/answer 的小领域模型，
+        保存问题、回答、日期，再把展示和“一年前回看”独立在 archive feature 内。
+        这样暗色体验可以重做，原来的 Entry 业务仍保持稳定。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="boundary-ok" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>边界正确，继续设计</h3>
+      <p>按这张边界图推进：暗色全改、浅色保护、档案馆独立增量实现。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="boundary-narrow" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>先缩小范围</h3>
+      <p>第一阶段只做主页 + 档案馆，其他暗色页面后续再改。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="boundary-expand" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>扩大范围</h3>
+      <p>暗色模式不仅换 UI，还要调整更深的写作/保存流程。</p>
+    </div>
+  </div>
+</div>

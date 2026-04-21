@@ -30,11 +30,8 @@ export function createStorageArchiveRepository(storage: JsonStorage): IArchiveRe
   return {
     async saveQuestion(question) {
       const state = readState(storage);
-
-      if (!state.questions[question.date]) {
-        state.questions[question.date] = question;
-        writeState(storage, state);
-      }
+      state.questions[question.date] = question;
+      writeState(storage, state);
     },
 
     async getQuestionByDate(date) {
@@ -65,6 +62,12 @@ export function createStorageArchiveRepository(storage: JsonStorage): IArchiveRe
       state.entries[date] = nextEntry;
       writeState(storage, state);
       return nextEntry;
+    },
+
+    async deleteByDate(date) {
+      const state = readState(storage);
+      delete state.entries[date];
+      writeState(storage, state);
     },
 
     async getByDate(date) {

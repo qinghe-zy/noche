@@ -142,4 +142,5 @@ describe("home welcome card parity", () => {
     expect(homePage).toContain(".type-scale-small .home-page__welcome-card-content { font-size: 14px; }");
     expect(homePage).toContain(".type-scale-large .home-page__welcome-card-content { font-size: 16px; }");
   });
+
 });

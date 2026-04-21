@@ -46,7 +46,11 @@
     {
       "path": "features/archive/pages/ArchivePage",
       "style": {
-        "navigationStyle": "custom"
+        "navigationStyle": "custom",
+        "disableScroll": true,
+        "app-plus": {
+          "softinputMode": "adjustResize"
+        }
       }
     },
     {

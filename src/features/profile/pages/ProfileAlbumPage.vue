@@ -135,16 +135,34 @@ onShow(() => {
 
 <style scoped>
 .profile-album-page {
+  --profile-soft-text: rgba(74, 70, 64, 0.88);
+  --profile-soft-meta: rgba(92, 87, 79, 0.8);
+  --profile-soft-hint: rgba(110, 104, 96, 0.72);
+  --profile-surface: rgba(255, 255, 255, 0.72);
+  --profile-line: rgba(177, 179, 171, 0.14);
+  --profile-title: #31332e;
+  --profile-topbar-bg: rgba(251, 249, 245, 0.92);
   min-height: 100vh;
   background: var(--noche-bg);
   color: var(--noche-text);
+}
+
+.theme-dark.profile-album-page {
+  --profile-soft-text: rgba(241, 237, 230, 0.92);
+  --profile-soft-meta: rgba(224, 218, 208, 0.82);
+  --profile-soft-hint: rgba(224, 218, 208, 0.72);
+  --profile-surface: rgba(20, 17, 11, 0.96);
+  --profile-line: var(--noche-shell-line);
+  --profile-title: var(--noche-shell-text);
+  --profile-topbar-bg: rgba(23, 23, 22, 0.92);
 }
 
 .profile-album-page__topbar {
   position: sticky;
   top: 0;
   width: 100%;
-  background: var(--noche-bg);
+  background: var(--profile-topbar-bg);
+  backdrop-filter: blur(12rpx);
   z-index: 8;
 }
 
@@ -161,7 +179,7 @@ onShow(() => {
 .profile-album-page__title {
   font-size: 30rpx;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--profile-title);
   letter-spacing: 0.24em;
   padding-left: 0.24em;
 }
@@ -181,6 +199,10 @@ onShow(() => {
   padding: 12rpx 30rpx 88rpx;
 }
 
+.theme-dark.profile-album-page .profile-album-page__content {
+  padding-top: 20rpx;
+}
+
 .profile-album-page__load-more {
   margin-top: 28rpx;
   display: flex;
@@ -188,9 +210,12 @@ onShow(() => {
 }
 
 .profile-album-page__load-more-text {
+  padding: 10rpx 18rpx;
+  border: 1rpx solid var(--profile-line);
+  background: var(--profile-surface);
   font-size: 20rpx;
   line-height: 1.5;
-  color: var(--noche-muted);
+  color: var(--profile-soft-meta);
   letter-spacing: 0.12em;
   padding-left: 0.12em;
 }

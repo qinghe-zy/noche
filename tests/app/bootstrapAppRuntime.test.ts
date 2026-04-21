@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from "pinia";
 import { describe, expect, it } from "vitest";
-import { bootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
+import { bootstrapAppRuntime, waitForBootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
 import { useAppStore } from "@/app/store/useAppStore";
 import { getArchiveRepository } from "@/app/store/archiveRepository";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
@@ -11,6 +11,26 @@ import { createMemoryPrefsRepository } from "@/data/repositories/memoryPrefsRepo
 import type { IArchiveRepository } from "@/data/repositories/archive.repository";
 
 describe("bootstrapAppRuntime", () => {
+  it("does not orphan callers that start waiting before bootstrap begins", async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+
+    const earlyReadyPromise = waitForBootstrapAppRuntime();
+    let earlyResolved = false;
+    void earlyReadyPromise.then(() => {
+      earlyResolved = true;
+    });
+
+    await bootstrapAppRuntime(pinia, {
+      draftRepository: createMemoryDraftRepository(),
+      entryRepository: createMemoryEntryRepository(),
+      prefsRepository: createMemoryPrefsRepository(),
+    });
+    await earlyReadyPromise;
+
+    expect(earlyResolved).toBe(true);
+  });
+
   it("configures repositories, hydrates settings, and marks app ready", async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
@@ -61,6 +81,7 @@ describe("bootstrapAppRuntime", () => {
         updatedAt: "2026-04-21T08:00:00.000Z",
         answeredAt: "2026-04-21T08:00:00.000Z",
       }),
+      deleteByDate: async () => undefined,
       getByDate: async () => null,
       listAnswered: async () => [],
       getOneYearAgo: async () => null,
@@ -74,5 +95,45 @@ describe("bootstrapAppRuntime", () => {
     });
 
     expect(getArchiveRepository()).toBe(archiveRepository);
+  });
+
+  it("resolves the runtime readiness promise after bootstrap finishes", async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
+
+    let releasePrefsHydration: (() => void) | null = null;
+    const prefsGate = new Promise<void>((resolve) => {
+      releasePrefsHydration = resolve;
+    });
+
+    const pendingPrefsRepository = createMemoryPrefsRepository();
+    const delayedPrefsRepository = {
+      ...pendingPrefsRepository,
+      async get(key: string) {
+        await prefsGate;
+        return pendingPrefsRepository.get(key);
+      },
+    };
+
+    const bootstrapPromise = bootstrapAppRuntime(pinia, {
+      draftRepository: createMemoryDraftRepository(),
+      entryRepository: createMemoryEntryRepository(),
+      prefsRepository: delayedPrefsRepository,
+    });
+
+    const readyPromise = waitForBootstrapAppRuntime();
+    let resolved = false;
+    void readyPromise.then(() => {
+      resolved = true;
+    });
+
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+
+    releasePrefsHydration?.();
+    await bootstrapPromise;
+    await readyPromise;
+
+    expect(resolved).toBe(true);
   });
 });

@@ -1,0 +1,55 @@
+<h2>图标复刻边界：必须跟随 chisu-v2</h2>
+<p class="subtitle">你选 B 的补充点已记录：代码里的图标也要复刻，不只复刻布局。</p>
+
+<div class="mockup">
+  <div class="mockup-header">Icon System · chisu-v2 visual symbols</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:22px;font-family:'Noto Serif SC',serif;">
+        <div style="font-size:12px;color:#B8883A;letter-spacing:.18em;">Bottom Tab Icons</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;margin-top:18px;">
+          <div><div style="font-size:24px;">◎</div><div style="font-size:12px;color:#564E42;margin-top:8px;">今日</div></div>
+          <div><div style="font-size:24px;">✒</div><div style="font-size:12px;color:#564E42;margin-top:8px;">随笔</div></div>
+          <div><div style="font-size:24px;">✉</div><div style="font-size:12px;color:#564E42;margin-top:8px;">致未来</div></div>
+          <div><div style="font-size:24px;">◫</div><div style="font-size:12px;color:#564E42;margin-top:8px;">邮箱</div></div>
+        </div>
+        <p style="font-size:12px;color:#564E42;line-height:1.8;margin-top:18px;">底部 Tab 优先复刻 v2 的符号感；不替换成现有通用 AppIcon。</p>
+      </div>
+
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:22px;font-family:'Noto Serif SC',serif;">
+        <div style="font-size:12px;color:#B8883A;letter-spacing:.18em;">Page Icons</div>
+        <div style="text-align:center;padding:24px 0;border-bottom:1px solid #1E1A14;">
+          <div style="font-size:42px;color:#564E42;">✉</div>
+          <div style="font-size:26px;margin-top:14px;">写给以后的你</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;">
+          <div style="font-size:32px;letter-spacing:.28em;">邮 箱</div>
+          <div style="width:48px;height:48px;border:1px solid #1E1A14;display:flex;align-items:center;justify-content:center;color:#564E42;font-size:20px;">▦</div>
+        </div>
+        <p style="font-size:12px;color:#564E42;line-height:1.8;margin-top:18px;">未来信主卡信封、邮箱日历入口网格图标，都要在 Vue 里复刻。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;border:1px solid rgba(184,136,58,.35);background:rgba(184,136,58,.08);border-radius:8px;padding:16px;color:#EAE2CE;">
+      <div class="label">Implementation Note</div>
+      <p style="line-height:1.8;margin:8px 0 0;">实现时可以新增 ChisuIcon/ChisuSymbol 组件，或扩展 AppIcon；但暗色主壳必须能渲染 v2 的符号图标、尺寸、透明度和 active 小红点。</p>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="icons-approved" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认图标复刻要求</h3>
+      <p>底部 Tab、未来信主卡、邮箱日历入口等符号都按 chisu-v2 复刻。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="icons-more" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>还要补更多图标</h3>
+      <p>除了 v2 已出现的符号，还需要新增更多页面内图标。</p>
+    </div>
+  </div>
+</div>

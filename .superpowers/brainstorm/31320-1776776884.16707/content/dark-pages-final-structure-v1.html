@@ -1,0 +1,80 @@
+<h2>暗色模式页面结构：按最新截图修订</h2>
+<p class="subtitle">这是新的页面边界：入口集成在各页面内部，减少浮动按钮和二级切换。</p>
+
+<div class="mockup">
+  <div class="mockup-header">Final Dark Page Structure · chisu-v2 visual only</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:18px;font-family:'Noto Serif SC',serif;">
+        <div style="font-family:serif;font-style:italic;font-size:12px;color:#564E42;letter-spacing:.14em;">April 2026</div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;">
+          <div style="font-size:38px;letter-spacing:.28em;">随 笔</div>
+          <div style="font-size:38px;letter-spacing:.28em;color:#D4C9B0;">日 记</div>
+        </div>
+        <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+        <div style="display:flex;gap:18px;border-bottom:1px solid #1E1A14;padding:18px 0;">
+          <div style="font-size:12px;color:#564E42;">20<br>04</div>
+          <div><div style="font-size:18px;">关于那段沉默</div><div style="font-size:13px;color:#564E42;line-height:1.8;margin-top:8px;">有些话我们都知道，但选择用沉默来保护彼此。</div></div>
+        </div>
+        <p style="font-size:12px;color:#B8883A;line-height:1.8;margin-top:14px;">规则：左标题“随笔”进入随笔编辑/列表，右标题“日记”进入日记编辑/列表。</p>
+      </div>
+
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:18px;font-family:'Noto Serif SC',serif;">
+        <div style="font-family:serif;font-style:italic;font-size:12px;color:#564E42;letter-spacing:.14em;">Letters to Future Self</div>
+        <div style="font-size:38px;letter-spacing:.18em;margin-top:14px;">致未来</div>
+        <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+        <div style="text-align:center;padding:28px 0;border-bottom:1px solid #1E1A14;">
+          <div style="font-size:36px;color:#564E42;">□</div>
+          <div style="font-size:24px;margin-top:14px;">写给以后的你</div>
+          <div style="font-size:13px;color:#564E42;line-height:1.9;margin-top:10px;">信件将在你指定的日期<br>悄悄出现在邮箱里</div>
+        </div>
+        <p style="font-size:12px;color:#B8883A;line-height:1.8;margin-top:14px;">规则：去掉右下角“写一封”按钮，点击上方引导区进入未来信编辑。</p>
+      </div>
+
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:18px;font-family:'Noto Serif SC',serif;">
+        <div style="font-family:serif;font-style:italic;font-size:12px;color:#564E42;letter-spacing:.14em;">Mailbox</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+          <div style="font-size:38px;letter-spacing:.28em;">邮 箱</div>
+          <div style="border:1px solid #1E1A14;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:#564E42;">▦</div>
+        </div>
+        <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+        <div style="border-bottom:1px solid #1E1A14;padding:16px 0;">
+          <div style="font-size:12px;color:#B8883A;">来自 2025.04.20 的你 <span style="float:right;color:#564E42;">04.20</span></div>
+          <div style="font-size:18px;margin-top:10px;">你好，一年后的自己</div>
+          <div style="font-size:13px;color:#564E42;margin-top:8px;">那时候你刚换了工作，还在适应新环境……</div>
+        </div>
+        <p style="font-size:12px;color:#B8883A;line-height:1.8;margin-top:14px;">规则：邮箱去掉“纪实/寄远、日记/随笔/已启/待启”切换，所有信件集中列表；日历按钮保留。</p>
+      </div>
+
+      <div style="border:1px solid #1E1A14;background:#0C0A08;color:#EAE2CE;border-radius:8px;padding:18px;font-family:'Noto Serif SC',serif;">
+        <div style="display:flex;justify-content:space-between;color:#564E42;font-size:13px;">
+          <span>← 邮箱</span><span>日历视图</span>
+        </div>
+        <div style="text-align:center;font-size:24px;letter-spacing:.18em;margin:30px 0 22px;">2026 · 四月</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:14px;text-align:center;color:#564E42;font-size:13px;">
+          <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+          <span></span><span></span><span></span><span style="color:#EAE2CE;">1</span><span>2</span><span style="color:#EAE2CE;">3</span><span>4</span>
+          <span>5</span><span>6</span><span>7</span><span style="color:#EAE2CE;">8</span><span>9</span><span>10</span><span style="color:#EAE2CE;">11</span>
+        </div>
+        <p style="font-size:12px;color:#B8883A;line-height:1.8;margin-top:26px;">规则：日历页面照常，视觉按 chisu-v2 暗色化。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="dark-pages-final-approved" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认这版页面结构</h3>
+      <p>随笔页双标题入口；未来信顶部引导入口；邮箱集中列表；日历照常。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="dark-pages-final-adjust" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>继续微调</h3>
+      <p>结构方向正确，但需要再调整某个页面的入口或命名。</p>
+    </div>
+  </div>
+</div>

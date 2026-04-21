@@ -1,0 +1,407 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&family=Noto+Serif+SC:wght@300;400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#141210;}
+.doc{--bg:#141210;--surface:#1C1915;--paper:#F0E8D5;--paper-dark:#E2D8C0;--ink:#1E1A14;--ink-light:#3D3526;--gold:#C9963C;--gold-dim:#8A6828;--muted:#6B5E48;--red:#8B2020;--ls:#2A2520;--lw:#1E1B17;--fd:'Cormorant Garamond',serif;--fm:'IBM Plex Mono',monospace;--fc:'Noto Serif SC',serif;background:var(--bg);color:var(--paper);font-family:var(--fm);padding:32px 28px 56px;max-width:680px;margin:0 auto;}
+.chapter{margin-bottom:40px;}
+.ch-head{font-family:var(--fm);font-size:8px;letter-spacing:.28em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.ch-head::after{content:'';flex:1;height:1px;background:var(--ls);}
+.ch-title{font-family:var(--fd);font-size:22px;font-style:italic;font-weight:300;color:var(--paper);line-height:1.1;margin-bottom:24px;}
+
+/* color palette */
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.swatch{padding:12px 10px 10px;position:relative;}
+.swatch-color{width:100%;height:36px;margin-bottom:8px;}
+.swatch-name{font-size:9px;letter-spacing:.1em;color:var(--paper);display:block;margin-bottom:2px;}
+.swatch-hex{font-size:8px;color:var(--muted);letter-spacing:.05em;}
+.swatch-role{font-size:8px;color:var(--gold-dim);letter-spacing:.08em;margin-top:3px;line-height:1.4;}
+
+/* typography */
+.type-row{display:flex;gap:0;border-bottom:1px solid var(--ls);}
+.type-row:first-child{border-top:1px solid var(--ls);}
+.type-meta{width:160px;flex-shrink:0;padding:14px 0 14px;border-right:1px solid var(--ls);padding-right:14px;}
+.type-name{font-size:9px;letter-spacing:.15em;color:var(--gold-dim);text-transform:uppercase;display:block;margin-bottom:4px;}
+.type-spec{font-size:8px;color:var(--muted);letter-spacing:.05em;line-height:1.6;}
+.type-demo{flex:1;padding:14px 0 14px 20px;display:flex;align-items:center;}
+
+/* spacing scale */
+.space-grid{display:flex;flex-direction:column;gap:6px;}
+.space-row{display:flex;align-items:center;gap:12px;}
+.space-bar-wrap{flex:1;display:flex;align-items:center;}
+.space-bar{height:6px;background:var(--gold);opacity:.35;}
+.space-label{font-size:8px;color:var(--gold-dim);letter-spacing:.1em;min-width:32px;}
+.space-val{font-size:8px;color:var(--muted);letter-spacing:.05em;min-width:36px;text-align:right;}
+
+/* components */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.comp-card{border:1px solid var(--ls);padding:16px;}
+.comp-label{font-size:8px;letter-spacing:.18em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:12px;}
+
+/* section-label demo */
+.demo-sec-lbl{font-family:var(--fm);font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:0;}
+.demo-sec-lbl::after{content:'';flex:1;height:1px;background:var(--ls);}
+
+/* stamp demo */
+.demo-stamp{display:inline-block;font-family:var(--fm);font-size:8px;color:var(--red);border:1px solid var(--red);padding:2px 6px;letter-spacing:.1em;opacity:.8;transform:rotate(-2deg);}
+.demo-answered{display:inline-block;background:var(--gold);color:var(--ink);font-family:var(--fm);font-size:8px;letter-spacing:.15em;padding:3px 8px;text-transform:uppercase;}
+
+/* paper card demo */
+.demo-paper{background:var(--paper);padding:14px;position:relative;overflow:hidden;}
+.demo-paper::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.06) 27px,rgba(0,0,0,.06) 28px);pointer-events:none;}
+.demo-paper-text{font-family:var(--fd);font-size:14px;font-style:italic;color:var(--ink);position:relative;z-index:1;line-height:1.4;}
+
+/* arrow demo */
+.demo-arrow-wrap{display:flex;align-items:center;gap:6px;}
+.demo-arrow-text{font-family:var(--fm);font-size:9px;color:var(--ink-light);letter-spacing:.1em;text-transform:uppercase;}
+.demo-arrow{width:24px;height:1px;background:var(--ink-light);position:relative;}
+.demo-arrow::after{content:'';position:absolute;right:0;top:-3px;width:5px;height:5px;border-right:1px solid var(--ink-light);border-top:1px solid var(--ink-light);transform:rotate(45deg);}
+
+/* back arrow */
+.demo-back{display:flex;align-items:center;gap:7px;font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.1em;}
+.demo-back-line{width:18px;height:1px;background:var(--muted);position:relative;}
+.demo-back-line::before{content:'';position:absolute;left:0;top:-3px;width:5px;height:5px;border-left:1px solid var(--muted);border-bottom:1px solid var(--muted);transform:rotate(45deg);}
+
+/* memory card demo */
+.demo-mem{border:1px solid var(--ls);padding:14px;position:relative;}
+.demo-mem-line{position:absolute;top:0;left:14px;right:14px;height:2px;background:var(--gold);opacity:.4;}
+.demo-mem-date{font-family:var(--fm);font-size:9px;color:var(--gold-dim);letter-spacing:.15em;margin-top:4px;margin-bottom:6px;}
+.demo-mem-q{font-family:var(--fd);font-size:12px;font-style:italic;color:var(--muted);line-height:1.4;}
+
+/* badge */
+.demo-badge{text-align:right;}
+.demo-badge-n{font-family:var(--fd);font-size:38px;font-weight:600;color:var(--gold);line-height:1;opacity:.9;}
+.demo-badge-l{font-family:var(--fm);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;}
+
+/* settings item */
+.demo-si{display:flex;align-items:center;gap:10px;border:1px solid var(--ls);padding:12px 12px;}
+.demo-si-body{flex:1;}
+.demo-si-t{font-family:var(--fc);font-size:13px;color:var(--paper);margin-bottom:2px;}
+.demo-si-d{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.05em;}
+.demo-si-v{font-family:var(--fm);font-size:9px;color:var(--gold-dim);letter-spacing:.09em;padding-right:8px;}
+.demo-chevron{width:5px;height:5px;border-right:1px solid var(--muted);border-top:1px solid var(--muted);transform:rotate(45deg);opacity:.5;}
+
+/* divider */
+.demo-divider{width:40px;height:1px;background:var(--gold);opacity:.6;margin:8px 0;}
+
+/* effects */
+.effect-row{display:flex;flex-direction:column;gap:8px;}
+.eff-item{display:flex;align-items:center;gap:16px;}
+.eff-preview{width:80px;height:32px;flex-shrink:0;}
+.eff-desc{font-size:9px;color:var(--muted);letter-spacing:.05em;line-height:1.6;}
+.eff-name{font-size:9px;color:var(--paper);letter-spacing:.1em;display:block;margin-bottom:2px;}
+.grain-demo{background:#141210;width:100%;height:100%;position:relative;overflow:hidden;}
+.grain-demo::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.6;}
+.line-demo{background:var(--ls);width:100%;height:1px;margin-top:16px;}
+.line-demo-soft{background:var(--lw);width:100%;height:1px;margin-top:8px;}
+
+/* motion tokens */
+.motion-table{width:100%;border-collapse:collapse;}
+.motion-table td{padding:8px 0;border-bottom:1px solid var(--lw);font-size:9px;letter-spacing:.08em;vertical-align:top;}
+.motion-table td:first-child{color:var(--gold-dim);width:130px;}
+.motion-table td:last-child{color:var(--muted);}
+</style>
+
+<div class="doc">
+
+  <div style="margin-bottom:40px;padding-bottom:28px;border-bottom:1px solid var(--ls);">
+    <div style="font-family:var(--fm);font-size:8px;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:10px;">Design System · 档案馆风格</div>
+    <div style="font-family:var(--fd);font-size:36px;font-style:italic;font-weight:300;color:var(--paper);line-height:1.1;">Design Tokens</div>
+    <div style="font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-top:6px;">Cormorant × IBM Plex Mono × Noto Serif SC</div>
+  </div>
+
+  <!-- COLOR -->
+  <div class="chapter">
+    <div class="ch-head">01 · Color Palette</div>
+    <div class="palette">
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#141210;border:1px solid #2A2520;"></div>
+        <span class="swatch-name">--bg</span>
+        <span class="swatch-hex">#141210</span>
+        <div class="swatch-role">页面底色</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#1C1915;border:1px solid #2A2520;"></div>
+        <span class="swatch-name">--surface</span>
+        <span class="swatch-hex">#1C1915</span>
+        <div class="swatch-role">卡片/悬浮面</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#F0E8D5;"></div>
+        <span class="swatch-name">--paper</span>
+        <span class="swatch-hex">#F0E8D5</span>
+        <div class="swatch-role">纸页卡片背景</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#E2D8C0;"></div>
+        <span class="swatch-name">--paper-dark</span>
+        <span class="swatch-hex">#E2D8C0</span>
+        <div class="swatch-role">纸页次级色</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#C9963C;"></div>
+        <span class="swatch-name">--gold</span>
+        <span class="swatch-hex">#C9963C</span>
+        <div class="swatch-role">主强调 / 数字</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#8A6828;"></div>
+        <span class="swatch-name">--gold-dim</span>
+        <span class="swatch-hex">#8A6828</span>
+        <div class="swatch-role">标签 / 次强调</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#6B5E48;"></div>
+        <span class="swatch-name">--muted</span>
+        <span class="swatch-hex">#6B5E48</span>
+        <div class="swatch-role">次要文字</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#8B2020;"></div>
+        <span class="swatch-name">--red-stamp</span>
+        <span class="swatch-hex">#8B2020</span>
+        <div class="swatch-role">印章 / 状态警示</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#1E1A14;"></div>
+        <span class="swatch-name">--ink</span>
+        <span class="swatch-hex">#1E1A14</span>
+        <div class="swatch-role">纸面正文色</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#3D3526;"></div>
+        <span class="swatch-name">--ink-light</span>
+        <span class="swatch-hex">#3D3526</span>
+        <div class="swatch-role">纸面次要文字</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#2A2520;"></div>
+        <span class="swatch-name">--line-strong</span>
+        <span class="swatch-hex">#2A2520</span>
+        <div class="swatch-role">主分割线 / 边框</div>
+      </div>
+      <div class="swatch" style="background:var(--surface);">
+        <div class="swatch-color" style="background:#1E1B17;"></div>
+        <span class="swatch-name">--line-soft</span>
+        <span class="swatch-hex">#1E1B17</span>
+        <div class="swatch-role">次级分割线</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="chapter">
+    <div class="ch-head">02 · Typography</div>
+    <div style="margin-bottom:16px;">
+      <div class="type-row">
+        <div class="type-meta">
+          <span class="type-name">--font-display</span>
+          <span class="type-spec">Cormorant Garamond<br>weights 300 · 400 · 600<br>italic preferred</span>
+        </div>
+        <div class="type-demo">
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;font-weight:300;color:var(--paper);line-height:1.1;margin-bottom:4px;">档案馆 Archive</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:var(--muted);">「如果今天是最后一天」</div>
+          </div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <span class="type-name">--font-mono</span>
+          <span class="type-spec">IBM Plex Mono<br>weights 300 · 400<br>ALL CAPS labels</span>
+        </div>
+        <div class="type-demo">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:6px;">PRIVATE ARCHIVE · 04.20</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);">NO.0042 · 已归档 · v1.0.1</div>
+          </div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <span class="type-name">--font-cjk</span>
+          <span class="type-spec">Noto Serif SC<br>weights 300 · 400 · 600<br>正文 / 设置文字</span>
+        </div>
+        <div class="type-demo">
+          <div style="font-family:'Noto Serif SC',serif;font-size:14px;color:var(--paper);line-height:1.7;">
+            一间本地优先、离线可写的私人角落。
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- font size scale -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;border:1px solid var(--ls);padding:14px;">
+      <div style="font-size:8px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">8px</span><span style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);">label-xs</span></div>
+      <div style="font-size:9px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">9px</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">label-sm</span></div>
+      <div style="font-size:10px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">10px</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);">label-md</span></div>
+      <div><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">13px</span><span style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:var(--muted);">body-sm</span></div>
+      <div><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">16px</span><span style="font-family:'Noto Serif SC',serif;font-size:16px;color:var(--paper);">body</span></div>
+      <div><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">22px</span><span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--paper);">card-q</span></div>
+      <div><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">28px</span><span style="font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;font-weight:300;color:var(--paper);">title</span></div>
+      <div><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold-dim);display:block;margin-bottom:4px;">42px</span><span style="font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:var(--gold);line-height:1;opacity:.9;">42</span></div>
+    </div>
+  </div>
+
+  <!-- SPACING -->
+  <div class="chapter">
+    <div class="ch-head">03 · Spacing Scale</div>
+    <div class="space-grid">
+      <div class="space-row"><span class="space-label">space-4</span><div class="space-bar-wrap"><div class="space-bar" style="width:4px;"></div></div><span class="space-val">4px</span></div>
+      <div class="space-row"><span class="space-label">space-6</span><div class="space-bar-wrap"><div class="space-bar" style="width:6px;"></div></div><span class="space-val">6px</span></div>
+      <div class="space-row"><span class="space-label">space-8</span><div class="space-bar-wrap"><div class="space-bar" style="width:8px;"></div></div><span class="space-val">8px</span></div>
+      <div class="space-row"><span class="space-label">space-12</span><div class="space-bar-wrap"><div class="space-bar" style="width:12px;"></div></div><span class="space-val">12px</span></div>
+      <div class="space-row"><span class="space-label">space-16</span><div class="space-bar-wrap"><div class="space-bar" style="width:16px;"></div></div><span class="space-val">16px</span></div>
+      <div class="space-row"><span class="space-label">space-20</span><div class="space-bar-wrap"><div class="space-bar" style="width:20px;"></div></div><span class="space-val">20px</span></div>
+      <div class="space-row"><span class="space-label">space-24</span><div class="space-bar-wrap"><div class="space-bar" style="width:24px;"></div></div><span class="space-val">24px · page gutter</span></div>
+      <div class="space-row"><span class="space-label">space-28</span><div class="space-bar-wrap"><div class="space-bar" style="width:28px;"></div></div><span class="space-val">28px</span></div>
+      <div class="space-row"><span class="space-label">space-32</span><div class="space-bar-wrap"><div class="space-bar" style="width:32px;"></div></div><span class="space-val">32px</span></div>
+      <div class="space-row"><span class="space-label">space-48</span><div class="space-bar-wrap"><div class="space-bar" style="width:48px;"></div></div><span class="space-val">48px</span></div>
+      <div class="space-row"><span class="space-label">space-52</span><div class="space-bar-wrap"><div class="space-bar" style="width:52px;"></div></div><span class="space-val">52px · topbar top</span></div>
+      <div class="space-row"><span class="space-label">space-100</span><div class="space-bar-wrap"><div class="space-bar" style="width:100px;"></div></div><span class="space-val">100px · bottom scroll safe</span></div>
+    </div>
+  </div>
+
+  <!-- COMPONENTS -->
+  <div class="chapter">
+    <div class="ch-head">04 · Components</div>
+    <div class="comp-grid">
+
+      <div class="comp-card">
+        <div class="comp-label">Section Label</div>
+        <div class="demo-sec-lbl">往期档案</div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-label">Archive Badge</div>
+        <div class="demo-badge">
+          <div class="demo-badge-n">42</div>
+          <div class="demo-badge-l">条记忆</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-label">Stamp · Pending</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div class="demo-stamp">PENDING</div>
+          <div class="demo-answered">已归档</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-label">Navigation Arrows</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="demo-arrow-wrap">
+            <div class="demo-arrow-text">写下今天</div>
+            <div class="demo-arrow"></div>
+          </div>
+          <div class="demo-back">
+            <div class="demo-back-line"></div>
+            返回
+          </div>
+        </div>
+      </div>
+
+      <div class="comp-card" style="grid-column:span 2;">
+        <div class="comp-label">Paper Card · 纸页卡片</div>
+        <div class="demo-paper">
+          <div class="demo-paper-text">「你生命中哪一段沉默，其实说了很多？」</div>
+          <div class="demo-divider"></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-light);letter-spacing:.1em;position:relative;z-index:1;">NO.0005 · 写下今天的答案 →</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-label">Memory Card · 记忆卡片</div>
+        <div class="demo-mem">
+          <div class="demo-mem-line"></div>
+          <div class="demo-mem-date">2024.04.20 · NO.0001</div>
+          <div class="demo-mem-q">「如果今天是你人生中的最后一天……」</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-label">Settings Item</div>
+        <div class="demo-si">
+          <div class="demo-si-body">
+            <div class="demo-si-t">外观设置</div>
+            <div class="demo-si-d">深色 · 周一开始</div>
+          </div>
+          <div class="demo-si-v">深色·中文</div>
+          <div class="demo-chevron"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EFFECTS -->
+  <div class="chapter">
+    <div class="ch-head">05 · Surface &amp; Effects</div>
+    <div class="effect-row">
+      <div class="eff-item">
+        <div class="eff-preview"><div class="grain-demo"></div></div>
+        <div class="eff-desc">
+          <span class="eff-name">Grain Overlay</span>
+          SVG feTurbulence · fractalNoise<br>baseFrequency 0.9 · 4 octaves<br>opacity 0.04 内层 + 0.6 外层
+        </div>
+      </div>
+      <div class="eff-item">
+        <div class="eff-preview" style="display:flex;flex-direction:column;justify-content:center;gap:8px;padding:4px 0;">
+          <div class="line-demo"></div>
+          <div class="line-demo-soft"></div>
+        </div>
+        <div class="eff-desc">
+          <span class="eff-name">Dividers</span>
+          line-strong #2A2520 · 主分割 / 边框<br>line-soft  #1E1B17 · 列表行间
+        </div>
+      </div>
+      <div class="eff-item">
+        <div class="eff-preview" style="display:flex;align-items:center;justify-content:center;">
+          <div style="width:48px;height:48px;background:var(--surface);border:1px solid var(--ls);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--muted);">我</span></div>
+        </div>
+        <div class="eff-desc">
+          <span class="eff-name">Paper Lines · 横格纸纹</span>
+          repeating-linear-gradient 每 27px<br>rgba(0,0,0,0.06) 1px 细线<br>仅用于 paper 背景卡片内
+        </div>
+      </div>
+      <div class="eff-item">
+        <div class="eff-preview" style="display:flex;align-items:center;justify-content:flex-start;padding-left:4px;">
+          <div style="position:relative;"><div style="width:0;height:2px;background:var(--gold);opacity:.4;position:absolute;top:0;left:0;right:0;"></div><div style="border:1px solid var(--ls);padding:10px 12px;"><div style="font-family:'Cormorant Garamond',serif;font-size:12px;font-style:italic;color:var(--muted);">一年前今天</div></div></div>
+        </div>
+        <div class="eff-desc">
+          <span class="eff-name">Gold Top Line · 金线</span>
+          position absolute · top 0<br>height 2px · background --gold<br>opacity 0.4 · memory card 专用
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTION -->
+  <div class="chapter">
+    <div class="ch-head">06 · Motion Tokens</div>
+    <table class="motion-table">
+      <tr><td>page-transition</td><td>opacity + translateX(24px)<br>duration 0.4s · cubic-bezier(0.4,0,0.2,1)</td></tr>
+      <tr><td>arrow-hover</td><td>width 24px → 32px · duration 0.2s ease</td></tr>
+      <tr><td>card-press</td><td>scale(0.99) on :active</td></tr>
+      <tr><td>stamp-in</td><td>rotate(-8deg)scale(1.3) → rotate(2deg)scale(0.95) → rotate(-2deg)scale(1)<br>duration 0.6s · cubic-bezier(0.2,0,0,1)</td></tr>
+      <tr><td>fade-up</td><td>opacity 0 + translateY(16px) → 1 + 0<br>duration 0.5s ease · stagger 0.4s / 0.6s / 0.8s</td></tr>
+      <tr><td>hover-opacity</td><td>list items → opacity 0.7 · duration 0.15s</td></tr>
+      <tr><td>border-color</td><td>memory card hover → --gold-dim · duration 0.2s</td></tr>
+    </table>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="chapter" style="margin-bottom:0;">
+    <div class="ch-head">07 · Layout Rules</div>
+    <table class="motion-table">
+      <tr><td>max-width</td><td>390px · mobile-first 单栏</td></tr>
+      <tr><td>page-gutter</td><td>24px 左右 · 所有区块统一</td></tr>
+      <tr><td>topbar-top</td><td>padding-top 52px · 为状态栏留空</td></tr>
+      <tr><td>bottom-safe</td><td>padding-bottom 100px · fixed nav 遮挡安全区</td></tr>
+      <tr><td>border-radius</td><td>0 · 全系统无圆角，直角切口</td></tr>
+      <tr><td>z-index grain</td><td>100 · 颗粒层永远浮于内容之上</td></tr>
+      <tr><td>z-index nav</td><td>10 · 底栏导航</td></tr>
+    </table>
+  </div>
+
+</div>

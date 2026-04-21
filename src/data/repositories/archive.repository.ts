@@ -4,6 +4,7 @@ export interface IArchiveRepository {
   saveQuestion(question: ArchiveQuestion): Promise<void>;
   getQuestionByDate(date: string): Promise<ArchiveQuestion | null>;
   answerToday(date: string, answer: string): Promise<ArchiveEntry>;
+  deleteByDate(date: string): Promise<void>;
   getByDate(date: string): Promise<ArchiveEntry | null>;
   listAnswered(): Promise<ArchiveEntry[]>;
   getOneYearAgo(date: string): Promise<ArchiveEntry | null>;

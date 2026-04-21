@@ -1,0 +1,73 @@
+<h2>深色模式最终壳层草案</h2>
+<p class="subtitle">参考 chisu-v2.jsx 页面设计；archives.jsx 只用于档案馆交互。底部 Tab 是暗色模式主壳，档案馆从首页今日一问进入。</p>
+
+<div class="mockup">
+  <div class="mockup-header">Dark Shell Route Plan · 优化跳转逻辑</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch;">
+      <div style="background:#0C0A08;color:#EAE2CE;border-radius:10px;border:1px solid #1E1A14;overflow:hidden;max-width:390px;margin:0 auto;font-family:'Noto Serif SC',serif;">
+        <div style="padding:52px 28px 92px;min-height:520px;">
+          <div style="font-family:serif;font-style:italic;font-size:12px;color:#564E42;letter-spacing:.1em;">二〇二六年四月二十一日 · 星期二</div>
+          <div style="font-size:48px;letter-spacing:.35em;margin-top:16px;">尺 素</div>
+          <div style="font-size:13px;line-height:1.9;color:#564E42;margin-top:14px;">把外界的纷乱关在门外<br>很高兴遇见你。</div>
+          <div style="height:1px;background:#1E1A14;margin:28px 0;"></div>
+          <div style="font-size:11px;color:#B8883A;letter-spacing:.18em;">今日一问 · 五分钟档案馆</div>
+          <div style="border:1px solid #1E1A14;border-left:2px solid #A83228;background:#131009;margin-top:12px;padding:18px;">
+            <div style="font-size:20px;line-height:1.55;">你今天最想把哪件事存进未来？</div>
+            <div style="font-size:11px;color:#564E42;margin-top:14px;">进入档案馆 →</div>
+          </div>
+          <div style="margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <div style="border:1px solid #1E1A14;padding:12px;text-align:center;color:#D4C9B0;">147<br><span style="font-size:10px;color:#564E42;">连续书写</span></div>
+            <div style="border:1px solid #1E1A14;padding:12px;text-align:center;color:#D4C9B0;">312<br><span style="font-size:10px;color:#564E42;">归档记忆</span></div>
+            <div style="border:1px solid #1E1A14;padding:12px;text-align:center;color:#D4C9B0;">2<br><span style="font-size:10px;color:#564E42;">待启信件</span></div>
+          </div>
+        </div>
+        <div style="height:72px;border-top:1px solid #1E1A14;background:#0C0A08;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;text-align:center;font-size:10px;color:#564E42;letter-spacing:.08em;">
+          <div style="color:#EAE2CE;">首页</div>
+          <div>随笔</div>
+          <div>致未来</div>
+          <div>邮箱</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:16px;background:#131009;color:#EAE2CE;">
+          <div class="label">Top-Level Tabs</div>
+          <p style="line-height:1.8;margin:8px 0 0;">首页 / 随笔 / 致未来 / 邮箱做成暗色主壳内部 Tab。切 Tab 不重建业务数据，只切换视图；需要打开编辑器、日历、阅读详情时再走现有页面路由。</p>
+        </div>
+        <div style="border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:16px;background:#131009;color:#EAE2CE;">
+          <div class="label">Archive Entry</div>
+          <p style="line-height:1.8;margin:8px 0 0;">首页“今日一问”卡片进入档案馆。档案馆是独立功能页：main / write / success / memory 四个状态，参考 archives.jsx。</p>
+        </div>
+        <div style="border:1px solid rgba(201,150,60,.32);border-radius:12px;padding:16px;background:rgba(184,136,58,.08);color:#EAE2CE;">
+          <div class="label">Jump Logic</div>
+          <p style="line-height:1.8;margin:8px 0 0;">暗色 Tab 内部切换保持轻；跨功能跳转保留 UniApp 路由。浅色模式继续使用原 HomePage 和原页面结构，不进入这个暗色壳。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve-shell" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>确认这个壳层方案</h3>
+      <p>底部 4 Tab 复刻 v2，档案馆从首页今日一问进入，深浅模式分流。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="archive-tab" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>档案馆也放进底部 Tab</h3>
+      <p>把底部导航改成 5 Tab：首页、档案馆、随笔、致未来、邮箱。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="route-only" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>不要内部 Tab 状态</h3>
+      <p>底部导航只做外观，所有点击都走独立页面路由。</p>
+    </div>
+  </div>
+</div>

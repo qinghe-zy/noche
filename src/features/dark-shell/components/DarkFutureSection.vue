@@ -86,8 +86,12 @@ onMounted(async () => {
 .dark-future__intro {
   margin-top: 28px;
   padding: 40px 24px;
-  border-top: 1px solid #1e1a14;
-  border-bottom: 1px solid #1e1a14;
+  border-top: 1px solid rgba(76, 63, 45, 0.82);
+  border-bottom: 1px solid rgba(76, 63, 45, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(201, 150, 60, 0.08),
+    inset 0 -1px 0 rgba(201, 150, 60, 0.08),
+    0 0 18px rgba(201, 150, 60, 0.08);
   text-align: center;
 }
 
@@ -111,8 +115,11 @@ onMounted(async () => {
 
 .dark-future__entry {
   margin-top: 18px;
-  border: 1px solid #1e1a14;
+  border: 1px solid rgba(76, 63, 45, 0.86);
   padding: 18px;
+  box-shadow:
+    inset 0 0 0 1px rgba(234, 226, 206, 0.03),
+    0 0 16px rgba(201, 150, 60, 0.08);
 }
 
 .dark-future__entry-head {

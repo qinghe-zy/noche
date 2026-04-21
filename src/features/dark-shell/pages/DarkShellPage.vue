@@ -1,6 +1,11 @@
 <template>
   <view class="dark-shell theme-dark">
-    <DarkTodaySection v-if="activeTab === 'today'" @open-archive="handleOpenArchive" />
+    <DarkTodaySection
+      v-if="activeTab === 'today'"
+      :welcome-content="welcomeContent"
+      @open-archive="handleOpenArchive"
+      @open-profile="handleOpenProfile"
+    />
     <DarkWritingSection v-else-if="activeTab === 'jotting'" />
     <DarkFutureSection v-else-if="activeTab === 'future'" />
     <DarkMailboxSection v-else />
@@ -38,10 +43,20 @@ const locale = computed(() => settingsStore.locale);
 const tabs = DARK_SHELL_TABS;
 const activeTab = ref<DarkShellTabId>("today");
 
+defineProps<{
+  welcomeContent?: string;
+}>();
+
 function handleOpenArchive(mode: "main" | "write") {
   const query = mode === "write" ? "?mode=write" : "";
   uni.navigateTo({
     url: `/${ROUTES.archive}${query}`,
+  });
+}
+
+function handleOpenProfile() {
+  uni.navigateTo({
+    url: `/${ROUTES.profile}`,
   });
 }
 </script>
@@ -54,8 +69,8 @@ function handleOpenArchive(mode: "main" | "write") {
 
 .dark-shell {
   height: 100vh;
-  background: #0c0a08;
-  color: #eae2ce;
+  background: var(--noche-shell-bg);
+  color: var(--noche-shell-text);
   display: flex;
   flex-direction: column;
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
@@ -70,14 +85,15 @@ function handleOpenArchive(mode: "main" | "write") {
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
   padding: 10px 0 calc(env(safe-area-inset-bottom, 0px) + 12px);
-  border-top: 1px solid #1e1a14;
-  background: #0c0a08;
+  border-top: 1px solid var(--noche-shell-line);
+  background: rgba(12, 10, 8, 0.94);
+  backdrop-filter: blur(14px);
 }
 
 .dark-shell__tab {
   border: none;
   background: transparent;
-  color: #564e42;
+  color: var(--noche-shell-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -85,7 +101,7 @@ function handleOpenArchive(mode: "main" | "write") {
 }
 
 .dark-shell__tab--active {
-  color: #eae2ce;
+  color: var(--noche-shell-text);
 }
 
 .dark-shell__tab-label {
@@ -97,6 +113,6 @@ function handleOpenArchive(mode: "main" | "write") {
   width: 4px;
   height: 4px;
   border-radius: 999px;
-  background: #a83228;
+  background: var(--noche-shell-accent-strong);
 }
 </style>

@@ -28,6 +28,33 @@ interface BootstrapPersistenceAdapters {
   demoEntries?: Entry[];
 }
 
+let runtimeReady = false;
+let runtimeReadyPromise: Promise<void>;
+let resolveRuntimeReady: (() => void) | null = null;
+
+function createRuntimeReadyPromise(): void {
+  runtimeReady = false;
+  runtimeReadyPromise = new Promise<void>((resolve) => {
+    resolveRuntimeReady = resolve;
+  });
+}
+
+function beginRuntimeBootstrap(): void {
+  runtimeReady = false;
+
+  if (!resolveRuntimeReady) {
+    createRuntimeReadyPromise();
+  }
+}
+
+function markRuntimeReady(): void {
+  runtimeReady = true;
+  resolveRuntimeReady?.();
+  resolveRuntimeReady = null;
+}
+
+createRuntimeReadyPromise();
+
 function shouldUseSQLitePersistence(): boolean {
   if (typeof plus !== "undefined" && Boolean(plus.sqlite)) {
     return true;
@@ -44,6 +71,7 @@ export async function bootstrapAppRuntime(
   pinia: Pinia,
   adapters: BootstrapPersistenceAdapters = {},
 ): Promise<void> {
+  beginRuntimeBootstrap();
   const storage = createUniJsonStorage();
   const storageDraftRepository = createStorageDraftRepository(storage);
   const storageEntryRepository = createStorageEntryRepository(storage, adapters.demoEntries ?? []);
@@ -107,4 +135,9 @@ export async function bootstrapAppRuntime(
   await settingsStore.hydrate();
   void prefetchRemoteHomeWelcomeCard(formatDate(new Date(), "YYYY-MM-DD"), settingsStore.locale);
   appStore.markReady();
+  markRuntimeReady();
+}
+
+export function waitForBootstrapAppRuntime(): Promise<void> {
+  return runtimeReady ? Promise.resolve() : runtimeReadyPromise;
 }

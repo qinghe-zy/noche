@@ -1,0 +1,60 @@
+<h2>暗色首页：日记入口放在哪里？</h2>
+<p class="subtitle">目标：保留“今日一问 · 档案馆”的主视觉，同时让“写日记”足够清晰、好点、不像临时塞进去。</p>
+
+<div class="cards">
+  <div class="card" data-choice="diary-secondary-action-row" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0C0A08;color:#EAE2CE;padding:18px;border-radius:8px;min-height:360px;font-family:'Noto Serif SC',serif;">
+      <div style="font-size:11px;color:#564E42;letter-spacing:.12em;">二〇二六年四月二十一日</div>
+      <div style="font-size:46px;letter-spacing:.32em;margin-top:14px;">尺 素</div>
+      <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+      <div style="font-size:10px;color:#B8883A;letter-spacing:.18em;">今日一问 · 五分钟档案馆</div>
+      <div style="border:1px solid #1E1A14;border-left:2px solid #A83228;background:#131009;margin-top:10px;padding:16px;">
+        <div style="font-size:19px;line-height:1.55;">你今天把什么悄悄留在了心里？</div>
+        <div style="font-size:11px;color:#564E42;margin-top:12px;">进入档案馆 →</div>
+      </div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="border:1px solid #1E1A14;background:#131009;padding:13px;text-align:center;color:#D4C9B0;">写日记</div>
+        <div style="border:1px solid #1E1A14;background:#131009;padding:13px;text-align:center;color:#564E42;">随笔</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 今日一问下方双按钮</h3>
+      <p>推荐。层级清楚：档案馆是主卡，日记入口是次级行动；不破坏 v2 的纵向叙事。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="diary-in-question-card" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0C0A08;color:#EAE2CE;padding:18px;border-radius:8px;min-height:360px;font-family:'Noto Serif SC',serif;">
+      <div style="font-size:46px;letter-spacing:.32em;">尺 素</div>
+      <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+      <div style="font-size:10px;color:#B8883A;letter-spacing:.18em;">今日</div>
+      <div style="border:1px solid #1E1A14;border-left:2px solid #A83228;background:#131009;margin-top:10px;padding:16px;">
+        <div style="font-size:19px;line-height:1.55;">你今天把什么悄悄留在了心里？</div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <div style="flex:1;border-top:1px solid #1E1A14;padding-top:10px;color:#B8883A;font-size:11px;">答一问</div>
+          <div style="flex:1;border-top:1px solid #1E1A14;padding-top:10px;color:#D4C9B0;font-size:11px;">写日记</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 合并进今日卡片</h3>
+      <p>行动最集中，但会让“档案馆问题”和“普通日记”语义混在一起，容易削弱每日一问仪式感。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="diary-bottom-fab" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0C0A08;color:#EAE2CE;padding:18px;border-radius:8px;min-height:360px;position:relative;font-family:'Noto Serif SC',serif;">
+      <div style="font-size:46px;letter-spacing:.32em;">尺 素</div>
+      <div style="height:1px;background:#1E1A14;margin:24px 0;"></div>
+      <div style="font-size:10px;color:#B8883A;letter-spacing:.18em;">今日一问 · 五分钟档案馆</div>
+      <div style="border:1px solid #1E1A14;border-left:2px solid #A83228;background:#131009;margin-top:10px;padding:16px;">
+        <div style="font-size:19px;line-height:1.55;">你今天把什么悄悄留在了心里？</div>
+      </div>
+      <div style="position:absolute;right:18px;bottom:18px;width:54px;height:54px;border-radius:50%;background:#A83228;color:#EAE2CE;display:flex;align-items:center;justify-content:center;font-size:22px;">筆</div>
+    </div>
+    <div class="card-body">
+      <h3>C · 右下角日记 FAB</h3>
+      <p>最明显，但会偏现代 App 操作感，和 chisu-v2 的克制、纸页式布局有一点冲突。</p>
+    </div>
+  </div>
+</div>

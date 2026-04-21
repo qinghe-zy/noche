@@ -49,4 +49,31 @@ describe("sqliteArchiveRepository", () => {
       }),
     ]));
   });
+
+  it("upserts archive questions so a test refresh can replace today's card", async () => {
+    const client = new FakeSQLiteClient();
+    const repository = createSQLiteArchiveRepository(client);
+
+    await repository.saveQuestion({
+      date: "2026-04-21",
+      question: "第二张测试问题？",
+      source: "remote",
+      createdAt: "2026-04-21T08:01:00.000Z",
+    });
+
+    expect(client.executed[0]?.sql).toContain("INSERT INTO");
+    expect(client.executed[0]?.sql).toContain("ON CONFLICT(date) DO UPDATE");
+  });
+
+  it("deletes an answered archive entry by date", async () => {
+    const client = new FakeSQLiteClient();
+    const repository = createSQLiteArchiveRepository(client);
+
+    await repository.deleteByDate("2026-04-21");
+
+    expect(client.executed[0]).toEqual(expect.objectContaining({
+      sql: expect.stringContaining("DELETE FROM archive_entries"),
+      params: ["2026-04-21"],
+    }));
+  });
 });

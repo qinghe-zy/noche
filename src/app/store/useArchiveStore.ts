@@ -1,16 +1,12 @@
 import { defineStore } from "pinia";
 import { getArchiveRepository } from "@/app/store/archiveRepository";
+import { createDeepSeekArchiveQuestionProvider } from "@/features/archive/archiveRemoteQuestionProvider";
 import {
   createArchiveQuestionResolver,
-  type ArchiveQuestionProvider,
 } from "@/features/archive/archiveQuestions";
 import type { ArchiveEntry, ArchiveQuestion } from "@/features/archive/types";
 
-const fallbackProvider: ArchiveQuestionProvider = {
-  async getQuestion() {
-    return null;
-  },
-};
+const archiveQuestionProvider = createDeepSeekArchiveQuestionProvider();
 
 export const useArchiveStore = defineStore("archive", {
   state: () => ({
@@ -46,15 +42,10 @@ export const useArchiveStore = defineStore("archive", {
             createdAt: existingEntry.createdAt,
           };
         } else {
-          const existingQuestion = await repository.getQuestionByDate(date);
-          if (existingQuestion) {
-            this.todayQuestion = existingQuestion;
-          } else {
-            const resolver = createArchiveQuestionResolver(fallbackProvider);
-            const nextQuestion = await resolver.resolve(date);
-            await repository.saveQuestion(nextQuestion);
-            this.todayQuestion = nextQuestion;
-          }
+          const resolver = createArchiveQuestionResolver(archiveQuestionProvider);
+          const nextQuestion = await resolver.resolve(date);
+          await repository.saveQuestion(nextQuestion);
+          this.todayQuestion = nextQuestion;
         }
 
         this.history = await repository.listAnswered();
@@ -81,6 +72,31 @@ export const useArchiveStore = defineStore("archive", {
         this.oneYearAgoEntry = await getArchiveRepository().getOneYearAgo(this.todayDate);
       } catch (error) {
         this.error = error instanceof Error ? error.message : "Failed to answer archive question.";
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async deleteArchiveEntry(date: string): Promise<void> {
+      this.isLoading = true;
+      this.error = null;
+
+      try {
+        const repository = getArchiveRepository();
+        await repository.deleteByDate(date);
+
+        if (date === this.todayDate) {
+          this.todayEntry = null;
+          this.todayQuestion = await repository.getQuestionByDate(date);
+        }
+
+        this.history = await repository.listAnswered();
+        this.oneYearAgoEntry = this.todayDate
+          ? await repository.getOneYearAgo(this.todayDate)
+          : null;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to delete archive entry.";
         throw error;
       } finally {
         this.isLoading = false;
