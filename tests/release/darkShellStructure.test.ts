@@ -12,4 +12,14 @@ describe("dark shell structure", () => {
     expect(symbolComponent).toContain("✉");
     expect(symbolComponent).toContain("▦");
   });
+
+  it("renders archive page states and chisu-style iconography", () => {
+    const archivePage = readFileSync("src/features/archive/pages/ArchivePage.vue", "utf8");
+
+    expect(archivePage).toContain("view === 'main'");
+    expect(archivePage).toContain("view === 'write'");
+    expect(archivePage).toContain("view === 'success'");
+    expect(archivePage).toContain("view === 'memory'");
+    expect(archivePage).toContain("ChisuSymbol");
+  });
 });
