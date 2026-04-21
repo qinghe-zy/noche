@@ -1,5 +1,6 @@
 <template>
-  <view class="home-page" :class="[themeClass, typographyClass]">
+  <DarkShellPage v-if="isDarkMode" />
+  <view v-else class="home-page" :class="[themeClass, typographyClass]">
     <view class="home-page__topnav">
       <view class="home-page__topnav-inner" :style="topnavInnerStyle">
         <view
@@ -207,7 +208,8 @@ import {
   type RemoteHomeWelcomeCardRecord,
 } from "@/features/home/homeWelcomeCardRemote";
 import { useEditorKeyboardViewport } from "@/features/editor/composables/useEditorKeyboardViewport";
-import { useThemeClass, useTypographyClass } from "@/shared/theme";
+import DarkShellPage from "@/features/dark-shell/pages/DarkShellPage.vue";
+import { resolveThemeMode, useThemeClass, useTypographyClass } from "@/shared/theme";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import { t } from "@/shared/i18n";
 
@@ -218,6 +220,7 @@ const draftStore = useDraftStore();
 const settingsStore = useSettingsStore();
 const themeClass = useThemeClass();
 const typographyClass = useTypographyClass();
+const isDarkMode = computed(() => resolveThemeMode(settingsStore.theme) === "dark");
 const { homeTop, homeBottomPadding, statusBarHeight, rpxToPx } = useEditorKeyboardViewport();
 const isJottingModalOpen = ref(false);
 const pendingJottingDraft = ref<Draft | null>(null);
