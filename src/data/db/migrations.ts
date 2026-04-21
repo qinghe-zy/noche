@@ -1,6 +1,7 @@
 import type { SQLiteClient } from "@/data/db/sqlite";
 import {
   ATTACHMENT_AND_STATS_SCHEMA_STATEMENTS,
+  ARCHIVE_SCHEMA_STATEMENTS,
   BASE_SCHEMA_STATEMENTS,
   LATEST_DB_VERSION,
   TABLES,
@@ -218,6 +219,13 @@ export async function migrateSQLiteSchema(client: SQLiteClient): Promise<void> {
     await backfillAttachmentTable(client);
     await rebuildProfileCaches(client);
     await setUserVersion(client, 3);
+    currentVersion = 3;
+  }
+
+  if (currentVersion < 4) {
+    await runStatements(client, ARCHIVE_SCHEMA_STATEMENTS);
+    currentVersion = 4;
+    await setUserVersion(client, 4);
   }
 }
 

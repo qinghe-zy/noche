@@ -5,11 +5,13 @@ export const TABLES = {
   attachments: "attachments",
   profileStatsCache: "profile_stats_cache",
   recordDateCounters: "record_date_counters",
+  archiveQuestions: "archive_questions",
+  archiveEntries: "archive_entries",
 } as const;
 
 export const SQLITE_DB_NAME = "noche";
 export const SQLITE_DB_PATH = "_doc/noche.db";
-export const LATEST_DB_VERSION = 3;
+export const LATEST_DB_VERSION = 4;
 
 export const BASE_SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS ${TABLES.entries} (
@@ -96,7 +98,29 @@ export const ATTACHMENT_AND_STATS_SCHEMA_STATEMENTS = [
     ON ${TABLES.attachments}(draft_slot_key, sort_order);`,
 ] as const;
 
+export const ARCHIVE_SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS ${TABLES.archiveQuestions} (
+    date TEXT PRIMARY KEY,
+    question TEXT NOT NULL,
+    source TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS ${TABLES.archiveEntries} (
+    date TEXT PRIMARY KEY,
+    id TEXT NOT NULL UNIQUE,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    question_source TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    answered_at TEXT
+  );`,
+  `CREATE INDEX IF NOT EXISTS idx_archive_entries_date
+    ON ${TABLES.archiveEntries}(date DESC);`,
+] as const;
+
 export const ALL_SCHEMA_STATEMENTS = [
   ...BASE_SCHEMA_STATEMENTS,
   ...ATTACHMENT_AND_STATS_SCHEMA_STATEMENTS,
+  ...ARCHIVE_SCHEMA_STATEMENTS,
 ] as const;
