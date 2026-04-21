@@ -25,6 +25,14 @@ export const useMailboxStore = defineStore("mailbox", {
     error: null,
   }),
   getters: {
+    mergedEntries(state): Entry[] {
+      return [
+        ...state.distantOpenedFutures,
+        ...state.distantPendingFutures,
+        ...state.documentaryDiaries,
+        ...state.documentaryJottings,
+      ];
+    },
     pastEntries(state): Entry[] {
       return [
         ...state.documentaryJottings,
