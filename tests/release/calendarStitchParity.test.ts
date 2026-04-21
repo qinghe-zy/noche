@@ -30,5 +30,24 @@ describe("calendar stitch parity", () => {
     expect(calendarPage).toContain("var(--surface-primary");
     expect(calendarPage).toContain("var(--font-heading)");
     expect(calendarPage).toContain("var(--accent-brand)");
+    expect(calendarPage).toContain("calendar-page--dark-shell");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell");
+    expect(calendarPage).toContain(".theme-dark .calendar-page__day--selected");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__paper-panel");
+    expect(calendarPage).toContain("border-color: rgba(214, 162, 77, 0.42);");
+  });
+
+  it("adds gold accents to each dark-shell mailbox history card instead of the outer mailbox shell", () => {
+    const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+
+    expect(calendarPage).not.toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox {");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item {");
+    expect(calendarPage).toContain("rgba(214, 162, 77, 0.42)");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-date");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-title");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-type");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-date");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-title");
+    expect(calendarPage).toContain("color: #d6a24d;");
   });
 });

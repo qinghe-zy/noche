@@ -81,7 +81,9 @@
     </view>
 
     <button class="dark-writing__fab" @tap="handleCompose">
-      <ChisuSymbol symbol="✦" tone="active" />
+      <view class="dark-writing__fab-icon">
+        <image class="dark-writing__fab-icon-image" :src="fabIconSource" mode="aspectFit" aria-hidden="true" />
+      </view>
     </button>
 
     <PaperConfirmDialog
@@ -103,7 +105,6 @@ import { useEntryStore } from "@/app/store/useEntryStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import type { Entry } from "@/domain/entry/types";
 import { fallbackEntryTitle } from "@/features/entries/entryDisplay";
-import ChisuSymbol from "@/features/dark-shell/components/ChisuSymbol.vue";
 import { ROUTES } from "@/shared/constants/routes";
 import { t } from "@/shared/i18n";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
@@ -117,6 +118,30 @@ const jottingEntries = ref<Entry[]>([]);
 const diaryEntries = ref<Entry[]>([]);
 const pendingDeleteEntry = ref<Entry | null>(null);
 const isDeleteDialogOpen = ref(false);
+
+function escapeSvg(value: string): string {
+  return encodeURIComponent(value)
+    .replace(/%20/g, " ")
+    .replace(/%3D/g, "=")
+    .replace(/%3A/g, ":")
+    .replace(/%2F/g, "/")
+    .replace(/%22/g, "'")
+    .replace(/%2C/g, ",")
+    .replace(/%3B/g, ";")
+    .replace(/%28/g, "(")
+    .replace(/%29/g, ")");
+}
+
+function buildGlyphDataUri(innerMarkup: string): string {
+  return `data:image/svg+xml;utf8,${escapeSvg(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">${innerMarkup}</svg>`,
+  )}`;
+}
+
+const fabIconSource = buildGlyphDataUri(`
+  <path d='M6.8 16.6L15.9 7.5L18.5 10.1L9.4 19.2H6.8V16.6Z' fill='#432c00' />
+  <path d='M15.1 6.7L16.7 5.1C17.1 4.7 17.7 4.7 18.1 5.1L20.9 7.9C21.3 8.3 21.3 8.9 20.9 9.3L19.3 10.9L15.1 6.7Z' fill='#432c00' />
+`);
 
 const visibleEntries = computed(() => activeMode.value === "jotting" ? jottingEntries.value : diaryEntries.value);
 const featuredEntry = computed(() => visibleEntries.value[0] ?? null);
@@ -604,13 +629,29 @@ onShow(() => {
 .dark-writing__fab {
   position: fixed;
   right: 28px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 82px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
   width: 56px;
   height: 56px;
   border: none;
-  background: #a83228;
+  border-radius: 0;
+  background: #f5bd5f;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.24);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.dark-writing__fab-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark-writing__fab-icon-image {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 </style>

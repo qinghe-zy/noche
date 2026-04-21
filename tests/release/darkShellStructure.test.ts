@@ -31,6 +31,11 @@ describe("dark shell structure", () => {
     expect(shellPage).toContain("DarkFutureSection");
     expect(shellPage).not.toContain("DarkMailboxSection");
     expect(shellPage).toContain("mode=write");
+    expect(shellPage).toContain("dark-shell__tab-icon");
+    expect(shellPage).toContain("dark-shell__tab-icon-image");
+    expect(shellPage).toContain("buildGlyphDataUri");
+    expect(shellPage).toContain("dark-shell__tab-active-line");
+    expect(shellPage).not.toContain("dark-shell__tab-dot");
   });
 
   it("passes the daily welcome copy into the dark today section", () => {
@@ -66,5 +71,11 @@ describe("dark shell structure", () => {
     expect(futureSection).toContain("openCalendar");
     expect(shellPage).toContain("handleTabTap");
     expect(shellPage).toContain("tabId === \"profile\"");
+    expect(writingSection).toContain("dark-writing__fab");
+    expect(writingSection).toContain("dark-writing__fab-icon");
+    expect(writingSection).toContain("dark-writing__fab-icon-image");
+    expect(writingSection).toContain("fabIconSource");
+    expect(writingSection).toContain("@tap=\"handleCompose\"");
+    expect(writingSection).not.toContain("<ChisuSymbol symbol=\"✦\"");
   });
 });

@@ -8,7 +8,7 @@
       </view>
     </view>
 
-    <component :is="bodyContainerTag" class="calendar-page__body" :scroll-y="shouldUnlockPageScroll">
+    <scroll-view scroll-y class="calendar-page__body">
       <view class="calendar-page__body-content">
         <view class="calendar-page__main">
           <view class="calendar-page__hero">
@@ -125,7 +125,7 @@
           </view>
         </view>
       </view>
-    </component>
+    </scroll-view>
 
     <PaperConfirmDialog
       :open="isLockedFutureDialogOpen"
@@ -273,8 +273,6 @@ const mailboxActionUrl = computed(() => {
   const targetDate = selectedDate.value ?? todayDateKey.value;
   return `${resolveH5AwareRouteUrl(ROUTES.editor)}?type=diary&recordDate=${targetDate}`;
 });
-const shouldUnlockPageScroll = computed(() => mailboxState.value.kind === "entries" && selectedEntries.value.length > 0);
-const bodyContainerTag = computed(() => (shouldUnlockPageScroll.value ? "scroll-view" : "view"));
 const topbarInnerStyle = computed(() => ({
   paddingTop: `${statusBarHeight.value + rpxToPx(32)}px`,
   paddingLeft: `${rpxToPx(32)}px`,
@@ -467,6 +465,42 @@ onShow(() => {
   display: flex;
   flex-direction: column;
   --calendar-accent-brand: var(--accent-brand);
+}
+
+.theme-dark.calendar-page--dark-shell {
+  background:
+    radial-gradient(circle at top left, rgba(184, 136, 58, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(168, 50, 40, 0.06), transparent 24%),
+    #0c0a08;
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__topbar,
+.theme-dark.calendar-page--dark-shell .calendar-page__paper-panel {
+  background: #131009;
+  border-color: rgba(214, 162, 77, 0.42);
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__hero-subtitle,
+.theme-dark.calendar-page--dark-shell .calendar-page__banner,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-body,
+.theme-dark.calendar-page--dark-shell .calendar-page__status-text,
+.theme-dark.calendar-page--dark-shell .calendar-page__legend-text,
+.theme-dark.calendar-page--dark-shell .calendar-page__weekday {
+  color: #564e42;
+}
+
+.theme-dark .calendar-page__day--selected .calendar-page__day-number {
+  color: #0c0a08;
+}
+
+.theme-dark .calendar-page__day--selected .calendar-page__day-inner::before {
+  background: #eae2ce;
+  opacity: 0.96;
+}
+
+.theme-dark .calendar-page__marker,
+.theme-dark .calendar-page__legend-dot {
+  background: #a83228;
 }
 
 .calendar-page__body {
@@ -773,6 +807,14 @@ onShow(() => {
   box-shadow: var(--button-pill-shadow, var(--button-secondary-shadow, none));
 }
 
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-action {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  min-height: 0;
+  padding: 0;
+}
+
 .calendar-page__day-mailbox-list {
   display: flex;
   flex-direction: column;
@@ -788,6 +830,12 @@ onShow(() => {
   border: 1px solid var(--border-subtle, var(--noche-border));
   text-align: center;
   border-radius: 2px;
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item {
+  border-color: rgba(214, 162, 77, 0.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 162, 77, 0.08);
 }
 
 .calendar-page__day-mailbox-item-head {
@@ -812,6 +860,14 @@ onShow(() => {
   color: var(--text-tertiary, var(--noche-muted));
   padding-left: 0.14em;
   text-transform: uppercase;
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-date,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-title,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-type,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-date,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-item-title {
+  color: #d6a24d;
 }
 
 .calendar-page__day-mailbox-item-prelude {

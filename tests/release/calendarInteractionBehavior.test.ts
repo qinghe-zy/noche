@@ -27,13 +27,12 @@ describe("calendar interaction behavior", () => {
     expect(calendarPage).toContain("calendar-page__day-mailbox-item-prelude");
   });
 
-  it("unlocks the calendar body scroll as soon as the day mailbox has entries", () => {
+  it("keeps the calendar body scrollable instead of locking the page to a single viewport", () => {
     const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
 
-    expect(calendarPage).toContain("shouldUnlockPageScroll");
-    expect(calendarPage).toContain("bodyContainerTag");
-    expect(calendarPage).toContain("mailboxState.value.kind === \"entries\"");
-    expect(calendarPage).toContain("<component :is=\"bodyContainerTag\"");
+    expect(calendarPage).toContain("<scroll-view scroll-y class=\"calendar-page__body\">");
+    expect(calendarPage).not.toContain("shouldUnlockPageScroll");
+    expect(calendarPage).not.toContain("bodyContainerTag");
     expect(calendarPage).not.toContain("max-height: 280px;");
     expect(calendarPage).not.toContain("overflow-y: auto;");
   });
@@ -46,7 +45,8 @@ describe("calendar interaction behavior", () => {
     expect(calendarPage).toContain("deleteDialogActions");
     expect(calendarPage).toContain(".calendar-page__day--today .calendar-page__day-number");
     expect(calendarPage).toContain("font-size: 20px;");
-    expect(calendarPage).toContain(".calendar-page__marker {\n  position: absolute;");
+    expect(calendarPage).toContain(".calendar-page__marker {");
+    expect(calendarPage).toContain("position: absolute;");
   });
 
   it("uses a navigator-based CTA for the empty day mailbox action instead of relying on a plain button click only", () => {
@@ -55,6 +55,11 @@ describe("calendar interaction behavior", () => {
     expect(calendarPage).toContain("mailboxActionUrl");
     expect(calendarPage).toContain("<navigator");
     expect(calendarPage).toContain(":url=\"mailboxActionUrl\"");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-action");
+    expect(calendarPage).toContain("border: none;");
+    expect(calendarPage).toContain("background: transparent;");
+    expect(calendarPage).toContain("border-radius: 0;");
+    expect(calendarPage).toContain("padding: 0;");
     expect(calendarPage).not.toContain("<button");
   });
 
