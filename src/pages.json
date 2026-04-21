@@ -44,6 +44,13 @@
       }
     },
     {
+      "path": "features/archive/pages/ArchivePage",
+      "style": {
+        "navigationStyle": "custom",
+        "disableScroll": true
+      }
+    },
+    {
       "path": "features/profile/pages/ProfilePage",
       "style": {
         "navigationStyle": "custom"

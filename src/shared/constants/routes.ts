@@ -5,6 +5,7 @@ export const ROUTES = {
   mailbox: "features/mailbox/pages/MailboxPage",
   calendar: "features/calendar/pages/CalendarPage",
   dayArchive: "features/day-archive/pages/DayArchivePage",
+  archive: "features/archive/pages/ArchivePage",
   profile: "features/profile/pages/ProfilePage",
   profileAlbum: "features/profile/pages/ProfileAlbumPage",
 } as const;
