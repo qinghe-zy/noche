@@ -83,7 +83,7 @@
             :time-label="headerTimeLabel"
             :status="diaryPreludeStatus"
             :prelude="diaryPrelude"
-            :show-glyphs="false"
+            :show-glyphs="showEditablePreludeGlyphs"
             @edit="$emit('edit-diary-prelude')"
           />
         </view>
@@ -94,7 +94,7 @@
       <view class="diary-shell-edit">
         <scroll-view
           class="diary-shell-edit__scroll"
-          :scroll-y="!isEditShellScrollLocked && editCanShellScroll"
+          :scroll-y="editCanShellScroll"
           :scroll-top="editScrollTopBinding"
           :scroll-with-animation="scrollWithAnimation"
           @scroll="onEditShellScroll"
@@ -223,7 +223,7 @@
             :time-label="headerTimeLabel"
             :status="diaryPreludeStatus"
             :prelude="diaryPrelude"
-            :show-glyphs="false"
+            :show-glyphs="showEditablePreludeGlyphs"
             @edit="$emit('edit-diary-prelude')"
           />
         </view>
@@ -442,6 +442,7 @@ const collapseDistance = computed(() => Math.max(expandedHeaderHeight.value, 1))
 const showCompactPreludeIcons = computed(() =>
   shouldRenderDiaryPreludeHeaderMeta(props.diaryPreludeStatus, props.diaryPrelude),
 );
+const showEditablePreludeGlyphs = computed(() => props.mode === "edit");
 const showCollapsedTitleRow = computed(() =>
   Boolean(props.title) || showCompactPreludeIcons.value,
 );
@@ -479,7 +480,7 @@ const readCollapseProgress = computed(() =>
   }),
 );
 
-const isEditShellScrollLocked = computed(() => keyboardVisible.value);
+const isEditCollapseLocked = computed(() => keyboardVisible.value);
 const editScrollTopBinding = computed(() => editProgrammaticScrollTop.value);
 
 const metaFadeProgress = computed(() =>
@@ -823,7 +824,7 @@ function onEditShellScroll(event: Event): void {
     editProgrammaticScrollTop.value = undefined;
   }
 
-  if (!isEditShellScrollLocked.value) {
+  if (!isEditCollapseLocked.value) {
     editUserScrollTop.value = editShellScrollTop.value;
     editCollapseProgress.value = resolveJottingCollapseProgress({
       effectiveCollapseScroll: editUserScrollTop.value,
@@ -1486,5 +1487,74 @@ watch(bodyViewportHeight, () => {
 .diary-shell-read__bottom-pad,
 .diary-shell-edit__bottom-pad {
   height: 96rpx;
+}
+
+.theme-dark.diary-editor-shell {
+  --diary-paper-base: linear-gradient(180deg, rgba(24, 20, 16, 0.985), rgba(18, 14, 11, 0.985));
+  --diary-paper-ink: #f0e8d5;
+  --diary-paper-ink-soft: #e2d8c0;
+  --diary-paper-muted: rgba(196, 181, 152, 0.78);
+  --diary-paper-muted-soft: rgba(143, 125, 98, 0.88);
+  --diary-paper-line: rgba(240, 232, 213, 0.065);
+  --diary-paper-border: rgba(76, 63, 45, 0.62);
+  --diary-paper-panel: rgba(34, 28, 21, 0.84);
+  --diary-paper-shadow: rgba(0, 0, 0, 0.28);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__grain {
+  opacity: 0.028;
+  background: linear-gradient(to bottom, rgba(12, 10, 8, 0.16), rgba(12, 10, 8, 0.04));
+}
+
+.theme-dark.diary-editor-shell .diary-shell-read__paper,
+.theme-dark.diary-editor-shell .diary-shell-edit__paper {
+  position: relative;
+  overflow: hidden;
+  background: var(--diary-paper-base);
+  box-shadow:
+    inset 0 1px 0 rgba(240, 232, 213, 0.04),
+    inset 0 0 0 1rpx var(--diary-paper-border),
+    0 18rpx 44rpx var(--diary-paper-shadow);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__textarea,
+.theme-dark.diary-editor-shell .diary-shell-read__content {
+  color: var(--diary-paper-ink);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__title-input,
+.theme-dark.diary-editor-shell .diary-shell-read__date,
+.theme-dark.diary-editor-shell .diary-shell-edit__date,
+.theme-dark.diary-editor-shell .diary-shell-read__title,
+.theme-dark.diary-editor-shell .diary-shell-edit__title-display,
+.theme-dark.diary-editor-shell .diary-editor-shell__icon-button,
+.theme-dark.diary-editor-shell .diary-editor-shell__topbar-svg {
+  color: var(--diary-paper-ink);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__title-placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__inline-placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__placeholder,
+.theme-dark.diary-editor-shell .diary-editor-shell__saved-hint,
+.theme-dark.diary-editor-shell .diary-editor-shell__continue-button,
+.theme-dark.diary-editor-shell .diary-editor-shell__meta-image-button {
+  color: var(--diary-paper-muted);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-card {
+  background: var(--diary-paper-panel);
+  box-shadow: inset 0 0 0 1rpx rgba(240, 232, 213, 0.04);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-remove {
+  background: rgba(22, 18, 14, 0.9);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__attachment-remove-svg {
+  color: var(--diary-paper-ink-soft);
+}
+
+.theme-dark.diary-editor-shell .diary-editor-shell__notice {
+  color: rgba(232, 186, 176, 0.88);
 }
 </style>

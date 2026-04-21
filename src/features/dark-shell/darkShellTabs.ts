@@ -1,4 +1,4 @@
-export type DarkShellTabId = "today" | "jotting" | "future" | "mailbox";
+export type DarkShellTabId = "today" | "jotting" | "future" | "profile";
 
 export interface DarkShellTab {
   id: DarkShellTabId;
@@ -11,7 +11,7 @@ export const DARK_SHELL_TABS: DarkShellTab[] = [
   { id: "today", labelZh: "今日", labelEn: "Today", symbol: "◎" },
   { id: "jotting", labelZh: "随笔", labelEn: "Jotting", symbol: "✒" },
   { id: "future", labelZh: "致未来", labelEn: "Future", symbol: "✉" },
-  { id: "mailbox", labelZh: "邮箱", labelEn: "Mailbox", symbol: "◫" },
+  { id: "profile", labelZh: "个人", labelEn: "Profile", symbol: "◫" },
 ];
 
 export function getDarkShellTabById(id: DarkShellTabId): DarkShellTab {

@@ -2,7 +2,7 @@
   <scroll-view class="dark-today" scroll-y>
     <view class="dark-today__inner">
       <text class="dark-today__date">{{ displayDate }}</text>
-      <text class="dark-today__title">{{ homeHeroTitle }}</text>
+      <text class="dark-today__title" :style="titleStyle">{{ homeHeroTitle }}</text>
       <text class="dark-today__subtitle">{{ subtitle }}</text>
 
       <view class="dark-today__divider">
@@ -29,38 +29,23 @@
           <text class="dark-today__stat-label">{{ item.label }}</text>
         </view>
       </view>
-
-      <view class="dark-today__section-head dark-today__section-head--secondary">
-        <text class="dark-today__section-label">最近随笔</text>
-        <view class="dark-today__section-line"></view>
-      </view>
-
-      <view
-        v-for="entry in recentJottings"
-        :key="entry.id"
-        class="dark-today__entry"
-        @tap="handleOpenEntry(entry.id)"
-      >
-        <text class="dark-today__entry-date">{{ formatDate(entry.recordDate, 'DD') }}</text>
-        <view class="dark-today__entry-copy">
-          <text class="dark-today__entry-title">{{ entry.title || '未命名随笔' }}</text>
-          <text class="dark-today__entry-preview">{{ formatPreview(entry.content) }}</text>
-        </view>
-      </view>
     </view>
   </scroll-view>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { waitForBootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime";
 import { useArchiveStore } from "@/app/store/useArchiveStore";
 import { getEntryRepository } from "@/app/store/entryRepository";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
-import { ROUTES } from "@/shared/constants/routes";
 import { t } from "@/shared/i18n";
 import { formatDate } from "@/shared/utils/date";
-import type { Entry } from "@/domain/entry/types";
+
+const props = defineProps<{
+  welcomeContent?: string;
+}>();
 
 const emit = defineEmits<{
   (event: "open-archive", mode: "main" | "write"): void;
@@ -70,7 +55,6 @@ const settingsStore = useSettingsStore();
 const archiveStore = useArchiveStore();
 const copy = computed(() => t(settingsStore.locale));
 const todayDate = computed(() => formatDate(new Date(), "YYYY-MM-DD"));
-const recentJottings = ref<Entry[]>([]);
 const recordedDays = ref(0);
 const pendingFutureCount = ref(0);
 
@@ -82,7 +66,47 @@ const homeHeroTitle = computed(() => resolveHomeHeroTitle({
   titleMode: settingsStore.homeTitleMode,
   customTitle: settingsStore.homeCustomTitle,
 }));
-const subtitle = computed(() => copy.value.home.heroSubtitle);
+const titleLength = computed(() => Array.from(homeHeroTitle.value.trim()).length || 1);
+const titleStyle = computed(() => {
+  if (titleLength.value <= 2) {
+    return {
+      fontSize: "58px",
+      letterSpacing: "0.64em",
+      paddingLeft: "0.64em",
+    };
+  }
+
+  if (titleLength.value === 3) {
+    return {
+      fontSize: "50px",
+      letterSpacing: "0.34em",
+      paddingLeft: "0.34em",
+    };
+  }
+
+  if (titleLength.value === 4) {
+    return {
+      fontSize: "42px",
+      letterSpacing: "0.18em",
+      paddingLeft: "0.18em",
+    };
+  }
+
+  if (titleLength.value === 5) {
+    return {
+      fontSize: "36px",
+      letterSpacing: "0.08em",
+      paddingLeft: "0.08em",
+    };
+  }
+
+  return {
+    fontSize: "32px",
+    letterSpacing: "0.04em",
+    paddingLeft: "0.04em",
+  };
+});
+const subtitle = computed(() => props.welcomeContent?.trim() || copy.value.home.heroSubtitle);
 const todayQuestion = computed(() => archiveStore.todayQuestion?.question ?? "今天你最想留下什么？");
 const streakText = computed(() => `第${Math.max(recordedDays.value, 1)}天`);
 const stats = computed(() => ([
@@ -91,30 +115,19 @@ const stats = computed(() => ([
   { value: String(pendingFutureCount.value), label: "待开封信件" },
 ]));
 
-function formatPreview(content: string): string {
-  return content.length > 46 ? `${content.slice(0, 46)}…` : content;
-}
-
 function openArchive() {
   emit("open-archive", archiveStore.hasAnsweredToday ? "main" : "write");
 }
 
-function handleOpenEntry(entryId: string) {
-  uni.navigateTo({
-    url: `/${ROUTES.editor}?mode=read&entryId=${entryId}`,
-  });
-}
-
 async function loadTodayData(): Promise<void> {
+  await waitForBootstrapAppRuntime();
   await archiveStore.resolveTodayQuestion(todayDate.value);
 
-  const [jottings, statsSnapshot, futures] = await Promise.all([
-    getEntryRepository().getByType("jotting"),
+  const [statsSnapshot, futures] = await Promise.all([
     getEntryRepository().getProfileStats(),
     getEntryRepository().getByType("future"),
   ]);
 
-  recentJottings.value = jottings.slice(0, 4);
   recordedDays.value = statsSnapshot.recordedDays;
   pendingFutureCount.value = futures.filter((entry) => entry.status === "sealed").length;
 }
@@ -146,11 +159,11 @@ onMounted(() => {
 .dark-today__title {
   display: block;
   margin-top: 22px;
-  font-size: 58px;
+  max-width: 100%;
   line-height: 1.05;
   font-weight: 300;
-  letter-spacing: 0.64em;
-  padding-left: 0.64em;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .dark-today__subtitle {
@@ -187,14 +200,9 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.dark-today__section-head--secondary {
-  margin-top: 36px;
-}
-
 .dark-today__section-label,
 .dark-today__question-action,
-.dark-today__stat-label,
-.dark-today__entry-date {
+.dark-today__stat-label {
   font-size: 12px;
   line-height: 1.6;
   color: #b8883a;
@@ -205,6 +213,10 @@ onMounted(() => {
   border-left: 2px solid #a83228;
   background: #131009;
   padding: 22px 22px 20px;
+  box-shadow:
+    0 0 0 1px rgba(201, 150, 60, 0.06),
+    0 18px 34px rgba(0, 0, 0, 0.28),
+    0 0 16px rgba(168, 50, 40, 0.12);
 }
 
 .dark-today__question {
@@ -230,6 +242,9 @@ onMounted(() => {
   border: 1px solid #1e1a14;
   background: #0c0a08;
   padding: 16px 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(234, 226, 206, 0.03),
+    0 0 14px rgba(201, 150, 60, 0.08);
 }
 
 .dark-today__stat-value {
@@ -237,34 +252,5 @@ onMounted(() => {
   font-size: 30px;
   line-height: 1.2;
   color: #d4c9b0;
-}
-
-.dark-today__entry {
-  display: flex;
-  gap: 20px;
-  padding: 24px 0;
-  border-bottom: 1px solid #1e1a14;
-}
-
-.dark-today__entry-date {
-  width: 40px;
-}
-
-.dark-today__entry-copy {
-  flex: 1;
-}
-
-.dark-today__entry-title {
-  display: block;
-  font-size: 20px;
-  line-height: 1.5;
-}
-
-.dark-today__entry-preview {
-  display: block;
-  margin-top: 12px;
-  font-size: 14px;
-  line-height: 1.9;
-  color: #564e42;
 }
 </style>

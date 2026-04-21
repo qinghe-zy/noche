@@ -96,4 +96,12 @@ describe("editor stitch parity", () => {
     expect(preludePicker).toContain("var(--button-option-active-bg");
     expect(preludePicker).toContain("var(--button-primary-bg");
   });
+
+  it("keeps the dark diary shell free of ruled lines and gold wash overlays", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+
+    expect(diaryShell).not.toContain("background-image: repeating-linear-gradient(");
+    expect(diaryShell).not.toContain("radial-gradient(circle at 16% 12%");
+    expect(diaryShell).not.toContain("radial-gradient(circle at 84% 8%");
+  });
 });

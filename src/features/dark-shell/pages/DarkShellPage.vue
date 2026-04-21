@@ -1,9 +1,12 @@
 <template>
   <view class="dark-shell theme-dark">
-    <DarkTodaySection v-if="activeTab === 'today'" @open-archive="handleOpenArchive" />
+    <DarkTodaySection
+      v-if="activeTab === 'today'"
+      :welcome-content="welcomeContent"
+      @open-archive="handleOpenArchive"
+    />
     <DarkWritingSection v-else-if="activeTab === 'jotting'" />
     <DarkFutureSection v-else-if="activeTab === 'future'" />
-    <DarkMailboxSection v-else />
 
     <view class="dark-shell__tabs">
       <button
@@ -11,7 +14,7 @@
         :key="tab.id"
         class="dark-shell__tab"
         :class="{ 'dark-shell__tab--active': activeTab === tab.id }"
-        @tap="activeTab = tab.id"
+        @tap="handleTabTap(tab.id)"
       >
         <ChisuSymbol :symbol="tab.symbol" :tone="activeTab === tab.id ? 'active' : 'muted'" />
         <text class="dark-shell__tab-label">{{ locale === 'en-US' ? tab.labelEn : tab.labelZh }}</text>
@@ -27,7 +30,6 @@ import { ROUTES } from "@/shared/constants/routes";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import type { DarkShellTabId } from "@/features/dark-shell/darkShellTabs";
 import DarkFutureSection from "@/features/dark-shell/components/DarkFutureSection.vue";
-import DarkMailboxSection from "@/features/dark-shell/components/DarkMailboxSection.vue";
 import DarkTodaySection from "@/features/dark-shell/components/DarkTodaySection.vue";
 import DarkWritingSection from "@/features/dark-shell/components/DarkWritingSection.vue";
 import { DARK_SHELL_TABS } from "@/features/dark-shell/darkShellTabs";
@@ -38,11 +40,26 @@ const locale = computed(() => settingsStore.locale);
 const tabs = DARK_SHELL_TABS;
 const activeTab = ref<DarkShellTabId>("today");
 
+defineProps<{
+  welcomeContent?: string;
+}>();
+
 function handleOpenArchive(mode: "main" | "write") {
   const query = mode === "write" ? "?mode=write" : "";
   uni.navigateTo({
     url: `/${ROUTES.archive}${query}`,
   });
+}
+
+function handleTabTap(tabId: DarkShellTabId) {
+  if (tabId === "profile") {
+    uni.navigateTo({
+      url: `/${ROUTES.profile}`,
+    });
+    return;
+  }
+
+  activeTab.value = tabId;
 }
 </script>
 

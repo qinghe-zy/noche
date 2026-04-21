@@ -103,22 +103,34 @@ function handleInput(event: Event): void {
   justify-content: center;
   padding: 20px 16px;
   background: var(--noche-overlay);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .paper-input-dialog {
   width: min(100%, 420px);
-  background: var(--surface-primary, var(--noche-surface));
-  border: 1px solid var(--border-subtle, var(--noche-border));
-  border-radius: 24px;
-  box-shadow: var(--shadow-whisper, 0 18px 40px rgba(44, 46, 42, 0.12));
+  position: relative;
+  background: var(--noche-dialog-surface);
+  border: 1px solid var(--noche-dialog-border);
+  border-radius: 26px;
+  box-shadow: var(--noche-dialog-shadow);
   overflow: hidden;
   color: var(--text-primary, var(--noche-text));
   font-family: var(--font-body, inherit);
 }
 
+.paper-input-dialog::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 14px;
+  height: 1px;
+  background: var(--noche-dialog-label);
+  opacity: 0.65;
+}
+
 .paper-input-dialog__head {
-  padding: 24px 22px 12px;
+  padding: 32px 22px 14px;
   text-align: center;
 }
 
@@ -126,7 +138,7 @@ function handleInput(event: Event): void {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--text-primary, var(--noche-text));
+  color: var(--noche-dialog-title);
   font-family: var(--font-heading, inherit);
 }
 
@@ -135,31 +147,30 @@ function handleInput(event: Event): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--noche-dialog-copy);
 }
 
 .paper-input-dialog__body {
-  padding: 0 22px 20px;
+  padding: 0 22px 18px;
 }
 
 .paper-input-dialog__textarea {
   width: 100%;
   min-height: 110px;
-  padding: 16px 0;
-  background: transparent;
-  border: none;
-  border-top: 1px solid var(--border-subtle, var(--noche-border));
-  border-bottom: 1px solid var(--border-subtle, var(--noche-border));
+  padding: 18px 16px;
+  background: var(--noche-dialog-paper);
+  border: 1px solid var(--noche-dialog-border);
+  border-radius: 16px;
   font-size: 16px;
   line-height: 1.75;
-  color: var(--text-primary, var(--noche-text));
+  color: var(--noche-dialog-paper-ink);
   font-family: var(--font-body, inherit);
 }
 
 .paper-input-dialog__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--border-subtle, var(--noche-border));
+  border-top: 1px solid var(--noche-dialog-border-soft);
 }
 
 .paper-input-dialog__action {
@@ -167,35 +178,21 @@ function handleInput(event: Event): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--button-radius, 18px);
-  margin: 10px;
 }
 
 .paper-input-dialog__action + .paper-input-dialog__action {
-  border-left: none;
+  border-left: 1px solid var(--noche-dialog-border-soft);
 }
 
 .paper-input-dialog__action-text {
   font-size: 16px;
   line-height: 1.4;
-  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
+  color: var(--noche-dialog-copy);
   font-family: var(--font-body, inherit);
 }
 
 .paper-input-dialog__action-text--primary {
-  color: var(--button-primary-text, var(--text-primary, var(--noche-text)));
-}
-
-.paper-input-dialog__action--muted {
-  background: var(--button-secondary-bg, transparent);
-  border: 1px solid var(--button-secondary-border, var(--border-subtle, var(--noche-border)));
-  box-shadow: var(--button-secondary-shadow, none);
-}
-
-.paper-input-dialog__action--primary {
-  background: var(--button-primary-bg, var(--text-primary, var(--noche-text)));
-  border: 1px solid var(--button-primary-border, transparent);
-  box-shadow: var(--button-primary-shadow, none);
+  color: var(--noche-dialog-title);
 }
 
 .type-scale-small .paper-input-dialog__title { font-size: 21px; }

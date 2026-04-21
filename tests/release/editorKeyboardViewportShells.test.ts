@@ -7,7 +7,7 @@ function readProjectFile(relativePath: string): string {
 }
 
 describe("editor keyboard viewport shells", () => {
-  it("gives diary editor the same collapsing read and edit shell pattern while freezing collapse during keyboard editing", () => {
+  it("keeps diary editor manually scrollable while the keyboard is open and only freezes collapse progress", () => {
     const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
     const editorPage = readProjectFile("src/features/editor/pages/EditorPage.vue");
 
@@ -18,10 +18,10 @@ describe("editor keyboard viewport shells", () => {
     expect(diaryShell).toContain("diary-shell-edit__scroll");
     expect(diaryShell).toContain("diary-shell-edit__overlay");
     expect(diaryShell).toContain("resolveJottingCollapseProgress");
-    expect(diaryShell).toContain("const isEditShellScrollLocked = computed(() => keyboardVisible.value);");
-    expect(diaryShell).toContain(":scroll-y=\"!isEditShellScrollLocked && editCanShellScroll\"");
+    expect(diaryShell).toContain("const isEditCollapseLocked = computed(() => keyboardVisible.value);");
+    expect(diaryShell).toContain(":scroll-y=\"editCanShellScroll\"");
     expect(diaryShell).toContain("editCollapseProgress.value = resolveJottingCollapseProgress({");
-    expect(diaryShell).toContain("if (!isEditShellScrollLocked.value) {");
+    expect(diaryShell).toContain("if (!isEditCollapseLocked.value) {");
     expect(diaryShell).toContain("visibleWindowHeight");
     expect(diaryShell).toContain("resolveInteractiveLayerHeight");
     expect(diaryShell).not.toContain("diary-editor-shell__fixed-layer");

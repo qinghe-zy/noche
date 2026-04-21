@@ -1,5 +1,5 @@
 <template>
-  <DarkShellPage v-if="isDarkMode" />
+  <DarkShellPage v-if="isDarkMode" :welcome-content="activeWelcomeCard.content" />
   <view v-else class="home-page" :class="[themeClass, typographyClass]">
     <view class="home-page__topnav">
       <view class="home-page__topnav-inner" :style="topnavInnerStyle">

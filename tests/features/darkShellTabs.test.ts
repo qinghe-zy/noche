@@ -7,14 +7,14 @@ describe("darkShellTabs", () => {
       "today",
       "jotting",
       "future",
-      "mailbox",
+      "profile",
     ]);
     expect(DARK_SHELL_TABS.map((tab) => tab.symbol)).toEqual(["◎", "✒", "✉", "◫"]);
   });
 
-  it("returns the mailbox tab definition by id", () => {
-    expect(getDarkShellTabById("mailbox")).toMatchObject({
-      id: "mailbox",
+  it("returns the profile tab definition by id", () => {
+    expect(getDarkShellTabById("profile")).toMatchObject({
+      id: "profile",
       symbol: "◫",
     });
   });

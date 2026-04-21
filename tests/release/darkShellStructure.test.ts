@@ -29,7 +29,42 @@ describe("dark shell structure", () => {
     expect(shellPage).toContain("DarkTodaySection");
     expect(shellPage).toContain("DarkWritingSection");
     expect(shellPage).toContain("DarkFutureSection");
-    expect(shellPage).toContain("DarkMailboxSection");
+    expect(shellPage).not.toContain("DarkMailboxSection");
     expect(shellPage).toContain("mode=write");
+  });
+
+  it("passes the daily welcome copy into the dark today section", () => {
+    const homePage = readFileSync("src/features/home/pages/HomePage.vue", "utf8");
+    const shellPage = readFileSync("src/features/dark-shell/pages/DarkShellPage.vue", "utf8");
+    const todaySection = readFileSync("src/features/dark-shell/components/DarkTodaySection.vue", "utf8");
+
+    expect(homePage).toContain(":welcome-content=\"activeWelcomeCard.content\"");
+    expect(shellPage).toContain("welcomeContent");
+    expect(todaySection).toContain("props.welcomeContent?.trim()");
+    expect(todaySection).not.toContain("profile-entry");
+  });
+
+  it("removes the recent jotting block from the dark today section", () => {
+    const todaySection = readFileSync("src/features/dark-shell/components/DarkTodaySection.vue", "utf8");
+
+    expect(todaySection).not.toContain("最近随笔");
+    expect(todaySection).not.toContain("recentJottings");
+    expect(todaySection).not.toContain("dark-today__entry");
+  });
+
+  it("wires long-press deletion into the dark writing list and moves calendar access into future", () => {
+    const writingSection = readFileSync("src/features/dark-shell/components/DarkWritingSection.vue", "utf8");
+    const futureSection = readFileSync("src/features/dark-shell/components/DarkFutureSection.vue", "utf8");
+    const shellPage = readFileSync("src/features/dark-shell/pages/DarkShellPage.vue", "utf8");
+
+    expect(writingSection).toContain("@longpress.stop=\"handleRequestDeleteEntry(featuredEntry)\"");
+    expect(writingSection).toContain("@longpress.stop=\"handleRequestDeleteEntry(entry)\"");
+    expect(writingSection).toContain("PaperConfirmDialog");
+    expect(writingSection).toContain("entryStore.destroyEntry");
+    expect(futureSection).toContain("TopbarIconButton");
+    expect(futureSection).toContain("icon-name=\"calendar\"");
+    expect(futureSection).toContain("openCalendar");
+    expect(shellPage).toContain("handleTabTap");
+    expect(shellPage).toContain("tabId === \"profile\"");
   });
 });

@@ -84,16 +84,17 @@ function handleMaskClose(): void {
   justify-content: center;
   padding: 24px 16px 28px;
   background: var(--noche-overlay);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .paper-option-sheet {
   width: min(100%, 420px);
   max-height: calc(100vh - 56px);
-  background: var(--surface-primary, var(--noche-surface));
-  border: 1px solid var(--border-subtle, var(--noche-border));
-  border-radius: 24px;
-  box-shadow: var(--shadow-whisper, 0 18px 40px rgba(44, 46, 42, 0.12));
+  position: relative;
+  background: var(--noche-dialog-surface);
+  border: 1px solid var(--noche-dialog-border);
+  border-radius: 26px;
+  box-shadow: var(--noche-dialog-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -101,10 +102,21 @@ function handleMaskClose(): void {
   font-family: var(--font-body, inherit);
 }
 
+.paper-option-sheet::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 14px;
+  height: 1px;
+  background: var(--noche-dialog-label);
+  opacity: 0.65;
+}
+
 .paper-option-sheet__head {
-  padding: 24px 22px 14px;
+  padding: 32px 22px 14px;
   text-align: center;
-  border-bottom: 1px solid var(--noche-border);
+  border-bottom: 1px solid var(--noche-dialog-border-soft);
   flex-shrink: 0;
 }
 
@@ -112,7 +124,7 @@ function handleMaskClose(): void {
   display: block;
   font-size: 22px;
   line-height: 1.35;
-  color: var(--text-primary, var(--noche-text));
+  color: var(--noche-dialog-title);
   font-family: var(--font-heading, inherit);
 }
 
@@ -121,7 +133,7 @@ function handleMaskClose(): void {
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.75;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--noche-dialog-copy);
 }
 
 .paper-option-sheet__options {
@@ -137,14 +149,10 @@ function handleMaskClose(): void {
   justify-content: space-between;
   gap: 14px;
   padding: 20px 22px;
-  border-radius: var(--button-radius, 18px);
-  margin: 8px 12px 0;
-  background: var(--button-ghost-bg, transparent);
-  border: 1px solid var(--button-ghost-border, transparent);
 }
 
 .paper-option-sheet__option + .paper-option-sheet__option {
-  border-top: none;
+  border-top: 1px solid var(--noche-dialog-border-soft);
 }
 
 .paper-option-sheet__option-copy {
@@ -158,27 +166,27 @@ function handleMaskClose(): void {
 .paper-option-sheet__option-title {
   font-size: 17px;
   line-height: 1.45;
-  color: var(--text-primary, var(--noche-text));
+  color: var(--noche-dialog-title);
 }
 
 .paper-option-sheet__option-copy-text {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--noche-dialog-copy);
 }
 
 .paper-option-sheet__option--danger .paper-option-sheet__option-title {
-  color: var(--button-danger-text, #8a3d3a);
+  color: var(--noche-dialog-danger);
 }
 
 .paper-option-sheet__option-icon {
   width: 16px;
   height: 16px;
-  color: var(--text-secondary, var(--noche-muted));
+  color: var(--noche-dialog-copy);
 }
 
 .paper-option-sheet__footer {
-  border-top: 1px solid var(--noche-border);
+  border-top: 1px solid var(--noche-dialog-border-soft);
   padding: 16px 22px 18px;
   display: flex;
   align-items: center;
@@ -189,12 +197,7 @@ function handleMaskClose(): void {
 .paper-option-sheet__footer-text {
   font-size: 15px;
   line-height: 1.4;
-  color: var(--button-secondary-text, var(--text-secondary, var(--noche-muted)));
-  background: var(--button-secondary-bg, transparent);
-  border: 1px solid var(--button-secondary-border, transparent);
-  border-radius: var(--button-pill-radius, 999px);
-  box-shadow: var(--button-secondary-shadow, none);
-  padding: 10px 18px;
+  color: var(--noche-dialog-copy);
 }
 
 .type-scale-small .paper-option-sheet__title { font-size: 21px; }
