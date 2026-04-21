@@ -1,11 +1,9 @@
 <template>
   <view class="dark-shell theme-dark">
-    <view class="dark-shell__body">
-      <view class="dark-shell__placeholder">
-        <text class="dark-shell__title">尺 素</text>
-        <text class="dark-shell__subtitle">Dark shell in progress</text>
-      </view>
-    </view>
+    <DarkTodaySection v-if="activeTab === 'today'" @open-archive="handleOpenArchive" />
+    <DarkWritingSection v-else-if="activeTab === 'jotting'" />
+    <DarkFutureSection v-else-if="activeTab === 'future'" />
+    <DarkMailboxSection v-else />
 
     <view class="dark-shell__tabs">
       <button
@@ -25,8 +23,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { ROUTES } from "@/shared/constants/routes";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import type { DarkShellTabId } from "@/features/dark-shell/darkShellTabs";
+import DarkFutureSection from "@/features/dark-shell/components/DarkFutureSection.vue";
+import DarkMailboxSection from "@/features/dark-shell/components/DarkMailboxSection.vue";
+import DarkTodaySection from "@/features/dark-shell/components/DarkTodaySection.vue";
+import DarkWritingSection from "@/features/dark-shell/components/DarkWritingSection.vue";
 import { DARK_SHELL_TABS } from "@/features/dark-shell/darkShellTabs";
 import ChisuSymbol from "@/features/dark-shell/components/ChisuSymbol.vue";
 
@@ -34,6 +37,13 @@ const settingsStore = useSettingsStore();
 const locale = computed(() => settingsStore.locale);
 const tabs = DARK_SHELL_TABS;
 const activeTab = ref<DarkShellTabId>("today");
+
+function handleOpenArchive(mode: "main" | "write") {
+  const query = mode === "write" ? "?mode=write" : "";
+  uni.navigateTo({
+    url: `/${ROUTES.archive}${query}`,
+  });
+}
 </script>
 
 <style scoped>
@@ -43,45 +53,12 @@ const activeTab = ref<DarkShellTabId>("today");
 }
 
 .dark-shell {
-  min-height: 100vh;
+  height: 100vh;
   background: #0c0a08;
   color: #eae2ce;
   display: flex;
   flex-direction: column;
   font-family: "Noto Serif SC", "Source Han Serif SC", serif;
-}
-
-.dark-shell__body {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 28px 96px;
-}
-
-.dark-shell__placeholder {
-  width: 100%;
-  max-width: 390px;
-  border: 1px solid #1e1a14;
-  padding: 32px 24px;
-  background: #131009;
-  text-align: center;
-}
-
-.dark-shell__title {
-  display: block;
-  font-size: 52px;
-  line-height: 1.08;
-  letter-spacing: 0.26em;
-  padding-left: 0.26em;
-}
-
-.dark-shell__subtitle {
-  display: block;
-  margin-top: 14px;
-  font-size: 14px;
-  line-height: 1.8;
-  color: #564e42;
 }
 
 .dark-shell__tabs {

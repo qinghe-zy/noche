@@ -22,4 +22,14 @@ describe("dark shell structure", () => {
     expect(archivePage).toContain("view === 'memory'");
     expect(archivePage).toContain("ChisuSymbol");
   });
+
+  it("wires the dark shell sections instead of the placeholder scaffold", () => {
+    const shellPage = readFileSync("src/features/dark-shell/pages/DarkShellPage.vue", "utf8");
+
+    expect(shellPage).toContain("DarkTodaySection");
+    expect(shellPage).toContain("DarkWritingSection");
+    expect(shellPage).toContain("DarkFutureSection");
+    expect(shellPage).toContain("DarkMailboxSection");
+    expect(shellPage).toContain("mode=write");
+  });
 });
