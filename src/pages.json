@@ -46,8 +46,7 @@
     {
       "path": "features/archive/pages/ArchivePage",
       "style": {
-        "navigationStyle": "custom",
-        "disableScroll": true
+        "navigationStyle": "custom"
       }
     },
     {
