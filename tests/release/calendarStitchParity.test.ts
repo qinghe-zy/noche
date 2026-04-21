@@ -23,4 +23,12 @@ describe("calendar stitch parity", () => {
     expect(calendarPage).toContain("AppIcon");
     expect(calendarPage).toContain("statusBarHeight.value + rpxToPx(32)");
   });
+
+  it("includes a dark-shell class branch without changing the calendar scaffold", () => {
+    const calendarPage = readProjectFile("src/features/calendar/pages/CalendarPage.vue");
+
+    expect(calendarPage).toContain("calendar-page--dark-shell");
+    expect(calendarPage).toContain(".theme-dark.calendar-page--dark-shell");
+    expect(calendarPage).toContain(".theme-dark .calendar-page__day--selected");
+  });
 });

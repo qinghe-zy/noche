@@ -1,5 +1,5 @@
 <template>
-  <view class="calendar-page" :class="[themeClass, typographyClass]">
+  <view class="calendar-page" :class="[themeClass, typographyClass, { 'calendar-page--dark-shell': themeClass === 'theme-dark' }]">
     <view class="calendar-page__topbar">
       <view class="calendar-page__topbar-inner" :style="topbarInnerStyle">
         <TopbarIconButton @tap="handleBackToMailbox" />
@@ -463,6 +463,43 @@ onShow(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.theme-dark.calendar-page--dark-shell {
+  background:
+    radial-gradient(circle at top left, rgba(184, 136, 58, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(168, 50, 40, 0.06), transparent 24%),
+    #0c0a08;
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__topbar,
+.theme-dark.calendar-page--dark-shell .calendar-page__paper-panel {
+  background: #131009;
+  border-color: #1e1a14;
+}
+
+.theme-dark.calendar-page--dark-shell .calendar-page__hero-subtitle,
+.theme-dark.calendar-page--dark-shell .calendar-page__banner,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-body,
+.theme-dark.calendar-page--dark-shell .calendar-page__status-text,
+.theme-dark.calendar-page--dark-shell .calendar-page__legend-text,
+.theme-dark.calendar-page--dark-shell .calendar-page__day-mailbox-date,
+.theme-dark.calendar-page--dark-shell .calendar-page__weekday {
+  color: #564e42;
+}
+
+.theme-dark .calendar-page__day--selected .calendar-page__day-number {
+  color: #0c0a08;
+}
+
+.theme-dark .calendar-page__day--selected .calendar-page__day-inner::before {
+  background: #eae2ce;
+  opacity: 0.96;
+}
+
+.theme-dark .calendar-page__marker,
+.theme-dark .calendar-page__legend-dot {
+  background: #a83228;
 }
 
 .calendar-page__body {
