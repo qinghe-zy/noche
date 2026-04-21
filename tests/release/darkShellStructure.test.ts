@@ -29,7 +29,7 @@ describe("dark shell structure", () => {
     expect(shellPage).toContain("DarkTodaySection");
     expect(shellPage).toContain("DarkWritingSection");
     expect(shellPage).toContain("DarkFutureSection");
-    expect(shellPage).toContain("DarkMailboxSection");
+    expect(shellPage).not.toContain("DarkMailboxSection");
     expect(shellPage).toContain("mode=write");
   });
 
@@ -41,25 +41,30 @@ describe("dark shell structure", () => {
     expect(homePage).toContain(":welcome-content=\"activeWelcomeCard.content\"");
     expect(shellPage).toContain("welcomeContent");
     expect(todaySection).toContain("props.welcomeContent?.trim()");
+    expect(todaySection).not.toContain("profile-entry");
   });
 
-  it("keeps the recent jotting block in the dark today section", () => {
+  it("removes the recent jotting block from the dark today section", () => {
     const todaySection = readFileSync("src/features/dark-shell/components/DarkTodaySection.vue", "utf8");
 
-    expect(todaySection).toContain("最近随笔");
-    expect(todaySection).toContain("recentJottings");
-    expect(todaySection).toContain("dark-today__entry");
+    expect(todaySection).not.toContain("最近随笔");
+    expect(todaySection).not.toContain("recentJottings");
+    expect(todaySection).not.toContain("dark-today__entry");
   });
 
-  it("does not wire long-press deletion into dark writing and mailbox lists yet", () => {
+  it("wires long-press deletion into the dark writing list and moves calendar access into future", () => {
     const writingSection = readFileSync("src/features/dark-shell/components/DarkWritingSection.vue", "utf8");
-    const mailboxSection = readFileSync("src/features/dark-shell/components/DarkMailboxSection.vue", "utf8");
+    const futureSection = readFileSync("src/features/dark-shell/components/DarkFutureSection.vue", "utf8");
+    const shellPage = readFileSync("src/features/dark-shell/pages/DarkShellPage.vue", "utf8");
 
-    expect(writingSection).not.toContain("@longpress.stop=\"handleRequestDeleteEntry(entry)\"");
-    expect(mailboxSection).not.toContain("@longpress.stop=\"handleRequestDeleteEntry(entry)\"");
-    expect(writingSection).not.toContain("PaperConfirmDialog");
-    expect(mailboxSection).not.toContain("PaperConfirmDialog");
-    expect(writingSection).not.toContain("entryStore.destroyEntry");
-    expect(mailboxSection).not.toContain("entryStore.destroyEntry");
+    expect(writingSection).toContain("@longpress.stop=\"handleRequestDeleteEntry(featuredEntry)\"");
+    expect(writingSection).toContain("@longpress.stop=\"handleRequestDeleteEntry(entry)\"");
+    expect(writingSection).toContain("PaperConfirmDialog");
+    expect(writingSection).toContain("entryStore.destroyEntry");
+    expect(futureSection).toContain("TopbarIconButton");
+    expect(futureSection).toContain("icon-name=\"calendar\"");
+    expect(futureSection).toContain("openCalendar");
+    expect(shellPage).toContain("handleTabTap");
+    expect(shellPage).toContain("tabId === \"profile\"");
   });
 });

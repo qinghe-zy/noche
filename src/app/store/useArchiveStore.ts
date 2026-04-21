@@ -42,10 +42,16 @@ export const useArchiveStore = defineStore("archive", {
             createdAt: existingEntry.createdAt,
           };
         } else {
-          const resolver = createArchiveQuestionResolver(archiveQuestionProvider);
-          const nextQuestion = await resolver.resolve(date);
-          await repository.saveQuestion(nextQuestion);
-          this.todayQuestion = nextQuestion;
+          const existingQuestion = await repository.getQuestionByDate(date);
+
+          if (existingQuestion) {
+            this.todayQuestion = existingQuestion;
+          } else {
+            const resolver = createArchiveQuestionResolver(archiveQuestionProvider);
+            const nextQuestion = await resolver.resolve(date);
+            await repository.saveQuestion(nextQuestion);
+            this.todayQuestion = nextQuestion;
+          }
         }
 
         this.history = await repository.listAnswered();

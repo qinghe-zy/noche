@@ -33,6 +33,17 @@ const resolvedTypographyClass = useTypographyClass();
   --noche-shell-accent-strong: #a83228;
   --noche-shell-shadow: rgba(49, 51, 46, 0.12);
   --noche-shell-glow: rgba(255, 255, 255, 0.82);
+  --noche-dialog-surface: rgba(252, 248, 241, 0.98);
+  --noche-dialog-surface-strong: #ffffff;
+  --noche-dialog-border: rgba(221, 212, 200, 0.72);
+  --noche-dialog-border-soft: rgba(221, 212, 200, 0.44);
+  --noche-dialog-title: #31332e;
+  --noche-dialog-copy: rgba(99, 95, 85, 0.8);
+  --noche-dialog-label: #8c6e2f;
+  --noche-dialog-paper: #fffdf8;
+  --noche-dialog-paper-ink: #31332e;
+  --noche-dialog-danger: #8a3d3a;
+  --noche-dialog-shadow: 0 18px 40px rgba(44, 46, 42, 0.12);
   --noche-type-scale: 1;
   background: var(--noche-bg);
   color: var(--noche-text);
@@ -58,6 +69,19 @@ const resolvedTypographyClass = useTypographyClass();
   --noche-shell-accent-strong: #a83228;
   --noche-shell-shadow: rgba(0, 0, 0, 0.32);
   --noche-shell-glow: rgba(234, 226, 206, 0.08);
+  --noche-dialog-surface: #1c1915;
+  --noche-dialog-surface-strong: #141210;
+  --noche-dialog-border: #2a2520;
+  --noche-dialog-border-soft: #1e1b17;
+  --noche-dialog-title: #f0e8d5;
+  --noche-dialog-copy: #6b5e48;
+  --noche-dialog-label: #8a6828;
+  --noche-dialog-paper: #f0e8d5;
+  --noche-dialog-paper-ink: #1e1a14;
+  --noche-dialog-danger: #8b2020;
+  --noche-dialog-shadow:
+    0 0 0 1px rgba(201, 150, 60, 0.06),
+    0 32px 60px rgba(0, 0, 0, 0.46);
 }
 
 .type-scale-small {

@@ -63,4 +63,13 @@ describe("diary editor stitch parity", () => {
     expect(headerMeta).toContain("variant?: \"default\" | \"compact-icons\"");
     expect(headerMeta).toContain("props.variant === \"compact-icons\"");
   });
+
+  it("keeps diary prelude glyphs visible and editable in edit mode instead of hiding them behind plain copy", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+
+    expect(diaryShell).toContain("const showEditablePreludeGlyphs = computed(() => props.mode === \"edit\");");
+    expect(diaryShell).toContain(":show-glyphs=\"showEditablePreludeGlyphs\"");
+    expect(diaryShell).toContain("@edit=\"$emit('edit-diary-prelude')\"");
+    expect(diaryShell).not.toContain(":show-glyphs=\"false\"");
+  });
 });

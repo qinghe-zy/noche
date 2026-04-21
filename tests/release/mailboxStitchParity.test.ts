@@ -21,6 +21,9 @@ describe("mailbox stitch parity", () => {
 
     expect(mailboxPage).toContain("TopbarIconButton");
     expect(mailboxPage).toContain("statusBarHeight.value + rpxToPx(32)");
+    expect(mailboxPage).toContain("navigateBackOrFallback");
+    expect(mailboxPage).toContain("fallbackUrl: `/${ROUTES.home}`");
+    expect(mailboxPage).not.toContain("function handleGoHome() {\n  uni.reLaunch");
     expect(mailboxPage).not.toContain(">edit_square<");
     expect(mailboxPage).not.toContain(">auto_stories<");
   });

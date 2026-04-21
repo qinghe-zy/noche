@@ -1,8 +1,13 @@
 <template>
   <scroll-view class="dark-future" scroll-y>
     <view class="dark-future__inner">
-      <text class="dark-future__eyebrow">Letters to Future Self</text>
-      <text class="dark-future__title">致未来</text>
+      <view class="dark-future__theme-bar">
+        <text class="dark-future__eyebrow">Letters to Future Self</text>
+        <view class="dark-future__head">
+          <text class="dark-future__title">致未来</text>
+          <TopbarIconButton icon-name="calendar" @tap="openCalendar" />
+        </view>
+      </view>
 
       <view class="dark-future__intro" @tap="openFutureEditor">
         <ChisuSymbol symbol="✉" tone="muted" class="dark-future__intro-icon" />
@@ -28,10 +33,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { getEntryRepository } from "@/app/store/entryRepository";
 import type { Entry } from "@/domain/entry/types";
 import ChisuSymbol from "@/features/dark-shell/components/ChisuSymbol.vue";
 import { ROUTES } from "@/shared/constants/routes";
+import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 
 const futureEntries = ref<Entry[]>([]);
 
@@ -45,14 +52,28 @@ function openFutureEditor() {
   });
 }
 
+function openCalendar() {
+  uni.navigateTo({
+    url: `/${ROUTES.calendar}`,
+  });
+}
+
 function handleOpenEntry(entryId: string) {
   uni.navigateTo({
     url: `/${ROUTES.editor}?mode=read&entryId=${entryId}`,
   });
 }
 
-onMounted(async () => {
+async function loadFutureEntries(): Promise<void> {
   futureEntries.value = await getEntryRepository().getByType("future");
+}
+
+onMounted(async () => {
+  await loadFutureEntries();
+});
+
+onShow(() => {
+  void loadFutureEntries();
 });
 </script>
 
@@ -75,22 +96,29 @@ onMounted(async () => {
   color: #564e42;
 }
 
+.dark-future__theme-bar {
+  padding: 0;
+}
+
 .dark-future__title {
-  display: block;
-  margin-top: 18px;
   font-size: 42px;
   line-height: 1.08;
   letter-spacing: 0.18em;
 }
 
+.dark-future__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
 .dark-future__intro {
   margin-top: 28px;
   padding: 40px 24px;
-  border-top: 1px solid rgba(76, 63, 45, 0.82);
-  border-bottom: 1px solid rgba(76, 63, 45, 0.82);
+  border: 1px solid rgba(201, 150, 60, 0.58);
   box-shadow:
-    inset 0 1px 0 rgba(201, 150, 60, 0.08),
-    inset 0 -1px 0 rgba(201, 150, 60, 0.08),
+    inset 0 0 0 1px rgba(201, 150, 60, 0.08),
     0 0 18px rgba(201, 150, 60, 0.08);
   text-align: center;
 }
@@ -103,6 +131,7 @@ onMounted(async () => {
   display: block;
   margin-top: 16px;
   font-size: 24px;
+  color: #c9963c;
 }
 
 .dark-future__intro-copy {
@@ -110,15 +139,15 @@ onMounted(async () => {
   margin-top: 12px;
   font-size: 14px;
   line-height: 1.9;
-  color: #564e42;
+  color: rgba(201, 150, 60, 0.86);
 }
 
 .dark-future__entry {
   margin-top: 18px;
-  border: 1px solid rgba(76, 63, 45, 0.86);
+  border: 1px solid rgba(201, 150, 60, 0.58);
   padding: 18px;
   box-shadow:
-    inset 0 0 0 1px rgba(234, 226, 206, 0.03),
+    inset 0 0 0 1px rgba(201, 150, 60, 0.08),
     0 0 16px rgba(201, 150, 60, 0.08);
 }
 

@@ -75,4 +75,12 @@ describe("editor stitch parity", () => {
     expect(futureShell).toContain(".theme-dark .editor-page__paper-surface");
     expect(futureShell).toContain(".theme-dark .editor-page__future-ribbon");
   });
+
+  it("keeps the dark diary shell free of ruled lines and gold wash overlays", () => {
+    const diaryShell = readProjectFile("src/features/editor/components/DiaryEditorShell.vue");
+
+    expect(diaryShell).not.toContain("background-image: repeating-linear-gradient(");
+    expect(diaryShell).not.toContain("radial-gradient(circle at 16% 12%");
+    expect(diaryShell).not.toContain("radial-gradient(circle at 84% 8%");
+  });
 });

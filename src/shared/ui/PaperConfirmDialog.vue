@@ -72,25 +72,37 @@ function handleMaskClose(): void {
   justify-content: center;
   padding: 24px 16px 28px;
   background: var(--noche-overlay);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .paper-confirm-dialog {
   width: min(100%, 420px);
   max-height: calc(100vh - 56px);
-  background: var(--noche-surface);
-  border: 1px solid var(--noche-border);
-  border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(44, 46, 42, 0.14);
+  position: relative;
+  background: var(--noche-dialog-surface);
+  border: 1px solid var(--noche-dialog-border);
+  border-radius: 26px;
+  box-shadow: var(--noche-dialog-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+.paper-confirm-dialog::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 14px;
+  height: 1px;
+  background: var(--noche-dialog-label);
+  opacity: 0.65;
+}
+
 .paper-confirm-dialog__head {
-  padding: 26px 24px 18px;
+  padding: 32px 24px 18px;
   text-align: center;
-  border-bottom: 1px solid var(--noche-border);
+  border-bottom: 1px solid var(--noche-dialog-border-soft);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -99,7 +111,7 @@ function handleMaskClose(): void {
   display: block;
   font-size: 24px;
   line-height: 1.35;
-  color: var(--noche-text);
+  color: var(--noche-dialog-title);
 }
 
 .paper-confirm-dialog__copy {
@@ -107,7 +119,7 @@ function handleMaskClose(): void {
   margin-top: 10px;
   font-size: 13px;
   line-height: 1.8;
-  color: var(--noche-muted);
+  color: var(--noche-dialog-copy);
 }
 
 .paper-confirm-dialog__actions {
@@ -123,31 +135,31 @@ function handleMaskClose(): void {
   gap: 6px;
   align-items: center;
   text-align: center;
-  background: transparent;
+  background: var(--noche-dialog-surface);
 }
 
 .paper-confirm-dialog__action + .paper-confirm-dialog__action {
-  border-top: 1px solid var(--noche-border);
+  border-top: 1px solid var(--noche-dialog-border-soft);
 }
 
 .paper-confirm-dialog__action-title {
   font-size: 18px;
   line-height: 1.4;
-  color: var(--noche-text);
+  color: var(--noche-dialog-title);
 }
 
 .paper-confirm-dialog__action-copy {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--noche-muted);
+  color: var(--noche-dialog-copy);
 }
 
 .paper-confirm-dialog__action--muted .paper-confirm-dialog__action-title {
-  color: var(--noche-muted);
+  color: var(--noche-dialog-copy);
 }
 
 .paper-confirm-dialog__action--danger .paper-confirm-dialog__action-title {
-  color: #8a3d3a;
+  color: var(--noche-dialog-danger);
 }
 
 .type-scale-small .paper-confirm-dialog__title { font-size: 23px; }

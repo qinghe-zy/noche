@@ -83,7 +83,7 @@
             :time-label="headerTimeLabel"
             :status="diaryPreludeStatus"
             :prelude="diaryPrelude"
-            :show-glyphs="false"
+            :show-glyphs="showEditablePreludeGlyphs"
             @edit="$emit('edit-diary-prelude')"
           />
         </view>
@@ -94,7 +94,7 @@
       <view class="diary-shell-edit">
         <scroll-view
           class="diary-shell-edit__scroll"
-          :scroll-y="!isEditShellScrollLocked && editCanShellScroll"
+          :scroll-y="editCanShellScroll"
           :scroll-top="editScrollTopBinding"
           :scroll-with-animation="scrollWithAnimation"
           @scroll="onEditShellScroll"
@@ -223,7 +223,7 @@
             :time-label="headerTimeLabel"
             :status="diaryPreludeStatus"
             :prelude="diaryPrelude"
-            :show-glyphs="false"
+            :show-glyphs="showEditablePreludeGlyphs"
             @edit="$emit('edit-diary-prelude')"
           />
         </view>
@@ -442,6 +442,7 @@ const collapseDistance = computed(() => Math.max(expandedHeaderHeight.value, 1))
 const showCompactPreludeIcons = computed(() =>
   shouldRenderDiaryPreludeHeaderMeta(props.diaryPreludeStatus, props.diaryPrelude),
 );
+const showEditablePreludeGlyphs = computed(() => props.mode === "edit");
 const showCollapsedTitleRow = computed(() =>
   Boolean(props.title) || showCompactPreludeIcons.value,
 );
@@ -479,7 +480,7 @@ const readCollapseProgress = computed(() =>
   }),
 );
 
-const isEditShellScrollLocked = computed(() => keyboardVisible.value);
+const isEditCollapseLocked = computed(() => keyboardVisible.value);
 const editScrollTopBinding = computed(() => editProgrammaticScrollTop.value);
 
 const metaFadeProgress = computed(() =>
@@ -823,7 +824,7 @@ function onEditShellScroll(event: Event): void {
     editProgrammaticScrollTop.value = undefined;
   }
 
-  if (!isEditShellScrollLocked.value) {
+  if (!isEditCollapseLocked.value) {
     editUserScrollTop.value = editShellScrollTop.value;
     editCollapseProgress.value = resolveJottingCollapseProgress({
       effectiveCollapseScroll: editUserScrollTop.value,
@@ -1469,22 +1470,15 @@ watch(bodyViewportHeight, () => {
 }
 
 .theme-dark.diary-editor-shell .diary-editor-shell__grain {
-  opacity: 0.055;
-  background:
-    radial-gradient(circle at 18% 10%, rgba(201, 150, 60, 0.08), transparent 18%),
-    radial-gradient(circle at 84% 14%, rgba(226, 216, 192, 0.05), transparent 20%),
-    linear-gradient(to bottom, rgba(12, 10, 8, 0.24), rgba(12, 10, 8, 0.08));
+  opacity: 0.028;
+  background: linear-gradient(to bottom, rgba(12, 10, 8, 0.16), rgba(12, 10, 8, 0.04));
 }
 
 .theme-dark.diary-editor-shell .diary-shell-read__paper,
 .theme-dark.diary-editor-shell .diary-shell-edit__paper {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 16% 12%, rgba(201, 150, 60, 0.08), transparent 18%),
-    radial-gradient(circle at 84% 8%, rgba(240, 232, 213, 0.045), transparent 24%),
-    linear-gradient(180deg, rgba(240, 232, 213, 0.025), rgba(240, 232, 213, 0)),
-    var(--diary-paper-base);
+  background: var(--diary-paper-base);
   box-shadow:
     inset 0 1px 0 rgba(240, 232, 213, 0.04),
     inset 0 0 0 1rpx var(--diary-paper-border),
@@ -1493,16 +1487,6 @@ watch(bodyViewportHeight, () => {
 
 .theme-dark.diary-editor-shell .diary-editor-shell__textarea,
 .theme-dark.diary-editor-shell .diary-shell-read__content {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent calc(var(--diary-writing-line-height, 40px) - 6px),
-    var(--diary-paper-line) calc(var(--diary-writing-line-height, 40px) - 6px),
-    var(--diary-paper-line) calc(var(--diary-writing-line-height, 40px) - 4px),
-    transparent calc(var(--diary-writing-line-height, 40px) - 4px),
-    transparent var(--diary-writing-line-height, 40px)
-  );
-  background-size: 100% var(--diary-writing-line-height, 40px);
   color: var(--diary-paper-ink);
 }
 

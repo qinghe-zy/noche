@@ -1,13 +1,6 @@
 <template>
   <scroll-view class="dark-today" scroll-y>
     <view class="dark-today__inner">
-      <view class="dark-today__topbar">
-        <view class="dark-today__profile-entry" @tap="openProfile">
-          <text class="dark-today__profile-entry-label">{{ copy.home.profileCenter }}</text>
-          <text class="dark-today__profile-entry-arrow">↗</text>
-        </view>
-      </view>
-
       <text class="dark-today__date">{{ displayDate }}</text>
       <text class="dark-today__title" :style="titleStyle">{{ homeHeroTitle }}</text>
       <text class="dark-today__subtitle">{{ subtitle }}</text>
@@ -37,23 +30,6 @@
         </view>
       </view>
 
-      <view class="dark-today__section-head dark-today__section-head--secondary">
-        <text class="dark-today__section-label">最近随笔</text>
-        <view class="dark-today__section-line"></view>
-      </view>
-
-      <view
-        v-for="entry in recentJottings"
-        :key="entry.id"
-        class="dark-today__entry"
-        @tap="handleOpenEntry(entry.id)"
-      >
-        <text class="dark-today__entry-date">{{ formatDate(entry.recordDate, 'DD') }}</text>
-        <view class="dark-today__entry-copy">
-          <text class="dark-today__entry-title">{{ entry.title || '未命名随笔' }}</text>
-          <text class="dark-today__entry-preview">{{ formatPreview(entry.content) }}</text>
-        </view>
-      </view>
     </view>
   </scroll-view>
 </template>
@@ -64,9 +40,7 @@ import { waitForBootstrapAppRuntime } from "@/app/providers/bootstrapAppRuntime"
 import { useArchiveStore } from "@/app/store/useArchiveStore";
 import { getEntryRepository } from "@/app/store/entryRepository";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
-import type { Entry } from "@/domain/entry/types";
 import { resolveHomeHeroTitle } from "@/features/home/homeHeroTitle";
-import { ROUTES } from "@/shared/constants/routes";
 import { t } from "@/shared/i18n";
 import { formatDate } from "@/shared/utils/date";
 
@@ -76,14 +50,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: "open-archive", mode: "main" | "write"): void;
-  (event: "open-profile"): void;
 }>();
 
 const settingsStore = useSettingsStore();
 const archiveStore = useArchiveStore();
 const copy = computed(() => t(settingsStore.locale));
 const todayDate = computed(() => formatDate(new Date(), "YYYY-MM-DD"));
-const recentJottings = ref<Entry[]>([]);
 const recordedDays = ref(0);
 const pendingFutureCount = ref(0);
 
@@ -144,35 +116,19 @@ const stats = computed(() => ([
   { value: String(pendingFutureCount.value), label: "待开封信件" },
 ]));
 
-function formatPreview(content: string): string {
-  return content.length > 46 ? `${content.slice(0, 46)}…` : content;
-}
-
 function openArchive() {
   emit("open-archive", archiveStore.hasAnsweredToday ? "main" : "write");
-}
-
-function openProfile() {
-  emit("open-profile");
-}
-
-function handleOpenEntry(entryId: string) {
-  uni.navigateTo({
-    url: `/${ROUTES.editor}?mode=read&entryId=${entryId}`,
-  });
 }
 
 async function loadTodayData(): Promise<void> {
   await waitForBootstrapAppRuntime();
   await archiveStore.resolveTodayQuestion(todayDate.value);
 
-  const [jottings, statsSnapshot, futures] = await Promise.all([
-    getEntryRepository().getByType("jotting"),
+  const [statsSnapshot, futures] = await Promise.all([
     getEntryRepository().getProfileStats(),
     getEntryRepository().getByType("future"),
   ]);
 
-  recentJottings.value = jottings.slice(0, 4);
   recordedDays.value = statsSnapshot.recordedDays;
   pendingFutureCount.value = futures.filter((entry) => entry.status === "sealed").length;
 }
@@ -192,39 +148,6 @@ onMounted(() => {
   max-width: 390px;
   margin: 0 auto;
   padding: 52px 28px 104px;
-}
-
-.dark-today__topbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 18px;
-}
-
-.dark-today__profile-entry {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 1px solid rgba(76, 63, 45, 0.82);
-  background: rgba(19, 16, 9, 0.88);
-  box-shadow:
-    0 0 0 1px rgba(201, 150, 60, 0.08),
-    0 12px 28px rgba(0, 0, 0, 0.28),
-    0 0 18px rgba(201, 150, 60, 0.14);
-}
-
-.dark-today__profile-entry-label {
-  font-size: 12px;
-  line-height: 1.5;
-  letter-spacing: 0.16em;
-  color: #eae2ce;
-}
-
-.dark-today__profile-entry-arrow {
-  font-size: 12px;
-  line-height: 1;
-  color: #c9963c;
 }
 
 .dark-today__date {
@@ -278,14 +201,9 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.dark-today__section-head--secondary {
-  margin-top: 36px;
-}
-
 .dark-today__section-label,
 .dark-today__question-action,
-.dark-today__stat-label,
-.dark-today__entry-date {
+.dark-today__stat-label {
   font-size: 12px;
   line-height: 1.6;
   color: #b8883a;
@@ -335,34 +253,5 @@ onMounted(() => {
   font-size: 30px;
   line-height: 1.2;
   color: #d4c9b0;
-}
-
-.dark-today__entry {
-  display: flex;
-  gap: 20px;
-  padding: 24px 0;
-  border-bottom: 1px solid #1e1a14;
-}
-
-.dark-today__entry-date {
-  width: 40px;
-}
-
-.dark-today__entry-copy {
-  flex: 1;
-}
-
-.dark-today__entry-title {
-  display: block;
-  font-size: 20px;
-  line-height: 1.5;
-}
-
-.dark-today__entry-preview {
-  display: block;
-  margin-top: 12px;
-  font-size: 14px;
-  line-height: 1.9;
-  color: #564e42;
 }
 </style>

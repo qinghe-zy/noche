@@ -182,6 +182,7 @@ import type { Entry, EntryType } from "@/domain/entry/types";
 import { ROUTES } from "@/shared/constants/routes";
 import { formatDate } from "@/shared/utils/date";
 import { createDateChangeWatcher } from "@/shared/utils/dateChange";
+import { navigateBackOrFallback } from "@/shared/utils/navigation";
 import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import AppIcon from "@/shared/ui/AppIcon.vue";
 import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
@@ -396,7 +397,9 @@ async function refresh() {
 }
 
 function handleGoHome() {
-  uni.reLaunch({ url: `/${ROUTES.home}` });
+  navigateBackOrFallback({
+    fallbackUrl: `/${ROUTES.home}`,
+  });
 }
 
 function handleGoToCalendar() {

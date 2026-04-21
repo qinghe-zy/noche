@@ -4,9 +4,7 @@
       <text class="dark-mailbox__eyebrow">Mailbox</text>
       <view class="dark-mailbox__head">
         <text class="dark-mailbox__title">邮 箱</text>
-        <button class="dark-mailbox__calendar" @tap="openCalendar">
-          <ChisuSymbol symbol="▦" tone="muted" />
-        </button>
+        <TopbarIconButton icon-name="calendar" @tap="openCalendar" />
       </view>
 
       <view
@@ -14,32 +12,70 @@
         :key="entry.id"
         class="dark-mailbox__item"
         @tap="openEntry(entry)"
+        @longpress.stop="handleRequestDeleteEntry(entry)"
       >
         <view class="dark-mailbox__item-head">
           <view class="dark-mailbox__item-mark" :class="{ 'dark-mailbox__item-mark--active': entry.type === 'future' }"></view>
           <text class="dark-mailbox__from">{{ resolveMailboxSource(entry) }}</text>
-          <text class="dark-mailbox__date">{{ formatDateLabel(entry) }}</text>
+          <view class="dark-mailbox__meta">
+            <text class="dark-mailbox__date">{{ formatDateLabel(entry) }}</text>
+            <view
+              v-if="hasDiaryPreludeGlyphs(entry)"
+              class="dark-mailbox__prelude"
+            >
+              <DiaryPreludeGlyph
+                v-if="entry.diaryPrelude?.weatherCode"
+                class="dark-mailbox__prelude-glyph"
+                kind="weather"
+                :code="entry.diaryPrelude.weatherCode"
+              />
+              <DiaryPreludeGlyph
+                v-if="entry.diaryPrelude?.moodCode"
+                class="dark-mailbox__prelude-glyph"
+                kind="mood"
+                :code="entry.diaryPrelude.moodCode"
+              />
+            </view>
+          </view>
         </view>
         <text class="dark-mailbox__subject">{{ entry.title || fallbackEntryTitle(entry.type, settingsStore.locale) }}</text>
         <text class="dark-mailbox__preview">{{ formatPreview(entry.content) }}</text>
       </view>
     </view>
+
+    <PaperConfirmDialog
+      :open="isDeleteDialogOpen"
+      :title="deleteDialogTitle"
+      :copy="deleteDialogCopy"
+      :actions="deleteDialogActions"
+      @close="closeDeleteDialog"
+      @action="handleDeleteDialogAction"
+    />
   </scroll-view>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useMailboxStore } from "@/app/store/useMailboxStore";
+import { useEntryStore } from "@/app/store/useEntryStore";
 import { useSettingsStore } from "@/app/store/useSettingsStore";
 import type { Entry } from "@/domain/entry/types";
 import { fallbackEntryTitle } from "@/features/entries/entryDisplay";
-import ChisuSymbol from "@/features/dark-shell/components/ChisuSymbol.vue";
+import DiaryPreludeGlyph from "@/features/editor/components/DiaryPreludeGlyph.vue";
 import { buildDarkMailboxList } from "@/features/dark-shell/darkMailboxView";
 import { ROUTES } from "@/shared/constants/routes";
+import { t } from "@/shared/i18n";
+import PaperConfirmDialog, { type PaperConfirmDialogAction } from "@/shared/ui/PaperConfirmDialog.vue";
+import TopbarIconButton from "@/shared/ui/TopbarIconButton.vue";
 import { formatDate } from "@/shared/utils/date";
 
 const mailboxStore = useMailboxStore();
+const entryStore = useEntryStore();
 const settingsStore = useSettingsStore();
+const copy = computed(() => t(settingsStore.locale));
+const pendingDeleteEntry = ref<Entry | null>(null);
+const isDeleteDialogOpen = ref(false);
 
 const mergedEntries = computed(() => buildDarkMailboxList({
   documentaryDiaries: mailboxStore.documentaryDiaries,
@@ -47,6 +83,32 @@ const mergedEntries = computed(() => buildDarkMailboxList({
   distantOpenedFutures: mailboxStore.distantOpenedFutures,
   distantPendingFutures: mailboxStore.distantPendingFutures,
 }));
+const deleteDialogTitle = computed(() => {
+  if (!pendingDeleteEntry.value) {
+    return copy.value.mailbox.deleteTitle;
+  }
+
+  if (settingsStore.locale === "en-US") {
+    return pendingDeleteEntry.value.type === "diary" ? "Delete this diary page?" : "Delete this jotting?";
+  }
+
+  return pendingDeleteEntry.value.type === "diary" ? "删除这页日记？" : "删除这页随笔？";
+});
+const deleteDialogCopy = computed(() => settingsStore.locale === "en-US"
+  ? "This page will be removed from the mailbox shelf and cannot be restored."
+  : "删除后这页会从邮箱目录里移除，且无法恢复。");
+const deleteDialogActions = computed<PaperConfirmDialogAction[]>(() => ([
+  {
+    key: "keep",
+    title: copy.value.mailbox.deleteKeep,
+    tone: "muted",
+  },
+  {
+    key: "delete",
+    title: copy.value.mailbox.deleteConfirm,
+    tone: "danger",
+  },
+]));
 
 function formatPreview(content: string): string {
   return content.length > 72 ? `${content.slice(0, 72)}…` : content;
@@ -63,6 +125,10 @@ function resolveMailboxSource(entry: Entry): string {
 function formatDateLabel(entry: Entry): string {
   const base = entry.unlockDate ?? entry.recordDate;
   return formatDate(base, "MM.DD");
+}
+
+function hasDiaryPreludeGlyphs(entry: Entry): boolean {
+  return entry.type === "diary" && Boolean(entry.diaryPrelude?.weatherCode || entry.diaryPrelude?.moodCode);
 }
 
 function openCalendar() {
@@ -85,7 +151,42 @@ function openEntry(entry: Entry) {
   });
 }
 
+function handleRequestDeleteEntry(entry: Entry): void {
+  if (entry.type === "future") {
+    return;
+  }
+
+  pendingDeleteEntry.value = entry;
+  isDeleteDialogOpen.value = true;
+}
+
+function closeDeleteDialog(): void {
+  isDeleteDialogOpen.value = false;
+  pendingDeleteEntry.value = null;
+}
+
+async function handleDeleteDialogAction(actionKey: string): Promise<void> {
+  const entry = pendingDeleteEntry.value;
+  closeDeleteDialog();
+
+  if (actionKey !== "delete" || !entry) {
+    return;
+  }
+
+  await entryStore.destroyEntry(entry.id);
+  await mailboxStore.refreshMailbox();
+
+  uni.showToast({
+    title: copy.value.mailbox.destroyedToast,
+    icon: "none",
+  });
+}
+
 onMounted(() => {
+  void mailboxStore.refreshMailbox();
+});
+
+onShow(() => {
   void mailboxStore.refreshMailbox();
 });
 </script>
@@ -122,13 +223,6 @@ onMounted(() => {
   letter-spacing: 0.24em;
 }
 
-.dark-mailbox__calendar {
-  width: 44px;
-  height: 44px;
-  border: 1px solid #1e1a14;
-  background: transparent;
-}
-
 .dark-mailbox__item {
   padding: 24px 0;
   border-top: 1px solid #1e1a14;
@@ -138,6 +232,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.dark-mailbox__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .dark-mailbox__item-mark {
@@ -161,6 +261,18 @@ onMounted(() => {
 .dark-mailbox__date {
   font-size: 12px;
   color: #564e42;
+}
+
+.dark-mailbox__prelude {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(184, 136, 58, 0.82);
+}
+
+.dark-mailbox__prelude-glyph {
+  width: 14px;
+  height: 14px;
 }
 
 .dark-mailbox__subject {
